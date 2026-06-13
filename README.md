@@ -1,144 +1,117 @@
-IT Asset Management System
-Project Overview
-
-The IT Asset Management System (ITAMS) is a web-based application designed to manage and track IT assets within an organization. The system helps organizations register, assign, monitor, maintain, and retire assets such as laptops, desktops, printers, servers, routers, and software licenses. It provides a centralized platform for efficient asset lifecycle management while incorporating DevOps practices for automated deployment and monitoring.
-
-Objectives
-Track and manage IT assets efficiently.
-Maintain asset assignment records.
-Monitor asset maintenance activities.
-Generate inventory and utilization reports.
-Automate application deployment using DevOps tools.
-Improve asset visibility and operational efficiency.
-Features
-Asset Management
-Add new assets
-Update asset information
-View asset inventory
-Retire outdated assets
-Asset Assignment
-Assign assets to employees
-Reassign returned assets
-Track asset ownership
-Maintenance Management
-Report asset issues
-Track maintenance requests
-Maintain repair history
-User Management
-Admin management
-Employee management
+Product Backlog
+Backlog ID	Feature	Description	Priority
+PB-01	User Authentication	Login, Logout, Password Management	High
+PB-02	Role-Based Access Control	Admin, Asset Manager, Employee, Technician roles	High
+PB-03	Add Asset	Register new IT assets	High
+PB-04	Update Asset	Modify asset details	High
+PB-05	Delete/Retire Asset	Remove old assets from active inventory	High
+PB-06	Asset Inventory View	Display all available assets	High
+PB-07	Asset Assignment	Assign assets to employees	High
+PB-08	Asset Reassignment	Reassign returned assets	Medium
+PB-09	Track Asset Ownership	Maintain assignment history	High
+PB-10	Issue Reporting	Employees report asset issues	High
+PB-11	Maintenance Request Management	Create maintenance tickets	High
+PB-12	Repair History Tracking	Store maintenance records	Medium
+PB-13	Asset Return Request	Employees request return of assets	Medium
+PB-14	Technician Dashboard	Manage maintenance activities	Medium
+PB-15	Admin Dashboard	View complete system activities	High
+PB-16	Inventory Reports	Generate inventory reports	High
+PB-17	Assigned Asset Reports	Generate assignment reports	Medium
+PB-18	Maintenance Reports	Generate maintenance reports	Medium
+PB-19	Retired Asset Reports	Generate retired asset reports	Medium
+PB-20	Search Assets	Search assets by ID, type, status	Medium
+PB-21	Notification System	Asset assignment and maintenance alerts	Low
+PB-22	Audit Logs	Track user activities	Medium
+PB-23	Database Design	Create MySQL schema and tables	High
+PB-24	API Development	Develop backend REST APIs	High
+PB-25	Frontend Development	Create user interface pages	High
+PB-26	Unit Testing	Test backend and frontend modules	Medium
+PB-27	GitHub Repository Setup	Source code management	High
+PB-28	Jenkins CI/CD Pipeline	Automated build and deployment	High
+PB-29	Docker Containerization	Package application in containers	High
+PB-30	Kubernetes Deployment	Deploy containers to cluster	High
+PB-31	Prometheus Monitoring	Collect application metrics	Medium
+PB-32	Grafana Dashboard	Visualize monitoring data	Medium
+PB-33	Documentation	User and technical documentation	High
+Sprint Backlogs
+Sprint 1: Project Setup & User Management
+Project initialization
+Database design
+Login and authentication
+User management module
 Role-based access control
-Reports
-Asset Inventory Report
-Assigned Assets Report
-Maintenance Report
-Retired Assets Report
-User Roles
-Admin
-Manage users
-Manage assets
-Generate reports
-Monitor system activities
-Asset Manager
-Register assets
-Assign assets
-Update asset details
-Track inventory
-Employee
-View assigned assets
-Report issues
-Request asset return
-Technician
-View maintenance requests
-Update repair status
-Close maintenance tasks
-Workflow
-Login
-   ↓
-Dashboard
-   ↓
-Add Asset
-   ↓
-Asset Inventory
-   ↓
-Assign Asset
-   ↓
-Employee Uses Asset
-   ↓
-Issue Reporting
-   ↓
-Maintenance
-   ↓
-Return Asset
-   ↓
-Available for Reassignment
-   ↓
-Retire Asset
-   ↓
-Generate Reports
-Technology Stack
-Frontend
-HTML
-CSS
-JavaScript
-React (Optional)
-Backend
-Java Spring Boot / Node.js / Python
-Database
-MySQL
-DevOps Tools
-Git
-GitHub
-Jenkins
-Docker
-Kubernetes
-Prometheus
-Grafana
-DevOps Pipeline
-Developer
-    ↓
-GitHub
-    ↓
-Jenkins Build
-    ↓
-Automated Testing
-    ↓
-Docker Image Creation
-    ↓
-Docker Hub
-    ↓
-Kubernetes Deployment
-    ↓
-Application Running
-    ↓
-Prometheus Monitoring
-    ↓
-Grafana Dashboard
-Project Structure
-IT-Asset-Management-System/
-│
-├── frontend/
-├── backend/
-├── database/
-├── docker/
-├── kubernetes/
-├── jenkins/
-├── docs/
-├── README.md
-└── LICENSE
-Benefits
-Centralized asset management
-Improved asset tracking
-Reduced operational costs
-Better maintenance management
-Automated deployment process
-Real-time monitoring and reporting
-Future Enhancements
-QR Code Asset Tracking
-Email Notifications
-Mobile Application Support
-Asset Location Tracking
-AI-Based Maintenance Prediction
-Conclusion
+GitHub repository setup
+Deliverable
 
-The IT Asset Management System provides an efficient solution for managing organizational IT assets throughout their lifecycle. By integrating DevOps practices such as CI/CD, containerization, automation, and monitoring, the system ensures reliability, scalability, and efficient software delivery.
+Working login system with user roles.
+
+Sprint 2: Asset Management
+Add asset
+Update asset
+View asset inventory
+Retire asset
+Search asset
+Deliverable
+
+Complete asset inventory management.
+
+Sprint 3: Asset Assignment
+Assign assets
+Reassign assets
+Track ownership
+Employee dashboard
+Deliverable
+
+Asset allocation system.
+
+Sprint 4: Maintenance Management
+Issue reporting
+Maintenance requests
+Repair tracking
+Technician dashboard
+Deliverable
+
+Maintenance workflow system.
+
+Sprint 5: Reports & Analytics
+Inventory reports
+Assignment reports
+Maintenance reports
+Retired asset reports
+Deliverable
+
+Reporting module.
+
+Sprint 6: DevOps Implementation
+Jenkins pipeline
+Automated testing
+Docker image creation
+Docker Hub integration
+Kubernetes deployment
+Deliverable
+
+CI/CD pipeline.
+
+Sprint 7: Monitoring & Finalization
+Prometheus setup
+Grafana dashboards
+Documentation
+Bug fixes
+Final testing
+Deliverable
+
+Production-ready application.
+
+Sample User Stories (Agile Backlog)
+Admin
+As an Admin, I want to manage users so that I can control system access.
+As an Admin, I want to generate reports so that I can analyze asset utilization.
+Asset Manager
+As an Asset Manager, I want to register assets so that they can be tracked.
+As an Asset Manager, I want to assign assets to employees so that ownership is recorded.
+Employee
+As an Employee, I want to view my assigned assets so that I know my allocated resources.
+As an Employee, I want to report issues so that faulty assets can be repaired.
+Technician
+As a Technician, I want to update maintenance status so that repair progress can be tracked.
+As a Technician, I want to close maintenance requests after repair completion.
