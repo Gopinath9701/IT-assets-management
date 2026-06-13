@@ -314,10 +314,10 @@ The IT Asset Management System (ITAMS) provides a comprehensive solution for man
 
 ## Authors
 
-Project Team
+Team gama
 
-Department of Computer Science and Engineering
+Department of Computer Science and Engineering (Data Science)
 
-Academic Mini/Major Project
+Devops Project
 
 2026
