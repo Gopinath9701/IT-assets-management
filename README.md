@@ -1,144 +1,70 @@
-IT Asset Management System
-Project Overview
+# Getting Started with Create React App
 
-The IT Asset Management System (ITAMS) is a web-based application designed to manage and track IT assets within an organization. The system helps organizations register, assign, monitor, maintain, and retire assets such as laptops, desktops, printers, servers, routers, and software licenses. It provides a centralized platform for efficient asset lifecycle management while incorporating DevOps practices for automated deployment and monitoring.
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-Objectives
-Track and manage IT assets efficiently.
-Maintain asset assignment records.
-Monitor asset maintenance activities.
-Generate inventory and utilization reports.
-Automate application deployment using DevOps tools.
-Improve asset visibility and operational efficiency.
-Features
-Asset Management
-Add new assets
-Update asset information
-View asset inventory
-Retire outdated assets
-Asset Assignment
-Assign assets to employees
-Reassign returned assets
-Track asset ownership
-Maintenance Management
-Report asset issues
-Track maintenance requests
-Maintain repair history
-User Management
-Admin management
-Employee management
-Role-based access control
-Reports
-Asset Inventory Report
-Assigned Assets Report
-Maintenance Report
-Retired Assets Report
-User Roles
-Admin
-Manage users
-Manage assets
-Generate reports
-Monitor system activities
-Asset Manager
-Register assets
-Assign assets
-Update asset details
-Track inventory
-Employee
-View assigned assets
-Report issues
-Request asset return
-Technician
-View maintenance requests
-Update repair status
-Close maintenance tasks
-Workflow
-Login
-   ↓
-Dashboard
-   ↓
-Add Asset
-   ↓
-Asset Inventory
-   ↓
-Assign Asset
-   ↓
-Employee Uses Asset
-   ↓
-Issue Reporting
-   ↓
-Maintenance
-   ↓
-Return Asset
-   ↓
-Available for Reassignment
-   ↓
-Retire Asset
-   ↓
-Generate Reports
-Technology Stack
-Frontend
-HTML
-CSS
-JavaScript
-React (Optional)
-Backend
-Java Spring Boot / Node.js / Python
-Database
-MySQL
-DevOps Tools
-Git
-GitHub
-Jenkins
-Docker
-Kubernetes
-Prometheus
-Grafana
-DevOps Pipeline
-Developer
-    ↓
-GitHub
-    ↓
-Jenkins Build
-    ↓
-Automated Testing
-    ↓
-Docker Image Creation
-    ↓
-Docker Hub
-    ↓
-Kubernetes Deployment
-    ↓
-Application Running
-    ↓
-Prometheus Monitoring
-    ↓
-Grafana Dashboard
-Project Structure
-IT-Asset-Management-System/
-│
-├── frontend/
-├── backend/
-├── database/
-├── docker/
-├── kubernetes/
-├── jenkins/
-├── docs/
-├── README.md
-└── LICENSE
-Benefits
-Centralized asset management
-Improved asset tracking
-Reduced operational costs
-Better maintenance management
-Automated deployment process
-Real-time monitoring and reporting
-Future Enhancements
-QR Code Asset Tracking
-Email Notifications
-Mobile Application Support
-Asset Location Tracking
-AI-Based Maintenance Prediction
-Conclusion
+## Available Scripts
 
-The IT Asset Management System provides an efficient solution for managing organizational IT assets throughout their lifecycle. By integrating DevOps practices such as CI/CD, containerization, automation, and monitoring, the system ensures reliability, scalability, and efficient software delivery.
+In the project directory, you can run:
+
+### `npm start`
+
+Runs the app in the development mode.\
+Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+
+The page will reload when you make changes.\
+You may also see any lint errors in the console.
+
+### `npm test`
+
+Launches the test runner in the interactive watch mode.\
+See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+
+### `npm run build`
+
+Builds the app for production to the `build` folder.\
+It correctly bundles React in production mode and optimizes the build for the best performance.
+
+The build is minified and the filenames include the hashes.\
+Your app is ready to be deployed!
+
+See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+
+### `npm run eject`
+
+**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+
+If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+
+Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+
+You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+
+## Learn More
+
+You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+
+To learn React, check out the [React documentation](https://reactjs.org/).
+
+### Code Splitting
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+
+### Analyzing the Bundle Size
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+
+### Making a Progressive Web App
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+
+### Advanced Configuration
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+
+### Deployment
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+
+### `npm run build` fails to minify
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
