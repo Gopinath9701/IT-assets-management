@@ -8,36 +8,22 @@ pipeline {
             }
         }
 
-        stage('Show Workspace Files') {
-            steps {
-                bat 'cd'
-                bat 'dir'
-            }
-        }
-
-        stage('CI Verification') {
-            steps {
-                echo 'Jenkins CI setup for wf branch is working.'
-            }
-        }
-    }
-
-    stage('Frontend Developer Branch') {
+        stage('Frontend Developer Branch') {
             when {
                 branch 'coder-1'
             }
             steps {
-                echo 'Frontend developer pushed code.'
+                echo 'Frontend developer branch build is running.'
                 bat 'dir'
             }
         }
 
         stage('Tester Branch') {
             when {
-                branch 'tester'
+                branch 'QA-Engineer'
             }
             steps {
-                echo 'Tester branch received code for testing.'
+                echo 'Tester branch validation is running.'
                 bat 'dir'
             }
         }
@@ -47,18 +33,18 @@ pipeline {
                 branch 'main'
             }
             steps {
-                echo 'Main branch ready for final integration.'
+                echo 'Main branch final integration is running.'
                 bat 'dir'
             }
         }
     }
 
-
     post {
         success {
-            echo 'Pipeline executed successfully.'
+            echo 'Pipeline completed successfully.'
         }
         failure {
             echo 'Pipeline failed.'
         }
     }
+}
