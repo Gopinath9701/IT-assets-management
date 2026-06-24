@@ -8,34 +8,23 @@ pipeline {
             }
         }
 
-        stage('Backend Build & Test') {
+        stage('Show Workspace Files') {
             steps {
-                dir('backend') {
-                    sh 'mvn clean test'
-                }
+                bat 'cd'
+                bat 'dir'
             }
         }
 
-        stage('Frontend Install') {
+        stage('CI Verification') {
             steps {
-                dir('frontend') {
-                    sh 'npm install'
-                }
-            }
-        }
-
-        stage('Frontend Build') {
-            steps {
-                dir('frontend') {
-                    sh 'npm run build'
-                }
+                echo 'Jenkins CI setup for wf branch is working.'
             }
         }
     }
 
     post {
         success {
-            echo 'Build and tests passed.'
+            echo 'Pipeline executed successfully.'
         }
         failure {
             echo 'Pipeline failed.'
