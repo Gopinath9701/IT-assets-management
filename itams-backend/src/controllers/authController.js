@@ -1,3 +1,4 @@
+const { sendOtpEmail } = require('../utils/emailservice');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
@@ -7,43 +8,6 @@ const pool = require('../config/db');
 const SALT_ROUNDS = 10;
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_change_me';
 
-// POST /api/register
-// Body (matches Register.js exactly): { employeeName, employeeId, email, department, password, confirmPassword }
-async function register(req, res) {
-  try {
-    const { employeeName, employeeId, email, department, password, confirmPassword } = req.body;
-
-    if (!employeeName || !employeeId || !email || !department || !password || !confirmPassword) {
-      return res.status(400).json({ message: 'All fields are required.' });
-    }
-    if (password !== confirmPassword) {
-      return res.status(400).json({ message: 'Passwords do not match.' });
-    }
-    if (!['IT', 'HR', 'Finance'].includes(department)) {
-      return res.status(400).json({ message: 'Invalid department.' });
-    }
-
-    const existingEmail = await User.findByEmail(email);
-    if (existingEmail) {
-      return res.status(409).json({ message: 'Email is already registered.' });
-    }
-    const existingEmpId = await User.findByEmployeeId(employeeId);
-    if (existingEmpId) {
-      return res.status(409).json({ message: 'Employee ID is already registered.' });
-    }
-
-    const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
-    const userId = await User.create({ employeeName, employeeId, email, department, passwordHash });
-
-    return res.status(201).json({
-      message: 'Registration successful.',
-      user: { userId, employeeName, employeeId, email, department },
-    });
-  } catch (err) {
-    console.error('Register error:', err);
-    return res.status(500).json({ message: 'Server error during registration.' });
-  }
-}
 
 // POST /api/login
 // Body (matches Login.js on DevopsEngineer branch): { employeeIdOrEmail, password }
@@ -111,8 +75,7 @@ async function sendOtp(req, res) {
       [user.user_id, otpHash, expiresAt]
     );
 
-    // TODO Sprint 2+: send via real email/SMS service instead of console
-    console.log(`OTP for ${emailOrId}: ${otp}`);
+    await sendOtpEmail(user.email, otp);
 
     return res.status(200).json({ message: 'If that account exists, an OTP has been sent.' });
   } catch (err) {
@@ -188,4 +151,4 @@ async function resetPassword(req, res) {
   }
 }
 
-module.exports = { register, login, sendOtp, verifyOtp, resetPassword };
+module.exports = { login, sendOtp, verifyOtp, resetPassword };
