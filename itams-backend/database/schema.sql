@@ -11,15 +11,14 @@ CREATE TABLE IF NOT EXISTS users (
   employee_name  VARCHAR(100)  NOT NULL,
   employee_id    VARCHAR(50)   NOT NULL UNIQUE,
   email          VARCHAR(100)  NOT NULL UNIQUE,
-  department     ENUM('IT', 'HR', 'Finance') NOT NULL,
+  department     ENUM('IT', 'HR', 'Finance', 'Marketing', 'Sales', 'Operations') NOT NULL,
+  status         ENUM('Active', 'On Leave', 'Inactive') NOT NULL DEFAULT 'Active',
   password_hash  VARCHAR(255)  NOT NULL,
-  role           ENUM('Admin', 'HR', 'Employee', 'Technician') NOT NULL DEFAULT 'Employee',
+  role           ENUM('Admin', 'HR', 'Employee', 'Technician', 'Asset Manager') NOT NULL DEFAULT 'Employee',
   created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- For the Forgot Password page (not built on frontend yet, but needed soon —
--- the Login page already has a dead link to /forgot-password)
 CREATE TABLE IF NOT EXISTS password_resets (
   id          INT AUTO_INCREMENT PRIMARY KEY,
   user_id     INT NOT NULL,

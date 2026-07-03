@@ -1,14 +1,21 @@
 const nodemailer = require('nodemailer');
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_APP_PASSWORD,
-  },
-});
+// Transporter is created lazily inside the function so that
+// process.env values are guaranteed to be loaded by dotenv
+// before this runs (dotenv.config() is called in server.js first).
+function createTransporter() {
+  return nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_APP_PASSWORD,
+    },
+  });
+}
 
 async function sendOtpEmail(toEmail, otp) {
+  const transporter = createTransporter();
+
   const mailOptions = {
     from: `"ITAMS Support" <${process.env.EMAIL_USER}>`,
     to: toEmail,
