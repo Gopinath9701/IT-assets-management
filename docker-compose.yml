@@ -1,0 +1,45 @@
+services:
+  app:
+    build:
+      context: .
+      target: development
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      # Mongo example:
+      - MONGO_URI=mongodb://mongo:27017/mydb
+      # MySQL example:
+      # - DB_HOST=mysql
+      # - DB_USER=root
+      # - DB_PASSWORD=example
+      # - DB_NAME=mydb
+    depends_on:
+      - mongo   # or: mysql
+
+  # --- MongoDB ---
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  # --- MySQL (use instead of mongo) ---
+  # mysql:
+  #   image: mysql:8
+  #   ports:
+  #     - "3306:3306"
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: example
+  #     MYSQL_DATABASE: mydb
+  #   volumes:
+  #     - mysql_data:/var/lib/mysql
+
+volumes:
+  mongo_data:
+  # mysql_data:
