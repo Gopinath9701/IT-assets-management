@@ -3,9 +3,11 @@ import { useState } from "react";
 import Home from "./components/Home";
 import Login from "./components/Login";
 import ForgotPassword from "./components/ForgotPassword";
+import AssetManagement from "./components/AssetManagement";
+import HRManagement from "./components/HRManagement";
 
 function App() {
-  const [view, setView] = useState("home"); // "home" | "login" | "forgot-password"
+  const [view, setView] = useState("home"); // "home" | "login" | "forgot-password" | "asset-management" | "hr-management"
   const [activeTab, setActiveTab] = useState("home");
 
   const scrollToSection = (id) => {
@@ -69,6 +71,20 @@ function App() {
             </button>
           </div>
         )}
+        {/* Dry-run quick-access buttons */}
+        {view !== "home" && (
+          <div className="nav-buttons">
+            <button className="outline-btn" style={{ fontSize: "12px", padding: "6px 14px" }} onClick={() => setView("asset-management")}>
+              Asset Mgmt
+            </button>
+            <button className="outline-btn" style={{ fontSize: "12px", padding: "6px 14px" }} onClick={() => setView("hr-management")}>
+              HR Mgmt
+            </button>
+            <button className="outline-btn" style={{ fontSize: "12px", padding: "6px 14px" }} onClick={() => setView("home")}>
+              Home
+            </button>
+          </div>
+        )}
       </nav>
 
       {/* View routing */}
@@ -85,6 +101,20 @@ function App() {
       {view === "home" && (
         <Home
           onLoginClick={() => setView("login")}
+        />
+      )}
+
+      {view === "asset-management" && (
+        <AssetManagement
+          username="username"
+          onLogout={() => setView("home")}
+        />
+      )}
+
+      {view === "hr-management" && (
+        <HRManagement
+          username="username"
+          onLogout={() => setView("home")}
         />
       )}
     </div>
