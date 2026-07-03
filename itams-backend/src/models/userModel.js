@@ -1,11 +1,11 @@
 const pool = require('../config/db');
 
 const User = {
-  async create({ employeeName, employeeId, email, department, passwordHash }) {
+  async create({ employeeName, employeeId, email, department, designation, phoneNumber, dateOfJoining, passwordHash }) {
     const [result] = await pool.query(
-      `INSERT INTO users (employee_name, employee_id, email, department, password_hash)
-       VALUES (?, ?, ?, ?, ?)`,
-      [employeeName, employeeId, email, department, passwordHash]
+      `INSERT INTO users (employee_name, employee_id, email, department, designation, phone_number, date_of_joining, password_hash)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [employeeName, employeeId, email, department, designation, phoneNumber, dateOfJoining, passwordHash]
     );
     return result.insertId;
   },
