@@ -60,9 +60,33 @@ pipeline {
     post {
         success {
             echo 'Pipeline completed successfully.'
+            // Email on successful build
+            emailext(
+                subject: "SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: """Build Succeeded.
+
+Job: ${env.JOB_NAME}
+Build: ${env.BUILD_NUMBER}
+Branch: ${env.BRANCH_NAME}
+URL: ${env.BUILD_URL}
+""",
+                to: "your-success-24211A6718@bvrit.ac.in"
+            )
         }
         failure {
             echo 'Pipeline failed.'
+            // Email on failed build
+            emailext(
+                subject: "FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: """Build Failed.
+
+Job: ${env.JOB_NAME}
+Build: ${env.BUILD_NUMBER}
+Branch: ${env.BRANCH_NAME}
+URL: ${env.BUILD_URL}
+""",
+                to: "your-failure-24211A6718@bvrit.ac.in"
+            )
         }
     }
 }
