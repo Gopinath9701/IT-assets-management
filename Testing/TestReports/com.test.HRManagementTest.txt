@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.test.HRManagementTest
 -------------------------------------------------------------------------------
-Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 70.22 s -- in com.test.HRManagementTest
+Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 70.22 s -- in com.test.HRManagementTest 
