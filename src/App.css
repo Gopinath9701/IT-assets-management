@@ -1,0 +1,188 @@
+/* Auth Components Specific Styles (Login & Register) */
+
+.login-card,
+.register-card,
+.forgot-password-card {
+  max-width: 480px;
+  margin: 120px auto 60px; /* space below fixed navbar */
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #ebecf0;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+  padding: 40px;
+  font-family: 'Inter', sans-serif;
+  text-align: left;
+}
+
+.login-card h2,
+.register-card h2,
+.forgot-password-card h2 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #091e42;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.login-card form,
+.register-card form,
+.forgot-password-card form {
+  display: flex;
+  flex-direction: column;
+}
+
+.login-card label,
+.register-card label,
+.forgot-password-card label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #42526e;
+  margin-bottom: 6px;
+  margin-top: 16px;
+}
+
+.login-card label:first-of-type,
+.register-card label:first-of-type,
+.forgot-password-card label:first-of-type {
+  margin-top: 0;
+}
+
+.login-card input,
+.login-card select,
+.register-card input,
+.register-card select,
+.forgot-password-card input {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid #ebecf0;
+  border-radius: 6px;
+  background-color: #fafbfc;
+  color: #172b4d;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.login-card input:focus,
+.login-card select:focus,
+.register-card input:focus,
+.register-card select:focus,
+.forgot-password-card input:focus {
+  border-color: #0056d6;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(0, 86, 214, 0.15);
+}
+
+/* Password eye icon toggle styles */
+.password-input-container {
+  position: relative;
+  width: 100%;
+}
+
+.password-input-container input {
+  padding-right: 44px; /* room for toggle button */
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #6b778c;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  transition: color 0.15s ease;
+}
+
+.password-toggle-btn:hover {
+  color: #0056d6;
+}
+
+.login-card button[type="submit"],
+.register-card button[type="submit"],
+.register-card .submit-btn {
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: #ffffff;
+  background-color: #0056d6;
+  border: none;
+  border-radius: 6px;
+  padding: 12px;
+  margin-top: 24px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  width: 100%;
+  text-align: center;
+}
+
+.login-card button[type="submit"]:hover,
+.register-card button[type="submit"]:hover,
+.register-card .submit-btn:hover {
+  background-color: #0047b3;
+}
+
+.login-card .links,
+.register-card .links {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+.login-card .links a,
+.register-card .links a {
+  color: #0056d6;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.15s ease;
+}
+
+.login-card .links a:hover,
+.register-card .links a:hover {
+  color: #0047b3;
+  text-decoration: underline;
+}
+
+.forgot-password-card .action-btn {
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: #ffffff;
+  background-color: #0056d6;
+  border: none;
+  border-radius: 6px;
+  padding: 12px;
+  margin-top: 16px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  width: 100%;
+  text-align: center;
+}
+
+.forgot-password-card .action-btn:hover {
+  background-color: #0047b3;
+}
+
+.login-card .forgot-password-link {
+  align-self: flex-end;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #0056d6;
+  text-decoration: none;
+  margin-top: 8px;
+  transition: color 0.15s ease;
+}
+
+.login-card .forgot-password-link:hover {
+  color: #0047b3;
+  text-decoration: underline;
+}
