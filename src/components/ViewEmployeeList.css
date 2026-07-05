@@ -1,0 +1,150 @@
+.view-page{
+    min-height:100vh;
+    background:#eef3fb;
+    font-family:Arial,sans-serif;
+}
+
+.view-header{
+    background:#fff;
+    height:70px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:0 40px;
+    border-bottom:1px solid #ddd;
+}
+
+.logo-section h1{
+    margin:0;
+    color:#0d5be1;
+}
+
+.logo-section p{
+    margin:0;
+    font-size:12px;
+    color:#666;
+}
+
+.user-section{
+    display:flex;
+    align-items:center;
+    gap:15px;
+}
+
+.logout-btn{
+    border:none;
+    background:none;
+    cursor:pointer;
+    font-weight:600;
+}
+
+.view-container{
+    width:90%;
+    margin:35px auto;
+}
+
+.search-card,
+.employee-card{
+    background:#fff;
+    padding:25px;
+    border-radius:12px;
+    margin-top:25px;
+    box-shadow:0 2px 10px rgba(0,0,0,.08);
+}
+
+.search-row{
+    display:flex;
+    gap:15px;
+    align-items:end;
+}
+
+.search-row label{
+    font-weight:600;
+}
+
+.search-row input{
+    flex:1;
+    padding:12px;
+    border:1px solid #ccc;
+    border-radius:6px;
+}
+
+.search-btn{
+    background:#0d5be1;
+    color:#fff;
+    border:none;
+    padding:12px 28px;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+}
+
+table th{
+    background:#0d5be1;
+    color:#fff;
+    padding:12px;
+}
+
+table td{
+    padding:12px;
+    border:1px solid #ddd;
+    text-align:center;
+}
+
+.view-btn{
+    background:#0d5be1;
+    color:#fff;
+    border:none;
+    padding:8px 18px;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+.popup-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.45);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:999;
+}
+
+.popup-card{
+    width:900px;
+    max-width:95%;
+    background:#fff;
+    border-radius:12px;
+    padding:25px;
+}
+
+.popup-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+.close-btn{
+    background:red;
+    color:#fff;
+    border:none;
+    width:35px;
+    height:35px;
+    border-radius:50%;
+    cursor:pointer;
+    font-size:18px;
+}
+
+.popup-body p{
+    margin:10px 0;
+}
+
+.asset-table{
+    margin-top:20px;
+}

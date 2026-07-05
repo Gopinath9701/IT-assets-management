@@ -1,0 +1,140 @@
+.department-page{
+    min-height:100vh;
+    background:#eef4ff;
+    padding:40px;
+}
+
+.department-container{
+    max-width:1300px;
+    margin:auto;
+}
+
+.department-container h1{
+    color:#163a72;
+    font-size:38px;
+    margin-bottom:8px;
+}
+
+.department-container p{
+    color:#555;
+    margin-bottom:30px;
+}
+
+.department-card{
+    background:#fff;
+    border-radius:14px;
+    padding:30px;
+    box-shadow:0 5px 18px rgba(0,0,0,.08);
+}
+
+.department-card h3{
+    color:#163a72;
+    margin-bottom:20px;
+}
+
+.search-row{
+    display:flex;
+    gap:15px;
+    margin-bottom:25px;
+}
+
+.search-row input{
+    flex:1;
+    padding:13px;
+    border:1px solid #ccc;
+    border-radius:8px;
+    font-size:15px;
+}
+
+.search-row button{
+    width:120px;
+    background:#1f5fd3;
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:15px;
+}
+
+.add-row{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:15px;
+    margin:25px 0;
+}
+
+.add-row input{
+    padding:12px;
+    border:1px solid #ccc;
+    border-radius:8px;
+}
+
+.add-row button{
+    background:#1f5fd3;
+    color:white;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:15px;
+}
+
+.department-card hr{
+    margin:30px 0;
+    border:none;
+    border-top:1px solid #ddd;
+}
+
+.department-card table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+.department-card thead{
+    background:#1f5fd3;
+    color:white;
+}
+
+.department-card th,
+.department-card td{
+    padding:15px;
+    border:1px solid #ddd;
+    text-align:center;
+}
+
+.department-card tbody tr:hover{
+    background:#f6f9ff;
+}
+
+.delete-btn{
+    background:#dc3545;
+    color:white;
+    border:none;
+    padding:8px 16px;
+    border-radius:6px;
+    cursor:pointer;
+    font-weight:600;
+}
+
+.delete-btn:hover{
+    background:#b52a37;
+}
+
+@media(max-width:1000px){
+
+.add-row{
+    grid-template-columns:1fr;
+}
+
+.search-row{
+    flex-direction:column;
+}
+
+.department-card{
+    overflow:auto;
+}
+
+.department-card table{
+    min-width:900px;
+}
+
+}
