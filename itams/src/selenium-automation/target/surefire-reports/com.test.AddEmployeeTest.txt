@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: com.test.AddEmployeeTest
--------------------------------------------------------------------------------
-Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 131.6 s -- in com.test.AddEmployeeTest
