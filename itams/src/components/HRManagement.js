@@ -10,13 +10,7 @@ const HRManagement = ({
   onDepartmentManagement,
   onReportMaintenance,
 }) => {
-  const [activeSidebar, setActiveSidebar] = useState("hr-management");
-
-  const sidebarItems = [
-    { id: "dashboard", label: "Dashboard" },
-    { id: "hr-management", label: "HR Management" },
-    { id: "asset-assignment", label: "Asset Assignment" },
-  ];
+ 
 
   const actionCards = [
     {
@@ -84,23 +78,7 @@ const HRManagement = ({
   </nav>
 
   <div style={styles.bodyWrapper}>
-    {/* Sidebar */}
-    <aside style={styles.sidebar}>
-      {sidebarItems.map((item) => (
-        <div
-          key={item.id}
-          style={{
-            ...styles.sidebarItem,
-            ...(activeSidebar === item.id
-              ? styles.sidebarItemActive
-              : {}),
-          }}
-          onClick={() => setActiveSidebar(item.id)}
-        >
-          {item.label}
-        </div>
-      ))}
-    </aside>
+    
 
     {/* Main Content */}
     <main style={styles.mainContent}>
@@ -234,28 +212,7 @@ const styles = {
     display: "flex",
     flex: 1,
   },
-  sidebar: {
-    width: "200px",
-    minWidth: "200px",
-    borderRight: "1px solid #e8edf4",
-    padding: "16px 0",
-    backgroundColor: "#ffffff",
-  },
-  sidebarItem: {
-    padding: "10px 20px",
-    fontSize: "14px",
-    fontWeight: "500",
-    color: "#172b4d",
-    cursor: "pointer",
-    borderRadius: "6px",
-    margin: "2px 8px",
-    transition: "background-color 0.15s ease",
-  },
-  sidebarItemActive: {
-    backgroundColor: "#0056d6",
-    color: "#ffffff",
-    fontWeight: "600",
-  },
+
   mainContent: {
     flex: 1,
     padding: "36px 40px",
