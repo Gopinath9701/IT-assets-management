@@ -70,7 +70,7 @@ Build: ${env.BUILD_NUMBER}
 Branch: ${env.BRANCH_NAME}
 URL: ${env.BUILD_URL}
 """,
-                to: "your-success-chintalapatigopinath02@gmail.com"
+                to: "chintalapatigopinath02@gmail.com"
             )
         }
         failure {
@@ -85,7 +85,7 @@ Build: ${env.BUILD_NUMBER}
 Branch: ${env.BRANCH_NAME}
 URL: ${env.BUILD_URL}
 """,
-                to: "your-failure-chintalapatigopinath02@gmail.com"
+                to: "chintalapatigopinath02@gmail.com"
             )
         }
     }
