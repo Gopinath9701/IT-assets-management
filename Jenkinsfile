@@ -70,7 +70,7 @@ Build: ${env.BUILD_NUMBER}
 Branch: ${env.BRANCH_NAME}
 URL: ${env.BUILD_URL}
 """,
-                to: "24211A6708@bvrit.ac.in"
+                to: "24211A6757@bvrit.ac.in"
             )
         }
         failure {
@@ -85,7 +85,7 @@ Build: ${env.BUILD_NUMBER}
 Branch: ${env.BRANCH_NAME}
 URL: ${env.BUILD_URL}
 """,
-                to: "24211A6708@bvrit.ac.in"
+                to: "24211A6757@bvrit.ac.in"
             )
         }
     }
