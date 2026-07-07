@@ -1,92 +1,274 @@
 pipeline {
     agent any
 
+    environment {
+        DEVOPS_EMAIL = "24211A6718@bvrit.ac.in"
+    }
+
     stages {
+
         stage('Checkout') {
             steps {
                 checkout scm
+                echo "Checked out branch: ${env.BRANCH_NAME}"
             }
         }
 
-        // Frontend developer branch (existing)
-        stage('Frontend Developer Branch') {
+        // ---------------- Product Owner ----------------
+        stage('Product Owner') {
             when {
-                branch 'frontend-developer'   // frontend dev branch
+                branch 'Scrum-Master/Product-Owner'
             }
             steps {
-                echo 'Frontend developer branch build is running.'
+                echo 'Product Owner branch'
                 bat 'dir'
-                // here you can later add npm install / frontend build commands
+                echo 'Validate sprint documents, backlog, user stories.'
             }
         }
 
-        // Backend developer branch (new)
-        stage('Backend Developer Branch') {
+        // ---------------- Lead Developer ----------------
+        stage('Lead Developer') {
             when {
-                branch 'BackendEngineer'   // your backend-dev branch name
+                branch 'Lead-Developer'
             }
             steps {
-                echo 'Backend developer branch build is running.'
+                echo 'Lead Developer branch'
                 bat 'dir'
-                // here you can later add backend build/test commands (npm, Maven, etc.)
+                echo 'Review project structure and integration.'
             }
         }
 
-        // Tester / QA branch (shared for both)
-        stage('Tester Branch') {
+        // ---------------- Frontend ----------------
+        stage('Frontend CI') {
+            when {
+                branch 'frontend-developer'
+            }
+            steps {
+                echo 'Running Frontend CI'
+
+                bat 'dir'
+
+                // Later replace these
+                // bat 'npm install'
+                // bat 'npm run build'
+                // bat 'npm test'
+            }
+        }
+
+        // ---------------- Backend ----------------
+        stage('Backend CI') {
+            when {
+                branch 'BackendEngineer'
+            }
+            steps {
+                echo 'Running Backend CI'
+
+                bat 'dir'
+
+                // Later replace these
+                // bat 'mvn clean install'
+                // bat 'mvn test'
+            }
+        }
+
+        // ---------------- QA ----------------
+        stage('QA CI') {
             when {
                 branch 'QA-Engineer'
             }
             steps {
-                echo 'Tester branch validation is running.'
+                echo 'Running QA Validation'
+
                 bat 'dir'
-                // later: run test suites, API tests, integration tests, etc.
+
+                // Later
+                // Selenium
+                // Postman
+                // Integration tests
             }
         }
 
-        // Main branch (stable)
-        stage('Main Branch') {
+        // ---------------- DevOps (Git/Jenkins) ----------------
+        stage('DevOps Monitoring') {
+            when {
+                branch 'DevopsEngineer'
+            }
+            steps {
+                echo 'Monitoring all CI Pipelines'
+
+                bat 'dir'
+
+                echo 'Checking pipeline health'
+                echo 'Checking build history'
+                echo 'Monitoring notifications'
+            }
+        }
+
+        // ---------------- Deployment ----------------
+        stage('Deployment') {
+            when {
+                branch 'Deployment-1'
+            }
+            steps {
+                echo 'Deployment Pipeline'
+
+                bat 'dir'
+
+                // Later replace with
+
+                // docker build
+                // docker push
+                // kubectl apply
+            }
+        }
+
+        // ---------------- Main ----------------
+        stage('Main Integration') {
             when {
                 branch 'main'
             }
             steps {
-                echo 'Main branch final integration is running.'
+                echo 'Main Branch'
+
                 bat 'dir'
-                // later: optional deploy or release steps
+
+                echo 'Final integration successful'
             }
         }
     }
 
     post {
+
         success {
-            echo 'Pipeline completed successfully.'
-            // Email on successful build
-            emailext(
-                subject: "SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                body: """Build Succeeded.
 
-Job: ${env.JOB_NAME}
-Build: ${env.BUILD_NUMBER}
-Branch: ${env.BRANCH_NAME}
-URL: ${env.BUILD_URL}
-""",
-                to: "chintalapatigopinath02@gmail.com"
-            )
+            script {
+
+                def recipients = ""
+
+                switch(env.BRANCH_NAME) {
+
+                    case "frontend-developer":
+                        recipients = "24211A6708@bvrit.ac.in,${DEVOPS_EMAIL}"
+                        break
+
+                    case "BackendEngineer":
+                        recipients = "24211A6701@bvrit.ac.in,${DEVOPS_EMAIL}"
+                        break
+
+                    case "QA-Engineer":
+                        recipients = "24211A657@bvrit.ac.in,${DEVOPS_EMAIL}"
+                        break
+
+                    case "Lead-Developer":
+                        recipients = "24211A6702@bvrit.ac.in"
+                        break
+
+                    case "Scrum-Master/Product-Owner":
+                        recipients = "24211A6716@bvrit.ac.in"
+                        break
+
+                    case "Deployment-1":
+                        recipients = "24211A6719@bvrit.ac.in,${DEVOPS_EMAIL}"
+                        break
+
+                    case "DevopsEngineer":
+                        recipients = "24211A6718@bvrit.ac.in"
+                        break
+
+                    case "main":
+                        recipients = "chintalapatigopinath02@gmail.com"
+                        break
+                }
+
+                emailext(
+                    to: recipients,
+                    subject: "SUCCESS : ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                    body: """
+Build Status : SUCCESS
+
+Project : IT Asset Management System
+
+Branch : ${env.BRANCH_NAME}
+
+Job : ${env.JOB_NAME}
+
+Build Number : ${env.BUILD_NUMBER}
+
+Build URL :
+${env.BUILD_URL}
+
+Regards,
+Jenkins CI Pipeline
+"""
+                )
+            }
         }
-        failure {
-            echo 'Pipeline failed.'
-            // Email on failed build
-            emailext(
-                subject: "FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                body: """Build Failed.
 
-Job: ${env.JOB_NAME}
-Build: ${env.BUILD_NUMBER}
-Branch: ${env.BRANCH_NAME}
-URL: ${env.BUILD_URL}
-""",
-                to: "chintalapatigopinath02@gmail.com"
-            )
+        failure {
+
+            script {
+
+                def recipients = ""
+
+                switch(env.BRANCH_NAME) {
+
+                    case "frontend-developer":
+                        recipients = "24211A6708@bvrit.ac.in,${DEVOPS_EMAIL}"
+                        break
+
+                    case "BackendEngineer":
+                        recipients = "24211A6701@bvrit.ac.in,${DEVOPS_EMAIL}"
+                        break
+
+                    case "QA-Engineer":
+                        recipients = "24211A657@bvrit.ac.in,${DEVOPS_EMAIL}"
+                        break
+
+                    case "Lead-Developer":
+                        recipients = "24211A6702@bvrit.ac.in"
+                        break
+
+                    case "Scrum-Master/Product-Owner":
+                        recipients = "24211A6716@bvrit.ac.in"
+                        break
+
+                    case "Deployment-1":
+                        recipients = "24211A6719@bvrit.ac.in,${DEVOPS_EMAIL}"
+                        break
+
+                    case "DevopsEngineer":
+                        recipients = "24211A6718@bvrit.ac.in"
+                        break
+
+                    case "main":
+                        recipients = "chintalapatigopinath02@gmail.com"
+                        break
+                }
+
+                emailext(
+                    to: recipients,
+                    subject: "FAILED : ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                    body: """
+Build Status : FAILED
+
+Project : IT Asset Management System
+
+Branch : ${env.BRANCH_NAME}
+
+Job : ${env.JOB_NAME}
+
+Build Number : ${env.BUILD_NUMBER}
+
+Build URL :
+${env.BUILD_URL}
+
+Please check the Jenkins console logs.
+
+Regards,
+Jenkins CI Pipeline
+"""
+                )
+            }
         }
     }
 }
