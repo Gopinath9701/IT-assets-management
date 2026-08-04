@@ -1,31 +1,68 @@
 import React, { useState } from "react";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
-import "../App.css"; // or wherever your CSS file is located
+import "../App.css";
 
 export default function Login({ onForgotPasswordClick }) {
   const [formData, setFormData] = useState({
-    nameOrEmail: "",
-    employeeId: "",
-    department: "",
+    employeeIdOrEmail: "",
     password: "",
   });
+
   const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
-    // TODO: connect to backend API with fetch/axios
+
+    try {
+      const response = await fetch("http://localhost:5000/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          employeeIdOrEmail: formData.employeeIdOrEmail,
+          password: formData.password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert("Login Successful");
+
+        // Store JWT token
+        localStorage.setItem("token", data.token);
+
+        // Store user details
+        localStorage.setItem("user", JSON.stringify(data.user));
+
+        console.log("User:", data.user);
+
+        // Redirect to dashboard
+        // window.location.href = "/dashboard";
+      } else {
+        alert(data.message);
+      }
+    } catch (error) {
+      console.error("Login Error:", error);
+      alert("Unable to connect to server.");
+    }
   };
 
   return (
     <div className="login-card">
       <h2>Login</h2>
+
       <form onSubmit={handleSubmit}>
         <label>Employee ID or Email</label>
+
         <input
           type="text"
           name="employeeIdOrEmail"
@@ -34,7 +71,9 @@ export default function Login({ onForgotPasswordClick }) {
           onChange={handleChange}
           required
         />
+
         <label>Password</label>
+
         <div className="password-input-container">
           <input
             type={showPassword ? "text" : "password"}
@@ -44,11 +83,12 @@ export default function Login({ onForgotPasswordClick }) {
             onChange={handleChange}
             required
           />
+
           <button
             type="button"
             className="password-toggle-btn"
             onClick={() => setShowPassword(!showPassword)}
-            aria-label={showPassword ? "Hide password" : "Show password"}
+            aria-label={showPassword ? "Hide Password" : "Show Password"}
           >
             {showPassword ? <FaRegEyeSlash /> : <FaRegEye />}
           </button>
@@ -59,6 +99,7 @@ export default function Login({ onForgotPasswordClick }) {
           className="forgot-password-link"
           onClick={(e) => {
             e.preventDefault();
+
             if (onForgotPasswordClick) {
               onForgotPasswordClick();
             }
@@ -67,8 +108,9 @@ export default function Login({ onForgotPasswordClick }) {
           Forgot Password?
         </a>
 
-        <button type="submit">Login</button>
-
+        <button type="submit">
+          Login
+        </button>
       </form>
     </div>
   );
