@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 
 const HRManagement = ({
   username = "username",
@@ -9,6 +9,7 @@ const HRManagement = ({
   onEmployeeStatus,
   onDepartmentManagement,
   onReportMaintenance,
+  onAssetRequest,
 }) => {
  
 
@@ -48,6 +49,12 @@ const HRManagement = ({
       title: "Report Maintainance",
       description: "Report the issues caused by the assigned assets",
       buttonLabel: "Report Issue",
+    },
+    {
+      id: "asset-request",
+      title: "Asset Request",
+      description: "Request a new IT asset from the Asset Manager",
+      buttonLabel: "Request Asset",
     },
   ];
 
@@ -111,6 +118,8 @@ onClick={() => {
     onDepartmentManagement();
   } else if (card.id === "report-maintenance") {
     onReportMaintenance();
+  } else if (card.id === "asset-request") {
+    onAssetRequest();
   }
 }}
   onMouseEnter={(e) => {

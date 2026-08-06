@@ -7,242 +7,154 @@ const DepartmentManagement = ({
   onBack,
 }) => {
 
-  const [search, setSearch] = useState("");
+  const [search, setSearch]               = useState("");
+  const [searchApplied, setSearchApplied] = useState("");
 
-  const [departmentId, setDepartmentId] = useState("");
   const [departmentName, setDepartmentName] = useState("");
   const [departmentHead, setDepartmentHead] = useState("");
-  const [employeeCount, setEmployeeCount] = useState("");
-
-  // Show/Hide Add Department Form
-  const [showFields, setShowFields] = useState(false);
+  const [employeeCount, setEmployeeCount]   = useState("");
 
   const [departments, setDepartments] = useState([
-    {
-      id: "DEP001",
-      name: "Information Technology (IT)",
-      head: "Head 1",
-      employees: 25,
-    },
-    {
-      id: "DEP002",
-      name: "Human Resources (HR)",
-      head: "Head 2",
-      employees: 10,
-    },
-    {
-      id: "DEP003",
-      name: "Finance",
-      head: "Head 3",
-      employees: 15,
-    },
-    {
-      id: "DEP004",
-      name: "Marketing",
-      head: "Head 4",
-      employees: 12,
-    },
-    {
-      id: "DEP005",
-      name: "Sales",
-      head: "Head 5",
-      employees: 20,
-    },
-    {
-      id: "DEP006",
-      name: "Administration",
-      head: "Head 6",
-      employees: 8,
-    },
+    { id: "DEP001", name: "Information Technology (IT)", head: "Head 1", employees: 25 },
+    { id: "DEP002", name: "Human Resources (HR)",        head: "Head 2", employees: 10 },
+    { id: "DEP003", name: "Finance",                     head: "Head 3", employees: 15 },
+    { id: "DEP004", name: "Marketing",                   head: "Head 4", employees: 12 },
+    { id: "DEP005", name: "Sales",                       head: "Head 5", employees: 20 },
+    { id: "DEP006", name: "Administration",              head: "Head 6", employees: 18 },
   ]);
+
   const filteredDepartments = departments.filter((dept) =>
-  dept.name.toLowerCase().includes(search.toLowerCase())
-);
-
-const addDepartment = () => {
-
-  if (
-    departmentId === "" ||
-    departmentName === "" ||
-    departmentHead === "" ||
-    employeeCount === ""
-  ) {
-    alert("Please fill all fields.");
-    return;
-  }
-
-  setDepartments([
-    ...departments,
-    {
-      id: departmentId,
-      name: departmentName,
-      head: departmentHead,
-      employees: employeeCount,
-    },
-  ]);
-
-  setDepartmentId("");
-  setDepartmentName("");
-  setDepartmentHead("");
-  setEmployeeCount("");
-
-  // Hide the form after adding
-  setShowFields(false);
-};
-
-const deleteDepartment = (id) => {
-  setDepartments(
-    departments.filter((dept) => dept.id !== id)
+    dept.name.toLowerCase().includes(searchApplied.toLowerCase())
   );
-};
 
-return (
-   
-  <div className="department-page">
+  const addDepartment = () => {
+    if (departmentName === "" || departmentHead === "" || employeeCount === "") {
+      alert("Please fill all fields.");
+      return;
+    }
+    const newId = `DEP${String(departments.length + 1).padStart(3, "0")}`;
+    setDepartments([
+      ...departments,
+      { id: newId, name: departmentName, head: departmentHead, employees: employeeCount },
+    ]);
+    setDepartmentName("");
+    setDepartmentHead("");
+    setEmployeeCount("");
+  };
 
-    <div className="department-container">
+  const deleteDepartment = (id) => {
+    setDepartments(departments.filter((dept) => dept.id !== id));
+  };
 
-      <h1>Department Management</h1>
+  return (
+    <div className="dm-page">
 
-      <p>Manage organization departments.</p>
+      {/* Navbar */}
+      <nav className="dm-nav">
+        <div className="dm-nav-logo">
+          <span className="dm-nav-title">ITAMS</span>
+          <span className="dm-nav-sub">IT Asset Management System</span>
+        </div>
+        <div className="dm-nav-right">
+          <span className="dm-nav-user">{username}</span>
+          <span className="dm-nav-divider">|</span>
+          <button className="dm-logout-btn" onClick={onLogout}>Logout</button>
+        </div>
+      </nav>
 
-      <div className="department-card">
+      {/* Body */}
+      <div className="dm-body">
 
-        <h3>Search Department</h3>
+        <h1 className="dm-page-title">Department Management</h1>
+        <p className="dm-page-sub">Manage organization departments.</p>
 
-        <div className="search-row">
-          <input
-            type="text"
-            placeholder="Enter Department Name"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          <button>Search</button>
+        {/* Search Card */}
+        <div className="dm-card">
+          <h2 className="dm-card-title">Search Department</h2>
+          <div className="dm-search-row">
+            <input
+              className="dm-input"
+              type="text"
+              placeholder="Enter Department Name"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && setSearchApplied(search)}
+            />
+            <button
+              className="dm-btn-primary"
+              onClick={() => setSearchApplied(search)}
+            >
+              Search
+            </button>
+          </div>
         </div>
 
-        <hr />
+        {/* Add + List Card */}
+        <div className="dm-card">
+          <h2 className="dm-card-title">Add New Department</h2>
+          <div className="dm-add-row">
+            <input
+              className="dm-input"
+              type="text"
+              placeholder="Department Name"
+              value={departmentName}
+              onChange={(e) => setDepartmentName(e.target.value)}
+            />
+            <input
+              className="dm-input"
+              type="text"
+              placeholder="Department Head"
+              value={departmentHead}
+              onChange={(e) => setDepartmentHead(e.target.value)}
+            />
+            <input
+              className="dm-input"
+              type="number"
+              placeholder="Number of Employees"
+              value={employeeCount}
+              onChange={(e) => setEmployeeCount(e.target.value)}
+            />
+            <button className="dm-btn-add" onClick={addDepartment}>
+              Add
+            </button>
+          </div>
 
-       <h3
-  style={{
-    cursor: "pointer",
-    color: "#1d5fd0",
-    display: "inline-block",
-  }}
-  onClick={() => setShowFields(true)}
->
-  Add New Department
-</h3>
-
-{showFields && (
-          
-
-
-
-<div className="add-row">
-
-  <input
-    type="text"
-    placeholder="Department ID"
-    value={departmentId}
-    onChange={(e) => setDepartmentId(e.target.value)}
-  />
-
-  <input
-    type="text"
-    placeholder="Department Name"
-    value={departmentName}
-    onChange={(e) => setDepartmentName(e.target.value)}
-  />
-
-  <input
-    type="text"
-    placeholder="Department Head"
-    value={departmentHead}
-    onChange={(e) => setDepartmentHead(e.target.value)}
-  />
-
-  <input
-    type="number"
-    placeholder="Number of Employees"
-    value={employeeCount}
-    onChange={(e) => setEmployeeCount(e.target.value)}
-  />
-
-  <button onClick={addDepartment}>
-    Add
-  </button>
-
-</div>
-
-)}
-
-        <hr />
-              <h3>Department List</h3>
-
-        <table>
-
-          <thead>
-            <tr>
-              <th>Department ID</th>
-              <th>Department Name</th>
-              <th>Department Head</th>
-              <th>Number of Employees</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-
-          <tbody>
-
-            {filteredDepartments.length > 0 ? (
-
-              filteredDepartments.map((dept) => (
-
-                <tr key={dept.id}>
-
-                  <td>{dept.id}</td>
-                  <td>{dept.name}</td>
-                  <td>{dept.head}</td>
-                  <td>{dept.employees}</td>
-
-                  <td>
-
-                    <button
-                      className="delete-btn"
-                      onClick={() => deleteDepartment(dept.id)}
-                    >
-                      Delete
-                    </button>
-
-                  </td>
-
+          {/* Department List */}
+          <h2 className="dm-card-title dm-list-title">Department List</h2>
+          <div className="dm-table-wrapper">
+            <table className="dm-table">
+              <thead>
+                <tr>
+                  <th>Department Name</th>
+                  <th>Department Head</th>
+                  <th>Number of Employees</th>
                 </tr>
+              </thead>
+              <tbody>
+                {filteredDepartments.length > 0 ? (
+                  filteredDepartments.map((dept) => (
+                    <tr key={dept.id}>
+                      <td>{dept.name}</td>
+                      <td>{dept.head}</td>
+                      <td>{dept.employees}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="3" className="dm-no-data">No Department Found</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
 
-              ))
-
-            ) : (
-
-              <tr>
-
-                <td colSpan="5">
-                  No Department Found
-                </td>
-
-              </tr>
-
-            )}
-
-          </tbody>
-
-        </table>
+        {/* Back */}
+        <button className="dm-back-btn" onClick={onBack}>Back</button>
 
       </div>
-
     </div>
-
-  </div>
-
-);
-
+  );
 };
 
 export default DepartmentManagement;
