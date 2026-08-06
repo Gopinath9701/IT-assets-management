@@ -24,6 +24,9 @@ const AddEmployee = () => {
   const emailRegex = /^[A-Za-z0-9._%+-]{3,}@gmail\.com$/;
   const designationRegex = /^[A-Za-z ]+$/;
 
+  // Updated to match Selenium Test
+  const phoneRegex = /^[6-9]\d{9}$/;
+
   // ==========================
   // Handle Change
   // ==========================
@@ -57,21 +60,22 @@ const AddEmployee = () => {
 
     if (!employee.employeeName.trim()) {
 
-      newErrors.employeeName = "Employee Name is required.";
+      newErrors.employeeName =
+        "Employee Name is required.";
 
     }
+
     else if (employee.employeeName.trim().length < 4) {
 
-    newErrors.employeeName =
+      newErrors.employeeName =
         "Employee Name must contain at least 4 characters.";
 
-}
+    }
 
-
-    else if (employee.employeeName.length > 20) {
+    else if (employee.employeeName.trim().length > 20) {
 
       newErrors.employeeName =
-        "Employee Name cannot exceed 20 characters";
+        "Employee Name cannot exceed 20 characters.";
 
     }
 
@@ -100,17 +104,10 @@ const AddEmployee = () => {
 
     }
 
-    else if (employee.employeeId.length < 6) {
+    else if (employee.employeeId.length !== 6) {
 
       newErrors.employeeId =
         "Employee ID must be exactly 6 characters.";
-
-    }
-
-    else if (employee.employeeId.length > 6) {
-
-      newErrors.employeeId =
-        "Employee ID cannot exceed 6 characters.";
 
     }
 
@@ -188,18 +185,18 @@ const AddEmployee = () => {
         "Designation is required.";
 
     }
+
     else if (employee.designation.trim().length < 4) {
 
-    newErrors.designation =
+      newErrors.designation =
         "Designation must contain at least 4 characters.";
 
-}
+    }
 
-
-    else if (employee.designation.length > 20) {
+    else if (employee.designation.trim().length > 20) {
 
       newErrors.designation =
-        "Designation cannot exceed 20 characters";
+        "Designation cannot exceed 20 characters.";
 
     }
 
@@ -211,7 +208,7 @@ const AddEmployee = () => {
     }
 
     // ----------------------------
-    // Phone Number
+    // Phone
     // ----------------------------
 
     if (!employee.phone.trim()) {
@@ -228,15 +225,15 @@ const AddEmployee = () => {
 
     }
 
-    else if (!/^\+91[6-9]\d{9}$/.test(employee.phone)) {
+    else if (!phoneRegex.test(employee.phone)) {
 
       newErrors.phone =
-        "Enter a valid Indian mobile number (Example: +91(6/7/8/9)).";
+        "Enter a valid 10-digit mobile number.";
 
     }
 
     // ----------------------------
-    // Date of Joining
+    // Joining Date
     // ----------------------------
 
     if (!employee.joiningDate) {
@@ -251,7 +248,9 @@ const AddEmployee = () => {
       const today = new Date();
       today.setHours(0,0,0,0);
 
-      const joiningDate = new Date(employee.joiningDate);
+      const joiningDate =
+        new Date(employee.joiningDate);
+
       joiningDate.setHours(0,0,0,0);
 
       const companyStartDate =
@@ -278,296 +277,283 @@ const AddEmployee = () => {
     return Object.keys(newErrors).length === 0;
 
   };
+    // ==========================
+  // Handle Submit
   // ==========================
-// Handle Submit
-// ==========================
 
-const handleSubmit = (e) => {
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-  e.preventDefault();
+    if (!validateForm()) return;
 
-  if (!validateForm()) {
-    return;
-  }
+    alert("Employee Added Successfully!");
 
-  alert("Employee Added Successfully!");
+    console.log(employee);
 
-  console.log(employee);
+    setEmployee({
+      employeeName: "",
+      employeeId: "",
+      email: "",
+      department: "",
+      designation: "",
+      phone: "",
+      joiningDate: "",
+    });
 
-  // Reset form
-  setEmployee({
-    employeeName: "",
-    employeeId: "",
-    email: "",
-    department: "",
-    designation: "",
-    phone: "",
-    joiningDate: "",
-  });
+    setErrors({});
+  };
 
-  setErrors({});
+  // ==========================
+  // Handle Cancel
+  // ==========================
 
-};
+  const handleCancel = () => {
+    setEmployee({
+      employeeName: "",
+      employeeId: "",
+      email: "",
+      department: "",
+      designation: "",
+      phone: "",
+      joiningDate: "",
+    });
 
-// ==========================
-// Handle Cancel
-// ==========================
+    setErrors({});
+  };
 
-const handleCancel = () => {
+  return (
+    <div className="add-employee-page">
 
-  setEmployee({
-    employeeName: "",
-    employeeId: "",
-    email: "",
-    department: "",
-    designation: "",
-    phone: "",
-    joiningDate: "",
-  });
+      <header className="employee-header">
 
-  setErrors({});
+        <div className="logo-section">
+          <h1>ITAMS</h1>
+          <p>IT Asset Management System</p>
+        </div>
 
-};
-return (
-  <div className="add-employee-page">
+        <div className="user-section">
+          <span>username</span>
+          <span className="divider">|</span>
 
-    {/* Header */}
-    <header className="employee-header">
+          <button className="logout-btn">
+            Logout
+          </button>
+        </div>
 
-      <div className="logo-section">
-        <h1>ITAMS</h1>
-        <p>IT Asset Management System</p>
-      </div>
+      </header>
 
-      <div className="user-section">
-        <span>username</span>
-        <span className="divider">|</span>
+      <div className="employee-container">
 
-        <button className="logout-btn">
-          Logout
-        </button>
+        <h1>Add Employee</h1>
 
-      </div>
+        <p className="subtitle">
+          Fill in the employee details below.
+        </p>
 
-    </header>
+        <form
+          className="employee-card"
+          onSubmit={handleSubmit}
+        >
 
-    <div className="employee-container">
+          <h2>Employee Information</h2>
 
-      <h1>Add Employee</h1>
+          <div className="form-grid">
 
-      <p className="subtitle">
-        Fill in the employee details below.
-      </p>
+            {/* Employee Name */}
 
-      <form
-        className="employee-card"
-        onSubmit={handleSubmit}
-      >
+            <div className="form-group">
 
-        <h2>Employee Information</h2>
+              <label>Employee Name</label>
 
-        <div className="form-grid">
+              <input
+                type="text"
+                name="employeeName"
+                placeholder="Enter full name"
+                value={employee.employeeName}
+                onChange={handleChange}
+                className={errors.employeeName ? "input-error" : ""}
+              />
 
-          {/* Employee Name */}
+              {errors.employeeName && (
+                <span className="error">
+                  {errors.employeeName}
+                </span>
+              )}
 
-          <div className="form-group">
+            </div>
 
-            <label>Employee Name</label>
+            {/* Employee ID */}
 
-            <input
-              type="text"
-              name="employeeName"
-              placeholder="Enter Full Name"
-              value={employee.employeeName}
-              onChange={handleChange}
-              className={errors.employeeName ? "input-error" : ""}
-            />
+            <div className="form-group">
 
-            {errors.employeeName && (
-              <span className="error">
-                {errors.employeeName}
-              </span>
-            )}
+              <label>Employee ID</label>
+
+              <input
+                type="text"
+                name="employeeId"
+                placeholder="Enter employee ID"
+                value={employee.employeeId}
+                onChange={handleChange}
+                className={errors.employeeId ? "input-error" : ""}
+              />
+
+              {errors.employeeId && (
+                <span className="error">
+                  {errors.employeeId}
+                </span>
+              )}
+
+            </div>
+
+            {/* Email */}
+
+            <div className="form-group">
+
+              <label>Email</label>
+
+              <input
+                type="email"
+                name="email"
+                placeholder="Enter email address"
+                value={employee.email}
+                onChange={handleChange}
+                className={errors.email ? "input-error" : ""}
+              />
+
+              {errors.email && (
+                <span className="error">
+                  {errors.email}
+                </span>
+              )}
+
+            </div>
+
+            {/* Department */}
+
+            <div className="form-group">
+
+              <label>Department</label>
+
+              <select
+                name="department"
+                value={employee.department}
+                onChange={handleChange}
+                className={errors.department ? "input-error" : ""}
+              >
+                <option value="">Select Department</option>
+                <option value="HR">HR</option>
+                <option value="Asset Manager">Asset Manager</option>
+                <option value="Inventory">Inventory</option>
+                <option value="IT">IT</option>
+                <option value="Finance">Finance</option>
+                <option value="Marketing">Marketing</option>
+                <option value="Sales">Sales</option>
+                <option value="Administration">Administration</option>
+              </select>
+
+              {errors.department && (
+                <span className="error">
+                  {errors.department}
+                </span>
+              )}
+
+            </div>
+
+            {/* Designation */}
+
+            <div className="form-group">
+
+              <label>Designation</label>
+
+              <input
+                type="text"
+                name="designation"
+                placeholder="Enter designation"
+                value={employee.designation}
+                onChange={handleChange}
+                className={errors.designation ? "input-error" : ""}
+              />
+
+              {errors.designation && (
+                <span className="error">
+                  {errors.designation}
+                </span>
+              )}
+
+            </div>
+
+            {/* Phone */}
+
+            <div className="form-group">
+
+              <label>Phone Number</label>
+
+              <input
+                type="text"
+                name="phone"
+                placeholder="Enter phone number"
+                value={employee.phone}
+                onChange={handleChange}
+                maxLength={10}
+                className={errors.phone ? "input-error" : ""}
+              />
+
+              {errors.phone && (
+                <span className="error">
+                  {errors.phone}
+                </span>
+              )}
+
+            </div>
+
+            {/* Date of Joining */}
+
+            <div className="form-group">
+
+              <label>Date of Joining</label>
+
+              <input
+                type="date"
+                name="joiningDate"
+                value={employee.joiningDate}
+                onChange={handleChange}
+                max={new Date().toISOString().split("T")[0]}
+                className={errors.joiningDate ? "input-error" : ""}
+              />
+
+              {errors.joiningDate && (
+                <span className="error">
+                  {errors.joiningDate}
+                </span>
+              )}
+
+            </div>
 
           </div>
 
-          {/* Employee ID */}
+          <div className="button-group">
 
-          <div className="form-group">
-
-            <label>Employee ID</label>
-
-            <input
-              type="text"
-              name="employeeId"
-              placeholder="EMP001"
-              value={employee.employeeId}
-              onChange={handleChange}
-              className={errors.employeeId ? "input-error" : ""}
-            />
-
-            {errors.employeeId && (
-              <span className="error">
-                {errors.employeeId}
-              </span>
-            )}
-
-          </div>
-
-          {/* Email */}
-
-          <div className="form-group">
-
-            <label>Email</label>
-
-            <input
-              type="email"
-              name="email"
-              placeholder="example@gmail.com"
-              value={employee.email}
-              onChange={handleChange}
-              className={errors.email ? "input-error" : ""}
-            />
-
-            {errors.email && (
-              <span className="error">
-                {errors.email}
-              </span>
-            )}
-
-          </div>
-
-          {/* Department */}
-
-          <div className="form-group">
-
-            <label>Department</label>
-
-            <select
-              name="department"
-              value={employee.department}
-              onChange={handleChange}
-              className={errors.department ? "input-error" : ""}
+            <button
+              type="submit"
+              className="save-btn"
             >
+              Save Employee
+            </button>
 
-              <option value="">Select Department</option>
-              <option value="HR">HR</option>
-              <option value="Asset Manager">Asset Manager</option>
-              <option value="Inventory">Inventory</option>
-              <option value="IT">IT</option>
-              <option value="Finance">Finance</option>
-              <option value="Marketing">Marketing</option>
-              <option value="Sales">Sales</option>
-              <option value="Administration">Administration</option>
-
-            </select>
-
-            {errors.department && (
-              <span className="error">
-                {errors.department}
-              </span>
-            )}
-
-          </div>
-                    {/* Designation */}
-
-          <div className="form-group">
-
-            <label>Designation</label>
-
-            <input
-              type="text"
-              name="designation"
-              placeholder="Enter Designation"
-              value={employee.designation}
-              onChange={handleChange}
-              className={errors.designation ? "input-error" : ""}
-            />
-
-            {errors.designation && (
-              <span className="error">
-                {errors.designation}
-              </span>
-            )}
+            <button
+              type="button"
+              className="cancel-btn"
+              onClick={handleCancel}
+            >
+              Cancel
+            </button>
 
           </div>
 
-          {/* Phone Number */}
-
-          <div className="form-group">
-
-            <label>Phone Number</label>
-
-            <input
-              type="text"
-              name="phone"
-              placeholder="+91(6/7/8/9)"
-              value={employee.phone}
-              onChange={handleChange}
-              maxLength={13}
-              className={errors.phone ? "input-error" : ""}
-            />
-
-            {errors.phone && (
-              <span className="error">
-                {errors.phone}
-              </span>
-            )}
-
-          </div>
-
-          {/* Date of Joining */}
-
-          <div className="form-group">
-
-            <label>Date of Joining</label>
-
-            <input
-              type="date"
-              name="joiningDate"
-              value={employee.joiningDate}
-              onChange={handleChange}
-              max={new Date().toISOString().split("T")[0]}
-              className={errors.joiningDate ? "input-error" : ""}
-            />
-
-            {errors.joiningDate && (
-              <span className="error">
-                {errors.joiningDate}
-              </span>
-            )}
-
-          </div>
-
-        </div>
-
-        <div className="button-group">
-
-          <button
-            type="submit"
-            className="save-btn"
-          >
-            Save Employee
-          </button>
-
-          <button
-            type="button"
-            className="cancel-btn"
-            onClick={handleCancel}
-          >
-            Cancel
-          </button>
-
-        </div>
-
-      </form>
-
+        </form>
+              </div>
     </div>
-
-  </div>
-
-);
-
+  );
 };
 
 export default AddEmployee;
