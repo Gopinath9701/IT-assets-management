@@ -1,0 +1,391 @@
+/* ── Reset ── */
+.ai-page *,
+.ai-page *::before,
+.ai-page *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Page wrapper ── */
+.ai-page {
+  min-height: 100vh;
+  background: #f9fafb;
+  font-family: "Inter", Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Navbar ── */
+.ai-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 36px;
+  height: 68px;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.ai-nav-logo {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+
+.ai-nav-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #1d4ed8;
+}
+
+.ai-nav-sub {
+  font-size: 11px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.ai-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.ai-nav-user {
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+}
+
+.ai-nav-divider {
+  color: #d1d5db;
+  font-size: 16px;
+}
+
+.ai-logout-btn {
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+  cursor: pointer;
+  padding: 0;
+}
+
+.ai-logout-btn:hover {
+  color: #1d4ed8;
+}
+
+/* ── Body ── */
+.ai-body {
+  flex: 1;
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 36px 24px 56px;
+}
+
+/* ── Page heading ── */
+.ai-page-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 6px;
+}
+
+.ai-page-sub {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 24px;
+}
+
+/* ── Select Asset dropdown ── */
+.ai-select-section {
+  margin-bottom: 24px;
+}
+
+.ai-select-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+.ai-dropdown-wrapper {
+  position: relative;
+  display: inline-block;
+  min-width: 260px;
+}
+
+.ai-dropdown-btn {
+  width: 100%;
+  padding: 10px 14px;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #111827;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: inherit;
+  text-align: left;
+}
+
+.ai-dropdown-btn:hover {
+  border-color: #1d4ed8;
+}
+
+.ai-dropdown-arrow {
+  font-size: 18px;
+  color: #6b7280;
+  line-height: 1;
+}
+
+.ai-dropdown-list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+  z-index: 200;
+  list-style: none;
+  overflow: hidden;
+}
+
+.ai-dropdown-item {
+  padding: 10px 14px;
+  font-size: 14px;
+  color: #374151;
+  cursor: pointer;
+}
+
+.ai-dropdown-item:hover {
+  background: #f3f4f6;
+}
+
+.ai-dropdown-item-active {
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
+/* ── Stats row ── */
+.ai-stats-row {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.ai-stat-card {
+  flex: 1;
+  min-width: 140px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ai-stat-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.ai-stat-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1;
+}
+
+.ai-stat-sub {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+/* ── Charts row ── */
+.ai-charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.ai-chart-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 24px;
+}
+
+.ai-chart-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 20px;
+}
+
+.ai-chart-body {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.ai-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ai-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ai-legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.ai-legend-text {
+  font-size: 12px;
+  color: #374151;
+}
+
+.ai-chart-footer {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 14px;
+  text-align: center;
+}
+
+/* ── Inventory Details table ── */
+.ai-table-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.ai-table-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 16px;
+}
+
+.ai-table-wrapper {
+  overflow-x: auto;
+}
+
+.ai-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+
+.ai-table thead tr {
+  background: #f3f4f6;
+}
+
+.ai-table th {
+  text-align: left;
+  padding: 11px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #374151;
+  border-bottom: 1px solid #e5e7eb;
+  white-space: nowrap;
+}
+
+.ai-table td {
+  padding: 12px 14px;
+  color: #374151;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 13.5px;
+  vertical-align: middle;
+}
+
+.ai-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.ai-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+/* ── Status badge ── */
+.ai-status-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* ── Back button ── */
+.ai-back-btn {
+  display: inline-block;
+  padding: 10px 28px;
+  background: #ffffff;
+  color: #374151;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+  font-family: inherit;
+}
+
+.ai-back-btn:hover {
+  background: #f3f4f6;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .ai-charts-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .ai-body {
+    padding: 20px 14px 36px;
+  }
+
+  .ai-stats-row {
+    gap: 10px;
+  }
+
+  .ai-stat-card {
+    min-width: calc(50% - 10px);
+  }
+
+  .ai-chart-body {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .ai-dropdown-wrapper {
+    width: 100%;
+  }
+}

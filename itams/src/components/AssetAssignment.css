@@ -1,0 +1,451 @@
+/* ============================================================
+   AssetAssignment.css — matches PDF design exactly
+   ============================================================ */
+
+.asa-page-wrapper *,
+.asa-page-wrapper *::before,
+.asa-page-wrapper *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Page Wrapper ── */
+.asa-page-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #ffffff;
+  font-family: "Inter", Arial, sans-serif;
+}
+
+/* ─────────────────────────────────────────
+   TOP NAVBAR
+───────────────────────────────────────── */
+.asa-top-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  height: 64px;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: #ffffff;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.asa-nav-logo {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.asa-nav-logo-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #2563eb;
+  letter-spacing: 0.5px;
+}
+
+.asa-nav-logo-sub {
+  font-size: 11px;
+  color: #6b7280;
+  font-weight: 400;
+  margin-top: 2px;
+}
+
+.asa-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.asa-nav-username {
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+}
+
+.asa-nav-divider {
+  width: 1px;
+  height: 20px;
+  background-color: #d1d5db;
+}
+
+.asa-logout-btn {
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 0;
+  transition: color 0.15s;
+}
+
+.asa-logout-btn:hover {
+  color: #2563eb;
+}
+
+/* ─────────────────────────────────────────
+   BODY
+───────────────────────────────────────── */
+.asa-body-wrapper {
+  display: flex;
+  flex: 1;
+}
+
+/* ─────────────────────────────────────────
+   SIDEBAR
+───────────────────────────────────────── */
+.asa-sidebar {
+  width: 210px;
+  min-width: 210px;
+  border-right: 1px solid #e5e7eb;
+  padding: 24px 0;
+  background-color: #ffffff;
+}
+
+.asa-sidebar-item {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+  cursor: pointer;
+  border-radius: 6px;
+  margin: 2px 8px;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  white-space: nowrap;
+}
+
+.asa-sidebar-item:hover:not(.asa-sidebar-item--active) {
+  background-color: #f3f4f6;
+}
+
+.asa-sidebar-item--active {
+  background-color: #2563eb;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* ─────────────────────────────────────────
+   MAIN CONTENT
+───────────────────────────────────────── */
+.asa-main-content {
+  flex: 1;
+  padding: 36px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+}
+
+.asa-page-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.asa-page-subtitle {
+  font-size: 14px;
+  color: #6b7280;
+  margin-top: -16px;
+}
+
+/* ─────────────────────────────────────────
+   SEARCH SECTION
+───────────────────────────────────────── */
+.asa-search-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.asa-search-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.asa-search-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.asa-input {
+  height: 40px;
+  padding: 0 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #111827;
+  background-color: #ffffff;
+  outline: none;
+  width: 280px;
+  max-width: 100%;
+  transition: border-color 0.15s;
+}
+
+.asa-input::placeholder {
+  color: #9ca3af;
+}
+
+.asa-input:focus {
+  border-color: #2563eb;
+}
+
+.asa-search-btn {
+  height: 40px;
+  padding: 0 28px;
+  background-color: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.15s;
+  flex-shrink: 0;
+}
+
+.asa-search-btn:hover {
+  background-color: #1d4ed8;
+}
+
+/* ─────────────────────────────────────────
+   CARDS
+───────────────────────────────────────── */
+.asa-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 24px 28px 16px;
+  background-color: #ffffff;
+}
+
+.asa-card-heading {
+  font-size: 15px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 16px;
+}
+
+/* ─────────────────────────────────────────
+   TABLES
+───────────────────────────────────────── */
+.asa-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.asa-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+  min-width: 700px;
+}
+
+.asa-table thead tr {
+  border-top: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+}
+
+.asa-table th {
+  padding: 12px 14px;
+  text-align: center;
+  font-weight: 600;
+  color: #374151;
+  font-size: 13.5px;
+  white-space: nowrap;
+}
+
+.asa-table td {
+  padding: 13px 14px;
+  text-align: center;
+  color: #374151;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 13.5px;
+  white-space: nowrap;
+}
+
+.asa-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.asa-table tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+.asa-no-data {
+  text-align: center;
+  color: #9ca3af;
+  padding: 28px;
+  font-size: 14px;
+}
+
+/* ── Blue Assign button — matches PDF ── */
+.asa-assign-btn {
+  padding: 6px 20px;
+  background-color: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 5px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.15s;
+}
+
+.asa-assign-btn:hover {
+  background-color: #1d4ed8;
+}
+
+/* ── Status badge ── */
+.asa-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Green Assigned — matches PDF */
+.asa-badge--assigned {
+  background-color: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+/* Rows-per-page right-aligned inside card */
+.asa-rows-right {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 14px;
+}
+
+.asa-rows-select {
+  height: 36px;
+  padding: 0 32px 0 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  color: #111827;
+  background-color: #ffffff;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236b7280' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  cursor: pointer;
+  outline: none;
+}
+
+.asa-rows-select:focus {
+  border-color: #2563eb;
+}
+
+/* ─────────────────────────────────────────
+   FOOTER (Back button)
+───────────────────────────────────────── */
+.asa-footer-row {
+  display: flex;
+  align-items: center;
+}
+
+.asa-back-btn {
+  padding: 8px 24px;
+  background-color: #ffffff;
+  border: 1.5px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  color: #111827;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.asa-back-btn:hover {
+  background-color: #f3f4f6;
+}
+
+/* ─────────────────────────────────────────
+   RESPONSIVE
+───────────────────────────────────────── */
+
+/* Tablet */
+@media (max-width: 960px) {
+  .asa-main-content {
+    padding: 24px 20px;
+  }
+
+  .asa-input {
+    width: 220px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .asa-body-wrapper {
+    flex-direction: column;
+  }
+
+  .asa-sidebar {
+    width: 100%;
+    min-width: unset;
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 10px 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .asa-sidebar-item {
+    margin: 0;
+    font-size: 13px;
+  }
+
+  .asa-main-content {
+    padding: 16px;
+  }
+
+  .asa-top-nav {
+    padding: 10px 16px;
+    height: auto;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .asa-page-title {
+    font-size: 22px;
+  }
+
+  .asa-input {
+    width: 100%;
+  }
+
+  .asa-search-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .asa-search-btn {
+    width: 100%;
+  }
+
+  .asa-card {
+    padding: 16px;
+  }
+}

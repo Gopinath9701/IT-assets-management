@@ -20,13 +20,19 @@ import EmployeeStatus from './components/EmployeeStatus';
 import DepartmentManagement from './components/DepartmentManagement';
 import ReportMaintenance from './components/ReportMaintenance';
 import AssetRequest from './components/AssetRequest';
+import AssetInventory from './components/AssetInventory';
+import ManageAsset from './components/ManageAsset';
+import AddAsset from './components/AddAsset';
+import AssetDetails from './components/AssetDetails';
+import EditAsset from './components/EditAsset';
+import RequestApproval from './components/RequestApproval';
+import AssetAssignment from './components/AssetAssignment';
 
 function App() {
   const [page, setPage] = useState('home');
   const [active, setActive] = useState('home');
-
-  // Logged-in user (set on successful login)
   const [username, setUsername] = useState('username');
+  const [selectedAsset, setSelectedAsset] = useState(null);
 
   const scrollToSection = (id) => {
     setActive(id);
@@ -39,7 +45,7 @@ function App() {
     setPage('home');
   };
 
-  // ── Page routing ────────────────────────────────────────────
+  // ── Login page ──────────────────────────────────────────────
   if (page === 'login') {
     return (
       <div className="auth-wrapper">
@@ -47,6 +53,26 @@ function App() {
           <div className="logo">
             <h1>ITAMS</h1>
             <p>IT Asset Management System</p>
+          </div>
+          <div className="login-nav-buttons">
+            <button
+              className="login-nav-btn"
+              onClick={() => setPage('hr-management')}
+            >
+              HR Management
+            </button>
+            <button
+              className="login-nav-btn"
+              onClick={() => setPage('asset-management')}
+            >
+              Asset Management
+            </button>
+            <button
+              className="login-nav-btn"
+              onClick={() => setPage('asset-inventory')}
+            >
+              Asset Inventory
+            </button>
           </div>
         </nav>
         <Login
@@ -61,12 +87,14 @@ function App() {
     );
   }
 
+  // ── Forgot Password ─────────────────────────────────────────
   if (page === 'forgot-password') {
     return (
       <ForgotPassword onLoginClick={() => setPage('login')} />
     );
   }
 
+  // ── HR Management ───────────────────────────────────────────
   if (page === 'hr-management') {
     return (
       <HRManagement
@@ -83,19 +111,118 @@ function App() {
     );
   }
 
+  // ── Asset Management ────────────────────────────────────────
   if (page === 'asset-management') {
     return (
       <AssetManagement
         username={username}
         onLogout={handleLogout}
+        onManageAssets={() => setPage('manage-asset')}
+        onAddAsset={() => setPage('add-asset')}
+        onAssetDetails={() => setPage('asset-details')}
+        onRequestApproval={() => setPage('request-approval')}
+        onAssetAssignment={() => setPage('asset-assignment')}
       />
     );
   }
 
-  if (page === 'add-employee') {
-    return <AddEmployee onBack={() => setPage('hr-management')} />;
+  // ── Asset Assignment ──────────────────────────────────────────
+  if (page === 'asset-assignment') {
+    return (
+      <AssetAssignment
+        username={username}
+        onLogout={handleLogout}
+        onBack={() => setPage('asset-management')}
+        onSidebarNavigate={(id) => {
+          if (id === 'asset-management')  setPage('asset-management');
+          if (id === 'request-approval')  setPage('request-approval');
+        }}
+      />
+    );
   }
 
+  // ── Request Approval ─────────────────────────────────────────
+  if (page === 'request-approval') {
+    return (
+      <RequestApproval
+        username={username}
+        onLogout={handleLogout}
+        onBack={() => setPage('asset-management')}
+        onSidebarNavigate={(id) => {
+          if (id === 'asset-management') setPage('asset-management');
+        }}
+      />
+    );
+  }
+
+  // ── Asset Details ────────────────────────────────────────────
+  if (page === 'asset-details') {
+    return (
+      <AssetDetails
+        username={username}
+        onLogout={handleLogout}
+        onBack={() => setPage('asset-management')}
+      />
+    );
+  }
+
+  // ── Add Asset ────────────────────────────────────────────────
+  if (page === 'add-asset') {
+    return (
+      <AddAsset
+        username={username}
+        onLogout={handleLogout}
+        onBack={() => setPage('asset-management')}
+      />
+    );
+  }
+
+  // ── Manage Asset ─────────────────────────────────────────────
+  if (page === 'manage-asset') {
+    return (
+      <ManageAsset
+        username={username}
+        onLogout={handleLogout}
+        onBack={() => setPage('asset-management')}
+        onEditAsset={(asset) => {
+          setSelectedAsset(asset);
+          setPage('edit-asset');
+        }}
+      />
+    );
+  }
+
+  // ── Edit Asset ───────────────────────────────────────────────
+  if (page === 'edit-asset') {
+    return (
+      <EditAsset
+        username={username}
+        onLogout={handleLogout}
+        onBack={() => setPage('manage-asset')}
+        asset={selectedAsset}
+      />
+    );
+  }
+
+  // ── Asset Inventory ─────────────────────────────────────────
+  if (page === 'asset-inventory') {
+    return (
+      <AssetInventory
+        username={username}
+        onLogout={handleLogout}
+        onBack={() => setPage('home')}
+      />
+    );
+  }
+
+  // ── Add Employee ────────────────────────────────────────────
+  if (page === 'add-employee') {
+    return (
+      <AddEmployee onBack={() => setPage('hr-management')} />
+    );
+  }
+
+  // ── Update Employee ─────────────────────────────────────────
   if (page === 'update-employee') {
     return (
       <UpdateEmployee
@@ -106,6 +233,7 @@ function App() {
     );
   }
 
+  // ── View Employee List ──────────────────────────────────────
   if (page === 'view-employee-list') {
     return (
       <ViewEmployeeList
@@ -116,6 +244,7 @@ function App() {
     );
   }
 
+  // ── Employee Status ─────────────────────────────────────────
   if (page === 'employee-status') {
     return (
       <EmployeeStatus
@@ -126,6 +255,7 @@ function App() {
     );
   }
 
+  // ── Department Management ───────────────────────────────────
   if (page === 'department-management') {
     return (
       <DepartmentManagement
@@ -136,6 +266,7 @@ function App() {
     );
   }
 
+  // ── Report Maintenance ──────────────────────────────────────
   if (page === 'report-maintenance') {
     return (
       <ReportMaintenance
@@ -146,6 +277,7 @@ function App() {
     );
   }
 
+  // ── Asset Request ───────────────────────────────────────────
   if (page === 'asset-request') {
     return (
       <AssetRequest
@@ -156,7 +288,7 @@ function App() {
     );
   }
 
-  // ── Landing / Home page ─────────────────────────────────────
+  // ── Home / Landing page ─────────────────────────────────────
   return (
     <div>
       <nav className="navbar">
@@ -164,7 +296,6 @@ function App() {
           <h1>ITAMS</h1>
           <p>IT Asset Management System</p>
         </div>
-
         <ul className="nav-links">
           <li
             className={active === 'home' ? 'active' : ''}
@@ -191,7 +322,6 @@ function App() {
             Contact
           </li>
         </ul>
-
         <div className="nav-buttons">
           <button className="outline-btn" onClick={() => setPage('login')}>
             Login
@@ -200,10 +330,7 @@ function App() {
       </nav>
 
       <section id="home" className="hero">
-        <h1>
-          IT Asset <br />
-          Management System
-        </h1>
+        <h1>IT Asset <br /> Management System</h1>
         <h2>Manage and Track IT Assets Efficiently</h2>
         <p>
           A centralized platform for managing and tracking IT assets,

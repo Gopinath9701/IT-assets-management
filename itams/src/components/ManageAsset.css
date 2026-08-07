@@ -1,0 +1,600 @@
+/* ============================================================
+   ManageAsset.css — matches PDF design exactly
+   ============================================================ */
+
+/* Scoped reset — prevents App.css margin:10px from breaking layout */
+.ma-page-wrapper *,
+.ma-page-wrapper *::before,
+.ma-page-wrapper *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Page Wrapper ── */
+.ma-page-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #ffffff;
+  font-family: "Inter", Arial, sans-serif;
+}
+
+/* ─────────────────────────────────────────
+   TOP NAVBAR
+───────────────────────────────────────── */
+.ma-top-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  height: 64px;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: #ffffff;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.ma-nav-logo {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.ma-nav-logo-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #2563eb;
+  letter-spacing: 0.5px;
+}
+
+.ma-nav-logo-sub {
+  font-size: 11px;
+  color: #6b7280;
+  font-weight: 400;
+  margin-top: 2px;
+}
+
+.ma-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.ma-nav-username {
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+}
+
+.ma-nav-divider {
+  width: 1px;
+  height: 20px;
+  background-color: #d1d5db;
+}
+
+.ma-logout-btn {
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 0;
+  transition: color 0.15s;
+}
+
+.ma-logout-btn:hover {
+  color: #2563eb;
+}
+
+/* ─────────────────────────────────────────
+   BODY  (sidebar + main)
+───────────────────────────────────────── */
+.ma-body-wrapper {
+  display: flex;
+  flex: 1;
+}
+
+/* ─────────────────────────────────────────
+   SIDEBAR
+───────────────────────────────────────── */
+.ma-sidebar {
+  width: 210px;
+  min-width: 210px;
+  border-right: 1px solid #e5e7eb;
+  padding: 24px 0;
+  background-color: #ffffff;
+}
+
+.ma-sidebar-item {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+  cursor: pointer;
+  border-radius: 6px;
+  margin: 2px 8px;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  white-space: nowrap;
+}
+
+.ma-sidebar-item:hover:not(.ma-sidebar-item--active) {
+  background-color: #f3f4f6;
+}
+
+.ma-sidebar-item--active {
+  background-color: #2563eb;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* ─────────────────────────────────────────
+   MAIN CONTENT
+───────────────────────────────────────── */
+.ma-main-content {
+  flex: 1;
+  padding: 40px 44px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.ma-page-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 4px;
+}
+
+.ma-page-subtitle {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+/* ─────────────────────────────────────────
+   CARDS (Search + Table container)
+───────────────────────────────────────── */
+.ma-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 28px 28px 24px;
+  background-color: #ffffff;
+}
+
+.ma-card--table {
+  padding-bottom: 20px;
+}
+
+.ma-card-heading {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 20px;
+}
+
+/* ─────────────────────────────────────────
+   SEARCH ROW
+───────────────────────────────────────── */
+.ma-search-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.ma-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 180px;
+}
+
+.ma-field-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.ma-input {
+  height: 40px;
+  padding: 0 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #111827;
+  outline: none;
+  transition: border-color 0.15s;
+  background-color: #ffffff;
+  width: 100%;
+}
+
+.ma-input::placeholder {
+  color: #9ca3af;
+}
+
+.ma-input:focus {
+  border-color: #2563eb;
+}
+
+.ma-select {
+  height: 40px;
+  padding: 0 36px 0 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #111827;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: #ffffff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236b7280' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  transition: border-color 0.15s;
+  width: 100%;
+}
+
+.ma-select:focus {
+  border-color: #2563eb;
+}
+
+/* Blue Search button — matches PDF */
+.ma-search-btn {
+  height: 40px;
+  padding: 0 28px;
+  background-color: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  align-self: flex-end;
+  transition: background-color 0.15s;
+  flex-shrink: 0;
+}
+
+.ma-search-btn:hover {
+  background-color: #1d4ed8;
+}
+
+/* ─────────────────────────────────────────
+   TABLE
+───────────────────────────────────────── */
+.ma-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.ma-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.ma-table thead tr {
+  border-top: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.ma-table th {
+  padding: 12px 16px;
+  text-align: center;
+  font-weight: 600;
+  color: #111827;
+  font-size: 14px;
+  background-color: #ffffff;
+}
+
+.ma-table td {
+  padding: 14px 16px;
+  text-align: center;
+  color: #374151;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 14px;
+}
+
+.ma-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.ma-table tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+/* ── Action buttons inside table ── */
+.ma-actions-cell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.ma-btn-edit,
+.ma-btn-delete {
+  padding: 6px 18px;
+  border-radius: 5px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+/* Edit — outlined dark border (matches PDF) */
+.ma-btn-edit {
+  background-color: #ffffff;
+  border: 1.5px solid #374151;
+  color: #111827;
+}
+
+.ma-btn-edit:hover {
+  background-color: #f3f4f6;
+}
+
+/* Delete — outlined dark border (matches PDF) */
+.ma-btn-delete {
+  background-color: #ffffff;
+  border: 1.5px solid #374151;
+  color: #111827;
+}
+
+.ma-btn-delete:hover {
+  background-color: #fef2f2;
+  border-color: #ef4444;
+  color: #dc2626;
+}
+
+.ma-no-data {
+  text-align: center;
+  color: #9ca3af;
+  padding: 32px 0;
+  font-size: 14px;
+}
+
+/* ─────────────────────────────────────────
+   TABLE FOOTER  (Back btn + rows selector)
+───────────────────────────────────────── */
+.ma-table-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* Back button — outlined (matches PDF) */
+.ma-back-btn {
+  padding: 8px 22px;
+  background-color: #ffffff;
+  border: 1.5px solid #374151;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  color: #111827;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.ma-back-btn:hover {
+  background-color: #f3f4f6;
+}
+
+/* Rows-per-page dropdown — right side (matches PDF) */
+.ma-rows-select-group {
+  display: flex;
+  align-items: center;
+}
+
+.ma-rows-select {
+  height: 36px;
+  padding: 0 32px 0 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  color: #111827;
+  background-color: #ffffff;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236b7280' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  cursor: pointer;
+  outline: none;
+}
+
+.ma-rows-select:focus {
+  border-color: #2563eb;
+}
+
+/* ─────────────────────────────────────────
+   MODALS  (Edit & Delete confirm)
+───────────────────────────────────────── */
+.ma-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+
+.ma-modal {
+  background-color: #ffffff;
+  border-radius: 10px;
+  padding: 32px 28px 24px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.16);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ma-modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.ma-modal-msg {
+  font-size: 14px;
+  color: #374151;
+  line-height: 1.6;
+}
+
+.ma-modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ma-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.ma-modal-cancel {
+  padding: 9px 22px;
+  background-color: #ffffff;
+  border: 1.5px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  color: #374151;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.ma-modal-cancel:hover {
+  background-color: #f3f4f6;
+}
+
+.ma-modal-save {
+  padding: 9px 22px;
+  background-color: #2563eb;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  color: #ffffff;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.ma-modal-save:hover {
+  background-color: #1d4ed8;
+}
+
+.ma-modal-delete {
+  padding: 9px 22px;
+  background-color: #dc2626;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  color: #ffffff;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.ma-modal-delete:hover {
+  background-color: #b91c1c;
+}
+
+/* ─────────────────────────────────────────
+   RESPONSIVE
+───────────────────────────────────────── */
+
+/* Tablet */
+@media (max-width: 960px) {
+  .ma-main-content {
+    padding: 28px 24px;
+  }
+
+  .ma-search-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ma-search-btn {
+    width: 100%;
+    height: 42px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .ma-body-wrapper {
+    flex-direction: column;
+  }
+
+  .ma-sidebar {
+    width: 100%;
+    min-width: unset;
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 10px 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .ma-sidebar-item {
+    margin: 0;
+    font-size: 13px;
+  }
+
+  .ma-main-content {
+    padding: 20px 16px;
+  }
+
+  .ma-top-nav {
+    padding: 10px 16px;
+    height: auto;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .ma-page-title {
+    font-size: 22px;
+  }
+
+  .ma-card {
+    padding: 20px 16px;
+  }
+
+  .ma-table th,
+  .ma-table td {
+    padding: 10px 10px;
+    font-size: 13px;
+  }
+
+  .ma-actions-cell {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .ma-table-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

@@ -1,0 +1,281 @@
+/* ============================================================
+   AssetManagement.css — matches PDF design exactly
+   ============================================================ */
+
+/* Scoped reset so App.css margin:10px doesn't break layout */
+.am-page-wrapper *,
+.am-page-wrapper *::before,
+.am-page-wrapper *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Page Wrapper ── */
+.am-page-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #ffffff;
+  font-family: "Inter", Arial, sans-serif;
+}
+
+/* ─────────────────────────────────────────
+   TOP NAVBAR
+───────────────────────────────────────── */
+.am-top-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  height: 64px;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: #ffffff;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.am-nav-logo {
+  display: flex;
+  flex-direction: column;
+}
+
+.am-nav-logo-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #2563eb;        /* blue — matches PDF */
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+}
+
+.am-nav-logo-sub {
+  font-size: 11px;
+  color: #6b7280;
+  font-weight: 400;
+  margin-top: 2px;
+  line-height: 1.2;
+}
+
+.am-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.am-nav-username {
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+}
+
+/* vertical line between username and Logout */
+.am-nav-divider {
+  width: 1px;
+  height: 20px;
+  background-color: #d1d5db;
+}
+
+.am-logout-btn {
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 0;
+  transition: color 0.15s;
+}
+
+.am-logout-btn:hover {
+  color: #2563eb;
+}
+
+/* ─────────────────────────────────────────
+   BODY  (sidebar + main side by side)
+───────────────────────────────────────── */
+.am-body-wrapper {
+  display: flex;
+  flex: 1;
+}
+
+/* ─────────────────────────────────────────
+   SIDEBAR
+───────────────────────────────────────── */
+.am-sidebar {
+  width: 210px;
+  min-width: 210px;
+  border-right: 1px solid #e5e7eb;
+  padding: 24px 0;
+  background-color: #ffffff;
+}
+
+.am-sidebar-item {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+  cursor: pointer;
+  border-radius: 6px;
+  margin: 2px 8px;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  white-space: nowrap;
+}
+
+.am-sidebar-item:hover:not(.am-sidebar-item--active) {
+  background-color: #f3f4f6;
+}
+
+/* Active item — solid blue pill, white text */
+.am-sidebar-item--active {
+  background-color: #2563eb;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* ─────────────────────────────────────────
+   MAIN CONTENT
+───────────────────────────────────────── */
+.am-main-content {
+  flex: 1;
+  padding: 40px 44px;
+}
+
+.am-page-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 6px;
+}
+
+.am-page-subtitle {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 32px;
+}
+
+/* ─────────────────────────────────────────
+   CARDS GRID
+   3 columns → 4 cards:
+   row 1 → Add Asset | Manage Assets | Asset Details
+   row 2 → Employee Status (sits in col 1 alone)
+───────────────────────────────────────── */
+.am-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+/* ─────────────────────────────────────────
+   SINGLE CARD
+───────────────────────────────────────── */
+.am-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 36px 24px 28px;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  transition: box-shadow 0.2s ease;
+}
+
+.am-card:hover {
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+}
+
+.am-card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.am-card-desc {
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.65;
+  flex: 1;
+}
+
+/* Outlined button — white bg, dark border (matches PDF exactly) */
+.am-card-btn {
+  margin-top: 16px;
+  padding: 9px 0;
+  width: 100%;
+  border: 1.5px solid #111827;
+  border-radius: 6px;
+  background-color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  color: #111827;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background-color 0.15s ease,
+              color 0.15s ease,
+              border-color 0.15s ease;
+}
+
+.am-card-btn:hover {
+  background-color: #eff6ff;
+  border-color: #2563eb;
+  color: #2563eb;
+}
+
+/* ─────────────────────────────────────────
+   RESPONSIVE
+───────────────────────────────────────── */
+
+/* Tablet — 2 columns */
+@media (max-width: 960px) {
+  .am-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .am-main-content {
+    padding: 28px 24px;
+  }
+}
+
+/* Mobile — 1 column, sidebar becomes horizontal bar */
+@media (max-width: 640px) {
+  .am-body-wrapper {
+    flex-direction: column;
+  }
+
+  .am-sidebar {
+    width: 100%;
+    min-width: unset;
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 10px 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .am-sidebar-item {
+    margin: 0;
+    font-size: 13px;
+  }
+
+  .am-main-content {
+    padding: 20px 16px;
+  }
+
+  .am-cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .am-top-nav {
+    padding: 10px 16px;
+    height: auto;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .am-page-title {
+    font-size: 22px;
+  }
+}
