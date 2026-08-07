@@ -1,0 +1,692 @@
+/* ============================================================
+   RequestApproval.css — matches PDF design exactly
+   ============================================================ */
+
+.ra-page-wrapper *,
+.ra-page-wrapper *::before,
+.ra-page-wrapper *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Page Wrapper ── */
+.ra-page-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #ffffff;
+  font-family: "Inter", Arial, sans-serif;
+}
+
+/* ─────────────────────────────────────────
+   TOP NAVBAR
+───────────────────────────────────────── */
+.ra-top-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  height: 64px;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: #ffffff;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.ra-nav-logo {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.ra-nav-logo-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #2563eb;
+  letter-spacing: 0.5px;
+}
+
+.ra-nav-logo-sub {
+  font-size: 11px;
+  color: #6b7280;
+  font-weight: 400;
+  margin-top: 2px;
+}
+
+.ra-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.ra-nav-username {
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+}
+
+.ra-nav-divider {
+  width: 1px;
+  height: 20px;
+  background-color: #d1d5db;
+}
+
+.ra-logout-btn {
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 0;
+  transition: color 0.15s;
+}
+
+.ra-logout-btn:hover {
+  color: #2563eb;
+}
+
+/* ─────────────────────────────────────────
+   BODY
+───────────────────────────────────────── */
+.ra-body-wrapper {
+  display: flex;
+  flex: 1;
+}
+
+/* ─────────────────────────────────────────
+   SIDEBAR
+───────────────────────────────────────── */
+.ra-sidebar {
+  width: 210px;
+  min-width: 210px;
+  border-right: 1px solid #e5e7eb;
+  padding: 24px 0;
+  background-color: #ffffff;
+}
+
+.ra-sidebar-item {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+  cursor: pointer;
+  border-radius: 6px;
+  margin: 2px 8px;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  white-space: nowrap;
+}
+
+.ra-sidebar-item:hover:not(.ra-sidebar-item--active) {
+  background-color: #f3f4f6;
+}
+
+.ra-sidebar-item--active {
+  background-color: #2563eb;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* ─────────────────────────────────────────
+   MAIN CONTENT
+───────────────────────────────────────── */
+.ra-main-content {
+  flex: 1;
+  padding: 36px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+.ra-page-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.ra-page-subtitle {
+  font-size: 14px;
+  color: #6b7280;
+  margin-top: -12px;
+}
+
+/* ─────────────────────────────────────────
+   CARDS
+───────────────────────────────────────── */
+.ra-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 24px 28px;
+  background-color: #ffffff;
+}
+
+.ra-card--table {
+  padding-bottom: 16px;
+}
+
+.ra-card--details {
+  padding: 24px 28px;
+}
+
+.ra-card-heading {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 18px;
+}
+
+/* ─────────────────────────────────────────
+   SEARCH ROW
+───────────────────────────────────────── */
+.ra-search-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.ra-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 160px;
+}
+
+.ra-field-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.ra-input {
+  height: 40px;
+  padding: 0 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #111827;
+  background-color: #ffffff;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.15s;
+}
+
+.ra-input::placeholder {
+  color: #9ca3af;
+}
+
+.ra-input:focus {
+  border-color: #2563eb;
+}
+
+.ra-select {
+  height: 40px;
+  padding: 0 36px 0 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #111827;
+  background-color: #ffffff;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236b7280' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  outline: none;
+  cursor: pointer;
+  width: 100%;
+  transition: border-color 0.15s;
+}
+
+.ra-select:focus {
+  border-color: #2563eb;
+}
+
+.ra-search-btn {
+  height: 40px;
+  padding: 0 28px;
+  background-color: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  align-self: flex-end;
+  flex-shrink: 0;
+  transition: background-color 0.15s;
+}
+
+.ra-search-btn:hover {
+  background-color: #1d4ed8;
+}
+
+/* ─────────────────────────────────────────
+   TABLE
+───────────────────────────────────────── */
+.ra-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.ra-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.ra-table thead tr {
+  border-top: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.ra-table th {
+  padding: 12px 16px;
+  text-align: center;
+  font-weight: 600;
+  color: #111827;
+  font-size: 14px;
+  background-color: #f9fafb;
+}
+
+.ra-table td {
+  padding: 13px 16px;
+  text-align: center;
+  color: #374151;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 14px;
+}
+
+.ra-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.ra-table-row:hover {
+  background-color: #f9fafb;
+}
+
+.ra-table-row--selected {
+  background-color: #eff6ff !important;
+}
+
+/* ── Status badges ── */
+.ra-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Orange pending — matches PDF */
+.ra-badge--pending {
+  background-color: #fff7ed;
+  color: #c2410c;
+  border: 1px solid #fed7aa;
+}
+
+.ra-badge--approved {
+  background-color: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.ra-badge--rejected {
+  background-color: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.ra-no-data {
+  text-align: center;
+  color: #9ca3af;
+  padding: 28px;
+  font-size: 14px;
+}
+
+/* Rows-per-page — right-aligned inside table card */
+.ra-rows-right {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 14px;
+}
+
+/* ─────────────────────────────────────────
+   REQUEST DETAILS CARD
+───────────────────────────────────────── */
+
+/* 3-column grid matching PDF */
+.ra-details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 16px 32px;
+  margin-bottom: 24px;
+  align-items: start;
+}
+
+.ra-details-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ra-details-col--right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 160px;
+}
+
+.ra-detail-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.ra-detail-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  white-space: nowrap;
+  min-width: 120px;
+}
+
+.ra-detail-sep {
+  color: #9ca3af;
+  font-size: 13px;
+}
+
+.ra-detail-value {
+  font-size: 13px;
+  color: #111827;
+}
+
+.ra-status-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Green Approve button — matches PDF */
+.ra-approve-btn {
+  width: 100%;
+  padding: 10px 0;
+  background-color: #16a34a;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s;
+  min-width: 140px;
+}
+
+.ra-approve-btn:hover:not(:disabled) {
+  background-color: #15803d;
+}
+
+.ra-approve-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ─────────────────────────────────────────
+   REJECTION SECTION
+───────────────────────────────────────── */
+.ra-rejection-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 1px solid #f3f4f6;
+  padding-top: 20px;
+}
+
+.ra-rejection-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.ra-rejection-hint {
+  font-size: 12px;
+  font-weight: 400;
+  color: #6b7280;
+}
+
+.ra-rejection-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.ra-textarea {
+  flex: 1;
+  padding: 12px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #111827;
+  resize: vertical;
+  outline: none;
+  min-height: 80px;
+  transition: border-color 0.15s;
+  background-color: #ffffff;
+}
+
+.ra-textarea::placeholder {
+  color: #9ca3af;
+}
+
+.ra-textarea:focus {
+  border-color: #2563eb;
+}
+
+.ra-textarea--error {
+  border-color: #ef4444 !important;
+}
+
+.ra-textarea:disabled {
+  background-color: #f9fafb;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* Red Reject button — matches PDF */
+.ra-reject-btn {
+  padding: 10px 28px;
+  background-color: #dc2626;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  align-self: flex-end;
+  transition: background-color 0.15s;
+  min-width: 100px;
+}
+
+.ra-reject-btn:hover:not(:disabled) {
+  background-color: #b91c1c;
+}
+
+.ra-reject-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ra-error {
+  font-size: 12px;
+  color: #ef4444;
+  font-weight: 500;
+}
+
+/* ─────────────────────────────────────────
+   FOOTER ROW  (Back + rows-per-page)
+───────────────────────────────────────── */
+.ra-footer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.ra-back-btn {
+  padding: 8px 24px;
+  background-color: #ffffff;
+  border: 1.5px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  color: #111827;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.ra-back-btn:hover {
+  background-color: #f3f4f6;
+}
+
+.ra-rows-select {
+  height: 36px;
+  padding: 0 32px 0 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  color: #111827;
+  background-color: #ffffff;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236b7280' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  cursor: pointer;
+  outline: none;
+}
+
+.ra-rows-select:focus {
+  border-color: #2563eb;
+}
+
+/* ─────────────────────────────────────────
+   RESPONSIVE
+───────────────────────────────────────── */
+
+/* Tablet */
+@media (max-width: 960px) {
+  .ra-main-content {
+    padding: 24px 20px;
+  }
+
+  .ra-details-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .ra-details-col--right {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .ra-approve-btn {
+    width: auto;
+    padding: 10px 28px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .ra-body-wrapper {
+    flex-direction: column;
+  }
+
+  .ra-sidebar {
+    width: 100%;
+    min-width: unset;
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 10px 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .ra-sidebar-item {
+    margin: 0;
+    font-size: 13px;
+  }
+
+  .ra-main-content {
+    padding: 16px;
+  }
+
+  .ra-top-nav {
+    padding: 10px 16px;
+    height: auto;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .ra-page-title {
+    font-size: 22px;
+  }
+
+  .ra-search-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ra-search-btn {
+    width: 100%;
+  }
+
+  .ra-details-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ra-details-col--right {
+    grid-column: 1;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .ra-approve-btn {
+    width: 100%;
+  }
+
+  .ra-rejection-row {
+    flex-direction: column;
+  }
+
+  .ra-reject-btn {
+    width: 100%;
+    align-self: stretch;
+    text-align: center;
+  }
+
+  .ra-footer-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

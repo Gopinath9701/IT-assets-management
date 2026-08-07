@@ -1,0 +1,424 @@
+/* ============================================================
+   EditAsset.css — matches PDF design exactly
+   ============================================================ */
+
+.ea-page-wrapper *,
+.ea-page-wrapper *::before,
+.ea-page-wrapper *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Page Wrapper ── */
+.ea-page-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f3f4f6;
+  font-family: "Inter", Arial, sans-serif;
+}
+
+/* ─────────────────────────────────────────
+   TOP NAVBAR
+───────────────────────────────────────── */
+.ea-top-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  height: 64px;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: #ffffff;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.ea-nav-logo {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.ea-nav-logo-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #2563eb;
+  letter-spacing: 0.5px;
+}
+
+.ea-nav-logo-sub {
+  font-size: 11px;
+  color: #6b7280;
+  font-weight: 400;
+  margin-top: 2px;
+}
+
+.ea-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.ea-nav-username {
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+}
+
+.ea-nav-divider {
+  width: 1px;
+  height: 20px;
+  background-color: #d1d5db;
+}
+
+.ea-logout-btn {
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 0;
+  transition: color 0.15s;
+}
+
+.ea-logout-btn:hover {
+  color: #2563eb;
+}
+
+/* ─────────────────────────────────────────
+   BODY
+───────────────────────────────────────── */
+.ea-body-wrapper {
+  display: flex;
+  flex: 1;
+}
+
+/* ─────────────────────────────────────────
+   SIDEBAR
+───────────────────────────────────────── */
+.ea-sidebar {
+  width: 210px;
+  min-width: 210px;
+  border-right: 1px solid #e5e7eb;
+  padding: 24px 0;
+  background-color: #ffffff;
+}
+
+.ea-sidebar-item {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+  cursor: pointer;
+  border-radius: 6px;
+  margin: 2px 8px;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  white-space: nowrap;
+}
+
+.ea-sidebar-item:hover:not(.ea-sidebar-item--active) {
+  background-color: #f3f4f6;
+}
+
+.ea-sidebar-item--active {
+  background-color: #2563eb;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* ─────────────────────────────────────────
+   MAIN CONTENT
+───────────────────────────────────────── */
+.ea-main-content {
+  flex: 1;
+  padding: 40px 44px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ea-page-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.ea-page-subtitle {
+  font-size: 14px;
+  color: #6b7280;
+  margin-top: -8px;
+}
+
+/* Success message */
+.ea-success-msg {
+  background-color: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+  border-radius: 6px;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* ─────────────────────────────────────────
+   FORM CARD
+───────────────────────────────────────── */
+.ea-card {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 32px 36px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 720px;
+}
+
+/* ── Label + Field row (matches PDF — label left, input right) ── */
+.ea-form-row {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  align-items: start;
+  gap: 12px 20px;
+}
+
+.ea-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  padding-top: 10px; /* vertically align with input */
+  white-space: nowrap;
+}
+
+.ea-field-col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* ── Input ── */
+.ea-input {
+  height: 44px;
+  padding: 0 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 7px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #111827;
+  background-color: #ffffff;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.15s;
+}
+
+.ea-input::placeholder {
+  color: #9ca3af;
+}
+
+.ea-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+}
+
+/* Read-only Asset ID — gray bg, matches PDF */
+.ea-input--readonly {
+  background-color: #f3f4f6;
+  color: #6b7280;
+  cursor: default;
+}
+
+.ea-input--readonly:focus {
+  border-color: #d1d5db;
+  box-shadow: none;
+}
+
+/* Error border */
+.ea-input--error {
+  border-color: #ef4444 !important;
+}
+
+/* ── Select ── */
+.ea-select {
+  height: 44px;
+  padding: 0 40px 0 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 7px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #111827;
+  background-color: #ffffff;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236b7280' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  outline: none;
+  cursor: pointer;
+  width: 100%;
+  transition: border-color 0.15s;
+}
+
+.ea-select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+}
+
+/* ── Validation error text ── */
+.ea-error {
+  font-size: 12px;
+  color: #ef4444;
+  font-weight: 500;
+}
+
+/* ── Divider before buttons ── */
+.ea-divider {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 4px 0 0;
+}
+
+/* ── Form action buttons ── */
+.ea-form-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+/* Blue filled — Update */
+.ea-btn-primary {
+  padding: 10px 32px;
+  background-color: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 7px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.15s;
+}
+
+.ea-btn-primary:hover {
+  background-color: #1d4ed8;
+}
+
+/* Outlined — Cancel */
+.ea-btn-outline {
+  padding: 9px 32px;
+  background-color: #ffffff;
+  color: #111827;
+  border: 1.5px solid #d1d5db;
+  border-radius: 7px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+
+.ea-btn-outline:hover {
+  background-color: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+/* ── Back button — outside card ── */
+.ea-back-wrapper {
+  margin-top: 4px;
+}
+
+.ea-btn-back {
+  padding: 9px 28px;
+  background-color: #ffffff;
+  color: #111827;
+  border: 1.5px solid #d1d5db;
+  border-radius: 7px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.ea-btn-back:hover {
+  background-color: #f3f4f6;
+}
+
+/* ─────────────────────────────────────────
+   RESPONSIVE
+───────────────────────────────────────── */
+
+/* Tablet */
+@media (max-width: 860px) {
+  .ea-main-content {
+    padding: 28px 24px;
+  }
+
+  .ea-card {
+    max-width: 100%;
+    padding: 24px 20px;
+  }
+
+  .ea-form-row {
+    grid-template-columns: 150px 1fr;
+  }
+}
+
+/* Mobile — stack label above input */
+@media (max-width: 600px) {
+  .ea-body-wrapper {
+    flex-direction: column;
+  }
+
+  .ea-sidebar {
+    width: 100%;
+    min-width: unset;
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 10px 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .ea-sidebar-item {
+    margin: 0;
+    font-size: 13px;
+  }
+
+  .ea-main-content {
+    padding: 20px 16px;
+  }
+
+  .ea-top-nav {
+    padding: 10px 16px;
+    height: auto;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .ea-page-title {
+    font-size: 22px;
+  }
+
+  .ea-form-row {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .ea-label {
+    padding-top: 0;
+  }
+
+  .ea-btn-primary,
+  .ea-btn-outline {
+    flex: 1;
+    text-align: center;
+  }
+}
