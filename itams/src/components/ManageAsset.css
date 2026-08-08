@@ -1,8 +1,8 @@
 /* ============================================================
-   ManageAsset.css — matches PDF design exactly
+   ManageAsset.css — Complete with Validation Styles
    ============================================================ */
 
-/* Scoped reset — prevents App.css margin:10px from breaking layout */
+/* Scoped reset */
 .ma-page-wrapper *,
 .ma-page-wrapper *::before,
 .ma-page-wrapper *::after {
@@ -245,7 +245,7 @@
   border-color: #2563eb;
 }
 
-/* Blue Search button — matches PDF */
+/* Blue Search button */
 .ma-search-btn {
   height: 40px;
   padding: 0 28px;
@@ -311,7 +311,30 @@
   background-color: #f9fafb;
 }
 
-/* ── Action buttons inside table ── */
+/* ── Asset ID Styling ── */
+.ma-asset-id {
+  font-family: "Courier New", monospace;
+  font-weight: 700;
+  color: #2563eb;
+  background: #eff6ff;
+  padding: 2px 10px;
+  border-radius: 4px;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+}
+
+/* ── Type Badge ── */
+.ma-type-badge {
+  display: inline-block;
+  padding: 3px 12px;
+  background-color: #f3f4f6;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #374151;
+}
+
+/* ── Action buttons ── */
 .ma-actions-cell {
   display: flex;
   justify-content: center;
@@ -330,7 +353,6 @@
   transition: background-color 0.15s, color 0.15s;
 }
 
-/* Edit — outlined dark border (matches PDF) */
 .ma-btn-edit {
   background-color: #ffffff;
   border: 1.5px solid #374151;
@@ -341,7 +363,6 @@
   background-color: #f3f4f6;
 }
 
-/* Delete — outlined dark border (matches PDF) */
 .ma-btn-delete {
   background-color: #ffffff;
   border: 1.5px solid #374151;
@@ -362,7 +383,7 @@
 }
 
 /* ─────────────────────────────────────────
-   TABLE FOOTER  (Back btn + rows selector)
+   TABLE FOOTER
 ───────────────────────────────────────── */
 .ma-table-footer {
   display: flex;
@@ -373,7 +394,6 @@
   gap: 12px;
 }
 
-/* Back button — outlined (matches PDF) */
 .ma-back-btn {
   padding: 8px 22px;
   background-color: #ffffff;
@@ -391,10 +411,16 @@
   background-color: #f3f4f6;
 }
 
-/* Rows-per-page dropdown — right side (matches PDF) */
 .ma-rows-select-group {
   display: flex;
   align-items: center;
+  gap: 12px;
+}
+
+.ma-pagination-info {
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 500;
 }
 
 .ma-rows-select {
@@ -462,6 +488,12 @@
   gap: 6px;
 }
 
+.ma-modal-field .ma-field-label::after {
+  content: " *";
+  color: #dc3545;
+  font-weight: 700;
+}
+
 .ma-modal-actions {
   display: flex;
   justify-content: flex-end;
@@ -521,6 +553,52 @@
 }
 
 /* ─────────────────────────────────────────
+   VALIDATION STYLES
+───────────────────────────────────────── */
+.ma-input--error {
+  border-color: #dc3545 !important;
+  background-color: #fff8f8;
+}
+
+.ma-input--error:focus {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25) !important;
+}
+
+.ma-error-text {
+  color: #dc3545;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 10px;
+  background-color: #fef2f2;
+  border-radius: 4px;
+  border-left: 3px solid #dc3545;
+  animation: maFadeIn 0.2s ease-out;
+}
+
+@keyframes maFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ma-input--readonly {
+  background-color: #f3f4f6;
+  color: #374151;
+  cursor: default;
+}
+
+.ma-input--readonly:focus {
+  border-color: #d1d5db;
+  box-shadow: none;
+}
+
+/* ─────────────────────────────────────────
    RESPONSIVE
 ───────────────────────────────────────── */
 
@@ -538,6 +616,10 @@
   .ma-search-btn {
     width: 100%;
     height: 42px;
+  }
+
+  .ma-rows-select-group {
+    flex-wrap: wrap;
   }
 }
 
@@ -596,5 +678,20 @@
   .ma-table-footer {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .ma-rows-select-group {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .ma-rows-select {
+    flex: 1;
+    min-width: 80px;
+  }
+
+  .ma-modal {
+    margin: 0 16px;
+    padding: 24px 20px;
   }
 }
