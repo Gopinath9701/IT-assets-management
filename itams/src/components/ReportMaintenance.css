@@ -1,172 +1,517 @@
-.report-page{
-    padding:30px;
-    background:#f5f7fb;
-    min-height:100vh;
+/* ============================
+   NAVBAR
+   ============================ */
+.report-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 36px;
+  height: 68px;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
-.report-header h2{
-    margin:0;
-    color:#1d3557;
-    font-size:32px;
+.report-nav-logo {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
 }
 
-.report-header p{
-    margin-top:8px;
-    color:#666;
-    margin-bottom:25px;
+.report-nav-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #1d4ed8;
 }
 
+.report-nav-sub {
+  font-size: 11px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.report-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.report-nav-user {
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+}
+
+.report-nav-divider {
+  color: #d1d5db;
+  font-size: 16px;
+}
+
+.report-logout-btn {
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s ease;
+}
+
+.report-logout-btn:hover {
+  color: #1d4ed8;
+}
+
+/* ============================
+   BODY
+   ============================ */
+.report-body {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 30px 24px 56px;
+}
+
+.report-page {
+  min-height: 100vh;
+  background: #f9fafb;
+  font-family: "Inter", Arial, sans-serif;
+}
+
+.report-header {
+  margin-bottom: 28px;
+}
+
+.report-page-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.report-page-sub {
+  font-size: 14px;
+  color: #6b7280;
+  margin-top: 6px;
+}
+
+/* ============================
+   CARDS
+   ============================ */
 .report-card,
-.table-card{
-    background:#fff;
-    border-radius:12px;
-    padding:25px;
-    margin-bottom:25px;
-    border:1px solid #e5e7eb;
-    box-shadow:0 2px 10px rgba(0,0,0,.05);
+.table-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 28px 32px;
+  margin-bottom: 24px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-.report-card h3,
-.table-card h3{
-    margin-bottom:20px;
-    color:#1d3557;
+.report-card-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #1d3557;
+  margin-bottom: 20px;
 }
 
-.form-grid{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:20px;
-    margin-bottom:20px;
+/* ============================
+   FORM
+   ============================ */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 16px;
 }
 
-.form-grid div{
-    display:flex;
-    flex-direction:column;
+.form-group {
+  display: flex;
+  flex-direction: column;
 }
 
-label{
-    font-size:14px;
-    font-weight:600;
-    margin-bottom:8px;
-    color:#333;
+.form-group label {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #333;
 }
 
-input,
-select,
-textarea{
-    width:100%;
-    padding:12px;
-    border:1px solid #d1d5db;
-    border-radius:8px;
-    font-size:15px;
-    outline:none;
-    transition:.3s;
-    box-sizing:border-box;
+.report-input,
+.report-select,
+.report-textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #111827;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  font-family: inherit;
+  background: #ffffff;
+  box-sizing: border-box;
 }
 
-input:focus,
-select:focus,
-textarea:focus{
-    border-color:#2563eb;
-    box-shadow:0 0 0 3px rgba(37,99,235,.15);
+.report-input:focus,
+.report-select:focus,
+.report-textarea:focus {
+  border-color: #1d4ed8;
+  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.1);
 }
 
-textarea{
-    resize:none;
-    margin-top:8px;
-    margin-bottom:20px;
+.report-input::placeholder,
+.report-textarea::placeholder {
+  color: #9ca3af;
 }
 
-.priority{
-    margin-bottom:20px;
+.report-textarea {
+  resize: vertical;
+  min-height: 100px;
+  margin-top: 6px;
 }
 
-.radio-group{
-    display:flex;
-    gap:30px;
-    margin-top:10px;
+/* ============================
+   VALIDATION STYLES
+   ============================ */
+.report-input-error {
+  border-color: #dc3545 !important;
+  background-color: #fff8f8;
 }
 
-.radio-group label{
-    display:flex;
-    align-items:center;
-    gap:8px;
-    font-weight:500;
+.report-input-error:focus {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25) !important;
 }
 
-.buttons{
-    display:flex;
-    gap:15px;
+.report-error-text {
+  color: #dc3545;
+  font-size: 0.8rem;
+  padding: 4px 10px;
+  margin-top: 4px;
+  background-color: #fef2f2;
+  border-radius: 4px;
+  border-left: 3px solid #dc3545;
+  animation: reportFadeIn 0.2s ease-out;
 }
 
-.submit-btn{
-    background:#2563eb;
-    color:#fff;
-    border:none;
-    padding:12px 28px;
-    border-radius:8px;
-    cursor:pointer;
-    font-weight:600;
+@keyframes reportFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.submit-btn:hover{
-    background:#1d4ed8;
+/* ============================
+   PRIORITY
+   ============================ */
+.priority-group {
+  margin-bottom: 20px;
 }
 
-.clear-btn{
-    background:#fff;
-    color:#333;
-    border:1px solid #d1d5db;
-    padding:12px 28px;
-    border-radius:8px;
-    cursor:pointer;
-    font-weight:600;
+.priority-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  display: block;
+  margin-bottom: 8px;
 }
 
-.clear-btn:hover{
-    background:#f3f4f6;
+.radio-group {
+  display: flex;
+  gap: 30px;
+  margin-top: 4px;
 }
 
-table{
-    width:100%;
-    border-collapse:collapse;
+.radio-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  cursor: pointer;
 }
 
-th{
-    background:#f3f4f6;
-    padding:14px;
-    text-align:left;
-    font-size:14px;
+.radio-option input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #1d4ed8;
+  cursor: pointer;
 }
 
-td{
-    padding:14px;
-    border-top:1px solid #e5e7eb;
-    font-size:14px;
+.priority-low {
+  color: #28a745;
 }
 
-tr:hover{
-    background:#f9fafb;
+.priority-medium {
+  color: #ffc107;
 }
 
-@media(max-width:900px){
-
-.form-grid{
-grid-template-columns:1fr;
+.priority-high {
+  color: #dc3545;
 }
 
-.buttons{
-flex-direction:column;
+/* ============================
+   BUTTONS
+   ============================ */
+.buttons {
+  display: flex;
+  gap: 15px;
+  margin-top: 8px;
 }
 
-.submit-btn,
-.clear-btn{
-width:100%;
+.submit-btn {
+  background: #1d4ed8;
+  color: #ffffff;
+  border: none;
+  padding: 12px 32px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  font-family: inherit;
 }
 
-table{
-display:block;
-overflow-x:auto;
+.submit-btn:hover {
+  background: #1e40af;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3);
 }
 
+.clear-btn {
+  background: #ffffff;
+  color: #374151;
+  border: 1.5px solid #d1d5db;
+  padding: 12px 32px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.clear-btn:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.report-back-btn {
+  display: inline-block;
+  padding: 10px 28px;
+  background: #ffffff;
+  color: #374151;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  margin-top: 8px;
+}
+
+.report-back-btn:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+  transform: translateX(-2px);
+}
+
+/* ============================
+   TABLE
+   ============================ */
+.table-wrapper {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  background: #f3f4f6;
+  padding: 14px 16px;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 700;
+  color: #374151;
+  border-bottom: 2px solid #e5e7eb;
+  white-space: nowrap;
+}
+
+td {
+  padding: 14px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 14px;
+  color: #374151;
+  vertical-align: middle;
+}
+
+tr:hover {
+  background: #f9fafb;
+}
+
+.no-data {
+  text-align: center;
+  color: #9ca3af;
+  padding: 24px !important;
+  font-style: italic;
+}
+
+/* ============================
+   BADGES
+   ============================ */
+.report-id {
+  font-family: "Courier New", monospace;
+  font-weight: 700;
+  color: #1d4ed8;
+  background: #eff6ff;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.asset-id {
+  font-family: "Courier New", monospace;
+  font-weight: 700;
+  color: #059669;
+  background: #ecfdf5;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.desc-cell {
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.priority-badge {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.priority-low {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.priority-medium {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.priority-high {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-pending {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffe8a1;
+}
+
+.status-in-progress {
+  background-color: #cce5ff;
+  color: #004085;
+  border: 1px solid #b8daff;
+}
+
+.status-completed {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+/* ============================
+   RESPONSIVE
+   ============================ */
+@media (max-width: 900px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .buttons {
+    flex-direction: column;
+  }
+
+  .submit-btn,
+  .clear-btn {
+    width: 100%;
+  }
+
+  .radio-group {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .report-card,
+  .table-card {
+    padding: 20px 16px;
+  }
+
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .report-nav {
+    padding: 0 16px;
+    height: 60px;
+  }
+
+  .report-nav-title {
+    font-size: 18px;
+  }
+
+  .report-nav-sub {
+    font-size: 10px;
+  }
+
+  .report-page-title {
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 480px) {
+  .report-body {
+    padding: 16px 12px 36px;
+  }
+
+  .report-card,
+  .table-card {
+    padding: 16px 12px;
+  }
+
+  th,
+  td {
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+
+  .report-back-btn {
+    width: 100%;
+    text-align: center;
+  }
 }
