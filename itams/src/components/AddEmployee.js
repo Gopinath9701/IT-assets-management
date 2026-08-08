@@ -21,7 +21,7 @@ const AddEmployee = () => {
 
   const nameRegex = /^[A-Za-z ]+$/;
   const empIdRegex = /^EMP\d{3}$/;
-  const emailRegex = /^[A-Za-z0-9._%+-]{3,}@gmail\.com$/;
+  const emailRegex = /^[A-Za-z0-9._%+-]{3,}@itams\.com$/;
   const designationRegex = /^[A-Za-z ]+$/;
 
   // Updated to match Selenium Test
@@ -150,10 +150,10 @@ const AddEmployee = () => {
 
     }
 
-    else if (!employee.email.endsWith("@gmail.com")) {
+    else if (!employee.email.endsWith("@itams.com")) {
 
       newErrors.email =
-        "Email must end with @gmail.com.";
+        "Email must end with @itams.com.";
 
     }
 
