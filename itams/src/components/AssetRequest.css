@@ -1,3 +1,5 @@
+/* AssetRequest.css - Complete CSS File */
+
 .ar-page *,
 .ar-page *::before,
 .ar-page *::after {
@@ -14,7 +16,9 @@
   flex-direction: column;
 }
 
-/* Navbar */
+/* ============================
+   NAVBAR
+   ============================ */
 .ar-nav {
   display: flex;
   align-items: center;
@@ -71,13 +75,16 @@
   color: #111827;
   cursor: pointer;
   padding: 0;
+  transition: color 0.2s ease;
 }
 
 .ar-logout-btn:hover {
   color: #1d4ed8;
 }
 
-/* Body */
+/* ============================
+   BODY
+   ============================ */
 .ar-body {
   flex: 1;
   max-width: 900px;
@@ -99,13 +106,16 @@
   margin-bottom: 28px;
 }
 
-/* Cards */
+/* ============================
+   CARDS
+   ============================ */
 .ar-card {
   background: #ffffff;
   border: 1px solid #e5e7eb;
   border-radius: 10px;
   padding: 28px 32px;
   margin-bottom: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .ar-card-title {
@@ -115,7 +125,9 @@
   margin-bottom: 22px;
 }
 
-/* Form */
+/* ============================
+   FORM
+   ============================ */
 .ar-form-group {
   margin-bottom: 20px;
 }
@@ -133,13 +145,13 @@
 .ar-textarea {
   width: 100%;
   padding: 11px 14px;
-  border: 1px solid #d1d5db;
+  border: 2px solid #d1d5db;
   border-radius: 8px;
   font-size: 14px;
   color: #111827;
   background: #ffffff;
   outline: none;
-  transition: border-color 0.15s;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
   font-family: inherit;
 }
 
@@ -155,18 +167,88 @@
   color: #9ca3af;
 }
 
+/* ============================
+   VALIDATION STYLES
+   ============================ */
+/* Error State */
 .ar-input-error {
   border-color: #dc2626 !important;
+  background-color: #fff8f8;
+}
+
+.ar-input-error:focus {
+  border-color: #dc2626 !important;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15) !important;
 }
 
 .ar-error-text {
   display: block;
   margin-top: 6px;
+  padding: 6px 12px;
   font-size: 12px;
   color: #dc2626;
   font-weight: 500;
+  background-color: #fef2f2;
+  border-radius: 6px;
+  border-left: 3px solid #dc2626;
+  animation: arFadeIn 0.2s ease-out;
 }
 
+/* Validation Hint */
+.ar-validation-hint {
+  margin-top: 4px;
+  color: #6c757d;
+  font-size: 0.8rem;
+}
+
+.ar-validation-hint small {
+  display: block;
+  padding: 4px 8px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  border-left: 3px solid #1d4ed8;
+  color: #495057;
+}
+
+/* Character Count */
+.ar-character-count {
+  margin-top: 4px;
+  text-align: right;
+  font-size: 12px;
+  color: #6c757d;
+}
+
+.ar-character-count small {
+  color: #6c757d;
+}
+
+/* ============================
+   ANIMATIONS
+   ============================ */
+@keyframes arFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes arShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+
+.ar-error-text {
+  animation: arFadeIn 0.2s ease-out;
+}
+
+/* ============================
+   SELECT DROPDOWN
+   ============================ */
 .ar-select {
   appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
@@ -176,13 +258,23 @@
   cursor: pointer;
 }
 
+.ar-select:focus {
+  border-color: #1d4ed8;
+  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.1);
+}
+
+/* ============================
+   TEXTAREA
+   ============================ */
 .ar-textarea {
   resize: vertical;
   min-height: 110px;
   line-height: 1.5;
 }
 
-/* Buttons */
+/* ============================
+   BUTTONS
+   ============================ */
 .ar-btn-row {
   display: flex;
   gap: 12px;
@@ -199,12 +291,27 @@
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: all 0.2s ease;
   font-family: inherit;
+  flex: 1;
+  min-width: 120px;
 }
 
 .ar-submit-btn:hover {
   background: #1e40af;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3);
+}
+
+.ar-submit-btn:active {
+  transform: translateY(0);
+}
+
+.ar-submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .ar-cancel-btn {
@@ -216,15 +323,17 @@
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: all 0.2s ease;
   font-family: inherit;
+  min-width: 120px;
 }
 
 .ar-cancel-btn:hover {
   background: #f3f4f6;
+  border-color: #9ca3af;
 }
 
-/* Search row */
+/* Search Button */
 .ar-search-row {
   display: flex;
   gap: 10px;
@@ -245,15 +354,41 @@
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s;
+  transition: all 0.2s ease;
   font-family: inherit;
 }
 
 .ar-search-btn:hover {
   background: #1e40af;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3);
 }
 
-/* Table */
+/* Back Button */
+.ar-back-btn {
+  display: inline-block;
+  padding: 10px 28px;
+  background: #ffffff;
+  color: #374151;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  margin-top: 8px;
+}
+
+.ar-back-btn:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+  transform: translateX(-2px);
+}
+
+/* ============================
+   TABLE
+   ============================ */
 .ar-table-wrapper {
   overflow-x: auto;
 }
@@ -274,7 +409,7 @@
   font-size: 13px;
   font-weight: 700;
   color: #374151;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 2px solid #e5e7eb;
   white-space: nowrap;
 }
 
@@ -292,33 +427,77 @@
 
 .ar-table tbody tr:hover {
   background: #f9fafb;
+  transition: background 0.15s ease;
 }
 
 .ar-no-data {
   text-align: center;
   color: #9ca3af;
   padding: 28px !important;
+  font-style: italic;
 }
 
-/* Status badge */
+/* ============================
+   STATUS BADGE
+   ============================ */
 .ar-status-badge {
   display: inline-block;
-  padding: 4px 12px;
+  padding: 4px 14px;
   border-radius: 999px;
   font-size: 12px;
   font-weight: 600;
+  text-transform: capitalize;
+  letter-spacing: 0.3px;
 }
 
-/* Pagination */
+/* Status Colors */
+.ar-status-pending {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffe8a1;
+}
+
+.ar-status-approved {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.ar-status-rejected {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* ============================
+   EMPLOYEE ID
+   ============================ */
+.ar-employee-id {
+  font-family: "Courier New", monospace;
+  font-weight: 700;
+  color: #1d4ed8;
+  background: #eff6ff;
+  padding: 2px 10px;
+  border-radius: 4px;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  display: inline-block;
+}
+
+/* ============================
+   PAGINATION
+   ============================ */
 .ar-pagination-row {
   display: flex;
   justify-content: center;
   margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #f3f4f6;
 }
 
 .ar-page-size {
   padding: 8px 36px 8px 14px;
-  border: 1px solid #d1d5db;
+  border: 1.5px solid #d1d5db;
   border-radius: 6px;
   font-size: 13px;
   font-family: inherit;
@@ -329,32 +508,63 @@
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 10px center;
+  transition: border-color 0.2s ease;
 }
 
-/* Back button */
-.ar-back-btn {
-  display: inline-block;
-  padding: 10px 28px;
-  background: #ffffff;
-  color: #374151;
-  border: 1.5px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s;
-  font-family: inherit;
-  margin-top: 8px;
+.ar-page-size:hover {
+  border-color: #1d4ed8;
 }
 
-.ar-back-btn:hover {
-  background: #f3f4f6;
+.ar-page-size:focus {
+  outline: none;
+  border-color: #1d4ed8;
+  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.1);
 }
 
-/* Responsive */
+/* ============================
+   SCROLLBAR STYLING
+   ============================ */
+.ar-table-wrapper::-webkit-scrollbar {
+  height: 6px;
+}
+
+.ar-table-wrapper::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.ar-table-wrapper::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.ar-table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* ============================
+   RESPONSIVE
+   ============================ */
 @media (max-width: 640px) {
+  .ar-nav {
+    padding: 0 16px;
+    height: 60px;
+  }
+
+  .ar-nav-title {
+    font-size: 18px;
+  }
+
+  .ar-nav-sub {
+    font-size: 10px;
+  }
+
   .ar-body {
     padding: 20px 14px 36px;
+  }
+
+  .ar-page-title {
+    font-size: 22px;
   }
 
   .ar-card {
@@ -368,6 +578,7 @@
   .ar-submit-btn,
   .ar-cancel-btn {
     width: 100%;
+    justify-content: center;
   }
 
   .ar-search-row {
@@ -377,5 +588,93 @@
 
   .ar-search-btn {
     width: 100%;
+    justify-content: center;
   }
+
+  .ar-table th,
+  .ar-table td {
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+
+  .ar-employee-id {
+    font-size: 11px;
+    padding: 2px 6px;
+  }
+
+  .ar-status-badge {
+    font-size: 11px;
+    padding: 3px 10px;
+  }
+
+  .ar-back-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .ar-pagination-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ar-page-size {
+    width: 100%;
+  }
+
+  .ar-validation-hint small {
+    font-size: 11px;
+  }
+}
+
+/* ============================
+   UTILITY CLASSES
+   ============================ */
+.ar-text-center {
+  text-align: center;
+}
+
+.ar-mt-16 {
+  margin-top: 16px;
+}
+
+.ar-mb-16 {
+  margin-bottom: 16px;
+}
+
+/* ============================
+   DATE INPUT STYLING
+   ============================ */
+input[type="date"] {
+  cursor: pointer;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+/* ============================
+   FOCUS VISIBLE
+   ============================ */
+.ar-input:focus-visible,
+.ar-select:focus-visible,
+.ar-textarea:focus-visible {
+  outline: 2px solid #1d4ed8;
+  outline-offset: 2px;
+}
+
+/* ============================
+   DISABLED STATE
+   ============================ */
+.ar-input:disabled,
+.ar-select:disabled,
+.ar-textarea:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #f3f4f6;
 }
