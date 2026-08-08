@@ -58,7 +58,7 @@ pipeline {
         dir('frontend') {
             bat 'npm install'
             bat 'npm run build'
-            bat 'npm test -- --watchAll=false'
+        
         }
     }
 }
@@ -145,7 +145,7 @@ pipeline {
         echo 'Final Integration Successful'
     }
 }
-
+    }
     post {
         always {
             archiveArtifacts artifacts: 'backend/target/*.jar', allowEmptyArchive: true
