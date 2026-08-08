@@ -4,6 +4,59 @@ import "./RequestApproval.css";
 const ASSET_TYPES = ["All Assets", "Laptop", "Monitor", "Keyboard", "Mouse", "Printer", "Desktop"];
 const ROWS_OPTIONS = [10, 30, 50, "All"];
 
+// ==========================================
+// VALIDATION FUNCTIONS
+// ==========================================
+
+// Validation for Employee ID
+const validateEmployeeId = (id) => {
+  if (!id || id.trim() === "") {
+    return { isValid: false, message: "Employee ID is required" };
+  }
+  if (id !== id.trim()) {
+    return { isValid: false, message: "Employee ID should not have leading or trailing spaces" };
+  }
+  if (/\s/.test(id)) {
+    return { isValid: false, message: "Employee ID should not contain spaces" };
+  }
+  if (/[^A-Za-z0-9]/.test(id)) {
+    return { isValid: false, message: "Employee ID should not contain special characters" };
+  }
+  if (!id.startsWith("EMP")) {
+    return { isValid: false, message: "Employee ID must start with 'EMP'" };
+  }
+  if (id.length !== 6) {
+    return { isValid: false, message: "Employee ID must be exactly 6 characters long (EMP + 3 alphanumeric characters)" };
+  }
+  const lastThree = id.substring(3);
+  if (!/^[A-Za-z0-9]{3}$/.test(lastThree)) {
+    return { isValid: false, message: "Last 3 characters must be alphanumeric (letters or numbers)" };
+  }
+  return { isValid: true, message: "" };
+};
+
+// Validation for Search
+const validateSearch = (empId, assetType) => {
+  const hasEmpId = empId && empId.trim() !== "";
+  const hasAssetType = assetType && assetType !== "All Assets";
+  
+  if (!hasEmpId && !hasAssetType) {
+    return { isValid: false, message: "Please enter an Employee ID or select an Asset Type to search" };
+  }
+  
+  if (hasEmpId) {
+    const result = validateEmployeeId(empId);
+    if (!result.isValid) {
+      return result;
+    }
+  }
+  
+  return { isValid: true, message: "" };
+};
+
+// ==========================================
+// INITIAL DATA
+// ==========================================
 const INITIAL_REQUESTS = [
   {
     id: "AR001",
@@ -40,7 +93,15 @@ const INITIAL_REQUESTS = [
   },
 ];
 
-const RequestApproval = ({ username = "username", onLogout, onBack, onSidebarNavigate }) => {
+// ==========================================
+// MAIN COMPONENT
+// ==========================================
+const RequestApproval = ({ 
+  username = "username", 
+  onLogout, 
+  onBack, 
+  onSidebarNavigate 
+}) => {
   const [activeSidebar, setActiveSidebar] = useState("request-approval");
 
   // Search state
@@ -48,11 +109,13 @@ const RequestApproval = ({ username = "username", onLogout, onBack, onSidebarNav
   const [searchType, setSearchType]     = useState("All Assets");
   const [appliedEmpId, setAppliedEmpId] = useState("");
   const [appliedType, setAppliedType]   = useState("All Assets");
+  const [searchError, setSearchError]   = useState("");
+  const [isSearchTouched, setIsSearchTouched] = useState(false);
 
   // Table state
   const [requests, setRequests]         = useState(INITIAL_REQUESTS);
   const [rowsPerPage, setRowsPerPage]   = useState(10);
-  const [selectedReq, setSelectedReq]   = useState(INITIAL_REQUESTS[0]);
+  const [selectedReq, setSelectedReq]   = useState(null);
 
   // Rejection reason
   const [rejectionReason, setRejectionReason] = useState("");
@@ -66,15 +129,56 @@ const RequestApproval = ({ username = "username", onLogout, onBack, onSidebarNav
     { id: "maintenance",      label: "Maintenance"      },
   ];
 
+  // ==========================================
+  // SIDEBAR CLICK HANDLER - FIXED
+  // ==========================================
   const handleSidebarClick = (item) => {
+    console.log("RequestApproval sidebar clicked:", item.id);
     setActiveSidebar(item.id);
-    if (onSidebarNavigate) onSidebarNavigate(item.id);
+    
+    // ✅ NOTIFY PARENT ABOUT NAVIGATION
+    if (onSidebarNavigate) {
+      onSidebarNavigate(item.id);
+    }
   };
 
-  // ── Search ───────────────────────────────────────────────────
+  // ==========================================
+  // SEARCH WITH VALIDATION
+  // ==========================================
   const handleSearch = () => {
-    setAppliedEmpId(searchEmpId.trim());
+    setIsSearchTouched(true);
+    setSearchError("");
+
+    const result = validateSearch(searchEmpId, searchType);
+    if (!result.isValid) {
+      setSearchError(result.message);
+      setAppliedEmpId("");
+      setAppliedType("All Assets");
+      return;
+    }
+
+    setAppliedEmpId(searchEmpId.trim().toUpperCase());
     setAppliedType(searchType);
+    setSearchError("");
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchEmpId(e.target.value);
+    setSearchError("");
+    setIsSearchTouched(false);
+  };
+
+  const handleSearchTypeChange = (e) => {
+    setSearchType(e.target.value);
+    setSearchError("");
+    setIsSearchTouched(false);
+  };
+
+  const handleSearchKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleSearch();
+    }
   };
 
   const filtered = requests.filter((r) => {
@@ -85,7 +189,18 @@ const RequestApproval = ({ username = "username", onLogout, onBack, onSidebarNav
 
   const displayed = rowsPerPage === "All" ? filtered : filtered.slice(0, rowsPerPage);
 
-  // ── Approve ──────────────────────────────────────────────────
+  // ==========================================
+  // SELECT REQUEST
+  // ==========================================
+  const selectRequest = (req) => {
+    setSelectedReq(req);
+    setRejectionReason(req.rejectionReason || "");
+    setRejectError("");
+  };
+
+  // ==========================================
+  // APPROVE
+  // ==========================================
   const handleApprove = () => {
     if (!selectedReq) return;
     setRequests((prev) =>
@@ -94,15 +209,26 @@ const RequestApproval = ({ username = "username", onLogout, onBack, onSidebarNav
     setSelectedReq((prev) => ({ ...prev, status: "Approved" }));
     setRejectionReason("");
     setRejectError("");
+    alert(`✅ Request ${selectedReq.id} approved successfully!`);
   };
 
-  // ── Reject ───────────────────────────────────────────────────
+  // ==========================================
+  // REJECT WITH VALIDATION
+  // ==========================================
   const handleReject = () => {
     if (!selectedReq) return;
+    
+    // ✅ Validate rejection reason
     if (!rejectionReason.trim()) {
       setRejectError("Reason for rejection is required.");
       return;
     }
+    
+    if (rejectionReason.trim().length < 5) {
+      setRejectError("Reason for rejection must be at least 5 characters long.");
+      return;
+    }
+
     setRequests((prev) =>
       prev.map((r) =>
         r.id === selectedReq.id ? { ...r, status: "Rejected", rejectionReason } : r
@@ -110,13 +236,7 @@ const RequestApproval = ({ username = "username", onLogout, onBack, onSidebarNav
     );
     setSelectedReq((prev) => ({ ...prev, status: "Rejected", rejectionReason }));
     setRejectError("");
-  };
-
-  // When a row is selected, reset rejection state
-  const selectRequest = (req) => {
-    setSelectedReq(req);
-    setRejectionReason(req.rejectionReason || "");
-    setRejectError("");
+    alert(`❌ Request ${selectedReq.id} rejected.`);
   };
 
   const statusClass = (s) => {
@@ -166,27 +286,27 @@ const RequestApproval = ({ username = "username", onLogout, onBack, onSidebarNav
             Review and approve or reject asset requests.
           </p>
 
-          {/* ── Search Request Card ── */}
+          {/* ── Search Request Card with Validation ── */}
           <div className="ra-card">
             <h2 className="ra-card-heading">Search Request</h2>
             <div className="ra-search-row">
               <div className="ra-field-group">
                 <label className="ra-field-label">Employee ID</label>
                 <input
-                  className="ra-input"
+                  className={`ra-input ${searchError && isSearchTouched ? "ra-input-error" : ""}`}
                   type="text"
                   placeholder="Enter employee ID"
                   value={searchEmpId}
-                  onChange={(e) => setSearchEmpId(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                  onChange={handleSearchChange}
+                  onKeyDown={handleSearchKeyDown}
                 />
               </div>
               <div className="ra-field-group">
                 <label className="ra-field-label">Asset Type</label>
                 <select
-                  className="ra-select"
+                  className={`ra-select ${searchError && isSearchTouched ? "ra-input-error" : ""}`}
                   value={searchType}
-                  onChange={(e) => setSearchType(e.target.value)}
+                  onChange={handleSearchTypeChange}
                 >
                   {ASSET_TYPES.map((t) => (
                     <option key={t} value={t}>{t}</option>
@@ -196,6 +316,12 @@ const RequestApproval = ({ username = "username", onLogout, onBack, onSidebarNav
               <button className="ra-search-btn" onClick={handleSearch}>
                 Search
               </button>
+            </div>
+            {searchError && isSearchTouched && (
+              <div className="ra-search-error">⚠️ {searchError}</div>
+            )}
+            <div className="ra-validation-hint">
+              <small>Format: EMP + 3 alphanumeric (e.g., EMP001, EMPA12, EMP1AB)</small>
             </div>
           </div>
 
@@ -232,7 +358,9 @@ const RequestApproval = ({ username = "username", onLogout, onBack, onSidebarNav
                         style={{ cursor: "pointer" }}
                       >
                         <td>{req.id}</td>
-                        <td>{req.employeeId}</td>
+                        <td>
+                          <span className="ra-employee-id">{req.employeeId}</span>
+                        </td>
                         <td>{req.assetType}</td>
                         <td>{req.purpose}</td>
                         <td>{req.requiredDate}</td>
@@ -248,8 +376,10 @@ const RequestApproval = ({ username = "username", onLogout, onBack, onSidebarNav
               </table>
             </div>
 
-            {/* rows-per-page top-right of this card */}
             <div className="ra-rows-right">
+              <span className="ra-pagination-info">
+                Showing {displayed.length} of {filtered.length} requests
+              </span>
               <select
                 className="ra-rows-select"
                 value={rowsPerPage}
@@ -357,24 +487,17 @@ const RequestApproval = ({ username = "username", onLogout, onBack, onSidebarNav
                     Reject
                   </button>
                 </div>
-                {rejectError && <span className="ra-error">{rejectError}</span>}
+                {rejectError && <span className="ra-error">⚠️ {rejectError}</span>}
+                <div className="ra-validation-hint">
+                  <small>Minimum 5 characters required for rejection reason</small>
+                </div>
               </div>
             </div>
           )}
 
-          {/* ── Footer: Back + rows-per-page ── */}
+          {/* ── Back Button ── */}
           <div className="ra-footer-row">
-            <button className="ra-back-btn" onClick={onBack}>Back</button>
-            <select
-              className="ra-rows-select"
-              value={rowsPerPage}
-              onChange={(e) => {
-                const v = e.target.value;
-                setRowsPerPage(v === "All" ? "All" : Number(v));
-              }}
-            >
-              {ROWS_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
-            </select>
+            <button className="ra-back-btn" onClick={onBack}>← Back</button>
           </div>
 
         </main>
