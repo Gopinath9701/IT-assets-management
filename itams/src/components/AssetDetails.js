@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import "./AssetDetails.css";
 
@@ -86,7 +87,68 @@ const STATUS_CLASS = {
   "Not In Use":          "ad-badge--notinuse",
 };
 
-const AssetDetails = ({ username = "username", onLogout }) => {
+// ==========================================
+// VALIDATION FUNCTIONS
+// ==========================================
+
+// Validation for Asset ID
+const validateAssetId = (id) => {
+  if (!id || id.trim() === "") {
+    return { isValid: true, message: "" };
+  }
+  if (id !== id.trim()) {
+    return { isValid: false, message: "Asset ID should not have leading or trailing spaces" };
+  }
+  if (/\s/.test(id)) {
+    return { isValid: false, message: "Asset ID should not contain spaces" };
+  }
+  if (/[^A-Za-z0-9]/.test(id)) {
+    return { isValid: false, message: "Asset ID should not contain special characters" };
+  }
+  if (!id.startsWith("AST")) {
+    return { isValid: false, message: "Asset ID must start with 'AST' (uppercase)" };
+  }
+  if (id.length !== 6) {
+    return { isValid: false, message: "Asset ID must be exactly 6 characters long (AST + 3 alphanumeric)" };
+  }
+  const lastThree = id.substring(3);
+  if (!/^[A-Za-z0-9]{3}$/.test(lastThree)) {
+    return { isValid: false, message: "Last 3 characters must be alphanumeric (letters or numbers)" };
+  }
+  return { isValid: true, message: "" };
+};
+
+// Validation for Search
+const validateSearch = (searchText, filterCat, filterStat, filterLoc) => {
+  const hasSearch = searchText && searchText.trim() !== "";
+  const hasFilter = filterCat !== "All Categories" || filterStat !== "All Status" || filterLoc !== "All Locations";
+  
+  if (!hasSearch && !hasFilter) {
+    return { isValid: false, message: "Please enter a search term or select at least one filter to search" };
+  }
+  
+  if (hasSearch) {
+    const searchValue = searchText.trim();
+    if (searchValue.startsWith("AST") || searchValue.length >= 3) {
+      const result = validateAssetId(searchValue);
+      if (!result.isValid) {
+        return result;
+      }
+    }
+  }
+  
+  return { isValid: true, message: "" };
+};
+
+// ==========================================
+// MAIN COMPONENT
+// ==========================================
+const AssetDetails = ({ 
+  username = "username", 
+  onLogout, 
+  onBack, 
+  onSidebarNavigate  // ← ADD THIS PROP
+}) => {
   const [activeSidebar, setActiveSidebar] = useState("asset-management");
 
   // Filter state
@@ -94,6 +156,10 @@ const AssetDetails = ({ username = "username", onLogout }) => {
   const [filterCat,  setFilterCat]    = useState("All Categories");
   const [filterStat, setFilterStat]   = useState("All Status");
   const [filterLoc,  setFilterLoc]    = useState("All Locations");
+  
+  // Validation state
+  const [searchError, setSearchError] = useState("");
+  const [showFieldError, setShowFieldError] = useState(false);
 
   // Table state
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -109,13 +175,60 @@ const AssetDetails = ({ username = "username", onLogout }) => {
     { id: "maintenance",      label: "Maintenance"      },
   ];
 
-  // ── Stats ────────────────────────────────────────────────────
+  // ==========================================
+  // SIDEBAR CLICK HANDLER - FIXED
+  // ==========================================
+  const handleSidebarClick = (item) => {
+    console.log("AssetDetails sidebar clicked:", item.id);
+    setActiveSidebar(item.id);
+    
+    // ✅ NOTIFY PARENT ABOUT NAVIGATION
+    if (onSidebarNavigate) {
+      onSidebarNavigate(item.id);
+    }
+  };
+
+  // Stats
   const totalAssets      = INITIAL_ASSETS.length;
   const inUse            = INITIAL_ASSETS.filter((a) => a.status === "In Use").length;
   const underMaintenance = INITIAL_ASSETS.filter((a) => a.status === "Under Maintenance").length;
   const notInUse         = INITIAL_ASSETS.filter((a) => a.status === "Not In Use").length;
 
-  // ── Filter ───────────────────────────────────────────────────
+  // Filter with Validation
+  const applyFilters = () => {
+    setSearchError("");
+    setShowFieldError(false);
+    
+    const result = validateSearch(searchText, filterCat, filterStat, filterLoc);
+    if (!result.isValid) {
+      setSearchError(result.message);
+      setShowFieldError(true);
+      return;
+    }
+    
+    setSearchError("");
+    setShowFieldError(false);
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchText(e.target.value);
+    setSearchError("");
+    setShowFieldError(false);
+  };
+
+  const handleFilterChange = (setter) => (e) => {
+    setter(e.target.value);
+    setSearchError("");
+    setShowFieldError(false);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      applyFilters();
+    }
+  };
+
   const filtered = INITIAL_ASSETS.filter((a) => {
     const matchSearch =
       searchText === "" ||
@@ -134,6 +247,8 @@ const AssetDetails = ({ username = "username", onLogout }) => {
     setFilterCat("All Categories");
     setFilterStat("All Status");
     setFilterLoc("All Locations");
+    setSearchError("");
+    setShowFieldError(false);
   };
 
   return (
@@ -163,7 +278,7 @@ const AssetDetails = ({ username = "username", onLogout }) => {
                 "ad-sidebar-item" +
                 (activeSidebar === item.id ? " ad-sidebar-item--active" : "")
               }
-              onClick={() => setActiveSidebar(item.id)}
+              onClick={() => handleSidebarClick(item)}
             >
               {item.label}
             </div>
@@ -201,35 +316,61 @@ const AssetDetails = ({ username = "username", onLogout }) => {
             </div>
           </div>
 
-          {/* ── Search & Filters ── */}
+          {/* ── Search & Filters with Validation ── */}
           <div className="ad-filters-row">
-            <div className="ad-search-wrapper">
+            <div className={`ad-search-wrapper ${showFieldError ? "ad-search-wrapper--error" : ""}`}>
               <svg className="ad-search-icon" viewBox="0 0 20 20" fill="none">
                 <circle cx="9" cy="9" r="6" stroke="#9ca3af" strokeWidth="1.8"/>
                 <path d="M15 15l-3-3" stroke="#9ca3af" strokeWidth="1.8" strokeLinecap="round"/>
               </svg>
               <input
-                className="ad-search-input"
+                className={`ad-search-input ${showFieldError ? "ad-input--error" : ""}`}
                 type="text"
-                placeholder="Search assets..."
+                placeholder="Search assets by name or ID..."
                 value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
+                onChange={handleSearchChange}
+                onKeyDown={handleKeyDown}
               />
             </div>
 
-            <select className="ad-filter-select" value={filterCat} onChange={(e) => setFilterCat(e.target.value)}>
-              {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
+            <select 
+              className={`ad-filter-select ${showFieldError ? "ad-input--error" : ""}`} 
+              value={filterCat} 
+              onChange={handleFilterChange(setFilterCat)}
+            >
+              {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
 
-            <select className="ad-filter-select" value={filterStat} onChange={(e) => setFilterStat(e.target.value)}>
-              {STATUSES.map((s) => <option key={s}>{s}</option>)}
+            <select 
+              className={`ad-filter-select ${showFieldError ? "ad-input--error" : ""}`} 
+              value={filterStat} 
+              onChange={handleFilterChange(setFilterStat)}
+            >
+              {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
 
-            <select className="ad-filter-select" value={filterLoc} onChange={(e) => setFilterLoc(e.target.value)}>
-              {LOCATIONS.map((l) => <option key={l}>{l}</option>)}
+            <select 
+              className={`ad-filter-select ${showFieldError ? "ad-input--error" : ""}`} 
+              value={filterLoc} 
+              onChange={handleFilterChange(setFilterLoc)}
+            >
+              {LOCATIONS.map((l) => <option key={l} value={l}>{l}</option>)}
             </select>
 
+            <button className="ad-search-btn" onClick={applyFilters}>Search</button>
             <button className="ad-reset-btn" onClick={handleReset}>Reset</button>
+          </div>
+
+          {/* Error Message */}
+          {searchError && (
+            <div className="ad-error-container">
+              <span className="ad-error-text">⚠️ {searchError}</span>
+            </div>
+          )}
+
+          {/* ── Back Button ── */}
+          <div className="ad-back-row">
+            <button className="ad-back-btn" onClick={onBack}>← Back</button>
           </div>
 
           {/* ── Table ── */}
@@ -252,7 +393,7 @@ const AssetDetails = ({ username = "username", onLogout }) => {
               <tbody>
                 {displayed.length === 0 ? (
                   <tr>
-                    <td colSpan={10} className="ad-no-data">No assets found.</td>
+                    <td colSpan={10} className="ad-no-data">No assets found. Please adjust your search or filters.</td>
                   </tr>
                 ) : (
                   displayed.map((asset) => (
@@ -287,6 +428,9 @@ const AssetDetails = ({ username = "username", onLogout }) => {
 
           {/* ── Rows per page ── */}
           <div className="ad-table-footer">
+            <span className="ad-pagination-info">
+              Showing {displayed.length} of {filtered.length} assets
+            </span>
             <select
               className="ad-rows-select"
               value={rowsPerPage}
