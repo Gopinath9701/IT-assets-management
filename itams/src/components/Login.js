@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import "../App.css";
 
-export default function Login({ onForgotPasswordClick, onLoginSuccess }) {
+export default function Login({ onForgotPasswordClick }) {
+
   const [formData, setFormData] = useState({
     employeeIdOrEmail: "",
     password: "",
@@ -18,12 +19,14 @@ export default function Login({ onForgotPasswordClick, onLoginSuccess }) {
   };
 
   const handleSubmit = async (e) => {
+
     e.preventDefault();
 
     const input = formData.employeeIdOrEmail.trim();
     const password = formData.password;
 
     // Empty Validation
+
     if (!input) {
       alert("Please enter Employee ID or Email.");
       return;
@@ -35,28 +38,32 @@ export default function Login({ onForgotPasswordClick, onLoginSuccess }) {
     }
 
     // Maximum Length
+
     if (input.length > 100) {
       alert("Input is too long.");
       return;
     }
 
     // Spaces
+
     if (/\s/.test(input)) {
       alert("Spaces are not allowed.");
       return;
     }
 
     // Dangerous Characters
+
     if (/[<>'"`;(){}[\]\\]/.test(input)) {
       alert("Invalid characters are not allowed.");
       return;
     }
 
     // ================= EMAIL =================
+
     if (input.includes("@")) {
 
-      if (!input.endsWith("@gmail.com")) {
-        alert("Email must end with @gmail.com.");
+      if (!input.endsWith("@itam.com")) {
+        alert("Email must end with @itam.com.");
         return;
       }
 
@@ -72,7 +79,8 @@ export default function Login({ onForgotPasswordClick, onLoginSuccess }) {
         return;
       }
 
-      const emailRegex = /^[A-Za-z0-9._%+-]{3,}@gmail\.com$/;
+      const emailRegex =
+        /^[A-Za-z0-9._%+-]{3,}@itam\.com$/;
 
       if (!emailRegex.test(input)) {
         alert("Please enter a valid Gmail address.");
@@ -82,6 +90,7 @@ export default function Login({ onForgotPasswordClick, onLoginSuccess }) {
     }
 
     // ================= EMPLOYEE ID =================
+
     else {
 
       if (!input.startsWith("EMP")) {
@@ -109,6 +118,7 @@ export default function Login({ onForgotPasswordClick, onLoginSuccess }) {
     }
 
     // Password Validation
+
     if (password.length < 6) {
       alert("Password must contain at least 6 characters.");
       return;
@@ -120,44 +130,63 @@ export default function Login({ onForgotPasswordClick, onLoginSuccess }) {
     }
 
     try {
+
       const response = await fetch("http://localhost:5000/api/login", {
+
         method: "POST",
+
         headers: {
           "Content-Type": "application/json",
         },
+
         body: JSON.stringify({
           employeeIdOrEmail: input,
           password: password,
         }),
+
       });
 
       const data = await response.json();
 
       if (response.ok) {
+
         alert("Login Successful");
+
         localStorage.setItem("token", data.token);
+
         localStorage.setItem("user", JSON.stringify(data.user));
-        console.log("User:", data.user);
-        if (onLoginSuccess) onLoginSuccess(data.user?.name || data.user?.employeeId || "Admin");
-      } else {
-        alert(data.message);
+
+        console.log(data.user);
+
+        // window.location.href="/dashboard";
+
       }
 
-    } catch (error) {
-      console.error("Login Error:", error);
-      // Allow demo navigation even without a backend
-      if (onLoginSuccess) onLoginSuccess("Admin");
+      else {
+
+        alert(data.message);
+
+      }
+
+    }
+
+    catch (error) {
+
+      console.error(error);
+
+      alert("Unable to connect to server.");
+
     }
 
   };
-
-  return (
+    return (
     <div className="login-card">
       <h2>Login</h2>
 
       <form onSubmit={handleSubmit}>
 
         <label>Employee ID or Email</label>
+
         <input
           type="text"
           name="employeeIdOrEmail"
@@ -168,7 +197,9 @@ export default function Login({ onForgotPasswordClick, onLoginSuccess }) {
         />
 
         <label>Password</label>
+
         <div className="password-input-container">
+
           <input
             type={showPassword ? "text" : "password"}
             name="password"
@@ -177,6 +208,7 @@ export default function Login({ onForgotPasswordClick, onLoginSuccess }) {
             onChange={handleChange}
             required
           />
+
           <button
             type="button"
             className="password-toggle-btn"
@@ -185,6 +217,7 @@ export default function Login({ onForgotPasswordClick, onLoginSuccess }) {
           >
             {showPassword ? <FaRegEyeSlash /> : <FaRegEye />}
           </button>
+
         </div>
 
         <a
@@ -192,6 +225,7 @@ export default function Login({ onForgotPasswordClick, onLoginSuccess }) {
           className="forgot-password-link"
           onClick={(e) => {
             e.preventDefault();
+
             if (onForgotPasswordClick) {
               onForgotPasswordClick();
             }
@@ -200,9 +234,13 @@ export default function Login({ onForgotPasswordClick, onLoginSuccess }) {
           Forgot Password?
         </a>
 
-        <button type="submit">Login</button>
+        <button type="submit">
+          Login
+        </button>
 
       </form>
+
     </div>
   );
+
 }
