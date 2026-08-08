@@ -27,117 +27,131 @@ pipeline {
         }
 
         // ---------------- Lead Developer ----------------
-        stage('Lead Developer') {
-            when {
-                branch 'Lead-Developer'
-            }
-            steps {
-                echo 'Lead Developer branch'
-                bat 'dir'
-                echo 'Review project structure and integration.'
-            }
+       stage('Lead Developer') {
+    when {
+        branch 'Lead-Developer'
+    }
+    steps {
+        echo 'Lead Developer Integration Build'
+
+        dir('frontend') {
+            bat 'npm install'
+            bat 'npm run build'
         }
+
+        dir('backend') {
+            bat 'mvn clean install'
+        }
+
+        echo 'Integration Build Successful'
+    }
+}
 
         // ---------------- Frontend ----------------
         stage('Frontend CI') {
-            when {
-                branch 'frontend-developer'
-            }
-            steps {
-                echo 'Running Frontend CI'
+    when {
+        branch 'frontend-developer'
+    }
+    steps {
+        echo 'Running Frontend CI'
 
-                bat 'dir'
-
-                // Later replace these
-                // bat 'npm install'
-                // bat 'npm run build'
-                // bat 'npm test'
-            }
+        dir('frontend') {
+            bat 'npm install'
+            bat 'npm run build'
+            bat 'npm test -- --watchAll=false'
         }
+    }
+}
 
         // ---------------- Backend ----------------
         stage('Backend CI') {
-            when {
-                branch 'BackendEngineer'
-            }
-            steps {
-                echo 'Running Backend CI'
+    when {
+        branch 'BackendEngineer'
+    }
+    steps {
+        echo 'Running Backend CI'
 
-                bat 'dir'
-
-                // Later replace these
-                // bat 'mvn clean install'
-                // bat 'mvn test'
-            }
+        dir('backend') {
+            bat 'mvn clean install'
         }
+    }
+}
 
         // ---------------- QA ----------------
         stage('QA CI') {
-            when {
-                branch 'QA-Engineer'
-            }
-            steps {
-                echo 'Running QA Validation'
+    when {
+        branch 'QA-Engineer'
+    }
+    steps {
+        echo 'Running QA Validation'
 
-                bat 'dir'
-
-                // Later
-                // Selenium
-                // Postman
-                // Integration tests
-            }
+        dir('backend') {
+            bat 'mvn test'
         }
+
+        echo 'QA Tests Completed Successfully'
+    }
+}
 
         // ---------------- DevOps (Git/Jenkins) ----------------
         stage('DevOps Monitoring') {
-            when {
-                branch 'DevopsEngineer'
-            }
-            steps {
-                echo 'Monitoring all CI Pipelines'
+    when {
+        branch 'DevopsEngineer'
+    }
+    steps {
+        echo 'Monitoring CI Pipeline'
 
-                bat 'dir'
+        bat 'echo Workspace: %WORKSPACE%'
+        bat 'echo Branch: %BRANCH_NAME%'
 
-                echo 'Checking pipeline health'
-                echo 'Checking build history'
-                echo 'Monitoring notifications'
-            }
-        }
+        echo 'Checking pipeline health'
+        echo 'Checking build history'
+        echo 'Monitoring notifications'
+    }
+}
 
         // ---------------- Deployment ----------------
-        stage('Deployment') {
-            when {
-                branch 'Deployment-1'
-            }
-            steps {
-                echo 'Deployment Pipeline'
-
-                bat 'dir'
-
-                // Later replace with
-
-                // docker build
-                // docker push
-                // kubectl apply
-            }
-        }
-
-        // ---------------- Main ----------------
-        stage('Main Integration') {
-            when {
-                branch 'main'
-            }
-            steps {
-                echo 'Main Branch'
-
-                bat 'dir'
-
-                echo 'Final integration successful'
-            }
-        }
+       stage('Deployment') {
+    when {
+        branch 'Deployment-1'
     }
+    steps {
+        echo 'Preparing Deployment'
+
+        dir('backend') {
+            bat 'mvn clean package'
+        }
+
+        echo 'Deployment Build Ready'
+    }
+}
+        // ---------------- Main ----------------
+       stage('Main Integration') {
+    when {
+        branch 'main'
+    }
+    steps {
+        echo 'Running Final Integration'
+
+        dir('frontend') {
+            bat 'npm install'
+            bat 'npm run build'
+        }
+
+        dir('backend') {
+            bat 'mvn clean install'
+        }
+
+        echo 'Final Integration Successful'
+    }
+}
 
     post {
+        always {
+            archiveArtifacts artifacts: 'backend/target/*.jar', allowEmptyArchive: true
+            archiveArtifacts artifacts: 'frontend/build/**', allowEmptyArchive: true
+        }
+
 
         success {
 
