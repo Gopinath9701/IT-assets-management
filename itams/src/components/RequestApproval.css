@@ -1,5 +1,5 @@
 /* ============================================================
-   RequestApproval.css — matches PDF design exactly
+   RequestApproval.css — Complete with Validation & Modal Styles
    ============================================================ */
 
 .ra-page-wrapper *,
@@ -162,6 +162,7 @@
   border-radius: 10px;
   padding: 24px 28px;
   background-color: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .ra-card--table {
@@ -206,7 +207,7 @@
 .ra-input {
   height: 40px;
   padding: 0 14px;
-  border: 1px solid #d1d5db;
+  border: 2px solid #d1d5db;
   border-radius: 6px;
   font-size: 14px;
   font-family: inherit;
@@ -214,7 +215,7 @@
   background-color: #ffffff;
   outline: none;
   width: 100%;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .ra-input::placeholder {
@@ -223,12 +224,13 @@
 
 .ra-input:focus {
   border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 .ra-select {
   height: 40px;
   padding: 0 36px 0 14px;
-  border: 1px solid #d1d5db;
+  border: 2px solid #d1d5db;
   border-radius: 6px;
   font-size: 14px;
   font-family: inherit;
@@ -242,11 +244,12 @@
   outline: none;
   cursor: pointer;
   width: 100%;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .ra-select:focus {
   border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 .ra-search-btn {
@@ -268,6 +271,49 @@
 
 .ra-search-btn:hover {
   background-color: #1d4ed8;
+}
+
+/* ── SEARCH VALIDATION STYLES ── */
+.ra-input-error {
+  border-color: #dc3545 !important;
+  background-color: #fff8f8;
+}
+
+.ra-input-error:focus {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25) !important;
+}
+
+.ra-search-error {
+  color: #dc3545;
+  font-size: 0.875rem;
+  padding: 8px 12px;
+  background-color: #f8d7da;
+  border-radius: 6px;
+  border: 1px solid #f5c6cb;
+  width: 100%;
+  animation: raShake 0.3s ease-in-out;
+}
+
+@keyframes raShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+
+.ra-validation-hint {
+  margin-top: 4px;
+  color: #6c757d;
+  font-size: 0.8rem;
+}
+
+.ra-validation-hint small {
+  display: block;
+  padding: 4px 10px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  border-left: 3px solid #2563eb;
+  color: #495057;
 }
 
 /* ─────────────────────────────────────────
@@ -328,7 +374,6 @@
   white-space: nowrap;
 }
 
-/* Orange pending — matches PDF */
 .ra-badge--pending {
   background-color: #fff7ed;
   color: #c2410c;
@@ -354,11 +399,53 @@
   font-size: 14px;
 }
 
-/* Rows-per-page — right-aligned inside table card */
+/* ── Employee ID Styling ── */
+.ra-employee-id {
+  font-family: "Courier New", monospace;
+  font-weight: 700;
+  color: #2563eb;
+  background: #eff6ff;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+/* Rows-per-page right-aligned inside card */
 .ra-rows-right {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
   margin-top: 14px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.ra-pagination-info {
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.ra-rows-select {
+  height: 36px;
+  padding: 0 32px 0 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  color: #111827;
+  background-color: #ffffff;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236b7280' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  cursor: pointer;
+  outline: none;
+}
+
+.ra-rows-select:focus {
+  border-color: #2563eb;
 }
 
 /* ─────────────────────────────────────────
@@ -476,7 +563,7 @@
 .ra-textarea {
   flex: 1;
   padding: 12px 14px;
-  border: 1px solid #d1d5db;
+  border: 2px solid #d1d5db;
   border-radius: 6px;
   font-size: 14px;
   font-family: inherit;
@@ -484,7 +571,7 @@
   resize: vertical;
   outline: none;
   min-height: 80px;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s;
   background-color: #ffffff;
 }
 
@@ -494,10 +581,17 @@
 
 .ra-textarea:focus {
   border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 .ra-textarea--error {
-  border-color: #ef4444 !important;
+  border-color: #dc3545 !important;
+  background-color: #fff8f8;
+}
+
+.ra-textarea--error:focus {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25) !important;
 }
 
 .ra-textarea:disabled {
@@ -534,8 +628,24 @@
 
 .ra-error {
   font-size: 12px;
-  color: #ef4444;
+  color: #dc3545;
   font-weight: 500;
+  padding: 4px 8px;
+  background-color: #fef2f2;
+  border-radius: 4px;
+  border-left: 3px solid #dc3545;
+  animation: raFadeIn 0.2s ease-out;
+}
+
+@keyframes raFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ─────────────────────────────────────────
@@ -613,6 +723,24 @@
     width: auto;
     padding: 10px 28px;
   }
+
+  .ra-search-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ra-search-btn {
+    width: 100%;
+  }
+
+  .ra-rows-right {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ra-rows-select {
+    width: 100%;
+  }
 }
 
 /* Mobile */
@@ -652,13 +780,8 @@
     font-size: 22px;
   }
 
-  .ra-search-row {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .ra-search-btn {
-    width: 100%;
+  .ra-card {
+    padding: 20px 16px;
   }
 
   .ra-details-grid {
@@ -689,4 +812,68 @@
     flex-direction: column;
     align-items: flex-start;
   }
+
+  .ra-table th,
+  .ra-table td {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .ra-employee-id {
+    font-size: 11px;
+  }
+
+  .ra-badge {
+    font-size: 11px;
+    padding: 3px 8px;
+  }
+
+  .ra-textarea {
+    min-height: 60px;
+  }
+
+  .ra-validation-hint small {
+    font-size: 11px;
+  }
+
+  .ra-search-error {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+}
+
+/* ─────────────────────────────────────────
+   SCROLLBAR STYLING
+───────────────────────────────────────── */
+.ra-table-wrapper::-webkit-scrollbar {
+  height: 6px;
+}
+
+.ra-table-wrapper::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.ra-table-wrapper::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.ra-table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* ─────────────────────────────────────────
+   UTILITY CLASSES
+───────────────────────────────────────── */
+.ra-text-center {
+  text-align: center;
+}
+
+.ra-mt-16 {
+  margin-top: 16px;
+}
+
+.ra-mb-16 {
+  margin-bottom: 16px;
 }
