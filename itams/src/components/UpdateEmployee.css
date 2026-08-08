@@ -1,152 +1,432 @@
-.update-page{
-    min-height:100vh;
-    background:#eef3fb;
-    font-family:Arial,Helvetica,sans-serif;
+/* ============================================================
+   UpdateEmployee.css — Complete with Validation
+   ============================================================ */
+
+.update-page {
+  min-height: 100vh;
+  background: #eef3fb;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
-.update-header{
-    height:70px;
-    background:#fff;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:0 40px;
-    border-bottom:1px solid #ddd;
+/* ─────────────────────────────────────────
+   HEADER / NAVBAR
+───────────────────────────────────────── */
+.update-header {
+  height: 70px;
+  background: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 40px;
+  border-bottom: 1px solid #ddd;
 }
 
-.logo-section h1{
-    color:#0b5ed7;
-    margin:0;
-    font-size:30px;
-    font-weight:700;
+.logo-section h1 {
+  color: #0b5ed7;
+  margin: 0;
+  font-size: 30px;
+  font-weight: 700;
 }
 
-.logo-section p{
-    margin:0;
-    color:#666;
-    font-size:13px;
+.logo-section p {
+  margin: 0;
+  color: #666;
+  font-size: 13px;
 }
 
-.user-section{
-    display:flex;
-    align-items:center;
-    gap:15px;
+.user-section {
+  display: flex;
+  align-items: center;
+  gap: 15px;
 }
 
-.divider{
-    color:#aaa;
+.divider {
+  color: #aaa;
 }
 
-.logout-btn{
-    background:none;
-    border:none;
-    cursor:pointer;
-    font-size:15px;
+.logout-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  color: #333;
+  transition: color 0.2s;
 }
 
-.update-container{
-    width:92%;
-    margin:35px auto;
+.logout-btn:hover {
+  color: #0b5ed7;
 }
 
-.update-container h1{
-    font-size:40px;
-    color:#162b54;
+/* ─────────────────────────────────────────
+   CONTAINER
+───────────────────────────────────────── */
+.update-container {
+  width: 92%;
+  max-width: 1000px;
+  margin: 35px auto;
 }
 
-.update-container p{
-    color:#666;
-    margin-bottom:25px;
+.update-container h1 {
+  font-size: 32px;
+  color: #162b54;
+  margin: 0 0 6px 0;
 }
 
+.update-container > p {
+  color: #666;
+  margin: 0 0 25px 0;
+}
+
+/* ─────────────────────────────────────────
+   CARDS
+───────────────────────────────────────── */
 .search-card,
-.employee-card{
-    background:#fff;
-    padding:30px;
-    border-radius:15px;
-    box-shadow:0 5px 15px rgba(0,0,0,.08);
-    margin-bottom:25px;
+.employee-card {
+  background: #fff;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+  margin-bottom: 25px;
 }
 
 .search-card h2,
-.employee-card h2{
-    color:#17396d;
-    margin-bottom:20px;
+.employee-card h2 {
+  color: #17396d;
+  margin: 0 0 20px 0;
+  font-size: 20px;
 }
 
-.search-row{
-    display:flex;
-    gap:20px;
+/* ─────────────────────────────────────────
+   SEARCH
+───────────────────────────────────────── */
+.search-row {
+  display: flex;
+  gap: 15px;
 }
 
-.search-row input{
-    flex:1;
+.search-row input {
+  flex: 1;
+  height: 50px;
+  border: 2px solid #d8d8d8;
+  border-radius: 8px;
+  padding: 0 15px;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.2s;
 }
 
-.form-grid{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:25px;
+.search-row input:focus {
+  border-color: #0b5ed7;
 }
 
-.form-group{
-    display:flex;
-    flex-direction:column;
+.search-input.input-error {
+  border-color: #dc3545 !important;
+  background-color: #fff8f8;
 }
 
-.form-group label{
-    margin-bottom:8px;
-    font-weight:600;
-    color:#1d3557;
+.search-btn {
+  background: #0b5ed7;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0 35px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.search-btn:hover {
+  background: #084298;
+}
+
+.search-error {
+  color: #dc3545;
+  font-size: 14px;
+  padding: 8px 12px;
+  margin-top: 10px;
+  background-color: #f8d7da;
+  border-radius: 6px;
+  border: 1px solid #f5c6cb;
+  animation: shake 0.3s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+
+.search-hint {
+  margin-top: 8px;
+  color: #6c757d;
+  font-size: 0.8rem;
+}
+
+.search-hint small {
+  display: block;
+  padding: 6px 12px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  border-left: 3px solid #0b5ed7;
+  color: #495057;
+}
+
+/* ─────────────────────────────────────────
+   FORM
+───────────────────────────────────────── */
+.employee-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: #1d3557;
+  font-size: 14px;
 }
 
 .form-group input,
-.form-group select{
-    height:50px;
-    border:1px solid #d8d8d8;
-    border-radius:8px;
-    padding:0 15px;
-    font-size:15px;
+.form-group select {
+  height: 50px;
+  border: 2px solid #d8d8d8;
+  border-radius: 8px;
+  padding: 0 15px;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.2s;
+  background: #fff;
 }
 
 .form-group input:focus,
-.form-group select:focus{
-    outline:none;
-    border:1px solid #0b5ed7;
+.form-group select:focus {
+  border-color: #0b5ed7;
 }
 
-.button-group{
-    margin-top:35px;
-    display:flex;
-    gap:20px;
+.readonly-input {
+  background-color: #f3f4f6;
+  color: #374151;
+  cursor: not-allowed;
 }
 
-.search-btn,
-.update-btn{
-    background:#0b5ed7;
-    color:white;
-    border:none;
-    border-radius:8px;
-    padding:13px 35px;
-    font-size:16px;
-    cursor:pointer;
-    font-weight:600;
+/* ─────────────────────────────────────────
+   VALIDATION STYLES
+───────────────────────────────────────── */
+.input-error {
+  border-color: #dc3545 !important;
+  background-color: #fff8f8;
 }
 
-.search-btn:hover,
-.update-btn:hover{
-    background:#084298;
+.input-error:focus {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25);
 }
 
-.cancel-btn{
-    background:#fff;
-    border:1px solid #bbb;
-    border-radius:8px;
-    padding:13px 35px;
-    cursor:pointer;
-    font-size:16px;
+.field-error {
+  color: #dc3545;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 10px;
+  background-color: #fef2f2;
+  border-radius: 4px;
+  border-left: 3px solid #dc3545;
+  animation: fadeIn 0.2s ease-out;
 }
 
-.cancel-btn:hover{
-    background:#f3f3f3;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ─────────────────────────────────────────
+   SUCCESS MESSAGE
+───────────────────────────────────────── */
+.success-message {
+  color: #155724;
+  font-size: 14px;
+  padding: 10px 15px;
+  background-color: #d4edda;
+  border-radius: 6px;
+  border: 1px solid #c3e6cb;
+  font-weight: 500;
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* ─────────────────────────────────────────
+   NO EMPLOYEE MESSAGE
+───────────────────────────────────────── */
+.no-employee-message {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6c757d;
+  font-size: 16px;
+}
+
+.no-employee-message p {
+  margin: 0;
+}
+
+/* ─────────────────────────────────────────
+   BUTTONS
+───────────────────────────────────────── */
+.button-group {
+  display: flex;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.update-btn {
+  background: #0b5ed7;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 13px 35px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.update-btn:hover {
+  background: #084298;
+}
+
+.cancel-btn {
+  background: #fff;
+  border: 1.5px solid #bbb;
+  border-radius: 8px;
+  padding: 13px 35px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.cancel-btn:hover {
+  background: #f3f3f3;
+  border-color: #999;
+}
+
+.back-btn {
+  background: #fff;
+  border: 1.5px solid #bbb;
+  border-radius: 8px;
+  padding: 12px 30px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-top: 10px;
+}
+
+.back-btn:hover {
+  background: #f3f3f3;
+}
+
+/* ─────────────────────────────────────────
+   RESPONSIVE
+───────────────────────────────────────── */
+@media (max-width: 768px) {
+  .update-header {
+    padding: 0 20px;
+    height: auto;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 15px 20px;
+  }
+
+  .logo-section h1 {
+    font-size: 24px;
+  }
+
+  .update-container {
+    width: 96%;
+    margin: 20px auto;
+  }
+
+  .update-container h1 {
+    font-size: 26px;
+  }
+
+  .search-card,
+  .employee-card {
+    padding: 20px;
+  }
+
+  .search-row {
+    flex-direction: column;
+  }
+
+  .search-btn {
+    width: 100%;
+    padding: 15px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .button-group {
+    flex-direction: column;
+  }
+
+  .update-btn,
+  .cancel-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo-section h1 {
+    font-size: 20px;
+  }
+
+  .logo-section p {
+    font-size: 11px;
+  }
+
+  .user-section {
+    font-size: 13px;
+    gap: 10px;
+  }
+
+  .update-container h1 {
+    font-size: 22px;
+  }
+
+  .search-card h2,
+  .employee-card h2 {
+    font-size: 17px;
+  }
+
+  .form-group input,
+  .form-group select {
+    height: 44px;
+    font-size: 14px;
+  }
+
+  .search-row input {
+    height: 44px;
+    font-size: 14px;
+  }
 }
