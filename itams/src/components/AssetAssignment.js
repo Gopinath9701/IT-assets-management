@@ -3,6 +3,68 @@ import "./AssetAssignment.css";
 
 const ROWS_OPTIONS = [10, 30, 50, "All"];
 
+// ==========================================
+// VALIDATION FUNCTIONS
+// ==========================================
+
+// Validation for Employee ID
+const validateEmployeeId = (id) => {
+  if (!id || id.trim() === "") {
+    return { isValid: false, message: "Employee ID is required" };
+  }
+  if (id !== id.trim()) {
+    return { isValid: false, message: "Employee ID should not have leading or trailing spaces" };
+  }
+  if (/\s/.test(id)) {
+    return { isValid: false, message: "Employee ID should not contain spaces" };
+  }
+  if (/[^A-Za-z0-9]/.test(id)) {
+    return { isValid: false, message: "Employee ID should not contain special characters" };
+  }
+  if (!id.startsWith("EMP")) {
+    return { isValid: false, message: "Employee ID must start with 'EMP'" };
+  }
+  if (id.length !== 6) {
+    return { isValid: false, message: "Employee ID must be exactly 6 characters long (EMP + 3 alphanumeric characters)" };
+  }
+  const lastThree = id.substring(3);
+  if (!/^[A-Za-z0-9]{3}$/.test(lastThree)) {
+    return { isValid: false, message: "Last 3 characters must be alphanumeric (letters or numbers)" };
+  }
+  return { isValid: true, message: "" };
+};
+
+// Validation for Asset ID
+const validateAssetId = (id) => {
+  if (!id || id.trim() === "") {
+    return { isValid: false, message: "Asset ID is required" };
+  }
+  if (id !== id.trim()) {
+    return { isValid: false, message: "Asset ID should not have leading or trailing spaces" };
+  }
+  if (/\s/.test(id)) {
+    return { isValid: false, message: "Asset ID should not contain spaces" };
+  }
+  if (/[^A-Za-z0-9]/.test(id)) {
+    return { isValid: false, message: "Asset ID should not contain special characters" };
+  }
+  if (!id.startsWith("AST")) {
+    return { isValid: false, message: "Asset ID must start with 'AST'" };
+  }
+  if (id.length !== 6) {
+    return { isValid: false, message: "Asset ID must be exactly 6 characters long (AST + 3 alphanumeric characters)" };
+  }
+  const lastThree = id.substring(3);
+  if (!/^[A-Za-z0-9]{3}$/.test(lastThree)) {
+    return { isValid: false, message: "Last 3 characters must be alphanumeric (letters or numbers)" };
+  }
+  return { isValid: true, message: "" };
+};
+
+// ==========================================
+// INITIAL DATA
+// ==========================================
+
 // Approved requests not yet assigned
 const INITIAL_PENDING = [
   {
@@ -74,12 +136,23 @@ const INITIAL_HISTORY = [
 // Simple assignment ID counter
 let assignCounter = INITIAL_HISTORY.length + 1;
 
-const AssetAssignment = ({ username = "username", onLogout, onBack, onSidebarNavigate }) => {
+// ==========================================
+// MAIN COMPONENT
+// ==========================================
+const AssetAssignment = ({ 
+  username = "username", 
+  onLogout, 
+  onBack, 
+  onSidebarNavigate 
+}) => {
   const [activeSidebar, setActiveSidebar] = useState("asset-assignment");
 
-  // Search
+  // Search state
   const [searchEmpId, setSearchEmpId]     = useState("");
   const [appliedEmpId, setAppliedEmpId]   = useState("");
+  const [searchError, setSearchError]     = useState("");
+  const [isSearchValid, setIsSearchValid] = useState(true);
+  const [isSearchTouched, setIsSearchTouched] = useState(false);
 
   // Table data
   const [pending, setPending]   = useState(INITIAL_PENDING);
@@ -89,6 +162,12 @@ const AssetAssignment = ({ username = "username", onLogout, onBack, onSidebarNav
   const [pendingRows, setPendingRows] = useState(10);
   const [historyRows, setHistoryRows] = useState(10);
 
+  // Assign modal state
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState(null);
+  const [assetNameId, setAssetNameId] = useState("");
+  const [assetNameError, setAssetNameError] = useState("");
+
   const sidebarItems = [
     { id: "dashboard",        label: "Dashboard"        },
     { id: "asset-management", label: "Asset Management" },
@@ -97,13 +176,59 @@ const AssetAssignment = ({ username = "username", onLogout, onBack, onSidebarNav
     { id: "maintenance",      label: "Maintenance"      },
   ];
 
+  // ==========================================
+  // SIDEBAR CLICK HANDLER - FIXED
+  // ==========================================
   const handleSidebarClick = (item) => {
+    console.log("AssetAssignment sidebar clicked:", item.id);
     setActiveSidebar(item.id);
-    if (onSidebarNavigate) onSidebarNavigate(item.id);
+    
+    // ✅ NOTIFY PARENT ABOUT NAVIGATION
+    if (onSidebarNavigate) {
+      onSidebarNavigate(item.id);
+    }
   };
 
-  // ── Search ───────────────────────────────────────────────────
-  const handleSearch = () => setAppliedEmpId(searchEmpId.trim());
+  // ==========================================
+  // SEARCH WITH VALIDATION
+  // ==========================================
+  const handleSearch = () => {
+    setIsSearchTouched(true);
+    setSearchError("");
+
+    if (searchEmpId.trim() === "") {
+      setSearchError("Please enter an Employee ID to search");
+      setIsSearchValid(false);
+      setAppliedEmpId("");
+      return;
+    }
+
+    const result = validateEmployeeId(searchEmpId);
+    if (!result.isValid) {
+      setSearchError(result.message);
+      setIsSearchValid(false);
+      setAppliedEmpId("");
+      return;
+    }
+
+    setAppliedEmpId(searchEmpId.trim().toUpperCase());
+    setIsSearchValid(true);
+    setSearchError("");
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchEmpId(e.target.value);
+    setSearchError("");
+    setIsSearchValid(true);
+    setIsSearchTouched(false);
+  };
+
+  const handleSearchKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleSearch();
+    }
+  };
 
   const filteredPending = pending.filter((r) =>
     appliedEmpId
@@ -122,26 +247,71 @@ const AssetAssignment = ({ username = "username", onLogout, onBack, onSidebarNav
   const displayedPending = pendingRows === "All" ? filteredPending : filteredPending.slice(0, pendingRows);
   const displayedHistory = historyRows === "All" ? filteredHistory : filteredHistory.slice(0, historyRows);
 
-  // ── Assign ───────────────────────────────────────────────────
-  const handleAssign = (req) => {
+  // ==========================================
+  // ASSIGN FUNCTIONALITY WITH VALIDATION
+  // ==========================================
+  const openAssignModal = (req) => {
+    setSelectedRequest(req);
+    setAssetNameId("");
+    setAssetNameError("");
+    setShowAssignModal(true);
+  };
+
+  const closeAssignModal = () => {
+    setShowAssignModal(false);
+    setSelectedRequest(null);
+    setAssetNameId("");
+    setAssetNameError("");
+  };
+
+  const validateAssetNameId = () => {
+    if (!assetNameId.trim()) {
+      setAssetNameError("Asset Name/ID is required");
+      return false;
+    }
+    
+    if (assetNameId.trim().startsWith("AST")) {
+      const result = validateAssetId(assetNameId.trim());
+      if (!result.isValid) {
+        setAssetNameError(result.message);
+        return false;
+      }
+    }
+    
+    if (assetNameId.trim().length < 3) {
+      setAssetNameError("Asset Name/ID must be at least 3 characters long");
+      return false;
+    }
+    
+    return true;
+  };
+
+  const confirmAssign = () => {
+    if (!validateAssetNameId()) {
+      return;
+    }
+
     const padded = String(assignCounter).padStart(3, "0");
     const today  = new Date();
     const assignedDate = `${String(today.getDate()).padStart(2, "0")}-${String(today.getMonth() + 1).padStart(2, "0")}-${today.getFullYear()}`;
 
     const newEntry = {
       assignmentId: `ASG${padded}`,
-      requestId:    req.requestId,
-      employeeId:   req.employeeId,
-      employeeName: req.employeeName,
-      assetType:    req.assetType,
-      assetNameId:  `${req.assetType} Asset (AUTO)`,
+      requestId:    selectedRequest.requestId,
+      employeeId:   selectedRequest.employeeId,
+      employeeName: selectedRequest.employeeName,
+      assetType:    selectedRequest.assetType,
+      assetNameId:  assetNameId.trim(),
       assignedDate,
       status:       "Assigned",
     };
 
     assignCounter += 1;
-    setPending((prev) => prev.filter((r) => r.requestId !== req.requestId));
+    setPending((prev) => prev.filter((r) => r.requestId !== selectedRequest.requestId));
     setHistory((prev) => [newEntry, ...prev]);
+    
+    alert(`✅ Asset assigned successfully!\nAssignment ID: ${newEntry.assignmentId}\nAsset: ${newEntry.assetNameId}`);
+    closeAssignModal();
   };
 
   return (
@@ -185,21 +355,27 @@ const AssetAssignment = ({ username = "username", onLogout, onBack, onSidebarNav
             Assign approved asset requests to employees.
           </p>
 
-          {/* ── Search by Employee ID ── */}
+          {/* ── Search by Employee ID with Validation ── */}
           <div className="asa-search-section">
             <label className="asa-search-label">Search by Employee ID</label>
             <div className="asa-search-row">
               <input
-                className="asa-input"
+                className={`asa-input ${(!isSearchValid && isSearchTouched) || (searchError && isSearchTouched) ? "asa-input-error" : ""}`}
                 type="text"
-                placeholder="Enter employee ID"
+                placeholder="Enter Employee ID (e.g., EMP001)"
                 value={searchEmpId}
-                onChange={(e) => setSearchEmpId(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                onChange={handleSearchChange}
+                onKeyDown={handleSearchKeyDown}
               />
               <button className="asa-search-btn" onClick={handleSearch}>
                 Search
               </button>
+            </div>
+            {searchError && isSearchTouched && (
+              <div className="asa-search-error">⚠️ {searchError}</div>
+            )}
+            <div className="asa-validation-hint">
+              <small>Format: EMP + 3 alphanumeric characters (e.g., EMP001, EMPA12, EMP1AB)</small>
             </div>
           </div>
 
@@ -220,7 +396,7 @@ const AssetAssignment = ({ username = "username", onLogout, onBack, onSidebarNav
                     <th>Purpose</th>
                     <th>Required Date</th>
                     <th>Approval Date</th>
-                    <th></th>
+                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -234,7 +410,9 @@ const AssetAssignment = ({ username = "username", onLogout, onBack, onSidebarNav
                     displayedPending.map((req) => (
                       <tr key={req.requestId}>
                         <td>{req.requestId}</td>
-                        <td>{req.employeeId}</td>
+                        <td>
+                          <span className="asa-employee-id">{req.employeeId}</span>
+                        </td>
                         <td>{req.employeeName}</td>
                         <td>{req.department}</td>
                         <td>{req.assetType}</td>
@@ -244,7 +422,7 @@ const AssetAssignment = ({ username = "username", onLogout, onBack, onSidebarNav
                         <td>
                           <button
                             className="asa-assign-btn"
-                            onClick={() => handleAssign(req)}
+                            onClick={() => openAssignModal(req)}
                           >
                             Assign
                           </button>
@@ -256,6 +434,9 @@ const AssetAssignment = ({ username = "username", onLogout, onBack, onSidebarNav
               </table>
             </div>
             <div className="asa-rows-right">
+              <span className="asa-pagination-info">
+                Showing {displayedPending.length} of {filteredPending.length} requests
+              </span>
               <select
                 className="asa-rows-select"
                 value={pendingRows}
@@ -300,7 +481,9 @@ const AssetAssignment = ({ username = "username", onLogout, onBack, onSidebarNav
                       <tr key={entry.assignmentId}>
                         <td>{entry.assignmentId}</td>
                         <td>{entry.requestId}</td>
-                        <td>{entry.employeeId}</td>
+                        <td>
+                          <span className="asa-employee-id">{entry.employeeId}</span>
+                        </td>
                         <td>{entry.employeeName}</td>
                         <td>{entry.assetType}</td>
                         <td>{entry.assetNameId}</td>
@@ -317,6 +500,9 @@ const AssetAssignment = ({ username = "username", onLogout, onBack, onSidebarNav
               </table>
             </div>
             <div className="asa-rows-right">
+              <span className="asa-pagination-info">
+                Showing {displayedHistory.length} of {filteredHistory.length} records
+              </span>
               <select
                 className="asa-rows-select"
                 value={historyRows}
@@ -332,11 +518,70 @@ const AssetAssignment = ({ username = "username", onLogout, onBack, onSidebarNav
 
           {/* ── Back Button ── */}
           <div className="asa-footer-row">
-            <button className="asa-back-btn" onClick={onBack}>Back</button>
+            <button className="asa-back-btn" onClick={onBack}>← Back</button>
           </div>
 
         </main>
       </div>
+
+      {/* ── Assign Modal ── */}
+      {showAssignModal && selectedRequest && (
+        <div className="asa-modal-overlay" onClick={closeAssignModal}>
+          <div className="asa-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="asa-modal-header">
+              <h2 className="asa-modal-title">Assign Asset</h2>
+              <button className="asa-modal-close" onClick={closeAssignModal}>✕</button>
+            </div>
+            
+            <div className="asa-modal-body">
+              <div className="asa-modal-field">
+                <label className="asa-modal-label">Request ID</label>
+                <span className="asa-modal-value">{selectedRequest.requestId}</span>
+              </div>
+              <div className="asa-modal-field">
+                <label className="asa-modal-label">Employee ID</label>
+                <span className="asa-modal-value">{selectedRequest.employeeId}</span>
+              </div>
+              <div className="asa-modal-field">
+                <label className="asa-modal-label">Employee Name</label>
+                <span className="asa-modal-value">{selectedRequest.employeeName}</span>
+              </div>
+              <div className="asa-modal-field">
+                <label className="asa-modal-label">Asset Type</label>
+                <span className="asa-modal-value">{selectedRequest.assetType}</span>
+              </div>
+              <div className="asa-modal-field">
+                <label className="asa-modal-label">Asset Name / ID *</label>
+                <input
+                  className={`asa-modal-input ${assetNameError ? "asa-input-error" : ""}`}
+                  type="text"
+                  placeholder="Enter Asset Name or ID (e.g., AST001)"
+                  value={assetNameId}
+                  onChange={(e) => {
+                    setAssetNameId(e.target.value);
+                    setAssetNameError("");
+                  }}
+                />
+                {assetNameError && (
+                  <span className="asa-modal-error">⚠️ {assetNameError}</span>
+                )}
+                <div className="asa-validation-hint">
+                  <small>Format: AST + 3 alphanumeric (e.g., AST001, ASTA12, AST1AB) or enter asset name</small>
+                </div>
+              </div>
+            </div>
+
+            <div className="asa-modal-footer">
+              <button className="asa-modal-cancel" onClick={closeAssignModal}>
+                Cancel
+              </button>
+              <button className="asa-modal-confirm" onClick={confirmAssign}>
+                Confirm Assignment
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
