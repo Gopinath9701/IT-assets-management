@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="com.test.EmployeeStatusTest" time="204.965" tests="18" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="com.test.EmployeeStatusTest" time="1508.631" tests="36" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="21"/>
     <property name="sun.cpu.isalist" value="amd64"/>
     <property name="sun.jnu.encoding" value="Cp1252"/>
-    <property name="java.class.path" value="C:\Users\konda\OneDrive\Desktop\itam\IT-assets-management\itams\src\selenium-automation\target\test-classes;C:\Users\konda\OneDrive\Desktop\itam\IT-assets-management\itams\src\selenium-automation\target\classes;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-java\4.34.0\selenium-java-4.34.0.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-api\4.34.0\selenium-api-4.34.0.jar;C:\Users\konda\.m2\repository\org\jspecify\jspecify\1.0.0\jspecify-1.0.0.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-chrome-driver\4.34.0\selenium-chrome-driver-4.34.0.jar;C:\Users\konda\.m2\repository\com\google\auto\service\auto-service-annotations\1.1.1\auto-service-annotations-1.1.1.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-chromium-driver\4.34.0\selenium-chromium-driver-4.34.0.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-json\4.34.0\selenium-json-4.34.0.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-manager\4.34.0\selenium-manager-4.34.0.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-devtools-v136\4.34.0\selenium-devtools-v136-4.34.0.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-devtools-v137\4.34.0\selenium-devtools-v137-4.34.0.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-devtools-v138\4.34.0\selenium-devtools-v138-4.34.0.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-edge-driver\4.34.0\selenium-edge-driver-4.34.0.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-firefox-driver\4.34.0\selenium-firefox-driver-4.34.0.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-http\4.34.0\selenium-http-4.34.0.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-ie-driver\4.34.0\selenium-ie-driver-4.34.0.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-remote-driver\4.34.0\selenium-remote-driver-4.34.0.jar;C:\Users\konda\.m2\repository\com\google\guava\guava\33.4.8-jre\guava-33.4.8-jre.jar;C:\Users\konda\.m2\repository\com\google\guava\failureaccess\1.0.3\failureaccess-1.0.3.jar;C:\Users\konda\.m2\repository\com\google\guava\listenablefuture\9999.0-empty-to-avoid-conflict-with-guava\listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar;C:\Users\konda\.m2\repository\com\google\j2objc\j2objc-annotations\3.0.0\j2objc-annotations-3.0.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-api\1.51.0\opentelemetry-api-1.51.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-context\1.51.0\opentelemetry-context-1.51.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-exporter-logging\1.51.0\opentelemetry-exporter-logging-1.51.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-sdk-common\1.51.0\opentelemetry-sdk-common-1.51.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-sdk-extension-autoconfigure-spi\1.51.0\opentelemetry-sdk-extension-autoconfigure-spi-1.51.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-sdk-extension-autoconfigure\1.51.0\opentelemetry-sdk-extension-autoconfigure-1.51.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-sdk-trace\1.51.0\opentelemetry-sdk-trace-1.51.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-sdk\1.51.0\opentelemetry-sdk-1.51.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-sdk-metrics\1.51.0\opentelemetry-sdk-metrics-1.51.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-sdk-logs\1.51.0\opentelemetry-sdk-logs-1.51.0.jar;C:\Users\konda\.m2\repository\net\bytebuddy\byte-buddy\1.17.6\byte-buddy-1.17.6.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-os\4.34.0\selenium-os-4.34.0.jar;C:\Users\konda\.m2\repository\org\apache\commons\commons-exec\1.5.0\commons-exec-1.5.0.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-safari-driver\4.34.0\selenium-safari-driver-4.34.0.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-support\4.34.0\selenium-support-4.34.0.jar;C:\Users\konda\.m2\repository\junit\junit\4.13.2\junit-4.13.2.jar;C:\Users\konda\.m2\repository\org\hamcrest\hamcrest-core\1.3\hamcrest-core-1.3.jar;C:\Users\konda\.m2\repository\io\github\bonigarcia\webdrivermanager\6.1.0\webdrivermanager-6.1.0.jar;C:\Users\konda\.m2\repository\org\slf4j\slf4j-api\2.0.17\slf4j-api-2.0.17.jar;C:\Users\konda\.m2\repository\com\google\code\gson\gson\2.13.0\gson-2.13.0.jar;C:\Users\konda\.m2\repository\com\google\errorprone\error_prone_annotations\2.37.0\error_prone_annotations-2.37.0.jar;C:\Users\konda\.m2\repository\com\github\docker-java\docker-java\3.5.0\docker-java-3.5.0.jar;C:\Users\konda\.m2\repository\com\github\docker-java\docker-java-core\3.5.0\docker-java-core-3.5.0.jar;C:\Users\konda\.m2\repository\com\github\docker-java\docker-java-api\3.5.0\docker-java-api-3.5.0.jar;C:\Users\konda\.m2\repository\com\fasterxml\jackson\core\jackson-annotations\2.18.3\jackson-annotations-2.18.3.jar;C:\Users\konda\.m2\repository\com\fasterxml\jackson\core\jackson-databind\2.18.3\jackson-databind-2.18.3.jar;C:\Users\konda\.m2\repository\com\fasterxml\jackson\core\jackson-core\2.18.3\jackson-core-2.18.3.jar;C:\Users\konda\.m2\repository\org\slf4j\jcl-over-slf4j\1.7.30\jcl-over-slf4j-1.7.30.jar;C:\Users\konda\.m2\repository\com\github\docker-java\docker-java-transport-httpclient5\3.5.0\docker-java-transport-httpclient5-3.5.0.jar;C:\Users\konda\.m2\repository\com\github\docker-java\docker-java-transport\3.5.0\docker-java-transport-3.5.0.jar;C:\Users\konda\.m2\repository\net\java\dev\jna\jna\5.17.0\jna-5.17.0.jar;C:\Users\konda\.m2\repository\org\brotli\dec\0.1.2\dec-0.1.2.jar;C:\Users\konda\.m2\repository\org\apache\commons\commons-lang3\3.17.0\commons-lang3-3.17.0.jar;C:\Users\konda\.m2\repository\org\apache\commons\commons-compress\1.27.1\commons-compress-1.27.1.jar;C:\Users\konda\.m2\repository\commons-codec\commons-codec\1.17.1\commons-codec-1.17.1.jar;C:\Users\konda\.m2\repository\commons-io\commons-io\2.16.1\commons-io-2.16.1.jar;C:\Users\konda\.m2\repository\org\apache\httpcomponents\client5\httpclient5\5.4.3\httpclient5-5.4.3.jar;C:\Users\konda\.m2\repository\org\apache\httpcomponents\core5\httpcore5\5.3.4\httpcore5-5.3.4.jar;C:\Users\konda\.m2\repository\org\apache\httpcomponents\core5\httpcore5-h2\5.3.4\httpcore5-h2-5.3.4.jar;C:\Users\konda\.m2\repository\net\java\dev\jna\jna-platform\5.13.0\jna-platform-5.13.0.jar;"/>
+    <property name="java.class.path" value="C:\Users\konda\OneDrive\Desktop\Asset\IT-assets-management\itams\src\selenium-automation\target\test-classes;C:\Users\konda\OneDrive\Desktop\Asset\IT-assets-management\itams\src\selenium-automation\target\classes;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-java\4.23.1\selenium-java-4.23.1.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-api\4.23.1\selenium-api-4.23.1.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-chrome-driver\4.23.1\selenium-chrome-driver-4.23.1.jar;C:\Users\konda\.m2\repository\com\google\auto\service\auto-service-annotations\1.1.1\auto-service-annotations-1.1.1.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-chromium-driver\4.23.1\selenium-chromium-driver-4.23.1.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-json\4.23.1\selenium-json-4.23.1.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-manager\4.23.1\selenium-manager-4.23.1.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-devtools-v125\4.23.1\selenium-devtools-v125-4.23.1.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-devtools-v126\4.23.1\selenium-devtools-v126-4.23.1.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-devtools-v127\4.23.1\selenium-devtools-v127-4.23.1.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-devtools-v85\4.23.1\selenium-devtools-v85-4.23.1.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-edge-driver\4.23.1\selenium-edge-driver-4.23.1.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-firefox-driver\4.23.1\selenium-firefox-driver-4.23.1.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-http\4.23.1\selenium-http-4.23.1.jar;C:\Users\konda\.m2\repository\dev\failsafe\failsafe\3.3.2\failsafe-3.3.2.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-ie-driver\4.23.1\selenium-ie-driver-4.23.1.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-remote-driver\4.23.1\selenium-remote-driver-4.23.1.jar;C:\Users\konda\.m2\repository\com\google\guava\guava\33.2.1-jre\guava-33.2.1-jre.jar;C:\Users\konda\.m2\repository\com\google\guava\failureaccess\1.0.2\failureaccess-1.0.2.jar;C:\Users\konda\.m2\repository\com\google\guava\listenablefuture\9999.0-empty-to-avoid-conflict-with-guava\listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar;C:\Users\konda\.m2\repository\com\google\code\findbugs\jsr305\3.0.2\jsr305-3.0.2.jar;C:\Users\konda\.m2\repository\org\checkerframework\checker-qual\3.42.0\checker-qual-3.42.0.jar;C:\Users\konda\.m2\repository\com\google\j2objc\j2objc-annotations\3.0.0\j2objc-annotations-3.0.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\semconv\opentelemetry-semconv\1.25.0-alpha\opentelemetry-semconv-1.25.0-alpha.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-api\1.40.0\opentelemetry-api-1.40.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-context\1.40.0\opentelemetry-context-1.40.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-exporter-logging\1.40.0\opentelemetry-exporter-logging-1.40.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-sdk-common\1.40.0\opentelemetry-sdk-common-1.40.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-sdk-extension-autoconfigure-spi\1.40.0\opentelemetry-sdk-extension-autoconfigure-spi-1.40.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-sdk-extension-autoconfigure\1.40.0\opentelemetry-sdk-extension-autoconfigure-1.40.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-api-incubator\1.40.0-alpha\opentelemetry-api-incubator-1.40.0-alpha.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-sdk-trace\1.40.0\opentelemetry-sdk-trace-1.40.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-sdk\1.40.0\opentelemetry-sdk-1.40.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-sdk-metrics\1.40.0\opentelemetry-sdk-metrics-1.40.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-sdk-logs\1.40.0\opentelemetry-sdk-logs-1.40.0.jar;C:\Users\konda\.m2\repository\net\bytebuddy\byte-buddy\1.14.18\byte-buddy-1.14.18.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-os\4.23.1\selenium-os-4.23.1.jar;C:\Users\konda\.m2\repository\org\apache\commons\commons-exec\1.4.0\commons-exec-1.4.0.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-safari-driver\4.23.1\selenium-safari-driver-4.23.1.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-support\4.23.1\selenium-support-4.23.1.jar;C:\Users\konda\.m2\repository\io\github\bonigarcia\webdrivermanager\5.9.2\webdrivermanager-5.9.2.jar;C:\Users\konda\.m2\repository\org\slf4j\slf4j-api\2.0.13\slf4j-api-2.0.13.jar;C:\Users\konda\.m2\repository\com\google\code\gson\gson\2.11.0\gson-2.11.0.jar;C:\Users\konda\.m2\repository\com\google\errorprone\error_prone_annotations\2.27.0\error_prone_annotations-2.27.0.jar;C:\Users\konda\.m2\repository\com\github\docker-java\docker-java\3.4.0\docker-java-3.4.0.jar;C:\Users\konda\.m2\repository\com\github\docker-java\docker-java-core\3.4.0\docker-java-core-3.4.0.jar;C:\Users\konda\.m2\repository\com\github\docker-java\docker-java-api\3.4.0\docker-java-api-3.4.0.jar;C:\Users\konda\.m2\repository\com\fasterxml\jackson\core\jackson-annotations\2.10.3\jackson-annotations-2.10.3.jar;C:\Users\konda\.m2\repository\com\fasterxml\jackson\core\jackson-databind\2.10.3\jackson-databind-2.10.3.jar;C:\Users\konda\.m2\repository\com\fasterxml\jackson\core\jackson-core\2.10.3\jackson-core-2.10.3.jar;C:\Users\konda\.m2\repository\org\slf4j\jcl-over-slf4j\1.7.30\jcl-over-slf4j-1.7.30.jar;C:\Users\konda\.m2\repository\com\github\docker-java\docker-java-transport-httpclient5\3.4.0\docker-java-transport-httpclient5-3.4.0.jar;C:\Users\konda\.m2\repository\com\github\docker-java\docker-java-transport\3.4.0\docker-java-transport-3.4.0.jar;C:\Users\konda\.m2\repository\net\java\dev\jna\jna\5.13.0\jna-5.13.0.jar;C:\Users\konda\.m2\repository\org\brotli\dec\0.1.2\dec-0.1.2.jar;C:\Users\konda\.m2\repository\org\apache\commons\commons-lang3\3.15.0\commons-lang3-3.15.0.jar;C:\Users\konda\.m2\repository\org\apache\commons\commons-compress\1.26.2\commons-compress-1.26.2.jar;C:\Users\konda\.m2\repository\commons-codec\commons-codec\1.17.0\commons-codec-1.17.0.jar;C:\Users\konda\.m2\repository\commons-io\commons-io\2.16.1\commons-io-2.16.1.jar;C:\Users\konda\.m2\repository\org\apache\httpcomponents\client5\httpclient5\5.2.1\httpclient5-5.2.1.jar;C:\Users\konda\.m2\repository\org\apache\httpcomponents\core5\httpcore5\5.2\httpcore5-5.2.jar;C:\Users\konda\.m2\repository\org\apache\httpcomponents\core5\httpcore5-h2\5.2\httpcore5-h2-5.2.jar;C:\Users\konda\.m2\repository\junit\junit\4.13.2\junit-4.13.2.jar;C:\Users\konda\.m2\repository\org\hamcrest\hamcrest-core\1.3\hamcrest-core-1.3.jar;"/>
     <property name="java.vm.vendor" value="Oracle Corporation"/>
     <property name="sun.arch.data.model" value="64"/>
     <property name="user.variant" value=""/>
-    <property name="java.vendor.url" value="https://java.oracle.com/"/
+    <property name="java.vendor.url" value="https://java.oracle.com/"/>
     <property name="user.timezone" value="Asia/Calcutta"/>
     <property name="os.name" value="Windows 11"/>
     <property name="java.vm.specification.version" value="21"/>
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="user.country" value="IN"/>
     <property name="sun.boot.library.path" value="C:\Program Files\Java\jdk-21.0.11\bin"/>
-    <property name="sun.java.command" value="C:\Users\konda\AppData\Local\Temp\surefire17811893691228648113\surefirebooter-20260705174404417_3.jar C:\Users\konda\AppData\Local\Temp\surefire17811893691228648113 2026-07-05T17-44-04_266-jvmRun1 surefire-20260705174404417_1tmp surefire_0-20260705174404417_2tmp"/>
+    <property name="sun.java.command" value="C:\Users\konda\AppData\Local\Temp\surefire8505182205713774626\surefirebooter-20260808181212066_3.jar C:\Users\konda\AppData\Local\Temp\surefire8505182205713774626 2026-08-08T18-12-11_923-jvmRun1 surefire-20260808181212066_1tmp surefire_0-20260808181212066_2tmp"/>
     <property name="jdk.debug" value="release"/>
     <property name="test" value="EmployeeStatusTest"/>
-    <property name="surefire.test.class.path" value="C:\Users\konda\OneDrive\Desktop\itam\IT-assets-management\itams\src\selenium-automation\target\test-classes;C:\Users\konda\OneDrive\Desktop\itam\IT-assets-management\itams\src\selenium-automation\target\classes;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-java\4.34.0\selenium-java-4.34.0.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-api\4.34.0\selenium-api-4.34.0.jar;C:\Users\konda\.m2\repository\org\jspecify\jspecify\1.0.0\jspecify-1.0.0.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-chrome-driver\4.34.0\selenium-chrome-driver-4.34.0.jar;C:\Users\konda\.m2\repository\com\google\auto\service\auto-service-annotations\1.1.1\auto-service-annotations-1.1.1.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-chromium-driver\4.34.0\selenium-chromium-driver-4.34.0.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-json\4.34.0\selenium-json-4.34.0.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-manager\4.34.0\selenium-manager-4.34.0.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-devtools-v136\4.34.0\selenium-devtools-v136-4.34.0.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-devtools-v137\4.34.0\selenium-devtools-v137-4.34.0.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-devtools-v138\4.34.0\selenium-devtools-v138-4.34.0.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-edge-driver\4.34.0\selenium-edge-driver-4.34.0.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-firefox-driver\4.34.0\selenium-firefox-driver-4.34.0.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-http\4.34.0\selenium-http-4.34.0.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-ie-driver\4.34.0\selenium-ie-driver-4.34.0.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-remote-driver\4.34.0\selenium-remote-driver-4.34.0.jar;C:\Users\konda\.m2\repository\com\google\guava\guava\33.4.8-jre\guava-33.4.8-jre.jar;C:\Users\konda\.m2\repository\com\google\guava\failureaccess\1.0.3\failureaccess-1.0.3.jar;C:\Users\konda\.m2\repository\com\google\guava\listenablefuture\9999.0-empty-to-avoid-conflict-with-guava\listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar;C:\Users\konda\.m2\repository\com\google\j2objc\j2objc-annotations\3.0.0\j2objc-annotations-3.0.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-api\1.51.0\opentelemetry-api-1.51.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-context\1.51.0\opentelemetry-context-1.51.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-exporter-logging\1.51.0\opentelemetry-exporter-logging-1.51.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-sdk-common\1.51.0\opentelemetry-sdk-common-1.51.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-sdk-extension-autoconfigure-spi\1.51.0\opentelemetry-sdk-extension-autoconfigure-spi-1.51.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-sdk-extension-autoconfigure\1.51.0\opentelemetry-sdk-extension-autoconfigure-1.51.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-sdk-trace\1.51.0\opentelemetry-sdk-trace-1.51.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-sdk\1.51.0\opentelemetry-sdk-1.51.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-sdk-metrics\1.51.0\opentelemetry-sdk-metrics-1.51.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-sdk-logs\1.51.0\opentelemetry-sdk-logs-1.51.0.jar;C:\Users\konda\.m2\repository\net\bytebuddy\byte-buddy\1.17.6\byte-buddy-1.17.6.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-os\4.34.0\selenium-os-4.34.0.jar;C:\Users\konda\.m2\repository\org\apache\commons\commons-exec\1.5.0\commons-exec-1.5.0.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-safari-driver\4.34.0\selenium-safari-driver-4.34.0.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-support\4.34.0\selenium-support-4.34.0.jar;C:\Users\konda\.m2\repository\junit\junit\4.13.2\junit-4.13.2.jar;C:\Users\konda\.m2\repository\org\hamcrest\hamcrest-core\1.3\hamcrest-core-1.3.jar;C:\Users\konda\.m2\repository\io\github\bonigarcia\webdrivermanager\6.1.0\webdrivermanager-6.1.0.jar;C:\Users\konda\.m2\repository\org\slf4j\slf4j-api\2.0.17\slf4j-api-2.0.17.jar;C:\Users\konda\.m2\repository\com\google\code\gson\gson\2.13.0\gson-2.13.0.jar;C:\Users\konda\.m2\repository\com\google\errorprone\error_prone_annotations\2.37.0\error_prone_annotations-2.37.0.jar;C:\Users\konda\.m2\repository\com\github\docker-java\docker-java\3.5.0\docker-java-3.5.0.jar;C:\Users\konda\.m2\repository\com\github\docker-java\docker-java-core\3.5.0\docker-java-core-3.5.0.jar;C:\Users\konda\.m2\repository\com\github\docker-java\docker-java-api\3.5.0\docker-java-api-3.5.0.jar;C:\Users\konda\.m2\repository\com\fasterxml\jackson\core\jackson-annotations\2.18.3\jackson-annotations-2.18.3.jar;C:\Users\konda\.m2\repository\com\fasterxml\jackson\core\jackson-databind\2.18.3\jackson-databind-2.18.3.jar;C:\Users\konda\.m2\repository\com\fasterxml\jackson\core\jackson-core\2.18.3\jackson-core-2.18.3.jar;C:\Users\konda\.m2\repository\org\slf4j\jcl-over-slf4j\1.7.30\jcl-over-slf4j-1.7.30.jar;C:\Users\konda\.m2\repository\com\github\docker-java\docker-java-transport-httpclient5\3.5.0\docker-java-transport-httpclient5-3.5.0.jar;C:\Users\konda\.m2\repository\com\github\docker-java\docker-java-transport\3.5.0\docker-java-transport-3.5.0.jar;C:\Users\konda\.m2\repository\net\java\dev\jna\jna\5.17.0\jna-5.17.0.jar;C:\Users\konda\.m2\repository\org\brotli\dec\0.1.2\dec-0.1.2.jar;C:\Users\konda\.m2\repository\org\apache\commons\commons-lang3\3.17.0\commons-lang3-3.17.0.jar;C:\Users\konda\.m2\repository\org\apache\commons\commons-compress\1.27.1\commons-compress-1.27.1.jar;C:\Users\konda\.m2\repository\commons-codec\commons-codec\1.17.1\commons-codec-1.17.1.jar;C:\Users\konda\.m2\repository\commons-io\commons-io\2.16.1\commons-io-2.16.1.jar;C:\Users\konda\.m2\repository\org\apache\httpcomponents\client5\httpclient5\5.4.3\httpclient5-5.4.3.jar;C:\Users\konda\.m2\repository\org\apache\httpcomponents\core5\httpcore5\5.3.4\httpcore5-5.3.4.jar;C:\Users\konda\.m2\repository\org\apache\httpcomponents\core5\httpcore5-h2\5.3.4\httpcore5-h2-5.3.4.jar;C:\Users\konda\.m2\repository\net\java\dev\jna\jna-platform\5.13.0\jna-platform-5.13.0.jar;"/>
+    <property name="surefire.test.class.path" value="C:\Users\konda\OneDrive\Desktop\Asset\IT-assets-management\itams\src\selenium-automation\target\test-classes;C:\Users\konda\OneDrive\Desktop\Asset\IT-assets-management\itams\src\selenium-automation\target\classes;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-java\4.23.1\selenium-java-4.23.1.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-api\4.23.1\selenium-api-4.23.1.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-chrome-driver\4.23.1\selenium-chrome-driver-4.23.1.jar;C:\Users\konda\.m2\repository\com\google\auto\service\auto-service-annotations\1.1.1\auto-service-annotations-1.1.1.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-chromium-driver\4.23.1\selenium-chromium-driver-4.23.1.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-json\4.23.1\selenium-json-4.23.1.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-manager\4.23.1\selenium-manager-4.23.1.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-devtools-v125\4.23.1\selenium-devtools-v125-4.23.1.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-devtools-v126\4.23.1\selenium-devtools-v126-4.23.1.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-devtools-v127\4.23.1\selenium-devtools-v127-4.23.1.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-devtools-v85\4.23.1\selenium-devtools-v85-4.23.1.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-edge-driver\4.23.1\selenium-edge-driver-4.23.1.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-firefox-driver\4.23.1\selenium-firefox-driver-4.23.1.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-http\4.23.1\selenium-http-4.23.1.jar;C:\Users\konda\.m2\repository\dev\failsafe\failsafe\3.3.2\failsafe-3.3.2.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-ie-driver\4.23.1\selenium-ie-driver-4.23.1.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-remote-driver\4.23.1\selenium-remote-driver-4.23.1.jar;C:\Users\konda\.m2\repository\com\google\guava\guava\33.2.1-jre\guava-33.2.1-jre.jar;C:\Users\konda\.m2\repository\com\google\guava\failureaccess\1.0.2\failureaccess-1.0.2.jar;C:\Users\konda\.m2\repository\com\google\guava\listenablefuture\9999.0-empty-to-avoid-conflict-with-guava\listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar;C:\Users\konda\.m2\repository\com\google\code\findbugs\jsr305\3.0.2\jsr305-3.0.2.jar;C:\Users\konda\.m2\repository\org\checkerframework\checker-qual\3.42.0\checker-qual-3.42.0.jar;C:\Users\konda\.m2\repository\com\google\j2objc\j2objc-annotations\3.0.0\j2objc-annotations-3.0.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\semconv\opentelemetry-semconv\1.25.0-alpha\opentelemetry-semconv-1.25.0-alpha.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-api\1.40.0\opentelemetry-api-1.40.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-context\1.40.0\opentelemetry-context-1.40.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-exporter-logging\1.40.0\opentelemetry-exporter-logging-1.40.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-sdk-common\1.40.0\opentelemetry-sdk-common-1.40.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-sdk-extension-autoconfigure-spi\1.40.0\opentelemetry-sdk-extension-autoconfigure-spi-1.40.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-sdk-extension-autoconfigure\1.40.0\opentelemetry-sdk-extension-autoconfigure-1.40.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-api-incubator\1.40.0-alpha\opentelemetry-api-incubator-1.40.0-alpha.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-sdk-trace\1.40.0\opentelemetry-sdk-trace-1.40.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-sdk\1.40.0\opentelemetry-sdk-1.40.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-sdk-metrics\1.40.0\opentelemetry-sdk-metrics-1.40.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-sdk-logs\1.40.0\opentelemetry-sdk-logs-1.40.0.jar;C:\Users\konda\.m2\repository\net\bytebuddy\byte-buddy\1.14.18\byte-buddy-1.14.18.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-os\4.23.1\selenium-os-4.23.1.jar;C:\Users\konda\.m2\repository\org\apache\commons\commons-exec\1.4.0\commons-exec-1.4.0.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-safari-driver\4.23.1\selenium-safari-driver-4.23.1.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-support\4.23.1\selenium-support-4.23.1.jar;C:\Users\konda\.m2\repository\io\github\bonigarcia\webdrivermanager\5.9.2\webdrivermanager-5.9.2.jar;C:\Users\konda\.m2\repository\org\slf4j\slf4j-api\2.0.13\slf4j-api-2.0.13.jar;C:\Users\konda\.m2\repository\com\google\code\gson\gson\2.11.0\gson-2.11.0.jar;C:\Users\konda\.m2\repository\com\google\errorprone\error_prone_annotations\2.27.0\error_prone_annotations-2.27.0.jar;C:\Users\konda\.m2\repository\com\github\docker-java\docker-java\3.4.0\docker-java-3.4.0.jar;C:\Users\konda\.m2\repository\com\github\docker-java\docker-java-core\3.4.0\docker-java-core-3.4.0.jar;C:\Users\konda\.m2\repository\com\github\docker-java\docker-java-api\3.4.0\docker-java-api-3.4.0.jar;C:\Users\konda\.m2\repository\com\fasterxml\jackson\core\jackson-annotations\2.10.3\jackson-annotations-2.10.3.jar;C:\Users\konda\.m2\repository\com\fasterxml\jackson\core\jackson-databind\2.10.3\jackson-databind-2.10.3.jar;C:\Users\konda\.m2\repository\com\fasterxml\jackson\core\jackson-core\2.10.3\jackson-core-2.10.3.jar;C:\Users\konda\.m2\repository\org\slf4j\jcl-over-slf4j\1.7.30\jcl-over-slf4j-1.7.30.jar;C:\Users\konda\.m2\repository\com\github\docker-java\docker-java-transport-httpclient5\3.4.0\docker-java-transport-httpclient5-3.4.0.jar;C:\Users\konda\.m2\repository\com\github\docker-java\docker-java-transport\3.4.0\docker-java-transport-3.4.0.jar;C:\Users\konda\.m2\repository\net\java\dev\jna\jna\5.13.0\jna-5.13.0.jar;C:\Users\konda\.m2\repository\org\brotli\dec\0.1.2\dec-0.1.2.jar;C:\Users\konda\.m2\repository\org\apache\commons\commons-lang3\3.15.0\commons-lang3-3.15.0.jar;C:\Users\konda\.m2\repository\org\apache\commons\commons-compress\1.26.2\commons-compress-1.26.2.jar;C:\Users\konda\.m2\repository\commons-codec\commons-codec\1.17.0\commons-codec-1.17.0.jar;C:\Users\konda\.m2\repository\commons-io\commons-io\2.16.1\commons-io-2.16.1.jar;C:\Users\konda\.m2\repository\org\apache\httpcomponents\client5\httpclient5\5.2.1\httpclient5-5.2.1.jar;C:\Users\konda\.m2\repository\org\apache\httpcomponents\core5\httpcore5\5.2\httpcore5-5.2.jar;C:\Users\konda\.m2\repository\org\apache\httpcomponents\core5\httpcore5-h2\5.2\httpcore5-h2-5.2.jar;C:\Users\konda\.m2\repository\junit\junit\4.13.2\junit-4.13.2.jar;C:\Users\konda\.m2\repository\org\hamcrest\hamcrest-core\1.3\hamcrest-core-1.3.jar;"/>
     <property name="sun.cpu.endian" value="little"/>
     <property name="user.home" value="C:\Users\konda"/>
     <property name="user.language" value="en"/>
@@ -26,12 +26,12 @@
     <property name="java.version.date" value="2026-04-21"/>
     <property name="java.home" value="C:\Program Files\Java\jdk-21.0.11"/>
     <property name="file.separator" value="\"/>
-    <property name="basedir" value="C:\Users\konda\OneDrive\Desktop\itam\IT-assets-management\itams\src\selenium-automation"/>
+    <property name="basedir" value="C:\Users\konda\OneDrive\Desktop\Asset\IT-assets-management\itams\src\selenium-automation"/>
     <property name="java.vm.compressedOopsMode" value="Zero based"/>
     <property name="line.separator" value="&#10;"/>
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
     <property name="java.specification.name" value="Java Platform API Specification"/>
-    <property name="surefire.real.class.path" value="C:\Users\konda\AppData\Local\Temp\surefire17811893691228648113\surefirebooter-20260705174404417_3.jar"/>
+    <property name="surefire.real.class.path" value="C:\Users\konda\AppData\Local\Temp\surefire8505182205713774626\surefirebooter-20260808181212066_3.jar"/>
     <property name="user.script" value=""/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="java.runtime.version" value="21.0.11+9-LTS-211"/>
@@ -46,12 +46,12 @@
     <property name="java.vendor.url.bug" value="https://bugreport.java.com/bugreport/"/>
     <property name="java.io.tmpdir" value="C:\Users\konda\AppData\Local\Temp\"/>
     <property name="java.version" value="21.0.11"/>
-    <property name="user.dir" value="C:\Users\konda\OneDrive\Desktop\itam\IT-assets-management\itams\src\selenium-automation"/>
+    <property name="user.dir" value="C:\Users\konda\OneDrive\Desktop\Asset\IT-assets-management\itams\src\selenium-automation"/>
     <property name="os.arch" value="amd64"/>
     <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
     <property name="sun.os.patch.level" value=""/>
     <property name="native.encoding" value="Cp1252"/>
-    <property name="java.library.path" value="C:\Program Files\Java\jdk-21.0.11\bin;C:\WINDOWS\Sun\Java\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\Program Files\Common Files\Oracle\Java\javapath;C:\Program Files\Python314\Scripts\;C:\Program Files\Python314\;C:\Users\konda\OneDrive\Desktop\Arithematic\Arithematic.java;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\Java\jdk1.8.0_202\bin;C:\Program Files\Java\jdk1.8.0_202\bin;C:\Program Files\nodejs\;C:\ProgramData\chocolatey\bin;C:\Program Files\Git\cmd;C:\Program Files\Docker\Docker\resources\bin;C:\Program Files\Java\jdk-21.0.11\bin;C:\Users\konda\Downloads\apache-maven-3.9.16-bin\apache-maven-3.9.16\bin;C:\Program Files\Java\jdk-21.0.11\bin;C:\Program Files\MySQL\MySQL Shell 8.0\bin\;C:\Users\konda\AppData\Local\Microsoft\WindowsApps;C:\Users\konda\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\konda\AppData\Roaming\npm;C:\Users\konda\AppData\Local\Programs\Kiro\bin;."/>
+    <property name="java.library.path" value="C:\Program Files\Java\jdk-21.0.11\bin;C:\WINDOWS\Sun\Java\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\Program Files\Common Files\Oracle\Java\javapath;C:\Program Files\Python314\Scripts\;C:\Program Files\Python314\;C:\Users\konda\OneDrive\Desktop\Arithematic\Arithematic.java;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\Java\jdk1.8.0_202\bin;C:\Program Files\Java\jdk1.8.0_202\bin;C:\Program Files\nodejs\;C:\ProgramData\chocolatey\bin;C:\Program Files\Git\cmd;C:\Program Files\Docker\Docker\resources\bin;C:\Program Files\Java\jdk-21.0.11\bin;C:\Users\konda\Downloads\apache-maven-3.9.16-bin\apache-maven-3.9.16\bin;C:\Program Files\Java\jdk-21.0.11\bin;C:\Program Files\MySQL\MySQL Shell 8.0\bin\;C:\Users\konda\AppData\Local\Microsoft\WindowsApps;C:\Users\konda\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\konda\AppData\Roaming\npm;C:\Users\konda\AppData\Local\Programs\Kiro\bin;c:\Users\konda\.vscode\extensions\vscjava.vscode-java-debug-0.59.0\bundled\scripts\noConfigScripts;."/>
     <property name="java.vm.info" value="mixed mode, sharing"/>
     <property name="stderr.encoding" value="Cp1252"/>
     <property name="java.vendor" value="Oracle Corporation"/>
@@ -59,133 +59,367 @@
     <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
     <property name="java.class.version" value="65.0"/>
   </properties>
-  <testcase name="verifySearchTextbox" classname="com.test.EmployeeStatusTest" time="11.745">
+  <testcase name="testSearchByNameWithPartialName" classname="com.test.EmployeeStatusTest" time="35.781">
+    <system-out><![CDATA[✗ Employee Status button not found
+✓ Clicked View Status button
+]]></system-out>
     <system-err><![CDATA[SLF4J(W): No SLF4J providers were found.
 SLF4J(W): Defaulting to no-operation (NOP) logger implementation
 SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
-Jul 05, 2026 5:44:06 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
-WARNING: Unable to find CDP implementation matching 149
-Jul 05, 2026 5:44:06 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$4
-WARNING: Unable to find version of CDP to use for 149.0.7827.201. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.34.0` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+Aug 08, 2026 6:12:13 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 151
+Aug 08, 2026 6:12:13 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.76. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
 ]]></system-err>
   </testcase>
-  <testcase name="updateStatusToInactive" classname="com.test.EmployeeStatusTest" time="11.747">
-    <system-err><![CDATA[Jul 05, 2026 5:44:17 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
-WARNING: Unable to find CDP implementation matching 149
-Jul 05, 2026 5:44:17 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$4
-WARNING: Unable to find version of CDP to use for 149.0.7827.201. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.34.0` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+  <testcase name="testSearchByEmployeeName" classname="com.test.EmployeeStatusTest" time="34.267">
+    <system-out><![CDATA[✗ Employee Status button not found
+✓ Clicked View Status button
+]]></system-out>
+    <system-err><![CDATA[Aug 08, 2026 6:12:48 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 151
+Aug 08, 2026 6:12:48 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.76. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
 ]]></system-err>
   </testcase>
-  <testcase name="searchByEmployeeId" classname="com.test.EmployeeStatusTest" time="11.487">
-    <system-err><![CDATA[Jul 05, 2026 5:44:29 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
-WARNING: Unable to find CDP implementation matching 149
-Jul 05, 2026 5:44:29 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$4
-WARNING: Unable to find version of CDP to use for 149.0.7827.201. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.34.0` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+  <testcase name="testSearchInputValue" classname="com.test.EmployeeStatusTest" time="32.533">
+    <system-out><![CDATA[✗ Employee Status button not found
+✓ Clicked View Status button
+]]></system-out>
+    <system-err><![CDATA[Aug 08, 2026 6:13:23 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 151
+Aug 08, 2026 6:13:23 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.76. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
 ]]></system-err>
   </testcase>
-  <testcase name="verifyStatusDropdown" classname="com.test.EmployeeStatusTest" time="10.74">
-    <system-err><![CDATA[Jul 05, 2026 5:44:40 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
-WARNING: Unable to find CDP implementation matching 149
-Jul 05, 2026 5:44:40 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$4
-WARNING: Unable to find version of CDP to use for 149.0.7827.201. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.34.0` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+  <testcase name="testSearchWithEnterKey" classname="com.test.EmployeeStatusTest" time="33.877">
+    <system-out><![CDATA[✗ Employee Status button not found
+✓ Clicked View Status button
+]]></system-out>
+    <system-err><![CDATA[Aug 08, 2026 6:13:55 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 151
+Aug 08, 2026 6:13:55 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.76. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
 ]]></system-err>
   </testcase>
-  <testcase name="updateThirdEmployeeStatus" classname="com.test.EmployeeStatusTest" time="11.622">
-    <system-err><![CDATA[Jul 05, 2026 5:44:51 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
-WARNING: Unable to find CDP implementation matching 149
-Jul 05, 2026 5:44:51 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$4
-WARNING: Unable to find version of CDP to use for 149.0.7827.201. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.34.0` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+  <testcase name="testValidateEmployeeId_Invalid_TooShort" classname="com.test.EmployeeStatusTest" time="64.311">
+    <system-out><![CDATA[✗ Employee Status button not found
+✓ Clicked View Status button
+]]></system-out>
+    <system-err><![CDATA[Aug 08, 2026 6:14:29 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 151
+Aug 08, 2026 6:14:29 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.76. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
 ]]></system-err>
   </testcase>
-  <testcase name="verifyPageHeading" classname="com.test.EmployeeStatusTest" time="10.374">
-    <system-err><![CDATA[Jul 05, 2026 5:45:02 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
-WARNING: Unable to find CDP implementation matching 149
-Jul 05, 2026 5:45:02 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$4
-WARNING: Unable to find version of CDP to use for 149.0.7827.201. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.34.0` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+  <testcase name="testVerifyEmployeeTable" classname="com.test.EmployeeStatusTest" time="32.376">
+    <system-out><![CDATA[✗ Employee Status button not found
+✓ Clicked View Status button
+]]></system-out>
+    <system-err><![CDATA[Aug 08, 2026 6:15:33 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 151
+Aug 08, 2026 6:15:33 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.76. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
 ]]></system-err>
   </testcase>
-  <testcase name="verifyDropdownCount" classname="com.test.EmployeeStatusTest" time="10.163">
-    <system-err><![CDATA[Jul 05, 2026 5:45:13 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
-WARNING: Unable to find CDP implementation matching 149
-Jul 05, 2026 5:45:13 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$4
-WARNING: Unable to find version of CDP to use for 149.0.7827.201. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.34.0` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+  <testcase name="testSearchWithSingleCharacter" classname="com.test.EmployeeStatusTest" time="53.95">
+    <system-out><![CDATA[✗ Employee Status button not found
+✓ Clicked View Status button
+]]></system-out>
+    <system-err><![CDATA[Aug 08, 2026 6:16:06 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 151
+Aug 08, 2026 6:16:06 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.76. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
 ]]></system-err>
   </testcase>
-  <testcase name="searchByEmployeeName" classname="com.test.EmployeeStatusTest" time="11.364">
-    <system-err><![CDATA[Jul 05, 2026 5:45:23 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
-WARNING: Unable to find CDP implementation matching 149
-Jul 05, 2026 5:45:23 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$4
-WARNING: Unable to find version of CDP to use for 149.0.7827.201. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.34.0` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+  <testcase name="testUpdateStatusToInactive" classname="com.test.EmployeeStatusTest" time="34.591">
+    <system-out><![CDATA[✗ Employee Status button not found
+✓ Clicked View Status button
+]]></system-out>
+    <system-err><![CDATA[Aug 08, 2026 6:17:00 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 151
+Aug 08, 2026 6:17:00 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.76. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
 ]]></system-err>
   </testcase>
-  <testcase name="verifyUpdateButtonCount" classname="com.test.EmployeeStatusTest" time="10.244">
-    <system-err><![CDATA[Jul 05, 2026 5:45:34 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
-WARNING: Unable to find CDP implementation matching 149
-Jul 05, 2026 5:45:34 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$4
-WARNING: Unable to find version of CDP to use for 149.0.7827.201. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.34.0` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+  <testcase name="testSearchWithEmptyInput" classname="com.test.EmployeeStatusTest" time="33.795">
+    <system-out><![CDATA[✗ Employee Status button not found
+✓ Clicked View Status button
+]]></system-out>
+    <system-err><![CDATA[Aug 08, 2026 6:17:34 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 151
+Aug 08, 2026 6:17:34 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.76. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
 ]]></system-err>
   </testcase>
-  <testcase name="verifyEmployeeDepartments" classname="com.test.EmployeeStatusTest" time="10.322">
-    <system-err><![CDATA[Jul 05, 2026 5:45:45 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
-WARNING: Unable to find CDP implementation matching 149
-Jul 05, 2026 5:45:45 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$4
-WARNING: Unable to find version of CDP to use for 149.0.7827.201. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.34.0` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+  <testcase name="testPaginationShowAll" classname="com.test.EmployeeStatusTest" time="34.267">
+    <system-out><![CDATA[✗ Employee Status button not found
+✓ Clicked View Status button
+]]></system-out>
+    <system-err><![CDATA[Aug 08, 2026 6:18:08 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 151
+Aug 08, 2026 6:18:08 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.76. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
 ]]></system-err>
   </testcase>
-  <testcase name="verifyTableHeaders" classname="com.test.EmployeeStatusTest" time="10.391">
-    <system-err><![CDATA[Jul 05, 2026 5:45:55 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
-WARNING: Unable to find CDP implementation matching 149
-Jul 05, 2026 5:45:55 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$4
-WARNING: Unable to find version of CDP to use for 149.0.7827.201. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.34.0` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+  <testcase name="testVerifySearchSection" classname="com.test.EmployeeStatusTest" time="32.279">
+    <system-out><![CDATA[✗ Employee Status button not found
+✓ Clicked View Status button
+]]></system-out>
+    <system-err><![CDATA[Aug 08, 2026 6:18:42 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 151
+Aug 08, 2026 6:18:42 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.76. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
 ]]></system-err>
   </testcase>
-  <testcase name="searchInvalidEmployee" classname="com.test.EmployeeStatusTest" time="21.357">
-    <system-err><![CDATA[Jul 05, 2026 5:46:05 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
-WARNING: Unable to find CDP implementation matching 149
-Jul 05, 2026 5:46:05 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$4
-WARNING: Unable to find version of CDP to use for 149.0.7827.201. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.34.0` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+  <testcase name="testUpdateStatusToActive" classname="com.test.EmployeeStatusTest" time="34.291">
+    <system-out><![CDATA[✗ Employee Status button not found
+✓ Clicked View Status button
+]]></system-out>
+    <system-err><![CDATA[Aug 08, 2026 6:19:15 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 151
+Aug 08, 2026 6:19:15 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.76. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
 ]]></system-err>
   </testcase>
-  <testcase name="verifyTableRowCount" classname="com.test.EmployeeStatusTest" time="10.446">
-    <system-err><![CDATA[Jul 05, 2026 5:46:27 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
-WARNING: Unable to find CDP implementation matching 149
-Jul 05, 2026 5:46:27 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$4
-WARNING: Unable to find version of CDP to use for 149.0.7827.201. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.34.0` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+  <testcase name="testValidateEmployeeId_Invalid_WithLeadingSpace" classname="com.test.EmployeeStatusTest" time="44.01">
+    <system-out><![CDATA[✗ Employee Status button not found
+✓ Clicked View Status button
+]]></system-out>
+    <system-err><![CDATA[Aug 08, 2026 6:19:49 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 151
+Aug 08, 2026 6:19:49 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.76. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
 ]]></system-err>
   </testcase>
-  <testcase name="verifyUpdateButtons" classname="com.test.EmployeeStatusTest" time="10.22">
-    <system-err><![CDATA[Jul 05, 2026 5:46:37 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
-WARNING: Unable to find CDP implementation matching 149
-Jul 05, 2026 5:46:37 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$4
-WARNING: Unable to find version of CDP to use for 149.0.7827.201. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.34.0` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+  <testcase name="testLogoutFunctionality" classname="com.test.EmployeeStatusTest" time="33.435">
+    <system-out><![CDATA[✗ Employee Status button not found
+✓ Clicked View Status button
+]]></system-out>
+    <system-err><![CDATA[Aug 08, 2026 6:20:33 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 151
+Aug 08, 2026 6:20:33 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.76. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
 ]]></system-err>
   </testcase>
-  <testcase name="verifyEmployeeRecords" classname="com.test.EmployeeStatusTest" time="10.403">
-    <system-err><![CDATA[Jul 05, 2026 5:46:47 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
-WARNING: Unable to find CDP implementation matching 149
-Jul 05, 2026 5:46:47 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$4
-WARNING: Unable to find version of CDP to use for 149.0.7827.201. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.34.0` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+  <testcase name="testVerifyBackButton" classname="com.test.EmployeeStatusTest" time="33.982">
+    <system-out><![CDATA[✗ Employee Status button not found
+✓ Clicked View Status button
+]]></system-out>
+    <system-err><![CDATA[Aug 08, 2026 6:21:07 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 151
+Aug 08, 2026 6:21:07 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.76. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
 ]]></system-err>
   </testcase>
-  <testcase name="verifySearchSection" classname="com.test.EmployeeStatusTest" time="10.377">
-    <system-err><![CDATA[Jul 05, 2026 5:46:58 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
-WARNING: Unable to find CDP implementation matching 149
-Jul 05, 2026 5:46:58 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$4
-WARNING: Unable to find version of CDP to use for 149.0.7827.201. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.34.0` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+  <testcase name="testValidateEmployeeId_Invalid_Lowercase" classname="com.test.EmployeeStatusTest" time="47.657">
+    <system-out><![CDATA[✗ Employee Status button not found
+✓ Clicked View Status button
+]]></system-out>
+    <system-err><![CDATA[Aug 08, 2026 6:21:40 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 151
+Aug 08, 2026 6:21:40 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.76. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
 ]]></system-err>
   </testcase>
-  <testcase name="updateStatusToOnLeave" classname="com.test.EmployeeStatusTest" time="11.455">
-    <system-err><![CDATA[Jul 05, 2026 5:47:08 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
-WARNING: Unable to find CDP implementation matching 149
-Jul 05, 2026 5:47:08 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$4
-WARNING: Unable to find version of CDP to use for 149.0.7827.201. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.34.0` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+  <testcase name="testVerifyHeader" classname="com.test.EmployeeStatusTest" time="32.186">
+    <system-out><![CDATA[✗ Employee Status button not found
+✓ Clicked View Status button
+]]></system-out>
+    <system-err><![CDATA[Aug 08, 2026 6:22:28 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 151
+Aug 08, 2026 6:22:28 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.76. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
 ]]></system-err>
   </testcase>
-  <testcase name="verifySearchButton" classname="com.test.EmployeeStatusTest" time="10.424">
-    <system-err><![CDATA[Jul 05, 2026 5:47:20 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
-WARNING: Unable to find CDP implementation matching 149
-Jul 05, 2026 5:47:20 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$4
-WARNING: Unable to find version of CDP to use for 149.0.7827.201. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.34.0` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+  <testcase name="testValidateEmployeeId_Invalid_NotStartingWithEMP" classname="com.test.EmployeeStatusTest" time="33.85">
+    <system-out><![CDATA[✗ Employee Status button not found
+✓ Clicked View Status button
+]]></system-out>
+    <system-err><![CDATA[Aug 08, 2026 6:23:00 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 151
+Aug 08, 2026 6:23:00 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.76. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+]]></system-err>
+  </testcase>
+  <testcase name="testValidateEmployeeId_Invalid_TooLong" classname="com.test.EmployeeStatusTest" time="64.145">
+    <system-out><![CDATA[✗ Employee Status button not found
+✓ Clicked View Status button
+]]></system-out>
+    <system-err><![CDATA[Aug 08, 2026 6:23:34 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 151
+Aug 08, 2026 6:23:34 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.76. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+]]></system-err>
+  </testcase>
+  <testcase name="testSearchInvalidEmployee" classname="com.test.EmployeeStatusTest" time="34.817">
+    <system-out><![CDATA[✗ Employee Status button not found
+✓ Clicked View Status button
+]]></system-out>
+    <system-err><![CDATA[Aug 08, 2026 6:24:38 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 151
+Aug 08, 2026 6:24:38 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.76. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+]]></system-err>
+  </testcase>
+  <testcase name="testValidateEmployeeId_Valid_EMP001" classname="com.test.EmployeeStatusTest" time="65.115">
+    <system-out><![CDATA[✗ Employee Status button not found
+✓ Clicked View Status button
+]]></system-out>
+    <system-err><![CDATA[Aug 08, 2026 6:25:13 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 151
+Aug 08, 2026 6:25:13 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.76. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+]]></system-err>
+  </testcase>
+  <testcase name="testValidateEmployeeId_Valid_EMP1AB" classname="com.test.EmployeeStatusTest" time="63.494">
+    <system-out><![CDATA[✗ Employee Status button not found
+✓ Clicked View Status button
+]]></system-out>
+    <system-err><![CDATA[Aug 08, 2026 6:26:18 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 151
+Aug 08, 2026 6:26:18 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.76. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+]]></system-err>
+  </testcase>
+  <testcase name="testValidateEmployeeId_Valid_EMPA12" classname="com.test.EmployeeStatusTest" time="63.618">
+    <system-out><![CDATA[✗ Employee Status button not found
+✓ Clicked View Status button
+]]></system-out>
+    <system-err><![CDATA[Aug 08, 2026 6:27:22 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 151
+Aug 08, 2026 6:27:22 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.76. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+]]></system-err>
+  </testcase>
+  <testcase name="testValidateEmployeeId_Valid_EMPXYZ" classname="com.test.EmployeeStatusTest" time="63.753">
+    <system-out><![CDATA[✗ Employee Status button not found
+✓ Clicked View Status button
+]]></system-out>
+    <system-err><![CDATA[Aug 08, 2026 6:28:25 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 151
+Aug 08, 2026 6:28:25 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.76. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+]]></system-err>
+  </testcase>
+  <testcase name="testVerifyPageHeading" classname="com.test.EmployeeStatusTest" time="32.411">
+    <system-out><![CDATA[✗ Employee Status button not found
+✓ Clicked View Status button
+]]></system-out>
+    <system-err><![CDATA[Aug 08, 2026 6:29:29 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 151
+Aug 08, 2026 6:29:29 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.76. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+]]></system-err>
+  </testcase>
+  <testcase name="testVerifyPaginationOptions" classname="com.test.EmployeeStatusTest" time="32.683">
+    <system-out><![CDATA[✗ Employee Status button not found
+✓ Clicked View Status button
+]]></system-out>
+    <system-err><![CDATA[Aug 08, 2026 6:30:01 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 151
+Aug 08, 2026 6:30:01 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.76. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+]]></system-err>
+  </testcase>
+  <testcase name="testVerifyEmployeeRecords" classname="com.test.EmployeeStatusTest" time="32.465">
+    <system-out><![CDATA[✗ Employee Status button not found
+✓ Clicked View Status button
+]]></system-out>
+    <system-err><![CDATA[Aug 08, 2026 6:30:34 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 151
+Aug 08, 2026 6:30:34 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.76. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+]]></system-err>
+  </testcase>
+  <testcase name="testSearchValidEmployee" classname="com.test.EmployeeStatusTest" time="33.89">
+    <system-out><![CDATA[✗ Employee Status button not found
+✓ Clicked View Status button
+]]></system-out>
+    <system-err><![CDATA[Aug 08, 2026 6:31:07 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 151
+Aug 08, 2026 6:31:07 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.76. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+]]></system-err>
+  </testcase>
+  <testcase name="testValidateEmployeeId_Invalid_Empty" classname="com.test.EmployeeStatusTest" time="53.976">
+    <system-out><![CDATA[✗ Employee Status button not found
+✓ Clicked View Status button
+]]></system-out>
+    <system-err><![CDATA[Aug 08, 2026 6:31:40 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 151
+Aug 08, 2026 6:31:40 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.76. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+]]></system-err>
+  </testcase>
+  <testcase name="testValidateEmployeeId_Invalid_TrailingSpace" classname="com.test.EmployeeStatusTest" time="44.018">
+    <system-out><![CDATA[✗ Employee Status button not found
+✓ Clicked View Status button
+]]></system-out>
+    <system-err><![CDATA[Aug 08, 2026 6:32:34 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 151
+Aug 08, 2026 6:32:34 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.76. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+]]></system-err>
+  </testcase>
+  <testcase name="testValidateEmployeeId_Invalid_WithSpace" classname="com.test.EmployeeStatusTest" time="54.18">
+    <system-out><![CDATA[✗ Employee Status button not found
+✓ Clicked View Status button
+]]></system-out>
+    <system-err><![CDATA[Aug 08, 2026 6:33:18 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 151
+Aug 08, 2026 6:33:18 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.76. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+]]></system-err>
+  </testcase>
+  <testcase name="testUpdateStatusToOnLeave" classname="com.test.EmployeeStatusTest" time="34.849">
+    <system-out><![CDATA[✗ Employee Status button not found
+✓ Clicked View Status button
+]]></system-out>
+    <system-err><![CDATA[Aug 08, 2026 6:34:13 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 151
+Aug 08, 2026 6:34:13 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.76. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+]]></system-err>
+  </testcase>
+  <testcase name="testVerifyLogoutButton" classname="com.test.EmployeeStatusTest" time="31.969">
+    <system-out><![CDATA[✗ Employee Status button not found
+✓ Clicked View Status button
+]]></system-out>
+    <system-err><![CDATA[Aug 08, 2026 6:34:47 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 151
+Aug 08, 2026 6:34:47 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.76. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+]]></system-err>
+  </testcase>
+  <testcase name="testPaginationSizeChange" classname="com.test.EmployeeStatusTest" time="33.752">
+    <system-out><![CDATA[✗ Employee Status button not found
+✓ Clicked View Status button
+]]></system-out>
+    <system-err><![CDATA[Aug 08, 2026 6:35:19 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 151
+Aug 08, 2026 6:35:19 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.76. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+]]></system-err>
+  </testcase>
+  <testcase name="testValidateEmployeeId_Invalid_WithSpecialChar" classname="com.test.EmployeeStatusTest" time="54.816">
+    <system-out><![CDATA[✗ Employee Status button not found
+✓ Clicked View Status button
+]]></system-out>
+    <system-err><![CDATA[Aug 08, 2026 6:35:53 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 151
+Aug 08, 2026 6:35:53 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.76. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+]]></system-err>
+  </testcase>
+  <testcase name="testVerifyStatusBadges" classname="com.test.EmployeeStatusTest" time="33.158">
+    <system-out><![CDATA[✗ Employee Status button not found
+✓ Clicked View Status button
+]]></system-out>
+    <system-err><![CDATA[Aug 08, 2026 6:36:48 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 151
+Aug 08, 2026 6:36:48 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.76. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
 ]]></system-err>
   </testcase>
 </testsuite>
