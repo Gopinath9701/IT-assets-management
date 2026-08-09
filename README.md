@@ -2,322 +2,258 @@
 
 ## Project Overview
 
-The IT Asset Management System (ITAMS) is a web-based application developed to manage and track IT assets within an organization. The system provides a centralized platform for registering, assigning, monitoring, maintaining, and retiring IT assets such as laptops, desktops, printers, servers, routers, and software licenses.
+The IT Asset Management System (ITAMS) is a web-based application for managing IT assets within an organization. It provides a centralized platform to record, assign, monitor, and maintain assets such as laptops, desktops, printers, servers, routers, and software licenses.
 
-The project also incorporates DevOps practices including Continuous Integration, Continuous Deployment (CI/CD), containerization, orchestration, and monitoring to ensure efficient software delivery and system reliability.
-
----
-
-## Objectives
-
-* Track and manage IT assets efficiently.
-* Maintain asset assignment records.
-* Monitor asset maintenance activities.
-* Generate inventory and utilization reports.
-* Automate deployment using DevOps tools.
-* Improve operational efficiency and asset visibility.
+This repository currently contains the backend implementation of the system using Node.js, Express, PostgreSQL, and Neon.
 
 ---
 
-## Features
+##  Implementation
+
+The backend is built with:
+
+- Node.js
+- Express.js
+- PostgreSQL / Neon
+- JWT authentication
+- Role-based access control
+- OTP-based password reset via email
+- REST APIs for employees, assets, requests, assignments, and maintenance
+
+---
+
+## Main Features
 
 ### Asset Management
-
-* Add new assets
-* Update asset information
-* View asset inventory
-* Retire outdated assets
-* Search assets
+- Add, update, view, and delete assets
+- Search assets by name or type
+- Track asset status and assignment information
 
 ### Asset Assignment
-
-* Assign assets to employees
-* Reassign returned assets
-* Track asset ownership history
+- Assign approved assets to employees
+- Prevent duplicate assignments
+- Track assignment history
 
 ### Maintenance Management
-
-* Report asset issues
-* Create maintenance requests
-* Track repair status
-* Maintain repair history
+- Report maintenance issues
+- Track maintenance request status
+- Update repair progress
 
 ### User Management
+- Employee management
+- Department management
+- Role-based access control for HR, Asset Manager, Admin, Employee, and Technician
 
-* Admin management
-* Employee management
-* Technician management
-* Role-Based Access Control (RBAC)
-
-### Reporting
-
-* Asset Inventory Report
-* Assigned Assets Report
-* Maintenance Report
-* Retired Assets Report
+### Authentication
+- Login using email or employee identifier
+- Password reset using OTP
+- JWT-based protected routes
 
 ---
 
 ## User Roles
 
 ### Admin
-
-* Manage users
-* Manage assets
-* Generate reports
-* Monitor system activities
+- Manage users and assets
+- Access all system modules
+- Manage approvals and assignments
 
 ### Asset Manager
+- Register and manage assets
+- Approve asset requests
+- Assign assets to employees
 
-* Register assets
-* Assign assets
-* Update asset details
-* Track inventory
+### HR
+- Manage employees and departments
+- View employee records and status
+- Submit asset requests
 
 ### Employee
-
-* View assigned assets
-* Report issues
-* Request asset return
+- View assigned assets
+- Report maintenance issues
+- Request assets
 
 ### Technician
-
-* View maintenance requests
-* Update repair status
-* Close maintenance tasks
-
----
-
-## System Workflow
-
-Login
-→ Dashboard
-→ Add Asset
-→ Asset Inventory
-→ Assign Asset
-→ Employee Uses Asset
-→ Issue Reporting
-→ Maintenance
-→ Return Asset
-→ Available for Reassignment
-→ Retire Asset
-→ Generate Reports
+- View maintenance requests
+- Update maintenance status
 
 ---
 
 ## Technology Stack
 
-### Frontend
-
-* HTML5
-* CSS3
-* JavaScript
-* React.js (Optional)
-
 ### Backend
-
-* Spring Boot (Java)
-* REST APIs
+- Node.js
+- Express.js
+- PostgreSQL
+- Neon
+- JWT
+- bcryptjs
+- nodemailer
+- dotenv
 
 ### Database
-
-* MySQL
+- PostgreSQL on Neon
 
 ### DevOps Tools
-
-* Git
-* GitHub
-* Jenkins
-* Docker
-* Kubernetes
-* Prometheus
-* Grafana
-
----
-
-## DevOps Pipeline
-
-Developer
-→ GitHub Repository
-→ Jenkins Build
-→ Automated Testing
-→ Docker Image Creation
-→ Docker Hub
-→ Kubernetes Deployment
-→ Application Running
-→ Prometheus Monitoring
-→ Grafana Dashboard
+- Git
+- GitHub
+- Jenkins
+- Docker
+- Kubernetes
+- Prometheus
+- Grafana
 
 ---
 
 ## Project Structure
 
 ```text
-IT-Asset-Management-System/
-│
-├── frontend/
+IT-assets-management/
+├── itams-backend/
+│   ├── server.js
+│   ├── package.json
 │   ├── src/
-│   ├── public/
-│   └── package.json
-│
-├── backend/
-│   ├── src/
-│   ├── controllers/
-│   ├── services/
-│   ├── repositories/
-│   └── pom.xml
-│
-├── database/
-│   ├── schema.sql
-│   └── sample-data.sql
-│
-├── docker/
-│   ├── Dockerfile
-│   └── docker-compose.yml
-│
-├── kubernetes/
-│   ├── deployment.yaml
-│   ├── service.yaml
-│   └── ingress.yaml
-│
-├── jenkins/
-│   └── Jenkinsfile
-│
-├── docs/
-│   ├── SRS.pdf
-│   ├── Design.pdf
-│   └── Reports.pdf
-│
-├── README.md
-└── LICENSE
+│   │   ├── config/
+│   │   ├── controllers/
+│   │   ├── middleware/
+│   │   ├── routes/
+│   │   └── utils/
+│   ├── sql/
+│   │   ├── schema.sql
+│   │   └── seed.js
+│   └── README.md
+├── Jenkinsfile
+├── backlogs.txt
+└── README.md
 ```
 
 ---
 
-## Installation
+## Backend Setup
 
-### Clone Repository
-
-```bash
-git clone https://github.com/your-username/IT-Asset-Management-System.git
-cd IT-Asset-Management-System
-```
-
-### Backend Setup
+### 1. Install dependencies
 
 ```bash
-cd backend
-mvn clean install
-mvn spring-boot:run
-```
-
-### Frontend Setup
-
-```bash
-cd frontend
+cd itams-backend
 npm install
+```
+
+### 2. Configure environment variables
+
+Create a `.env` file in the backend folder using the values from `.env.example`.
+
+Example:
+
+```env
+PORT=5000
+NODE_ENV=development
+CLIENT_ORIGIN=http://localhost:3000
+
+JWT_SECRET=your_secure_secret
+
+DATABASE_URL=postgresql://user:password@ep-xxxx.region.aws.neon.tech/dbname?sslmode=require
+
+GMAIL_USER=your_email@gmail.com
+GMAIL_APP_PASSWORD=your_16_char_app_password
+EMAIL_FROM_NAME=ITAMS Support
+
+DEFAULT_SEED_PASSWORD=ITAMS@2026
+SEED_HR_EMAIL=your.hr.email@gmail.com
+SEED_ASSET_MANAGER_EMAIL=your.assetmanager.email@gmail.com
+```
+
+### 3. Create the database tables
+
+Run the SQL from [itams-backend/sql/schema.sql](itams-backend/sql/schema.sql) in your Neon database.
+
+### 4. Seed initial users
+
+```bash
+npm run seed
+```
+
+### 5. Start the backend
+
+```bash
+npm run dev
+```
+
+Or:
+
+```bash
 npm start
 ```
 
-### Database Setup
+---
 
-```sql
-CREATE DATABASE it_asset_management;
-```
+## API Overview
 
-Import schema.sql and sample-data.sql into MySQL.
+The backend exposes REST APIs for:
+
+- Authentication:
+  - `POST /api/login`
+  - `POST /api/forgot-password/send-otp`
+  - `POST /api/forgot-password/verify-otp`
+  - `POST /api/forgot-password/reset`
+
+- Employees:
+  - `GET /api/employees`
+  - `POST /api/employees`
+  - `PUT /api/employees/:employeeId`
+  - `PATCH /api/employees/:employeeId/status`
+
+- Departments:
+  - `GET /api/departments`
+  - `POST /api/departments`
+
+- Assets:
+  - `GET /api/assets`
+  - `POST /api/assets`
+  - `PUT /api/assets/:assetId`
+  - `DELETE /api/assets/:assetId`
+
+- Asset Requests:
+  - `GET /api/asset-requests`
+  - `POST /api/asset-requests`
+  - `PATCH /api/asset-requests/:requestId/approve`
+  - `PATCH /api/asset-requests/:requestId/reject`
+
+- Asset Assignments:
+  - `GET /api/asset-assignments/pending`
+  - `GET /api/asset-assignments/history`
+  - `POST /api/asset-assignments`
+
+- Maintenance:
+  - `GET /api/maintenance`
+  - `POST /api/maintenance`
+  - `PATCH /api/maintenance/:requestId/status`
 
 ---
 
-## Docker Deployment
+## Notes
 
-Build Docker Image:
-
-```bash
-docker build -t itams .
-```
-
-Run Container:
-
-```bash
-docker run -p 8080:8080 itams
-```
-
----
-
-## Kubernetes Deployment
-
-```bash
-kubectl apply -f kubernetes/
-```
-
-Check deployment status:
-
-```bash
-kubectl get pods
-kubectl get services
-```
-
----
-
-## Monitoring
-
-### Prometheus
-
-* Collect application metrics
-* Monitor resource utilization
-
-### Grafana
-
-* Visualize performance metrics
-* Create dashboards and alerts
-
----
-
-## Reports Generated
-
-* Asset Inventory Report
-* Asset Assignment Report
-* Maintenance Report
-* Retired Assets Report
-* User Activity Report
+- The backend is currently the main implemented part of this project.
+- The project uses PostgreSQL on Neon rather than the older MySQL-based setup.
+- Email sending is configured through Gmail SMTP using an app password.
 
 ---
 
 ## Future Enhancements
 
-* QR Code Asset Tracking
-* Email Notifications
-* Mobile Application Support
-* Asset Location Tracking
-* AI-Based Maintenance Prediction
-* Barcode Scanning Integration
-
----
-
-## Benefits
-
-* Centralized asset management
-* Improved asset tracking
-* Reduced operational costs
-* Better maintenance management
-* Automated deployment process
-* Real-time monitoring and reporting
-
----
-
-## Conclusion
-
-The IT Asset Management System (ITAMS) provides a comprehensive solution for managing organizational IT assets throughout their lifecycle. By integrating modern DevOps practices such as CI/CD, containerization, orchestration, and monitoring, the system ensures scalability, reliability, security, and efficient software delivery.
+- Frontend integration improvements
+- Mobile app support
+- QR/barcode-based asset tracking
+- Advanced reporting dashboards
+- Notification system enhancements
 
 ---
 
 ## Authors
 
-Team gama
+Team Gama
 
 Department of Computer Science and Engineering (Data Science)
 
-Devops Project
+DevOps Project
 
 2026

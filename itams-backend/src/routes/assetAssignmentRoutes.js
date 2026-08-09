@@ -1,0 +1,21 @@
+const express = require("express");
+const { authenticate, authorize } = require("../middleware/auth");
+const {
+  getPending,
+  getHistory,
+  getAvailableAssets,
+  assignAsset,
+  reassignAsset,
+} = require("../controllers/assetAssignmentController");
+
+const router = express.Router();
+
+router.use(authenticate, authorize("AssetManager", "Admin"));
+
+router.get("/pending", getPending);
+router.get("/history", getHistory);
+router.get("/available-assets", getAvailableAssets);
+router.post("/reassign", reassignAsset);
+router.post("/", assignAsset);
+
+module.exports = router;
