@@ -1,4 +1,4 @@
-package com.test;
+  package com.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -11,10 +11,14 @@ import org.junit.Test;
 
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
 
@@ -37,17 +41,17 @@ public class AddEmployeeTest {
 
         Thread.sleep(2000);
 
-        // Click Login button on Home Page
+        // Login
         driver.findElement(By.xpath("//button[text()='Login']")).click();
 
         Thread.sleep(2000);
 
-        // Click HR Management button
+        // HR Management
         driver.findElement(By.xpath("//*[text()='HR Mgmt']")).click();
 
         Thread.sleep(2000);
 
-        // Click Add Employee button
+        // Add Employee
         driver.findElement(By.xpath("//button[text()='Add Employee']")).click();
 
         Thread.sleep(2000);
@@ -57,16 +61,13 @@ public class AddEmployeeTest {
     public void verifyPageHeading() {
 
         assertTrue(driver.findElement(
-                By.xpath("//*[text()='Add Employee']"))
-                .isDisplayed());
+                By.xpath("//*[text()='Add Employee']")).isDisplayed());
 
         assertTrue(driver.findElement(
-                By.xpath("//*[text()='Fill in the employee details below.']"))
-                .isDisplayed());
+                By.xpath("//*[text()='Fill in the employee details below.']")).isDisplayed());
 
         assertTrue(driver.findElement(
-                By.xpath("//*[text()='Employee Information']"))
-                .isDisplayed());
+                By.xpath("//*[text()='Employee Information']")).isDisplayed());
 
     }
 
@@ -74,69 +75,45 @@ public class AddEmployeeTest {
     public void verifyHeader() {
 
         assertTrue(driver.findElement(
-                By.xpath("//*[text()='ITAMS']"))
-                .isDisplayed());
+                By.xpath("//*[text()='ITAMS']")).isDisplayed());
 
         assertTrue(driver.findElement(
-                By.xpath("//*[text()='IT Asset Management System']"))
-                .isDisplayed());
+                By.xpath("//*[text()='IT Asset Management System']")).isDisplayed());
 
         assertTrue(driver.findElement(
-                By.xpath("//button[text()='Logout']"))
-                .isDisplayed());
+                By.xpath("//button[text()='Logout']")).isDisplayed());
 
     }
 
     @Test
     public void verifyAllFields() {
 
-        assertTrue(driver.findElement(
-                By.name("employeeName"))
-                .isDisplayed());
-
-        assertTrue(driver.findElement(
-                By.name("employeeId"))
-                .isDisplayed());
-
-        assertTrue(driver.findElement(
-                By.name("email"))
-                .isDisplayed());
-
-        assertTrue(driver.findElement(
-                By.name("department"))
-                .isDisplayed());
-
-        assertTrue(driver.findElement(
-                By.name("designation"))
-                .isDisplayed());
-
-        assertTrue(driver.findElement(
-                By.name("phone"))
-                .isDisplayed());
-
-        assertTrue(driver.findElement(
-                By.name("joiningDate"))
-                .isDisplayed());
+        assertTrue(driver.findElement(By.name("employeeName")).isDisplayed());
+        assertTrue(driver.findElement(By.name("employeeId")).isDisplayed());
+        assertTrue(driver.findElement(By.name("email")).isDisplayed());
+        assertTrue(driver.findElement(By.name("department")).isDisplayed());
+        assertTrue(driver.findElement(By.name("designation")).isDisplayed());
+        assertTrue(driver.findElement(By.name("phone")).isDisplayed());
+        assertTrue(driver.findElement(By.name("joiningDate")).isDisplayed());
 
     }
-        @Test
+
+    @Test
     public void verifyButtons() {
 
         assertTrue(driver.findElement(
-                By.xpath("//button[text()='Save Employee']"))
-                .isDisplayed());
+                By.xpath("//button[text()='Save Employee']")).isDisplayed());
 
         assertTrue(driver.findElement(
-                By.xpath("//button[text()='Cancel']"))
-                .isDisplayed());
+                By.xpath("//button[text()='Cancel']")).isDisplayed());
 
     }
 
     @Test
     public void verifyDepartmentDropdown() {
 
-        Select department = new Select(
-                driver.findElement(By.name("department")));
+        Select department =
+                new Select(driver.findElement(By.name("department")));
 
         assertEquals(9, department.getOptions().size());
 
@@ -168,9 +145,8 @@ public class AddEmployeeTest {
                 department.getOptions().get(8).getText());
 
     }
-
-    @Test
-    public void addEmployee() throws InterruptedException {
+        @Test
+    public void addEmployee() throws Exception {
 
         driver.findElement(By.name("employeeName"))
                 .sendKeys("Satwika");
@@ -179,10 +155,10 @@ public class AddEmployeeTest {
                 .sendKeys("EMP101");
 
         driver.findElement(By.name("email"))
-                .sendKeys("satwika@gmail.com");
+                .sendKeys("satwika@itams.com");
 
-        Select department = new Select(
-                driver.findElement(By.name("department")));
+        Select department =
+                new Select(driver.findElement(By.name("department")));
 
         department.selectByVisibleText("HR");
 
@@ -193,18 +169,25 @@ public class AddEmployeeTest {
                 .sendKeys("9876543210");
 
         driver.findElement(By.name("joiningDate"))
-                .sendKeys("01-07-2026");
+                .sendKeys("2025-07-01");
+
+        WebElement saveButton =
+                driver.findElement(By.xpath("//button[text()='Save Employee']"));
+
+        ((JavascriptExecutor) driver)
+                .executeScript("arguments[0].scrollIntoView(true);", saveButton);
 
         Thread.sleep(1000);
 
-        driver.findElement(
-                By.xpath("//button[text()='Save Employee']"))
-                .click();
+        ((JavascriptExecutor) driver)
+                .executeScript("arguments[0].click();", saveButton);
+
+        Thread.sleep(1000);
 
     }
 
     @Test
-    public void verifySuccessAlert() throws InterruptedException {
+    public void verifySuccessAlert() throws Exception {
 
         driver.findElement(By.name("employeeName"))
                 .sendKeys("Satwika");
@@ -213,10 +196,10 @@ public class AddEmployeeTest {
                 .sendKeys("EMP101");
 
         driver.findElement(By.name("email"))
-                .sendKeys("satwika@gmail.com");
+                .sendKeys("satwika@itams.com");
 
-        Select department = new Select(
-                driver.findElement(By.name("department")));
+        Select department =
+                new Select(driver.findElement(By.name("department")));
 
         department.selectByVisibleText("HR");
 
@@ -227,15 +210,24 @@ public class AddEmployeeTest {
                 .sendKeys("9876543210");
 
         driver.findElement(By.name("joiningDate"))
-                .sendKeys("01-07-2026");
+                .sendKeys("01-07-2020");
 
-        driver.findElement(
-                By.xpath("//button[text()='Save Employee']"))
-                .click();
+        WebElement saveButton =
+                driver.findElement(By.xpath("//button[text()='Save Employee']"));
+
+        ((JavascriptExecutor) driver)
+                .executeScript("arguments[0].scrollIntoView(true);", saveButton);
 
         Thread.sleep(1000);
 
-        Alert alert = driver.switchTo().alert();
+        ((JavascriptExecutor) driver)
+                .executeScript("arguments[0].click();", saveButton);
+
+        WebDriverWait wait =
+                new WebDriverWait(driver, Duration.ofSeconds(10));
+
+        Alert alert =
+                wait.until(ExpectedConditions.alertIsPresent());
 
         assertEquals(
                 "Employee Added Successfully!",
@@ -244,8 +236,9 @@ public class AddEmployeeTest {
         alert.accept();
 
     }
-        @Test
-    public void verifyCancelButton() {
+
+    @Test
+    public void verifyCancelButton() throws Exception {
 
         driver.findElement(By.name("employeeName"))
                 .sendKeys("Satwika");
@@ -254,10 +247,10 @@ public class AddEmployeeTest {
                 .sendKeys("EMP101");
 
         driver.findElement(By.name("email"))
-                .sendKeys("satwika@gmail.com");
+                .sendKeys("satwika@itams.com");
 
-        Select department = new Select(
-                driver.findElement(By.name("department")));
+        Select department =
+                new Select(driver.findElement(By.name("department")));
 
         department.selectByVisibleText("HR");
 
@@ -268,11 +261,18 @@ public class AddEmployeeTest {
                 .sendKeys("9876543210");
 
         driver.findElement(By.name("joiningDate"))
-                .sendKeys("01-07-2026");
+                .sendKeys("01-07-2020");
 
-        driver.findElement(
-                By.xpath("//button[text()='Cancel']"))
-                .click();
+        WebElement cancelButton =
+                driver.findElement(By.xpath("//button[text()='Cancel']"));
+
+        ((JavascriptExecutor) driver)
+                .executeScript("arguments[0].scrollIntoView(true);", cancelButton);
+
+        Thread.sleep(1000);
+
+        ((JavascriptExecutor) driver)
+                .executeScript("arguments[0].click();", cancelButton);
 
         assertEquals("",
                 driver.findElement(By.name("employeeName"))
@@ -299,8 +299,7 @@ public class AddEmployeeTest {
                         .getAttribute("value"));
 
     }
-
-    @Test
+        @Test
     public void verifyLogoutButton() {
 
         assertTrue(driver.findElement(
@@ -345,23 +344,28 @@ public class AddEmployeeTest {
     @Test
     public void verifyPlaceholders() {
 
-        assertEquals("Enter full name",
+        assertEquals(
+                "Enter full name",
                 driver.findElement(By.name("employeeName"))
                         .getAttribute("placeholder"));
 
-        assertEquals("Enter employee ID",
+        assertEquals(
+                "Enter employee ID",
                 driver.findElement(By.name("employeeId"))
                         .getAttribute("placeholder"));
 
-        assertEquals("Enter email address",
+        assertEquals(
+                "Enter email address",
                 driver.findElement(By.name("email"))
                         .getAttribute("placeholder"));
 
-        assertEquals("Enter designation",
+        assertEquals(
+                "Enter designation",
                 driver.findElement(By.name("designation"))
                         .getAttribute("placeholder"));
 
-        assertEquals("Enter phone number",
+        assertEquals(
+                "Enter phone number",
                 driver.findElement(By.name("phone"))
                         .getAttribute("placeholder"));
 
@@ -375,5 +379,4 @@ public class AddEmployeeTest {
         }
 
     }
-
 }
