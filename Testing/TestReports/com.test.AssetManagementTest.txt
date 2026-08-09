@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.test.AssetManagementTest
+-------------------------------------------------------------------------------
+Tests run: 19, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 224.5 s -- in com.test.AssetManagementTest
