@@ -149,6 +149,9 @@ async function reassignAsset(req, res, next) {
     if (assetResult.rows.length === 0) {
       return res.status(404).json({ success: false, message: "Asset not found" });
     }
+    if (targetAssetId !== currentAssignment.asset_id && assetResult.rows[0].status !== "Not In Use") {
+      return res.status(400).json({ success: false, message: "Target asset is not available for assignment" });
+    }
 
     await client.query("BEGIN");
 
