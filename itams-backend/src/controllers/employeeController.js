@@ -1,3 +1,4 @@
+const bcrypt = require("bcryptjs");
 const { pool } = require("../config/db");
 const { validateEmployeePayload } = require("../utils/validators");
 
@@ -42,6 +43,7 @@ async function getEmployeeById(req, res, next) {
 
 // POST /api/employees  (AddEmployee.js form)
 async function addEmployee(req, res, next) {
+  const client = await pool.connect();
   try {
     const { employeeId, employeeName, email, department, designation, phone, joiningDate } = req.body;
 
@@ -52,23 +54,44 @@ async function addEmployee(req, res, next) {
       return res.status(400).json({ success: false, message: validationError });
     }
 
-    await pool.query(
+    const defaultPassword = process.env.DEFAULT_SEED_PASSWORD || "ITAMS@2026";
+    const passwordHash = await bcrypt.hash(defaultPassword, 10);
+
+    await client.query("BEGIN");
+
+    await client.query(
       `INSERT INTO employees (employee_id, employee_name, email, department, designation, phone, joining_date)
        VALUES ($1, $2, $3, $4, $5, $6, $7)`,
       [employeeId, employeeName, email, department, designation || null, phone || null, joiningDate || null]
     );
 
-    res.status(201).json({ success: true, message: "Employee Added Successfully!" });
+    await client.query(
+      `INSERT INTO users (login_id, name, email, department, password_hash, role)
+       VALUES ($1, $2, $3, $4, $5, 'Employee')`,
+      [employeeId, employeeName, email, department, passwordHash]
+    );
+
+    await client.query("COMMIT");
+
+    res.status(201).json({
+      success: true,
+      message: "Employee Added Successfully!",
+      loginCreated: { loginId: employeeId, temporaryPassword: defaultPassword },
+    });
   } catch (err) {
-    if (err.code === "23505") { // Postgres unique_violation
+    await client.query("ROLLBACK");
+    if (err.code === "23505") {
       return res.status(409).json({ success: false, message: "Employee ID or email already exists" });
     }
     next(err);
+  } finally {
+    client.release();
   }
 }
 
 // PUT /api/employees/:employeeId  (UpdateEmployee.js form)
 async function updateEmployee(req, res, next) {
+  const client = await pool.connect();
   try {
     const { employeeId } = req.params;
     const { employeeName, email, department, designation, phone, joiningDate } = req.body;
@@ -80,19 +103,31 @@ async function updateEmployee(req, res, next) {
       return res.status(400).json({ success: false, message: validationError });
     }
 
-    const result = await pool.query(
+    await client.query("BEGIN");
+
+    const result = await client.query(
       `UPDATE employees SET employee_name=$1, email=$2, department=$3, designation=$4, phone=$5, joining_date=$6
        WHERE employee_id = $7`,
       [employeeName, email, department, designation || null, phone || null, joiningDate || null, employeeId]
     );
 
     if (result.rowCount === 0) {
+      await client.query("ROLLBACK");
       return res.status(404).json({ success: false, message: "Employee not found" });
     }
 
+    await client.query(
+      `UPDATE users SET name = $1, email = $2, department = $3 WHERE login_id = $4`,
+      [employeeName, email, department, employeeId]
+    );
+
+    await client.query("COMMIT");
     res.json({ success: true, message: "Employee Updated Successfully!" });
   } catch (err) {
+    await client.query("ROLLBACK");
     next(err);
+  } finally {
+    client.release();
   }
 }
 
@@ -119,18 +154,7 @@ async function updateEmployeeStatus(req, res, next) {
 }
 
 // DELETE /api/employees/:employeeId
-async function deleteEmployee(req, res, next) {
-  try {
-    const { employeeId } = req.params;
-    const result = await pool.query("DELETE FROM employees WHERE employee_id = $1", [employeeId]);
-    if (result.rowCount === 0) {
-      return res.status(404).json({ success: false, message: "Employee not found" });
-    }
-    res.json({ success: true, message: "Employee deleted" });
-  } catch (err) {
-    next(err);
-  }
-}
+
 
 // GET /api/employees/:employeeId/dashboard  (Employee dashboard support)
 async function getEmployeeDashboard(req, res, next) {
@@ -141,7 +165,30 @@ async function getEmployeeDashboard(req, res, next) {
     if (employeeRows.length === 0) {
       return res.status(404).json({ success: false, message: "Employee not found" });
     }
+async function deleteEmployee(req, res, next) {
+  const client = await pool.connect();
+  try {
+    const { employeeId } = req.params;
 
+    await client.query("BEGIN");
+
+    const result = await client.query("DELETE FROM employees WHERE employee_id = $1", [employeeId]);
+    if (result.rowCount === 0) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ success: false, message: "Employee not found" });
+    }
+
+    await client.query("DELETE FROM users WHERE login_id = $1 AND role = 'Employee'", [employeeId]);
+
+    await client.query("COMMIT");
+    res.json({ success: true, message: "Employee deleted" });
+  } catch (err) {
+    await client.query("ROLLBACK");
+    next(err);
+  } finally {
+    client.release();
+  }
+}
     const { rows: assignedAssets } = await pool.query(
       `SELECT a.asset_id, a.asset_name, a.asset_type, aa.assigned_date
        FROM asset_assignments aa
