@@ -89,18 +89,6 @@ const validatePhoneNumber = (phone) => {
   return { isValid: true, message: "" };
 };
 
-// Validation for Email
-const validateEmail = (email) => {
-  if (!email || email.trim() === "") {
-    return { isValid: false, message: "Email is required" };
-  }
-  const emailStr = email.trim();
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailStr)) {
-    return { isValid: false, message: "Please enter a valid email address" };
-  }
-  return { isValid: true, message: "" };
-};
-
 // ==========================================
 // SAMPLE EMPLOYEE DATA
 // ==========================================
@@ -111,7 +99,6 @@ const EMPLOYEE_DATA = {
     department: "IT",
     designation: "Developer",
     phone: "9876543210",
-    email: "emp1@itams.com",
   },
   "EMP002": {
     id: "EMP002",
@@ -119,7 +106,6 @@ const EMPLOYEE_DATA = {
     department: "HR",
     designation: "Manager",
     phone: "9876543211",
-    email: "emp2@itams.com",
   },
   "EMP003": {
     id: "EMP003",
@@ -127,7 +113,6 @@ const EMPLOYEE_DATA = {
     department: "Finance",
     designation: "Accountant",
     phone: "9876543212",
-    email: "emp3@itams.com",
   },
 };
 
@@ -150,7 +135,6 @@ const UpdateEmployee = ({ username = "username", onLogout, onBack }) => {
     department: "",
     designation: "",
     phone: "",
-    email: "",
   });
   const [formErrors, setFormErrors] = useState({});
   const [updateSuccess, setUpdateSuccess] = useState(false);
@@ -242,9 +226,6 @@ const UpdateEmployee = ({ username = "username", onLogout, onBack }) => {
 
     const phoneResult = validatePhoneNumber(formData.phone);
     if (!phoneResult.isValid) errors.phone = phoneResult.message;
-
-    const emailResult = validateEmail(formData.email);
-    if (!emailResult.isValid) errors.email = emailResult.message;
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
@@ -397,21 +378,7 @@ const UpdateEmployee = ({ username = "username", onLogout, onBack }) => {
                   />
                   {formErrors.phone && <span className="field-error">{formErrors.phone}</span>}
                 </div>
-
-                {/* Email - Editable */}
-                <div className="form-group">
-                  <label>Email (Editable) *</label>
-                  <input
-                    className={`${formErrors.email ? "input-error" : ""}`}
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleFormChange}
-                    placeholder="Enter email address"
-                  />
-                  {formErrors.email && <span className="field-error">{formErrors.email}</span>}
                 </div>
-              </div>
 
               {updateSuccess && (
                 <div className="success-message">
