@@ -82,43 +82,6 @@ const validateAssetId = (id) => {
 };
 
 
-// Validation for Asset Name
-const validateAssetName = (name) => {
-  if (!name || name.trim() === "") {
-    return {
-      isValid: false,
-      message: "Asset name is required"
-    };
-  }
-
-  if (name.trim().length < 2) {
-    return {
-      isValid: false,
-      message: "Asset name must be at least 2 characters long"
-    };
-  }
-
-  if (name.trim().length > 100) {
-    return {
-      isValid: false,
-      message: "Asset name cannot exceed 100 characters"
-    };
-  }
-
-  if (/[^A-Za-z0-9\s()-]/.test(name.trim())) {
-    return {
-      isValid: false,
-      message: "Asset name contains invalid characters"
-    };
-  }
-
-  return {
-    isValid: true,
-    message: ""
-  };
-};
-
-
 // Validation for Asset Type
 const validateAssetType = (type) => {
   if (!type) {
@@ -317,7 +280,6 @@ const AddAsset = ({
     useState(generateAssetId);
 
   const [form, setForm] = useState({
-    assetName: "",
     assetType: "",
     brand: "",
     warrantyExpiry: "",
@@ -383,17 +345,6 @@ const AddAsset = ({
 
       newErrors.assetId =
         idResult.message;
-    }
-
-
-    // Asset Name
-    const nameResult =
-      validateAssetName(form.assetName);
-
-    if (!nameResult.isValid) {
-
-      newErrors.assetName =
-        nameResult.message;
     }
 
 
@@ -484,7 +435,6 @@ const AddAsset = ({
 
     // Clear form after successful submission
     setForm({
-      assetName: "",
       assetType: "",
       brand: "",
       warrantyExpiry: "",
@@ -511,7 +461,6 @@ const AddAsset = ({
   const handleClear = () => {
 
     setForm({
-      assetName: "",
       assetType: "",
       brand: "",
       warrantyExpiry: "",
@@ -673,37 +622,6 @@ const AddAsset = ({
               ================================= */}
 
           <div className="aa-row">
-
-            {/* Asset Name */}
-
-            <div className="aa-field-group">
-
-              <label className="aa-label">
-                Asset Name *
-              </label>
-
-
-              <input
-                className={`aa-input${
-                  errors.assetName
-                    ? " aa-input--error"
-                    : ""
-                }`}
-                type="text"
-                name="assetName"
-                placeholder="Enter Asset Name"
-                value={form.assetName}
-                onChange={handleChange}
-              />
-
-
-              {errors.assetName && (
-                <span className="aa-error">
-                  ⚠️ {errors.assetName}
-                </span>
-              )}
-
-            </div>
 
 
             {/* Asset Type */}
