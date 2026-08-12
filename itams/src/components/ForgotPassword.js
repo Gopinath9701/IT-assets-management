@@ -57,7 +57,7 @@ export default function ForgotPassword({ onLoginClick }) {
     // Email Validation
 
     if (!value.endsWith("@gmail.com")) {
-      return "Please enter a valid Gmail address.";
+      return "must ends with @gmail.com.";
     }
 
     const username = value.split("@")[0];
