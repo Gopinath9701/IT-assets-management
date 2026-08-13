@@ -1,516 +1,452 @@
-import React, { useState } from "react";
-import "./AddAsset.css";
+import React, { useEffect, useState } from "react";
+import "./AssetDetails.css";
 
-const ASSET_TYPES = [
-  "Laptop",
-  "Desktop",
+const ROWS_OPTIONS = [10, 30, 50, "All"];
+
+// ==========================================
+// STATUS BADGE CLASSES
+// ==========================================
+const STATUS_CLASS = {
+  Active: "ad-badge--active",
+  Inactive: "ad-badge--inactive",
+  onLeave: "ad-badge--onleave",
+  "On Leave": "ad-badge--onleave",
+
+  // Keep these if your backend still has old values
+  "In Use": "ad-badge--inuse",
+  "Under Maintenance": "ad-badge--maintenance",
+  "Not In Use": "ad-badge--notinuse",
+};
+
+// ==========================================
+// FIXED ASSET TYPE OPTIONS
+// ==========================================
+const ASSET_TYPE_OPTIONS = [
+  "All Asset Types",
   "Monitor",
   "Keyboard",
-  "Mouse",
-  "Printer",
-  "Headset",
   "Webcam",
-  "Scanner",
+  "CPU",
+  "Mouse",
   "Projector",
-  "Tablet",
-  "Phone"
+  "Printer",
 ];
 
 // ==========================================
-// VALIDATION FUNCTIONS
+// FIXED STATUS OPTIONS
 // ==========================================
-
-// Validation for Asset ID
-const validateAssetId = (id) => {
-  if (!id || id.trim() === "") {
-    return {
-      isValid: false,
-      message: "Asset ID is required"
-    };
-  }
-
-  if (id !== id.trim()) {
-    return {
-      isValid: false,
-      message: "Asset ID should not have leading or trailing spaces"
-    };
-  }
-
-  if (/\s/.test(id)) {
-    return {
-      isValid: false,
-      message: "Asset ID should not contain spaces"
-    };
-  }
-
-  if (/[^A-Za-z0-9]/.test(id)) {
-    return {
-      isValid: false,
-      message: "Asset ID should not contain special characters"
-    };
-  }
-
-  if (!id.startsWith("AST")) {
-    return {
-      isValid: false,
-      message: "Asset ID must start with 'AST'"
-    };
-  }
-
-  if (id.length !== 6) {
-    return {
-      isValid: false,
-      message:
-        "Asset ID must be exactly 6 characters long (AST + 3 alphanumeric characters)"
-    };
-  }
-
-  const lastThree = id.substring(3);
-
-  if (!/^[A-Za-z0-9]{3}$/.test(lastThree)) {
-    return {
-      isValid: false,
-      message:
-        "Last 3 characters must be alphanumeric (letters or numbers)"
-    };
-  }
-
-  return {
-    isValid: true,
-    message: ""
-  };
-};
-
-
-// Validation for Asset Type
-const validateAssetType = (type) => {
-  if (!type) {
-    return {
-      isValid: false,
-      message: "Asset type is required"
-    };
-  }
-
-  if (!ASSET_TYPES.includes(type)) {
-    return {
-      isValid: false,
-      message: "Please select a valid asset type"
-    };
-  }
-
-  return {
-    isValid: true,
-    message: ""
-  };
-};
-
-
-// Validation for Brand
-const validateBrand = (brand) => {
-  if (!brand || brand.trim() === "") {
-    return {
-      isValid: false,
-      message: "Brand is required"
-    };
-  }
-
-  if (brand.trim().length < 2) {
-    return {
-      isValid: false,
-      message: "Brand must be at least 2 characters long"
-    };
-  }
-
-  if (brand.trim().length > 50) {
-    return {
-      isValid: false,
-      message: "Brand cannot exceed 50 characters"
-    };
-  }
-
-  if (/[^A-Za-z0-9\s.-]/.test(brand.trim())) {
-    return {
-      isValid: false,
-      message: "Brand contains invalid characters"
-    };
-  }
-
-  return {
-    isValid: true,
-    message: ""
-  };
-};
-
-
-// Warranty Expiry Validation
-// REJECTS PAST DATES
-const validateWarrantyExpiry = (date) => {
-  if (!date) {
-    return {
-      isValid: false,
-      message: "Warranty expiry date is required"
-    };
-  }
-
-  const today = new Date();
-
-  today.setHours(0, 0, 0, 0);
-
-  const selectedDate = new Date(date);
-
-  selectedDate.setHours(0, 0, 0, 0);
-
-  // Reject past dates
-  if (selectedDate < today) {
-    return {
-      isValid: false,
-      message:
-        "Warranty expiry date cannot be in the past. Please select today or a future date."
-    };
-  }
-
-  // Maximum 5 years from today
-  const maxDate = new Date();
-
-  maxDate.setFullYear(maxDate.getFullYear() + 5);
-
-  if (selectedDate > maxDate) {
-    return {
-      isValid: false,
-      message:
-        "Warranty expiry date cannot exceed 5 years from today"
-    };
-  }
-
-  return {
-    isValid: true,
-    message: ""
-  };
-};
-
-
-// ==========================================
-// PURCHASE COST VALIDATION
-// ==========================================
-
-const validatePurchaseCost = (cost) => {
-
-  // Required
-  if (!cost || cost.trim() === "") {
-    return {
-      isValid: false,
-      message: "Purchase cost is required"
-    };
-  }
-
-  const num = Number(cost);
-
-  // Must be a number
-  if (isNaN(num)) {
-    return {
-      isValid: false,
-      message: "Purchase cost must be a valid number"
-    };
-  }
-
-  // MUST BE GREATER THAN ZERO
-  if (num <= 0) {
-    return {
-      isValid: false,
-      message: "Purchase cost must be greater than 0"
-    };
-  }
-
-  // Maximum purchase cost
-  if (num > 999999) {
-    return {
-      isValid: false,
-      message: "Purchase cost cannot exceed 999,999"
-    };
-  }
-
-  // Whole number only
-  if (num % 1 !== 0) {
-    return {
-      isValid: false,
-      message: "Purchase cost must be a whole number"
-    };
-  }
-
-  return {
-    isValid: true,
-    message: ""
-  };
-};
-
-
-// ==========================================
-// ASSET ID GENERATOR
-// ==========================================
-
-const generateAssetId = () => {
-
-  const chars =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-
-  let result = "";
-
-  for (let i = 0; i < 3; i++) {
-
-    result += chars.charAt(
-      Math.floor(Math.random() * chars.length)
-    );
-  }
-
-  return `AST${result}`;
-};
-
+const STATUS_OPTIONS = [
+  "All Status",
+  "Active",
+  "Inactive",
+  "onLeave",
+];
 
 // ==========================================
 // MAIN COMPONENT
 // ==========================================
-
-const AddAsset = ({
+const AssetDetails = ({
   username = "username",
   onLogout,
-  onBack
+  onBack,
+  onSidebarNavigate,
 }) => {
+  // ==========================================
+  // SIDEBAR
+  // ==========================================
+  const [activeSidebar, setActiveSidebar] =
+    useState("asset-management");
 
-  const [assetId, setAssetId] =
-    useState(generateAssetId);
+  // ==========================================
+  // ASSETS FROM DATABASE
+  // ==========================================
+  const [assets, setAssets] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState("");
 
-  const [form, setForm] = useState({
-    assetType: "",
-    brand: "",
-    warrantyExpiry: "",
-    purchaseCost: ""
-  });
+  // ==========================================
+  // SEARCH / FILTER
+  // ==========================================
+  const [searchText, setSearchText] = useState("");
 
-  const [errors, setErrors] = useState({});
+  const [filterCat, setFilterCat] =
+    useState("All Asset Types");
 
-  const [successMsg, setSuccessMsg] =
+  const [filterStat, setFilterStat] =
+    useState("All Status");
+
+  const [searchError, setSearchError] =
     useState("");
 
+  const [showFieldError, setShowFieldError] =
+    useState(false);
 
   // ==========================================
-  // REGENERATE ASSET ID
+  // TABLE
   // ==========================================
-
-  const regenerateAssetId = () => {
-
-    setAssetId(generateAssetId());
-
-  };
-
+  const [rowsPerPage, setRowsPerPage] =
+    useState(10);
 
   // ==========================================
-  // HANDLE INPUT CHANGE
+  // VIEW ASSET
   // ==========================================
-
-  const handleChange = (e) => {
-
-    const {
-      name,
-      value
-    } = e.target;
-
-    setForm((prev) => ({
-      ...prev,
-      [name]: value
-    }));
-
-    setErrors((prev) => ({
-      ...prev,
-      [name]: ""
-    }));
-
-    setSuccessMsg("");
-  };
-
+  const [selectedAsset, setSelectedAsset] =
+    useState(null);
 
   // ==========================================
-  // VALIDATE FORM
+  // SIDEBAR ITEMS
   // ==========================================
-
-  const validateForm = () => {
-
-    const newErrors = {};
-
-
-    // Asset ID
-    const idResult =
-      validateAssetId(assetId);
-
-    if (!idResult.isValid) {
-
-      newErrors.assetId =
-        idResult.message;
-    }
-
-
-    // Asset Type
-    const typeResult =
-      validateAssetType(form.assetType);
-
-    if (!typeResult.isValid) {
-
-      newErrors.assetType =
-        typeResult.message;
-    }
-
-
-    // Brand
-    const brandResult =
-      validateBrand(form.brand);
-
-    if (!brandResult.isValid) {
-
-      newErrors.brand =
-        brandResult.message;
-    }
-
-
-    // Warranty
-    const warrantyResult =
-      validateWarrantyExpiry(
-        form.warrantyExpiry
-      );
-
-    if (!warrantyResult.isValid) {
-
-      newErrors.warrantyExpiry =
-        warrantyResult.message;
-    }
-
-
-    // Purchase Cost
-    const costResult =
-      validatePurchaseCost(
-        form.purchaseCost
-      );
-
-    if (!costResult.isValid) {
-
-      newErrors.purchaseCost =
-        costResult.message;
-    }
-
-
-    setErrors(newErrors);
-
-    return Object.keys(newErrors).length === 0;
-  };
-
+  const sidebarItems = [
+    {
+      id: "dashboard",
+      label: "Dashboard",
+    },
+    {
+      id: "asset-management",
+      label: "Asset Management",
+    },
+    {
+      id: "asset-assignment",
+      label: "Asset Assignment",
+    },
+    {
+      id: "request-approval",
+      label: "Request Approval",
+    },
+    {
+      id: "maintenance",
+      label: "Maintenance",
+    },
+  ];
 
   // ==========================================
-  // HANDLE SUBMIT
+  // FIXED FILTER OPTIONS
   // ==========================================
+  const categories = ASSET_TYPE_OPTIONS;
+  const statuses = STATUS_OPTIONS;
 
-  const handleSubmit = (e) => {
+  // ==========================================
+  // FETCH ASSETS FROM BACKEND
+  // ==========================================
+  const fetchAssets = async () => {
+    try {
+      setLoading(true);
+      setFetchError("");
 
-    e.preventDefault();
+      const token =
+        localStorage.getItem("token");
 
-
-    if (!validateForm()) {
-
-      const firstError =
-        document.querySelector(
-          ".aa-input--error"
+      if (!token) {
+        throw new Error(
+          "Login session expired. Please login again."
         );
-
-      if (firstError) {
-
-        firstError.focus();
       }
 
-      return;
+      const response = await fetch(
+        "http://localhost:5000/api/assets",
+        {
+          method: "GET",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+
+            Authorization:
+              `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message ||
+            "Failed to fetch assets"
+        );
+      }
+
+      setAssets(data.assets || []);
+    } catch (error) {
+      console.error(
+        "Fetch Assets Error:",
+        error
+      );
+
+      setFetchError(
+        error.message ||
+          "Unable to load assets from server."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ==========================================
+  // LOAD ASSETS WHEN PAGE OPENS
+  // ==========================================
+  useEffect(() => {
+    fetchAssets();
+
+    // Prevent exhaustive-deps warning
+    // because fetchAssets is intentionally
+    // called only when the page loads.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ==========================================
+  // SIDEBAR CLICK
+  // ==========================================
+  const handleSidebarClick = (item) => {
+    console.log(
+      "AssetDetails sidebar clicked:",
+      item.id
+    );
+
+    setActiveSidebar(item.id);
+
+    if (onSidebarNavigate) {
+      onSidebarNavigate(item.id);
+    }
+  };
+
+  // ==========================================
+  // SEARCH VALIDATION
+  // ==========================================
+  const validateSearch = () => {
+    setSearchError("");
+    setShowFieldError(false);
+
+    const hasSearch =
+      searchText.trim() !== "";
+
+    const hasFilter =
+      filterCat !== "All Asset Types" ||
+      filterStat !== "All Status";
+
+    if (!hasSearch && !hasFilter) {
+      setSearchError(
+        "Please enter a search term or select at least one filter."
+      );
+
+      setShowFieldError(true);
+
+      return false;
     }
 
-
-    // Success message
-    setSuccessMsg(
-      `✅ Asset ${assetId} added successfully!`
-    );
-
-
-    // Clear form after successful submission
-    setForm({
-      assetType: "",
-      brand: "",
-      warrantyExpiry: "",
-      purchaseCost: ""
-    });
-
-
-    // Generate new Asset ID
-    setAssetId(generateAssetId());
-
-
-    // Remove success message after 5 seconds
-    setTimeout(
-      () => setSuccessMsg(""),
-      5000
-    );
+    return true;
   };
 
-
   // ==========================================
-  // CLEAR FORM
+  // SEARCH BUTTON
   // ==========================================
-
-  const handleClear = () => {
-
-    setForm({
-      assetType: "",
-      brand: "",
-      warrantyExpiry: "",
-      purchaseCost: ""
-    });
-
-    setErrors({});
-
-    setSuccessMsg("");
-
-    setAssetId(generateAssetId());
+  const applyFilters = () => {
+    validateSearch();
   };
 
+  // ==========================================
+  // SEARCH INPUT
+  // ==========================================
+  const handleSearchChange = (e) => {
+    setSearchText(e.target.value);
+
+    setSearchError("");
+    setShowFieldError(false);
+  };
 
   // ==========================================
-  // UI
+  // FILTER CHANGE
   // ==========================================
+  const handleFilterChange =
+    (setter) => (e) => {
+      setter(e.target.value);
 
+      setSearchError("");
+      setShowFieldError(false);
+    };
+
+  // ==========================================
+  // ENTER KEY
+  // ==========================================
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+
+      applyFilters();
+    }
+  };
+
+  // ==========================================
+  // RESET
+  // ==========================================
+  const handleReset = () => {
+    setSearchText("");
+
+    setFilterCat(
+      "All Asset Types"
+    );
+
+    setFilterStat(
+      "All Status"
+    );
+
+    setSearchError("");
+    setShowFieldError(false);
+  };
+
+  // ==========================================
+  // FILTER DATABASE DATA
+  // ==========================================
+  const filtered = assets.filter(
+    (asset) => {
+      const search =
+        searchText
+          .toLowerCase()
+          .trim();
+
+      // ========================================
+      // SEARCH MATCH
+      // ========================================
+      const matchSearch =
+        search === "" ||
+        (asset.asset_name || "")
+          .toLowerCase()
+          .includes(search) ||
+        (asset.asset_id || "")
+          .toLowerCase()
+          .includes(search);
+
+      // ========================================
+      // ASSET TYPE MATCH
+      // ========================================
+      const matchCategory =
+        filterCat ===
+          "All Asset Types" ||
+        asset.asset_type ===
+          filterCat;
+
+      // ========================================
+      // STATUS MATCH
+      // ========================================
+      let matchStatus = true;
+
+      if (
+        filterStat !== "All Status"
+      ) {
+        if (
+          filterStat === "onLeave"
+        ) {
+          // Accept both possible
+          // backend values
+          matchStatus =
+            asset.status ===
+              "onLeave" ||
+            asset.status ===
+              "On Leave";
+        } else {
+          matchStatus =
+            asset.status ===
+            filterStat;
+        }
+      }
+
+      return (
+        matchSearch &&
+        matchCategory &&
+        matchStatus
+      );
+    }
+  );
+
+  // ==========================================
+  // DISPLAYED ROWS
+  // ==========================================
+  const displayed =
+    rowsPerPage === "All"
+      ? filtered
+      : filtered.slice(
+          0,
+          rowsPerPage
+        );
+
+  // ==========================================
+  // STATISTICS
+  // ==========================================
+  const totalAssets =
+    assets.length;
+
+  const inUse = assets.filter(
+    (asset) =>
+      asset.status ===
+      "In Use"
+  ).length;
+
+  const underMaintenance =
+    assets.filter(
+      (asset) =>
+        asset.status ===
+        "Under Maintenance"
+    ).length;
+
+  const notInUse =
+    assets.filter(
+      (asset) =>
+        asset.status ===
+        "Not In Use"
+    ).length;
+
+  // ==========================================
+  // DATE FORMAT
+  // ==========================================
+  const formatDate = (date) => {
+    if (!date) {
+      return "-";
+    }
+
+    try {
+      return new Date(
+        date
+      ).toLocaleDateString(
+        "en-GB"
+      );
+    } catch {
+      return date;
+    }
+  };
+
+  // ==========================================
+  // RENDER
+  // ==========================================
   return (
-    <div className="aa-page-wrapper">
+    <div className="ad-page-wrapper">
 
-      {/* =====================================
-          TOP NAVIGATION
-          ===================================== */}
+      {/* ======================================
+          TOP NAVBAR
+      ====================================== */}
+      <nav className="ad-top-nav">
 
-      <nav className="aa-top-nav">
+        <div className="ad-nav-logo">
 
-        <div className="aa-nav-logo">
-
-          <span className="aa-nav-logo-title">
+          <span className="ad-nav-logo-title">
             ITAMS
           </span>
 
-          <span className="aa-nav-logo-sub">
+          <span className="ad-nav-logo-sub">
             IT Asset Management System
           </span>
 
         </div>
 
+        <div className="ad-nav-right">
 
-        <div className="aa-nav-right">
-
-          <span className="aa-nav-username">
+          <span className="ad-nav-username">
             {username}
           </span>
 
-          <div className="aa-nav-divider" />
+          <div className="ad-nav-divider" />
 
           <button
-            className="aa-logout-btn"
+            className="ad-logout-btn"
             onClick={onLogout}
           >
             Logout
@@ -520,339 +456,654 @@ const AddAsset = ({
 
       </nav>
 
+      {/* ======================================
+          BODY
+      ====================================== */}
+      <div className="ad-body-wrapper">
 
-      {/* =====================================
-          PAGE BODY
-          ===================================== */}
+        {/* ====================================
+            SIDEBAR
+        ==================================== */}
+        <aside className="ad-sidebar">
 
-      <div className="aa-body">
+          {sidebarItems.map(
+            (item) => (
 
-        <h1 className="aa-page-title">
-          Add Asset
-        </h1>
+              <div
+                key={item.id}
+                className={
+                  "ad-sidebar-item" +
+                  (
+                    activeSidebar ===
+                    item.id
+                      ? " ad-sidebar-item--active"
+                      : ""
+                  )
+                }
+                onClick={() =>
+                  handleSidebarClick(
+                    item
+                  )
+                }
+              >
+                {item.label}
+              </div>
 
-        <p className="aa-page-subtitle">
-          Add a new asset to the inventory.
-        </p>
+            )
+          )}
 
+        </aside>
 
-        {/* SUCCESS MESSAGE */}
+        {/* ====================================
+            MAIN CONTENT
+        ==================================== */}
+        <main className="ad-main-content">
 
-        {successMsg && (
-          <div className="aa-success-msg">
-            {successMsg}
+          {/* PAGE TITLE */}
+          <h1 className="ad-page-title">
+            Asset Details
+          </h1>
+
+          <div className="ad-breadcrumb">
+
+            <span className="ad-breadcrumb-link">
+              Dashboard
+            </span>
+
+            <span className="ad-breadcrumb-sep">
+              &gt;
+            </span>
+
+            <span className="ad-breadcrumb-current">
+              Asset Details
+            </span>
+
           </div>
-        )}
 
+          {/* ==================================
+              STAT CARDS
+          ================================== */}
+          <div className="ad-stats-row">
 
-        {/* ===================================
-            FORM
-            =================================== */}
+            <div className="ad-stat-card">
 
-        <form
-          className="aa-card"
-          onSubmit={handleSubmit}
-          noValidate
-        >
+              <span className="ad-stat-label">
+                Total Assets
+              </span>
 
-          <h2 className="aa-card-heading">
-            Add Asset Details
-          </h2>
+              <span className="ad-stat-value">
+                {totalAssets}
+              </span>
 
+            </div>
 
-          {/* =================================
-              ASSET ID
-              ================================= */}
+            <div className="ad-stat-card">
 
-          <div className="aa-field-full">
+              <span className="ad-stat-label">
+                In Use
+              </span>
 
-            <label className="aa-label">
-              Asset ID (Automatically Generated)
-            </label>
+              <span className="ad-stat-value">
+                {inUse}
+              </span>
 
+            </div>
 
-            <div className="aa-asset-id-container">
+            <div className="ad-stat-card">
+
+              <span className="ad-stat-label">
+                Under Maintenance
+              </span>
+
+              <span className="ad-stat-value">
+                {underMaintenance}
+              </span>
+
+            </div>
+
+            <div className="ad-stat-card">
+
+              <span className="ad-stat-label">
+                Not In Use
+              </span>
+
+              <span className="ad-stat-value">
+                {notInUse}
+              </span>
+
+            </div>
+
+          </div>
+
+          {/* ==================================
+              SEARCH / FILTER
+          ================================== */}
+          <div className="ad-filters-row">
+
+            {/* SEARCH */}
+            <div
+              className={
+                `ad-search-wrapper ${
+                  showFieldError
+                    ? "ad-search-wrapper--error"
+                    : ""
+                }`
+              }
+            >
+
+              <svg
+                className="ad-search-icon"
+                viewBox="0 0 20 20"
+                fill="none"
+              >
+
+                <circle
+                  cx="9"
+                  cy="9"
+                  r="6"
+                  stroke="#9ca3af"
+                  strokeWidth="1.8"
+                />
+
+                <path
+                  d="M15 15l-3-3"
+                  stroke="#9ca3af"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                />
+
+              </svg>
 
               <input
-                className={`aa-input aa-input--readonly ${
-                  errors.assetId
-                    ? "aa-input--error"
-                    : ""
-                }`}
+                className={
+                  `ad-search-input ${
+                    showFieldError
+                      ? "ad-input--error"
+                      : ""
+                  }`
+                }
                 type="text"
-                value={assetId}
-                readOnly
+                placeholder="Search assets..."
+                value={searchText}
+                onChange={
+                  handleSearchChange
+                }
+                onKeyDown={
+                  handleKeyDown
+                }
               />
 
+            </div>
+
+            {/* =================================
+                ASSET TYPE DROPDOWN
+            ================================= */}
+            <select
+              className={
+                `ad-filter-select ${
+                  showFieldError
+                    ? "ad-input--error"
+                    : ""
+                }`
+              }
+              value={filterCat}
+              onChange={
+                handleFilterChange(
+                  setFilterCat
+                )
+              }
+            >
+
+              {categories.map(
+                (category) => (
+
+                  <option
+                    key={category}
+                    value={category}
+                  >
+                    {category}
+                  </option>
+
+                )
+              )}
+
+            </select>
+
+            {/* =================================
+                STATUS DROPDOWN
+            ================================= */}
+            <select
+              className={
+                `ad-filter-select ${
+                  showFieldError
+                    ? "ad-input--error"
+                    : ""
+                }`
+              }
+              value={filterStat}
+              onChange={
+                handleFilterChange(
+                  setFilterStat
+                )
+              }
+            >
+
+              {statuses.map(
+                (status) => (
+
+                  <option
+                    key={status}
+                    value={status}
+                  >
+                    {status}
+                  </option>
+
+                )
+              )}
+
+            </select>
+
+            {/* SEARCH BUTTON */}
+            <button
+              className="ad-search-btn"
+              onClick={
+                applyFilters
+              }
+            >
+              Search
+            </button>
+
+            {/* RESET BUTTON */}
+            <button
+              className="ad-reset-btn"
+              onClick={
+                handleReset
+              }
+            >
+              Reset
+            </button>
+
+          </div>
+
+          {/* ==================================
+              SEARCH ERROR
+          ================================== */}
+          {searchError && (
+
+            <div className="ad-error-container">
+
+              <span className="ad-error-text">
+                ⚠️ {searchError}
+              </span>
+
+            </div>
+
+          )}
+
+          {/* ==================================
+              FETCH ERROR
+          ================================== */}
+          {fetchError && (
+
+            <div className="ad-error-container">
+
+              <span className="ad-error-text">
+                ⚠️ {fetchError}
+              </span>
+
+            </div>
+
+          )}
+
+          {/* ==================================
+              BACK BUTTON
+          ================================== */}
+          <div className="ad-back-row">
+
+            <button
+              className="ad-back-btn"
+              onClick={onBack}
+            >
+              ← Back
+            </button>
+
+          </div>
+
+          {/* ==================================
+              LOADING / TABLE
+          ================================== */}
+          {loading ? (
+
+            <div className="ad-error-container">
+
+              <span className="ad-error-text">
+                Loading assets...
+              </span>
+
+            </div>
+
+          ) : (
+
+            <div className="ad-table-wrapper">
+
+              <table className="ad-table">
+
+                <thead>
+
+                  <tr>
+
+                    <th>
+                      Asset ID
+                    </th>
+
+                    <th>
+                      Asset Type
+                    </th>
+
+                    <th>
+                      Status
+                    </th>
+
+                    <th>
+                      Purchase Date
+                    </th>
+
+                    <th>
+                      Actions
+                    </th>
+
+                  </tr>
+
+                </thead>
+
+                <tbody>
+
+                  {displayed.length === 0 ? (
+
+                    <tr>
+
+                      <td
+                        colSpan={5}
+                        className="ad-no-data"
+                      >
+                        No assets found.
+                      </td>
+
+                    </tr>
+
+                  ) : (
+
+                    displayed.map(
+                      (asset) => (
+
+                        <tr
+                          key={
+                            asset.asset_id
+                          }
+                        >
+
+                          {/* ASSET ID */}
+                          <td>
+
+                            <span className="ad-asset-id">
+                              {
+                                asset.asset_id
+                              }
+                            </span>
+
+                          </td>
+
+                          {/* ASSET TYPE */}
+                          <td>
+                            {
+                              asset.asset_type ||
+                              "-"
+                            }
+                          </td>
+
+                          {/* STATUS */}
+                          <td>
+
+                            <span
+                              className={
+                                `ad-badge ${
+                                  STATUS_CLASS[
+                                    asset.status
+                                  ] || ""
+                                }`
+                              }
+                            >
+                              {
+                                asset.status ||
+                                "-"
+                              }
+                            </span>
+
+                          </td>
+
+                          {/* PURCHASE DATE */}
+                          <td>
+
+                            {formatDate(
+                              asset.purchase_date
+                            )}
+
+                          </td>
+
+                          {/* ACTION */}
+                          <td>
+
+                            <button
+                              className="ad-view-btn"
+                              onClick={() =>
+                                setSelectedAsset(
+                                  asset
+                                )
+                              }
+                            >
+                              View
+                            </button>
+
+                          </td>
+
+                        </tr>
+
+                      )
+                    )
+
+                  )}
+
+                </tbody>
+
+              </table>
+
+            </div>
+
+          )}
+
+          {/* ==================================
+              TABLE FOOTER
+          ================================== */}
+          <div className="ad-table-footer">
+
+            <span className="ad-pagination-info">
+
+              Showing{" "}
+              {displayed.length}{" "}
+              of{" "}
+              {filtered.length}{" "}
+              assets
+
+            </span>
+
+            <select
+              className="ad-rows-select"
+              value={rowsPerPage}
+              onChange={(e) => {
+
+                const value =
+                  e.target.value;
+
+                setRowsPerPage(
+                  value === "All"
+                    ? "All"
+                    : Number(value)
+                );
+
+              }}
+            >
+
+              {ROWS_OPTIONS.map(
+                (option) => (
+
+                  <option
+                    key={option}
+                    value={option}
+                  >
+                    {option}
+                  </option>
+
+                )
+              )}
+
+            </select>
+
+          </div>
+
+        </main>
+
+      </div>
+
+      {/* ======================================
+          ASSET DETAIL MODAL
+      ====================================== */}
+      {selectedAsset && (
+
+        <div
+          className="ad-overlay"
+          onClick={() =>
+            setSelectedAsset(null)
+          }
+        >
+
+          <div
+            className="ad-detail-panel"
+            onClick={(e) =>
+              e.stopPropagation()
+            }
+          >
+
+            {/* HEADER */}
+            <div className="ad-detail-header">
+
+              <h2 className="ad-detail-title">
+                Asset Details
+              </h2>
 
               <button
-                type="button"
-                className="aa-regenerate-btn"
-                onClick={regenerateAssetId}
-                title="Generate new Asset ID"
+                className="ad-detail-close"
+                onClick={() =>
+                  setSelectedAsset(null)
+                }
+                aria-label="Close"
               >
-                🔄
+                ✕
               </button>
 
             </div>
 
+            {/* DETAILS */}
+            <div className="ad-detail-body">
 
-            {errors.assetId && (
-              <span className="aa-error">
-                ⚠️ {errors.assetId}
-              </span>
-            )}
+              {[
+                [
+                  "Asset ID",
+                  selectedAsset.asset_id,
+                ],
 
+                [
+                  "Asset Type",
+                  selectedAsset.asset_type,
+                ],
 
-            <div className="aa-validation-hint">
+                [
+                  "Brand",
+                  selectedAsset.brand,
+                ],
 
-              <small>
-                Format: AST + 3 alphanumeric
-                characters
-                (e.g., AST001, ASTA12, AST1AB)
-              </small>
+                [
+                  "Model",
+                  selectedAsset.model,
+                ],
 
-            </div>
+                [
+                  "Status",
+                  selectedAsset.status,
+                ],
 
-          </div>
+                [
+                  "Purchase Date",
+                  formatDate(
+                    selectedAsset.purchase_date
+                  ),
+                ],
 
+                [
+                  "Warranty Expiry",
+                  formatDate(
+                    selectedAsset.warranty_expiry
+                  ),
+                ],
 
-          {/* =================================
-              ASSET NAME + ASSET TYPE
-              ================================= */}
+                [
+                  "Description",
+                  selectedAsset.description,
+                ],
+              ].map(
+                ([label, value]) => (
 
-          <div className="aa-row">
-
-
-            {/* Asset Type */}
-
-            <div className="aa-field-group">
-
-              <label className="aa-label">
-                Asset Type *
-              </label>
-
-
-              <select
-                className={`aa-select${
-                  errors.assetType
-                    ? " aa-input--error"
-                    : ""
-                }`}
-                name="assetType"
-                value={form.assetType}
-                onChange={handleChange}
-              >
-
-                <option value="">
-                  Select Asset Type
-                </option>
-
-                {ASSET_TYPES.map((t) => (
-
-                  <option
-                    key={t}
-                    value={t}
+                  <div
+                    className="ad-detail-row"
+                    key={label}
                   >
-                    {t}
-                  </option>
 
-                ))}
+                    <span className="ad-detail-label">
+                      {label}
+                    </span>
 
-              </select>
+                    <span className="ad-detail-value">
+                      {value || "-"}
+                    </span>
 
+                  </div>
 
-              {errors.assetType && (
-                <span className="aa-error">
-                  ⚠️ {errors.assetType}
-                </span>
+                )
               )}
 
             </div>
 
-          </div>
+            {/* FOOTER */}
+            <div className="ad-detail-footer">
 
-
-          {/* =================================
-              BRAND + WARRANTY
-              ================================= */}
-
-          <div className="aa-row">
-
-            {/* Brand */}
-
-            <div className="aa-field-group">
-
-              <label className="aa-label">
-                Brand *
-              </label>
-
-
-              <input
-                className={`aa-input${
-                  errors.brand
-                    ? " aa-input--error"
-                    : ""
-                }`}
-                type="text"
-                name="brand"
-                placeholder="Enter Brand"
-                value={form.brand}
-                onChange={handleChange}
-              />
-
-
-              {errors.brand && (
-                <span className="aa-error">
-                  ⚠️ {errors.brand}
-                </span>
-              )}
-
-            </div>
-
-
-            {/* Warranty */}
-
-            <div className="aa-field-group">
-
-              <label className="aa-label">
-                Warranty Expiry Date *
-              </label>
-
-
-              <input
-                className={`aa-input${
-                  errors.warrantyExpiry
-                    ? " aa-input--error"
-                    : ""
-                }`}
-                type="date"
-                name="warrantyExpiry"
-                value={form.warrantyExpiry}
-                onChange={handleChange}
-                min={
-                  new Date()
-                    .toISOString()
-                    .split("T")[0]
+              <button
+                className="ad-close-btn"
+                onClick={() =>
+                  setSelectedAsset(null)
                 }
-              />
-
-
-              {errors.warrantyExpiry && (
-                <span className="aa-error">
-                  ⚠️ {errors.warrantyExpiry}
-                </span>
-              )}
-
-
-              <div className="aa-validation-hint">
-
-                <small>
-                  ⚠️ Past dates are not allowed.
-                  Select today or a future date.
-                </small>
-
-              </div>
+              >
+                Close
+              </button>
 
             </div>
 
           </div>
-
-
-          {/* =================================
-              PURCHASE COST
-              ================================= */}
-
-          <div className="aa-row">
-
-            <div className="aa-field-group">
-
-              <label className="aa-label">
-                Purchase Cost *
-              </label>
-
-
-              <input
-                className={`aa-input${
-                  errors.purchaseCost
-                    ? " aa-input--error"
-                    : ""
-                }`}
-                type="text"
-                name="purchaseCost"
-                placeholder="Enter Purchase Cost (e.g., 50000)"
-                value={form.purchaseCost}
-                onChange={handleChange}
-              />
-
-
-              {errors.purchaseCost && (
-                <span className="aa-error">
-                  ⚠️ {errors.purchaseCost}
-                </span>
-              )}
-
-            </div>
-
-
-            <div className="aa-field-group aa-field-group--empty" />
-
-          </div>
-
-
-          {/* =================================
-              DIVIDER
-              ================================= */}
-
-          <div className="aa-divider" />
-
-
-          {/* =================================
-              FORM BUTTONS
-              ================================= */}
-
-          <div className="aa-form-actions">
-
-            <button
-              type="submit"
-              className="aa-btn-primary"
-            >
-              Add Asset
-            </button>
-
-
-            <button
-              type="button"
-              className="aa-btn-outline"
-              onClick={handleClear}
-            >
-              Clear
-            </button>
-
-          </div>
-
-        </form>
-
-
-        {/* =================================
-            BACK BUTTON
-            ================================= */}
-
-        <div className="aa-back-wrapper">
-
-          <button
-            className="aa-btn-back"
-            onClick={onBack}
-          >
-            ← Back
-          </button>
 
         </div>
 
-      </div>
+      )}
 
     </div>
   );
 };
 
-export default AddAsset;
+export default AssetDetails;
