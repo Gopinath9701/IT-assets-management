@@ -1,387 +1,912 @@
 /* ============================================================
-   AddAsset.css — matches PDF design exactly
+   AddAsset.css
+   ITAMS - Add Asset Page
    ============================================================ */
 
-.aa-page-wrapper *,
-.aa-page-wrapper *::before,
-.aa-page-wrapper *::after {
+
+/* ============================================================
+   GLOBAL RESET
+   ============================================================ */
+
+.aa-page-wrapper,
+.aa-page-wrapper * {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
 
-/* ── Page Wrapper ── */
 .aa-page-wrapper {
-  display: flex;
-  flex-direction: column;
   min-height: 100vh;
-  background-color: #f3f4f6; /* light gray background from PDF */
+  width: 100%;
+  background-color: #ffffff;
   font-family: "Inter", Arial, sans-serif;
+  color: #111827;
 }
 
-/* ─────────────────────────────────────────
-   TOP NAVBAR
-───────────────────────────────────────── */
+.aa-page-wrapper button,
+.aa-page-wrapper input,
+.aa-page-wrapper select,
+.aa-page-wrapper textarea {
+  font-family: inherit;
+}
+
+
+/* ============================================================
+   TOP NAVIGATION BAR
+   ============================================================ */
+
 .aa-top-nav {
+  width: 100%;
+  height: 145px;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 32px;
-  height: 64px;
-  border-bottom: 1px solid #e5e7eb;
+
+  padding: 25px 40px;
+
   background-color: #ffffff;
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  border-bottom: 1px solid #e5e7eb;
 }
+
+
+/* ---------------- Logo ---------------- */
 
 .aa-nav-logo {
   display: flex;
   flex-direction: column;
-  line-height: 1.2;
+  justify-content: center;
 }
 
 .aa-nav-logo-title {
-  font-size: 22px;
+  font-size: 40px;
+  line-height: 1;
   font-weight: 800;
   color: #2563eb;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
 }
 
 .aa-nav-logo-sub {
-  font-size: 11px;
-  color: #6b7280;
-  font-weight: 400;
-  margin-top: 2px;
+  margin-top: 14px;
+
+  font-size: 16px;
+  line-height: 1.2;
+  font-weight: 500;
+
+  color: #111827;
 }
+
+
+/* ---------------- Right side ---------------- */
 
 .aa-nav-right {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 22px;
 }
 
 .aa-nav-username {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 16px;
+  font-weight: 600;
   color: #111827;
 }
 
 .aa-nav-divider {
   width: 1px;
-  height: 20px;
-  background-color: #d1d5db;
+  height: 25px;
+  background-color: #9ca3af;
 }
 
 .aa-logout-btn {
-  background: none;
   border: none;
-  font-size: 14px;
-  font-weight: 500;
-  color: #111827;
-  cursor: pointer;
-  font-family: inherit;
+  background: transparent;
+
   padding: 0;
-  transition: color 0.15s;
+
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+
+  cursor: pointer;
+
+  transition: color 0.2s ease;
 }
 
 .aa-logout-btn:hover {
   color: #2563eb;
 }
 
-/* ─────────────────────────────────────────
-   PAGE BODY
-───────────────────────────────────────── */
+
+/* ============================================================
+   MAIN PAGE BODY
+   ============================================================ */
+
 .aa-body {
   width: 100%;
-  max-width: 1100px;
+  max-width: 1120px;
+
   margin: 0 auto;
-  padding: 40px 24px 48px;
+
+  padding: 44px 24px 55px;
+
   display: flex;
   flex-direction: column;
-  gap: 8px;
 }
 
+
+/* ============================================================
+   PAGE TITLE
+   ============================================================ */
+
 .aa-page-title {
-  font-size: 30px;
+  margin: 0 0 12px;
+
+  font-size: 40px;
+  line-height: 1.2;
   font-weight: 700;
+
   color: #111827;
-  margin-bottom: 4px;
 }
 
 .aa-page-subtitle {
-  font-size: 14px;
-  color: #6b7280;
-  margin-bottom: 20px;
+  margin: 0 0 42px;
+
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color: #374151;
 }
 
-/* ── Success message ── */
+
+/* ============================================================
+   SUCCESS MESSAGE
+   ============================================================ */
+
 .aa-success-msg {
-  background-color: #dcfce7;
-  color: #166534;
+  width: 100%;
+
+  margin-bottom: 20px;
+  padding: 13px 16px;
+
   border: 1px solid #bbf7d0;
-  border-radius: 6px;
-  padding: 12px 16px;
-  font-size: 14px;
-  font-weight: 500;
-  margin-bottom: 8px;
-}
+  border-radius: 7px;
 
-/* ─────────────────────────────────────────
-   FORM CARD
-───────────────────────────────────────── */
-.aa-card {
-  background-color: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 40px;
-  display: flex;
-  flex-direction: column;
-  gap: 28px;
-}
+  background-color: #f0fdf4;
+  color: #166534;
 
-.aa-card-heading {
-  font-size: 18px;
-  font-weight: 700;
-  color: #111827;
-}
-
-/* ── Full-width field ── */
-.aa-field-full {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-/* ── Two-column row ── */
-.aa-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
-}
-
-.aa-field-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-/* Empty spacer column */
-.aa-field-group--empty {
-  visibility: hidden;
-}
-
-/* ── Label ── */
-.aa-label {
   font-size: 14px;
   font-weight: 600;
+}
+
+
+/* ============================================================
+   API ERROR MESSAGE
+   ============================================================ */
+
+.aa-api-error {
+  width: 100%;
+
+  margin-bottom: 20px;
+  padding: 13px 16px;
+
+  border: 1px solid #fecaca;
+  border-radius: 7px;
+
+  background-color: #fef2f2;
+  color: #b91c1c;
+
+  font-size: 14px;
+  font-weight: 500;
+}
+
+
+/* ============================================================
+   MAIN FORM CARD
+   ============================================================ */
+
+.aa-card {
+  width: 100%;
+
+  padding: 42px 32px 34px;
+
+  background-color: #ffffff;
+
+  border: 1px solid #dfe3e8;
+  border-radius: 9px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 28px;
+
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+
+/* ============================================================
+   CARD HEADING
+   ============================================================ */
+
+.aa-card-heading {
+  margin: 0 0 14px;
+
+  font-size: 23px;
+  line-height: 1.3;
+  font-weight: 700;
+
   color: #111827;
 }
 
-/* ── Text / Date Input ── */
-.aa-input {
-  height: 48px;
-  padding: 0 16px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 14px;
-  font-family: inherit;
-  color: #111827;
-  background-color: #ffffff;
-  outline: none;
+
+/* ============================================================
+   FULL WIDTH FIELD
+   ============================================================ */
+
+.aa-field-full {
   width: 100%;
-  transition: border-color 0.15s;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 9px;
 }
+
+
+/* ============================================================
+   TWO COLUMN ROW
+   ============================================================ */
+
+.aa-row {
+  width: 100%;
+
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+
+  column-gap: 52px;
+  row-gap: 24px;
+}
+
+
+/* ============================================================
+   FIELD GROUP
+   ============================================================ */
+
+.aa-field-group {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 9px;
+}
+
+
+/* ============================================================
+   LABEL
+   ============================================================ */
+
+.aa-label {
+  display: block;
+
+  font-size: 16px;
+  line-height: 1.3;
+
+  font-weight: 600;
+
+  color: #111827;
+}
+
+
+/* ============================================================
+   INPUT
+   ============================================================ */
+
+.aa-input {
+  width: 100%;
+  height: 58px;
+
+  padding: 0 16px;
+
+  border: 1px solid #d1d5db;
+  border-radius: 7px;
+
+  background-color: #ffffff;
+
+  color: #111827;
+
+  font-size: 16px;
+  font-weight: 400;
+
+  outline: none;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+
+
+/* Placeholder */
 
 .aa-input::placeholder {
-  color: #9ca3af;
+  color: #253858;
+  opacity: 1;
 }
+
+
+/* Focus */
 
 .aa-input:focus {
   border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+
+  box-shadow:
+    0 0 0 3px rgba(37, 99, 235, 0.10);
 }
 
-/* Read-only Asset ID — light gray bg */
+
+/* ============================================================
+   READ ONLY ASSET ID
+   ============================================================ */
+
 .aa-input--readonly {
+  width: 440px;
+  max-width: 100%;
+
   background-color: #f3f4f6;
+
   color: #374151;
+
   cursor: default;
-  max-width: 320px;
 }
 
 .aa-input--readonly:focus {
   border-color: #d1d5db;
+
   box-shadow: none;
 }
 
-/* Error state */
-.aa-input--error {
-  border-color: #ef4444 !important;
-}
 
-/* ── Select ── */
+/* ============================================================
+   SELECT / DROPDOWN
+   ============================================================ */
+
 .aa-select {
-  height: 48px;
-  padding: 0 40px 0 16px;
+  width: 100%;
+  height: 58px;
+
+  padding: 0 48px 0 16px;
+
   border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 14px;
-  font-family: inherit;
-  color: #111827;
+  border-radius: 7px;
+
   background-color: #ffffff;
+
+  color: #253858;
+
+  font-size: 16px;
+  font-weight: 400;
+
+  cursor: pointer;
+
+  outline: none;
+
   appearance: none;
   -webkit-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236b7280' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+  -moz-appearance: none;
+
+  /* Dropdown arrow */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'%3E%3Cpath d='M1 1.5L7 7.5L13 1.5' fill='none' stroke='%23111827' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+
   background-repeat: no-repeat;
-  background-position: right 14px center;
-  outline: none;
-  cursor: pointer;
-  width: 100%;
-  transition: border-color 0.15s;
+  background-position: right 18px center;
+  background-size: 14px 9px;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
+
+
+/* Select focus */
 
 .aa-select:focus {
   border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+
+  box-shadow:
+    0 0 0 3px rgba(37, 99, 235, 0.10);
 }
+
+
+/* First option */
 
 .aa-select option[value=""] {
-  color: #9ca3af;
+  color: #6b7280;
 }
 
-/* ── Validation error text ── */
+
+/* ============================================================
+   TEXTAREA
+   ============================================================ */
+
+.aa-textarea {
+  height: 100px;
+
+  min-height: 100px;
+
+  padding: 15px 16px;
+
+  resize: vertical;
+
+  line-height: 1.5;
+}
+
+
+/* ============================================================
+   ERROR INPUT
+   ============================================================ */
+
+.aa-input--error,
+.aa-select.aa-input--error {
+  border-color: #ef4444 !important;
+
+  background-color: #fffafa;
+}
+
+.aa-input--error:focus,
+.aa-select.aa-input--error:focus {
+  border-color: #ef4444 !important;
+
+  box-shadow:
+    0 0 0 3px rgba(239, 68, 68, 0.10);
+}
+
+
+/* ============================================================
+   VALIDATION ERROR MESSAGE
+   ============================================================ */
+
 .aa-error {
+  display: block;
+
+  margin-top: 1px;
+
   font-size: 12px;
-  color: #ef4444;
+  line-height: 1.4;
+
   font-weight: 500;
+
+  color: #dc2626;
 }
 
-/* ── Divider before action buttons ── */
+
+/* ============================================================
+   DIVIDER
+   ============================================================ */
+
 .aa-divider {
+  width: 100%;
+
+  margin: 2px 0 0;
+
   border: none;
   border-top: 1px solid #e5e7eb;
-  margin: 4px 0 0;
 }
 
-/* ── Form action buttons ── */
+
+/* ============================================================
+   FORM ACTION BUTTONS
+   ============================================================ */
+
 .aa-form-actions {
   display: flex;
   align-items: center;
-  gap: 16px;
+
+  gap: 25px;
+
   flex-wrap: wrap;
 }
 
-/* Blue filled — Add Asset */
+
+/* ============================================================
+   ADD ASSET BUTTON
+   ============================================================ */
+
 .aa-btn-primary {
-  padding: 11px 32px;
+  min-width: 155px;
+  height: 56px;
+
+  padding: 0 28px;
+
+  border: none;
+  border-radius: 7px;
+
   background-color: #2563eb;
   color: #ffffff;
-  border: none;
-  border-radius: 8px;
-  font-size: 15px;
+
+  font-size: 16px;
   font-weight: 600;
-  font-family: inherit;
+
   cursor: pointer;
-  transition: background-color 0.15s;
-  white-space: nowrap;
+
+  transition:
+    background-color 0.2s ease,
+    transform 0.1s ease;
 }
 
 .aa-btn-primary:hover {
   background-color: #1d4ed8;
 }
 
-/* Outlined — Clear */
+.aa-btn-primary:active {
+  transform: translateY(1px);
+}
+
+
+/* ============================================================
+   DISABLED ADD BUTTON
+   ============================================================ */
+
+.aa-btn-primary:disabled {
+  background-color: #93c5fd;
+
+  cursor: not-allowed;
+
+  transform: none;
+}
+
+
+/* ============================================================
+   CLEAR BUTTON
+   ============================================================ */
+
 .aa-btn-outline {
-  padding: 10px 32px;
+  min-width: 140px;
+  height: 56px;
+
+  padding: 0 28px;
+
+  border: 1.5px solid #d1d5db;
+  border-radius: 7px;
+
   background-color: #ffffff;
   color: #111827;
-  border: 1.5px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 15px;
+
+  font-size: 16px;
   font-weight: 600;
-  font-family: inherit;
+
   cursor: pointer;
-  transition: background-color 0.15s, border-color 0.15s;
-  white-space: nowrap;
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .aa-btn-outline:hover {
-  background-color: #f3f4f6;
+  background-color: #f9fafb;
+
   border-color: #9ca3af;
 }
 
-/* ── Back button — outside card ── */
-.aa-back-wrapper {
-  margin-top: 16px;
+
+/* ============================================================
+   DISABLED CLEAR BUTTON
+   ============================================================ */
+
+.aa-btn-outline:disabled {
+  opacity: 0.6;
+
+  cursor: not-allowed;
 }
 
+
+/* ============================================================
+   BACK BUTTON
+   ============================================================ */
+
+.aa-back-wrapper {
+  margin-top: 28px;
+}
+
+
 .aa-btn-back {
-  padding: 10px 28px;
+  min-width: 145px;
+  height: 58px;
+
+  padding: 0 28px;
+
+  border: 1.5px solid #d1d5db;
+  border-radius: 7px;
+
   background-color: #ffffff;
   color: #111827;
-  border: 1.5px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 14px;
+
+  font-size: 16px;
   font-weight: 600;
-  font-family: inherit;
+
   cursor: pointer;
-  transition: background-color 0.15s;
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .aa-btn-back:hover {
-  background-color: #f3f4f6;
+  background-color: #f9fafb;
+
+  border-color: #9ca3af;
 }
 
-/* ─────────────────────────────────────────
-   RESPONSIVE
-───────────────────────────────────────── */
 
-/* Tablet */
-@media (max-width: 720px) {
+/* ============================================================
+   DATE INPUT
+   ============================================================ */
+
+.aa-input[type="date"] {
+  color: #253858;
+
+  cursor: pointer;
+}
+
+
+/* Date placeholder-like appearance */
+
+.aa-input[type="date"]:not(:valid) {
+  color: #253858;
+}
+
+
+/* Calendar icon */
+
+.aa-input[type="date"]::-webkit-calendar-picker-indicator {
+  width: 18px;
+  height: 18px;
+
+  cursor: pointer;
+
+  opacity: 0.8;
+}
+
+
+/* ============================================================
+   NUMBER / COST INPUT
+   ============================================================ */
+
+.aa-input[inputmode="decimal"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+
+/* ============================================================
+   REMOVE NUMBER ARROWS IF INPUT TYPE NUMBER IS USED
+   ============================================================ */
+
+.aa-input[type="number"]::-webkit-inner-spin-button,
+.aa-input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+
+/* ============================================================
+   HOVER EFFECT
+   ============================================================ */
+
+.aa-input:hover,
+.aa-select:hover {
+  border-color: #9ca3af;
+}
+
+
+/* ============================================================
+   RESPONSIVE - TABLET
+   ============================================================ */
+
+@media (max-width: 900px) {
+
+  .aa-top-nav {
+    height: 120px;
+
+    padding: 22px 28px;
+  }
+
+  .aa-nav-logo-title {
+    font-size: 34px;
+  }
+
+  .aa-nav-logo-sub {
+    font-size: 14px;
+  }
+
   .aa-body {
-    padding: 28px 16px 40px;
+    max-width: 100%;
+
+    padding: 36px 24px 48px;
+  }
+
+  .aa-page-title {
+    font-size: 34px;
   }
 
   .aa-card {
-    padding: 24px 20px 20px;
-    gap: 22px;
+    padding: 32px 26px;
+  }
+
+  .aa-row {
+    column-gap: 30px;
+  }
+
+}
+
+
+/* ============================================================
+   RESPONSIVE - SMALL TABLET
+   ============================================================ */
+
+@media (max-width: 720px) {
+
+  .aa-top-nav {
+    height: auto;
+
+    min-height: 100px;
+
+    padding: 20px;
+
+    gap: 20px;
+  }
+
+  .aa-nav-logo-title {
+    font-size: 30px;
+  }
+
+  .aa-nav-logo-sub {
+    font-size: 13px;
+  }
+
+  .aa-nav-right {
+    gap: 12px;
+  }
+
+  .aa-nav-username,
+  .aa-logout-btn {
+    font-size: 14px;
+  }
+
+  .aa-body {
+    padding: 30px 18px 40px;
+  }
+
+  .aa-page-title {
+    font-size: 30px;
+  }
+
+  .aa-page-subtitle {
+    font-size: 14px;
+
+    margin-bottom: 28px;
+  }
+
+  .aa-card {
+    padding: 28px 20px;
   }
 
   .aa-row {
     grid-template-columns: 1fr;
-    gap: 22px;
-  }
 
-  .aa-field-group--empty {
-    display: none;
+    gap: 24px;
   }
 
   .aa-input--readonly {
-    max-width: 450px;
+    width: 100%;
   }
+
 }
 
-/* Mobile */
+
+/* ============================================================
+   RESPONSIVE - MOBILE
+   ============================================================ */
+
 @media (max-width: 480px) {
-  .aa-page-title {
-    font-size: 24px;
-  }
 
   .aa-top-nav {
-    padding: 10px 16px;
-    height: auto;
-    flex-wrap: wrap;
-    gap: 8px;
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    padding: 18px 16px;
+  }
+
+  .aa-nav-right {
+    width: 100%;
+
+    justify-content: flex-end;
+  }
+
+  .aa-nav-logo-title {
+    font-size: 28px;
+  }
+
+  .aa-nav-logo-sub {
+    font-size: 12px;
+
+    margin-top: 8px;
+  }
+
+  .aa-body {
+    padding: 25px 14px 35px;
+  }
+
+  .aa-page-title {
+    font-size: 27px;
+  }
+
+  .aa-page-subtitle {
+    margin-bottom: 24px;
+  }
+
+  .aa-card {
+    padding: 24px 16px;
+
+    gap: 22px;
+
+    border-radius: 8px;
+  }
+
+  .aa-card-heading {
+    font-size: 20px;
+  }
+
+  .aa-label {
+    font-size: 14px;
+  }
+
+  .aa-input,
+  .aa-select {
+    height: 52px;
+
+    font-size: 14px;
+  }
+
+  .aa-textarea {
+    min-height: 100px;
+  }
+
+  .aa-form-actions {
+    flex-direction: column;
+
+    align-items: stretch;
+
+    gap: 12px;
   }
 
   .aa-btn-primary,
   .aa-btn-outline {
     width: 100%;
-    text-align: center;
   }
 
-  .aa-form-actions {
-    flex-direction: column;
+  .aa-btn-back {
+    width: 100%;
   }
+
+}
+
+
+/* ============================================================
+   VERY SMALL MOBILE
+   ============================================================ */
+
+@media (max-width: 350px) {
+
+  .aa-nav-right {
+    justify-content: space-between;
+  }
+
+  .aa-page-title {
+    font-size: 24px;
+  }
+
+  .aa-card {
+    padding: 20px 13px;
+  }
+
 }
