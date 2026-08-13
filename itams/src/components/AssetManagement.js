@@ -5,7 +5,7 @@ import RequestApproval from "./RequestApproval";
 import AddAsset from "./AddAsset";
 import ManageAsset from "./ManageAsset";
 import AssetDetails from "./AssetDetails";
-import EmployeeStatus from "./EmployeeStatus";  // ← ADD THIS IMPORT
+import EmployeeStatus from "./AssetEmployeeStatus";  // ← ADD THIS IMPORT
 
 const AssetManagement = ({ 
   username = "username", 
