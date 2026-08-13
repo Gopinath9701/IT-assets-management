@@ -1,504 +1,1107 @@
-
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./AssetDetails.css";
 
 const ROWS_OPTIONS = [10, 30, 50, "All"];
 
-const INITIAL_ASSETS = [
-  {
-    id: "AST001",
-    name: "Dell Laptop",
-    category: "Laptop",
-    brand: "Dell",
-    model: "Inspiron 15",
-    location: "IT Department",
-    status: "In Use",
-    assignedTo: "John Doe",
-    purchaseDate: "15-01-2024",
-    warrantyExpiry: "15-01-2027",
-    serialNumber: "DL123456789",
-    description: "Dell Inspiron 15 laptop with 8GB RAM, 512GB SSD, Windows 11.",
-  },
-  {
-    id: "AST002",
-    name: "HP Printer",
-    category: "Printer",
-    brand: "HP",
-    model: "LaserJet Pro",
-    location: "Admin Office",
-    status: "In Use",
-    assignedTo: "Jane Smith",
-    purchaseDate: "10-02-2024",
-    warrantyExpiry: "10-02-2027",
-    serialNumber: "HP987654321",
-    description: "HP LaserJet Pro printer for administrative office use.",
-  },
-  {
-    id: "AST003",
-    name: "Lenovo Desktop",
-    category: "Desktop",
-    brand: "Lenovo",
-    model: "ThinkCentre",
-    location: "IT Department",
-    status: "Under Maintenance",
-    assignedTo: "-",
-    purchaseDate: "05-03-2024",
-    warrantyExpiry: "05-03-2027",
-    serialNumber: "LN112233445",
-    description: "Lenovo ThinkCentre desktop undergoing hardware maintenance.",
-  },
-  {
-    id: "AST004",
-    name: "Epson Projector",
-    category: "Projector",
-    brand: "Epson",
-    model: "EB-X41",
-    location: "Conference Room",
-    status: "In Use",
-    assignedTo: "Robert Brown",
-    purchaseDate: "20-03-2024",
-    warrantyExpiry: "20-03-2026",
-    serialNumber: "EP556677889",
-    description: "Epson EB-X41 projector used in the main conference room.",
-  },
-  {
-    id: "AST005",
-    name: "Cisco Switch",
-    category: "Network",
-    brand: "Cisco",
-    model: "SG350-28",
-    location: "Server Room",
-    status: "Not In Use",
-    assignedTo: "-",
-    purchaseDate: "12-04-2024",
-    warrantyExpiry: "12-04-2027",
-    serialNumber: "CS998877665",
-    description: "Cisco SG350-28 managed switch currently not in service.",
-  },
+// ==========================================
+// STATUS BADGE CLASSES
+// ==========================================
+const STATUS_CLASS = {
+  Active: "ad-badge--active",
+  Inactive: "ad-badge--inactive",
+  onLeave: "ad-badge--onleave",
+  "On Leave": "ad-badge--onleave",
+
+  // Keep these if your backend still has old values
+  "In Use": "ad-badge--inuse",
+  "Under Maintenance": "ad-badge--maintenance",
+  "Not In Use": "ad-badge--notinuse",
+};
+
+// ==========================================
+// FIXED ASSET TYPE OPTIONS
+// ==========================================
+const ASSET_TYPE_OPTIONS = [
+  "All Asset Types",
+  "Monitor",
+  "Keyboard",
+  "Webcam",
+  "CPU",
+  "Mouse",
+  "Projector",
+  "Printer",
 ];
 
-const CATEGORIES = ["All Categories", "Laptop", "Printer", "Desktop", "Projector", "Network"];
-const STATUSES   = ["All Status", "In Use", "Under Maintenance", "Not In Use"];
-const LOCATIONS  = ["All Locations", "IT Department", "Admin Office", "Conference Room", "Server Room"];
-
-const STATUS_CLASS = {
-  "In Use":              "ad-badge--inuse",
-  "Under Maintenance":   "ad-badge--maintenance",
-  "Not In Use":          "ad-badge--notinuse",
-};
-
 // ==========================================
-// VALIDATION FUNCTIONS
+// FIXED STATUS OPTIONS
 // ==========================================
-
-// Validation for Asset ID
-const validateAssetId = (id) => {
-  if (!id || id.trim() === "") {
-    return { isValid: true, message: "" };
-  }
-  if (id !== id.trim()) {
-    return { isValid: false, message: "Asset ID should not have leading or trailing spaces" };
-  }
-  if (/\s/.test(id)) {
-    return { isValid: false, message: "Asset ID should not contain spaces" };
-  }
-  if (/[^A-Za-z0-9]/.test(id)) {
-    return { isValid: false, message: "Asset ID should not contain special characters" };
-  }
-  if (!id.startsWith("AST")) {
-    return { isValid: false, message: "Asset ID must start with 'AST' (uppercase)" };
-  }
-  if (id.length !== 6) {
-    return { isValid: false, message: "Asset ID must be exactly 6 characters long (AST + 3 alphanumeric)" };
-  }
-  const lastThree = id.substring(3);
-  if (!/^[A-Za-z0-9]{3}$/.test(lastThree)) {
-    return { isValid: false, message: "Last 3 characters must be alphanumeric (letters or numbers)" };
-  }
-  return { isValid: true, message: "" };
-};
-
-// Validation for Search
-const validateSearch = (searchText, filterCat, filterStat, filterLoc) => {
-  const hasSearch = searchText && searchText.trim() !== "";
-  const hasFilter = filterCat !== "All Categories" || filterStat !== "All Status" || filterLoc !== "All Locations";
-  
-  if (!hasSearch && !hasFilter) {
-    return { isValid: false, message: "Please enter a search term or select at least one filter to search" };
-  }
-  
-  if (hasSearch) {
-    const searchValue = searchText.trim();
-    if (searchValue.startsWith("AST") || searchValue.length >= 3) {
-      const result = validateAssetId(searchValue);
-      if (!result.isValid) {
-        return result;
-      }
-    }
-  }
-  
-  return { isValid: true, message: "" };
-};
+const STATUS_OPTIONS = [
+  "All Status",
+  "Active",
+  "Inactive",
+  "onLeave",
+];
 
 // ==========================================
 // MAIN COMPONENT
 // ==========================================
-const AssetDetails = ({ 
-  username = "username", 
-  onLogout, 
-  onBack, 
-  onSidebarNavigate  // ← ADD THIS PROP
+const AssetDetails = ({
+  username = "username",
+  onLogout,
+  onBack,
+  onSidebarNavigate,
 }) => {
-  const [activeSidebar, setActiveSidebar] = useState("asset-management");
+  // ==========================================
+  // SIDEBAR
+  // ==========================================
+  const [activeSidebar, setActiveSidebar] =
+    useState("asset-management");
 
-  // Filter state
-  const [searchText, setSearchText]   = useState("");
-  const [filterCat,  setFilterCat]    = useState("All Categories");
-  const [filterStat, setFilterStat]   = useState("All Status");
-  const [filterLoc,  setFilterLoc]    = useState("All Locations");
-  
-  // Validation state
-  const [searchError, setSearchError] = useState("");
-  const [showFieldError, setShowFieldError] = useState(false);
+  // ==========================================
+  // ASSETS FROM DATABASE
+  // ==========================================
+  const [assets, setAssets] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState("");
 
-  // Table state
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  // ==========================================
+  // SEARCH / FILTER
+  // ==========================================
+  const [searchText, setSearchText] = useState("");
 
-  // Detail panel
-  const [selectedAsset, setSelectedAsset] = useState(null);
+  const [filterCat, setFilterCat] =
+    useState("All Asset Types");
 
+  const [filterStat, setFilterStat] =
+    useState("All Status");
+
+  const [searchError, setSearchError] =
+    useState("");
+
+  const [showFieldError, setShowFieldError] =
+    useState(false);
+
+  // ==========================================
+  // TABLE
+  // ==========================================
+  const [rowsPerPage, setRowsPerPage] =
+    useState(10);
+
+  // ==========================================
+  // VIEW ASSET
+  // ==========================================
+  const [selectedAsset, setSelectedAsset] =
+    useState(null);
+
+  // ==========================================
+  // SIDEBAR ITEMS
+  // ==========================================
   const sidebarItems = [
-    { id: "dashboard",        label: "Dashboard"        },
-    { id: "asset-management", label: "Asset Management" },
-    { id: "asset-assignment", label: "Asset Assignment" },
-    { id: "request-approval", label: "Request Approval" },
-    { id: "maintenance",      label: "Maintenance"      },
+    {
+      id: "dashboard",
+      label: "Dashboard",
+    },
+    {
+      id: "asset-management",
+      label: "Asset Management",
+    },
+    {
+      id: "asset-assignment",
+      label: "Asset Assignment",
+    },
+    {
+      id: "request-approval",
+      label: "Request Approval",
+    },
+    {
+      id: "maintenance",
+      label: "Maintenance",
+    },
   ];
 
   // ==========================================
-  // SIDEBAR CLICK HANDLER - FIXED
+  // FIXED FILTER OPTIONS
+  // ==========================================
+  const categories = ASSET_TYPE_OPTIONS;
+  const statuses = STATUS_OPTIONS;
+
+  // ==========================================
+  // FETCH ASSETS FROM BACKEND
+  // ==========================================
+  const fetchAssets = async () => {
+    try {
+      setLoading(true);
+      setFetchError("");
+
+      const token =
+        localStorage.getItem("token");
+
+      if (!token) {
+        throw new Error(
+          "Login session expired. Please login again."
+        );
+      }
+
+      const response = await fetch(
+        "http://localhost:5000/api/assets",
+        {
+          method: "GET",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+
+            Authorization:
+              `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message ||
+            "Failed to fetch assets"
+        );
+      }
+
+      setAssets(data.assets || []);
+    } catch (error) {
+      console.error(
+        "Fetch Assets Error:",
+        error
+      );
+
+      setFetchError(
+        error.message ||
+          "Unable to load assets from server."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ==========================================
+  // LOAD ASSETS WHEN PAGE OPENS
+  // ==========================================
+  useEffect(() => {
+    fetchAssets();
+
+    // Prevent exhaustive-deps warning
+    // because fetchAssets is intentionally
+    // called only when the page loads.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ==========================================
+  // SIDEBAR CLICK
   // ==========================================
   const handleSidebarClick = (item) => {
-    console.log("AssetDetails sidebar clicked:", item.id);
+    console.log(
+      "AssetDetails sidebar clicked:",
+      item.id
+    );
+
     setActiveSidebar(item.id);
-    
-    // ✅ NOTIFY PARENT ABOUT NAVIGATION
+
     if (onSidebarNavigate) {
       onSidebarNavigate(item.id);
     }
   };
 
-  // Stats
-  const totalAssets      = INITIAL_ASSETS.length;
-  const inUse            = INITIAL_ASSETS.filter((a) => a.status === "In Use").length;
-  const underMaintenance = INITIAL_ASSETS.filter((a) => a.status === "Under Maintenance").length;
-  const notInUse         = INITIAL_ASSETS.filter((a) => a.status === "Not In Use").length;
+  // ==========================================
+  // SEARCH VALIDATION
+  // ==========================================
+  const validateSearch = () => {
+    setSearchError("");
+    setShowFieldError(false);
 
-  // Filter with Validation
-  const applyFilters = () => {
-    setSearchError("");
-    setShowFieldError(false);
-    
-    const result = validateSearch(searchText, filterCat, filterStat, filterLoc);
-    if (!result.isValid) {
-      setSearchError(result.message);
+    const hasSearch =
+      searchText.trim() !== "";
+
+    const hasFilter =
+      filterCat !== "All Asset Types" ||
+      filterStat !== "All Status";
+
+    if (!hasSearch && !hasFilter) {
+      setSearchError(
+        "Please enter a search term or select at least one filter."
+      );
+
       setShowFieldError(true);
-      return;
+
+      return false;
     }
-    
-    setSearchError("");
-    setShowFieldError(false);
+
+    return true;
   };
 
+  // ==========================================
+  // SEARCH BUTTON
+  // ==========================================
+  const applyFilters = () => {
+    validateSearch();
+  };
+
+  // ==========================================
+  // SEARCH INPUT
+  // ==========================================
   const handleSearchChange = (e) => {
     setSearchText(e.target.value);
+
     setSearchError("");
     setShowFieldError(false);
   };
 
-  const handleFilterChange = (setter) => (e) => {
-    setter(e.target.value);
-    setSearchError("");
-    setShowFieldError(false);
-  };
+  // ==========================================
+  // FILTER CHANGE
+  // ==========================================
+  const handleFilterChange =
+    (setter) => (e) => {
+      setter(e.target.value);
 
+      setSearchError("");
+      setShowFieldError(false);
+    };
+
+  // ==========================================
+  // ENTER KEY
+  // ==========================================
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
+
       applyFilters();
     }
   };
 
-  const filtered = INITIAL_ASSETS.filter((a) => {
-    const matchSearch =
-      searchText === "" ||
-      a.name.toLowerCase().includes(searchText.toLowerCase()) ||
-      a.id.toLowerCase().includes(searchText.toLowerCase());
-    const matchCat  = filterCat  === "All Categories" || a.category === filterCat;
-    const matchStat = filterStat === "All Status"     || a.status   === filterStat;
-    const matchLoc  = filterLoc  === "All Locations"  || a.location === filterLoc;
-    return matchSearch && matchCat && matchStat && matchLoc;
-  });
-
-  const displayed = rowsPerPage === "All" ? filtered : filtered.slice(0, rowsPerPage);
-
+  // ==========================================
+  // RESET
+  // ==========================================
   const handleReset = () => {
     setSearchText("");
-    setFilterCat("All Categories");
-    setFilterStat("All Status");
-    setFilterLoc("All Locations");
+
+    setFilterCat(
+      "All Asset Types"
+    );
+
+    setFilterStat(
+      "All Status"
+    );
+
     setSearchError("");
     setShowFieldError(false);
   };
 
+  // ==========================================
+  // FILTER DATABASE DATA
+  // ==========================================
+  const filtered = assets.filter(
+    (asset) => {
+      const search =
+        searchText
+          .toLowerCase()
+          .trim();
+
+      // ========================================
+      // SEARCH MATCH
+      // ========================================
+      const matchSearch =
+        search === "" ||
+        (asset.asset_name || "")
+          .toLowerCase()
+          .includes(search) ||
+        (asset.asset_id || "")
+          .toLowerCase()
+          .includes(search);
+
+      // ========================================
+      // ASSET TYPE MATCH
+      // ========================================
+      const matchCategory =
+        filterCat ===
+          "All Asset Types" ||
+        asset.asset_type ===
+          filterCat;
+
+      // ========================================
+      // STATUS MATCH
+      // ========================================
+      let matchStatus = true;
+
+      if (
+        filterStat !== "All Status"
+      ) {
+        if (
+          filterStat === "onLeave"
+        ) {
+          // Accept both possible
+          // backend values
+          matchStatus =
+            asset.status ===
+              "onLeave" ||
+            asset.status ===
+              "On Leave";
+        } else {
+          matchStatus =
+            asset.status ===
+            filterStat;
+        }
+      }
+
+      return (
+        matchSearch &&
+        matchCategory &&
+        matchStatus
+      );
+    }
+  );
+
+  // ==========================================
+  // DISPLAYED ROWS
+  // ==========================================
+  const displayed =
+    rowsPerPage === "All"
+      ? filtered
+      : filtered.slice(
+          0,
+          rowsPerPage
+        );
+
+  // ==========================================
+  // STATISTICS
+  // ==========================================
+  const totalAssets =
+    assets.length;
+
+  const inUse = assets.filter(
+    (asset) =>
+      asset.status ===
+      "In Use"
+  ).length;
+
+  const underMaintenance =
+    assets.filter(
+      (asset) =>
+        asset.status ===
+        "Under Maintenance"
+    ).length;
+
+  const notInUse =
+    assets.filter(
+      (asset) =>
+        asset.status ===
+        "Not In Use"
+    ).length;
+
+  // ==========================================
+  // DATE FORMAT
+  // ==========================================
+  const formatDate = (date) => {
+    if (!date) {
+      return "-";
+    }
+
+    try {
+      return new Date(
+        date
+      ).toLocaleDateString(
+        "en-GB"
+      );
+    } catch {
+      return date;
+    }
+  };
+
+  // ==========================================
+  // RENDER
+  // ==========================================
   return (
     <div className="ad-page-wrapper">
 
-      {/* ── Top Navbar ── */}
+      {/* ======================================
+          TOP NAVBAR
+      ====================================== */}
       <nav className="ad-top-nav">
+
         <div className="ad-nav-logo">
-          <span className="ad-nav-logo-title">ITAMS</span>
-          <span className="ad-nav-logo-sub">IT Asset Management System</span>
+
+          <span className="ad-nav-logo-title">
+            ITAMS
+          </span>
+
+          <span className="ad-nav-logo-sub">
+            IT Asset Management System
+          </span>
+
         </div>
+
         <div className="ad-nav-right">
-          <span className="ad-nav-username">{username}</span>
+
+          <span className="ad-nav-username">
+            {username}
+          </span>
+
           <div className="ad-nav-divider" />
-          <button className="ad-logout-btn" onClick={onLogout}>Logout</button>
+
+          <button
+            className="ad-logout-btn"
+            onClick={onLogout}
+          >
+            Logout
+          </button>
+
         </div>
+
       </nav>
 
+      {/* ======================================
+          BODY
+      ====================================== */}
       <div className="ad-body-wrapper">
 
-        {/* ── Sidebar ── */}
+        {/* ====================================
+            SIDEBAR
+        ==================================== */}
         <aside className="ad-sidebar">
-          {sidebarItems.map((item) => (
-            <div
-              key={item.id}
-              className={
-                "ad-sidebar-item" +
-                (activeSidebar === item.id ? " ad-sidebar-item--active" : "")
-              }
-              onClick={() => handleSidebarClick(item)}
-            >
-              {item.label}
-            </div>
-          ))}
-        </aside>
 
-        {/* ── Main Content ── */}
-        <main className="ad-main-content">
+          {sidebarItems.map(
+            (item) => (
 
-          {/* Page heading + breadcrumb */}
-          <h1 className="ad-page-title">Asset Details</h1>
-          <div className="ad-breadcrumb">
-            <span className="ad-breadcrumb-link">Dashboard</span>
-            <span className="ad-breadcrumb-sep">&gt;</span>
-            <span className="ad-breadcrumb-current">Asset Details</span>
-          </div>
+              <div
+                key={item.id}
+                className={
+                  "ad-sidebar-item" +
+                  (
+                    activeSidebar ===
+                    item.id
+                      ? " ad-sidebar-item--active"
+                      : ""
+                  )
+                }
+                onClick={() =>
+                  handleSidebarClick(
+                    item
+                  )
+                }
+              >
+                {item.label}
+              </div>
 
-          {/* ── Stat Cards ── */}
-          <div className="ad-stats-row">
-            <div className="ad-stat-card">
-              <span className="ad-stat-label">Total Assets</span>
-              <span className="ad-stat-value">{totalAssets}</span>
-            </div>
-            <div className="ad-stat-card">
-              <span className="ad-stat-label">In Use</span>
-              <span className="ad-stat-value">{inUse}</span>
-            </div>
-            <div className="ad-stat-card">
-              <span className="ad-stat-label">Under Maintenance</span>
-              <span className="ad-stat-value">{underMaintenance}</span>
-            </div>
-            <div className="ad-stat-card">
-              <span className="ad-stat-label">Not In Use</span>
-              <span className="ad-stat-value">{notInUse}</span>
-            </div>
-          </div>
-
-          {/* ── Search & Filters with Validation ── */}
-          <div className="ad-filters-row">
-            <div className={`ad-search-wrapper ${showFieldError ? "ad-search-wrapper--error" : ""}`}>
-              <svg className="ad-search-icon" viewBox="0 0 20 20" fill="none">
-                <circle cx="9" cy="9" r="6" stroke="#9ca3af" strokeWidth="1.8"/>
-                <path d="M15 15l-3-3" stroke="#9ca3af" strokeWidth="1.8" strokeLinecap="round"/>
-              </svg>
-              <input
-                className={`ad-search-input ${showFieldError ? "ad-input--error" : ""}`}
-                type="text"
-                placeholder="Search assets by name or ID..."
-                value={searchText}
-                onChange={handleSearchChange}
-                onKeyDown={handleKeyDown}
-              />
-            </div>
-
-            <select 
-              className={`ad-filter-select ${showFieldError ? "ad-input--error" : ""}`} 
-              value={filterCat} 
-              onChange={handleFilterChange(setFilterCat)}
-            >
-              {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
-            </select>
-
-            <select 
-              className={`ad-filter-select ${showFieldError ? "ad-input--error" : ""}`} 
-              value={filterStat} 
-              onChange={handleFilterChange(setFilterStat)}
-            >
-              {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
-            </select>
-
-            <select 
-              className={`ad-filter-select ${showFieldError ? "ad-input--error" : ""}`} 
-              value={filterLoc} 
-              onChange={handleFilterChange(setFilterLoc)}
-            >
-              {LOCATIONS.map((l) => <option key={l} value={l}>{l}</option>)}
-            </select>
-
-            <button className="ad-search-btn" onClick={applyFilters}>Search</button>
-            <button className="ad-reset-btn" onClick={handleReset}>Reset</button>
-          </div>
-
-          {/* Error Message */}
-          {searchError && (
-            <div className="ad-error-container">
-              <span className="ad-error-text">⚠️ {searchError}</span>
-            </div>
+            )
           )}
 
-          {/* ── Back Button ── */}
-          <div className="ad-back-row">
-            <button className="ad-back-btn" onClick={onBack}>← Back</button>
-          </div>
+        </aside>
 
-          {/* ── Table ── */}
-          <div className="ad-table-wrapper">
-            <table className="ad-table">
-              <thead>
-                <tr>
-                  <th>Asset ID</th>
-                  <th>Asset Name</th>
-                  <th>Category</th>
-                  <th>Brand</th>
-                  <th>Model</th>
-                  <th>Location</th>
-                  <th>Status</th>
-                  <th>Assigned To</th>
-                  <th>Purchase Date</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {displayed.length === 0 ? (
-                  <tr>
-                    <td colSpan={10} className="ad-no-data">No assets found. Please adjust your search or filters.</td>
-                  </tr>
-                ) : (
-                  displayed.map((asset) => (
-                    <tr key={asset.id}>
-                      <td>{asset.id}</td>
-                      <td>{asset.name}</td>
-                      <td>{asset.category}</td>
-                      <td>{asset.brand}</td>
-                      <td>{asset.model}</td>
-                      <td>{asset.location}</td>
-                      <td>
-                        <span className={`ad-badge ${STATUS_CLASS[asset.status] || ""}`}>
-                          {asset.status}
-                        </span>
-                      </td>
-                      <td>{asset.assignedTo}</td>
-                      <td>{asset.purchaseDate}</td>
-                      <td>
-                        <button
-                          className="ad-view-btn"
-                          onClick={() => setSelectedAsset(asset)}
-                        >
-                          View
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+        {/* ====================================
+            MAIN CONTENT
+        ==================================== */}
+        <main className="ad-main-content">
 
-          {/* ── Rows per page ── */}
-          <div className="ad-table-footer">
-            <span className="ad-pagination-info">
-              Showing {displayed.length} of {filtered.length} assets
+          {/* PAGE TITLE */}
+          <h1 className="ad-page-title">
+            Asset Details
+          </h1>
+
+          <div className="ad-breadcrumb">
+
+            <span className="ad-breadcrumb-link">
+              Dashboard
             </span>
+
+            <span className="ad-breadcrumb-sep">
+              &gt;
+            </span>
+
+            <span className="ad-breadcrumb-current">
+              Asset Details
+            </span>
+
+          </div>
+
+          {/* ==================================
+              STAT CARDS
+          ================================== */}
+          <div className="ad-stats-row">
+
+            <div className="ad-stat-card">
+
+              <span className="ad-stat-label">
+                Total Assets
+              </span>
+
+              <span className="ad-stat-value">
+                {totalAssets}
+              </span>
+
+            </div>
+
+            <div className="ad-stat-card">
+
+              <span className="ad-stat-label">
+                In Use
+              </span>
+
+              <span className="ad-stat-value">
+                {inUse}
+              </span>
+
+            </div>
+
+            <div className="ad-stat-card">
+
+              <span className="ad-stat-label">
+                Under Maintenance
+              </span>
+
+              <span className="ad-stat-value">
+                {underMaintenance}
+              </span>
+
+            </div>
+
+            <div className="ad-stat-card">
+
+              <span className="ad-stat-label">
+                Not In Use
+              </span>
+
+              <span className="ad-stat-value">
+                {notInUse}
+              </span>
+
+            </div>
+
+          </div>
+
+          {/* ==================================
+              SEARCH / FILTER
+          ================================== */}
+          <div className="ad-filters-row">
+
+            {/* SEARCH */}
+            <div
+              className={
+                `ad-search-wrapper ${
+                  showFieldError
+                    ? "ad-search-wrapper--error"
+                    : ""
+                }`
+              }
+            >
+
+              <svg
+                className="ad-search-icon"
+                viewBox="0 0 20 20"
+                fill="none"
+              >
+
+                <circle
+                  cx="9"
+                  cy="9"
+                  r="6"
+                  stroke="#9ca3af"
+                  strokeWidth="1.8"
+                />
+
+                <path
+                  d="M15 15l-3-3"
+                  stroke="#9ca3af"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                />
+
+              </svg>
+
+              <input
+                className={
+                  `ad-search-input ${
+                    showFieldError
+                      ? "ad-input--error"
+                      : ""
+                  }`
+                }
+                type="text"
+                placeholder="Search assets..."
+                value={searchText}
+                onChange={
+                  handleSearchChange
+                }
+                onKeyDown={
+                  handleKeyDown
+                }
+              />
+
+            </div>
+
+            {/* =================================
+                ASSET TYPE DROPDOWN
+            ================================= */}
+            <select
+              className={
+                `ad-filter-select ${
+                  showFieldError
+                    ? "ad-input--error"
+                    : ""
+                }`
+              }
+              value={filterCat}
+              onChange={
+                handleFilterChange(
+                  setFilterCat
+                )
+              }
+            >
+
+              {categories.map(
+                (category) => (
+
+                  <option
+                    key={category}
+                    value={category}
+                  >
+                    {category}
+                  </option>
+
+                )
+              )}
+
+            </select>
+
+            {/* =================================
+                STATUS DROPDOWN
+            ================================= */}
+            <select
+              className={
+                `ad-filter-select ${
+                  showFieldError
+                    ? "ad-input--error"
+                    : ""
+                }`
+              }
+              value={filterStat}
+              onChange={
+                handleFilterChange(
+                  setFilterStat
+                )
+              }
+            >
+
+              {statuses.map(
+                (status) => (
+
+                  <option
+                    key={status}
+                    value={status}
+                  >
+                    {status}
+                  </option>
+
+                )
+              )}
+
+            </select>
+
+            {/* SEARCH BUTTON */}
+            <button
+              className="ad-search-btn"
+              onClick={
+                applyFilters
+              }
+            >
+              Search
+            </button>
+
+            {/* RESET BUTTON */}
+            <button
+              className="ad-reset-btn"
+              onClick={
+                handleReset
+              }
+            >
+              Reset
+            </button>
+
+          </div>
+
+          {/* ==================================
+              SEARCH ERROR
+          ================================== */}
+          {searchError && (
+
+            <div className="ad-error-container">
+
+              <span className="ad-error-text">
+                ⚠️ {searchError}
+              </span>
+
+            </div>
+
+          )}
+
+          {/* ==================================
+              FETCH ERROR
+          ================================== */}
+          {fetchError && (
+
+            <div className="ad-error-container">
+
+              <span className="ad-error-text">
+                ⚠️ {fetchError}
+              </span>
+
+            </div>
+
+          )}
+
+          {/* ==================================
+              BACK BUTTON
+          ================================== */}
+          <div className="ad-back-row">
+
+            <button
+              className="ad-back-btn"
+              onClick={onBack}
+            >
+              ← Back
+            </button>
+
+          </div>
+
+          {/* ==================================
+              LOADING / TABLE
+          ================================== */}
+          {loading ? (
+
+            <div className="ad-error-container">
+
+              <span className="ad-error-text">
+                Loading assets...
+              </span>
+
+            </div>
+
+          ) : (
+
+            <div className="ad-table-wrapper">
+
+              <table className="ad-table">
+
+                <thead>
+
+                  <tr>
+
+                    <th>
+                      Asset ID
+                    </th>
+
+                    <th>
+                      Asset Type
+                    </th>
+
+                    <th>
+                      Status
+                    </th>
+
+                    <th>
+                      Purchase Date
+                    </th>
+
+                    <th>
+                      Actions
+                    </th>
+
+                  </tr>
+
+                </thead>
+
+                <tbody>
+
+                  {displayed.length === 0 ? (
+
+                    <tr>
+
+                      <td
+                        colSpan={5}
+                        className="ad-no-data"
+                      >
+                        No assets found.
+                      </td>
+
+                    </tr>
+
+                  ) : (
+
+                    displayed.map(
+                      (asset) => (
+
+                        <tr
+                          key={
+                            asset.asset_id
+                          }
+                        >
+
+                          {/* ASSET ID */}
+                          <td>
+
+                            <span className="ad-asset-id">
+                              {
+                                asset.asset_id
+                              }
+                            </span>
+
+                          </td>
+
+                          {/* ASSET TYPE */}
+                          <td>
+                            {
+                              asset.asset_type ||
+                              "-"
+                            }
+                          </td>
+
+                          {/* STATUS */}
+                          <td>
+
+                            <span
+                              className={
+                                `ad-badge ${
+                                  STATUS_CLASS[
+                                    asset.status
+                                  ] || ""
+                                }`
+                              }
+                            >
+                              {
+                                asset.status ||
+                                "-"
+                              }
+                            </span>
+
+                          </td>
+
+                          {/* PURCHASE DATE */}
+                          <td>
+
+                            {formatDate(
+                              asset.purchase_date
+                            )}
+
+                          </td>
+
+                          {/* ACTION */}
+                          <td>
+
+                            <button
+                              className="ad-view-btn"
+                              onClick={() =>
+                                setSelectedAsset(
+                                  asset
+                                )
+                              }
+                            >
+                              View
+                            </button>
+
+                          </td>
+
+                        </tr>
+
+                      )
+                    )
+
+                  )}
+
+                </tbody>
+
+              </table>
+
+            </div>
+
+          )}
+
+          {/* ==================================
+              TABLE FOOTER
+          ================================== */}
+          <div className="ad-table-footer">
+
+            <span className="ad-pagination-info">
+
+              Showing{" "}
+              {displayed.length}{" "}
+              of{" "}
+              {filtered.length}{" "}
+              assets
+
+            </span>
+
             <select
               className="ad-rows-select"
               value={rowsPerPage}
               onChange={(e) => {
-                const v = e.target.value;
-                setRowsPerPage(v === "All" ? "All" : Number(v));
+
+                const value =
+                  e.target.value;
+
+                setRowsPerPage(
+                  value === "All"
+                    ? "All"
+                    : Number(value)
+                );
+
               }}
             >
-              {ROWS_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
+
+              {ROWS_OPTIONS.map(
+                (option) => (
+
+                  <option
+                    key={option}
+                    value={option}
+                  >
+                    {option}
+                  </option>
+
+                )
+              )}
+
             </select>
+
           </div>
+
         </main>
+
       </div>
 
-      {/* ── Asset Detail Panel (modal) ── */}
+      {/* ======================================
+          ASSET DETAIL MODAL
+      ====================================== */}
       {selectedAsset && (
+
         <div
           className="ad-overlay"
-          onClick={() => setSelectedAsset(null)}
+          onClick={() =>
+            setSelectedAsset(null)
+          }
         >
+
           <div
             className="ad-detail-panel"
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) =>
+              e.stopPropagation()
+            }
           >
+
+            {/* HEADER */}
             <div className="ad-detail-header">
-              <h2 className="ad-detail-title">Asset Details</h2>
+
+              <h2 className="ad-detail-title">
+                Asset Details
+              </h2>
+
               <button
                 className="ad-detail-close"
-                onClick={() => setSelectedAsset(null)}
+                onClick={() =>
+                  setSelectedAsset(null)
+                }
                 aria-label="Close"
               >
                 ✕
               </button>
+
             </div>
 
+            {/* DETAILS */}
             <div className="ad-detail-body">
+
               {[
-                ["Asset ID",        selectedAsset.id],
-                ["Asset Name",      selectedAsset.name],
-                ["Category",        selectedAsset.category],
-                ["Brand",           selectedAsset.brand],
-                ["Model",           selectedAsset.model],
-                ["Serial Number",   selectedAsset.serialNumber],
-                ["Location",        selectedAsset.location],
-                ["Status",          selectedAsset.status],
-                ["Assigned To",     selectedAsset.assignedTo],
-                ["Purchase Date",   selectedAsset.purchaseDate],
-                ["Warranty Expiry", selectedAsset.warrantyExpiry],
-                ["Description",     selectedAsset.description],
-              ].map(([label, value]) => (
-                <div className="ad-detail-row" key={label}>
-                  <span className="ad-detail-label">{label}</span>
-                  <span className="ad-detail-value">{value}</span>
-                </div>
-              ))}
+                [
+                  "Asset ID",
+                  selectedAsset.asset_id,
+                ],
+
+                [
+                  "Asset Type",
+                  selectedAsset.asset_type,
+                ],
+
+                [
+                  "Brand",
+                  selectedAsset.brand,
+                ],
+
+                [
+                  "Model",
+                  selectedAsset.model,
+                ],
+
+                [
+                  "Status",
+                  selectedAsset.status,
+                ],
+
+                [
+                  "Purchase Date",
+                  formatDate(
+                    selectedAsset.purchase_date
+                  ),
+                ],
+
+                [
+                  "Warranty Expiry",
+                  formatDate(
+                    selectedAsset.warranty_expiry
+                  ),
+                ],
+
+                [
+                  "Description",
+                  selectedAsset.description,
+                ],
+              ].map(
+                ([label, value]) => (
+
+                  <div
+                    className="ad-detail-row"
+                    key={label}
+                  >
+
+                    <span className="ad-detail-label">
+                      {label}
+                    </span>
+
+                    <span className="ad-detail-value">
+                      {value || "-"}
+                    </span>
+
+                  </div>
+
+                )
+              )}
+
             </div>
 
+            {/* FOOTER */}
             <div className="ad-detail-footer">
+
               <button
                 className="ad-close-btn"
-                onClick={() => setSelectedAsset(null)}
+                onClick={() =>
+                  setSelectedAsset(null)
+                }
               >
                 Close
               </button>
+
             </div>
+
           </div>
+
         </div>
+
       )}
+
     </div>
   );
 };
