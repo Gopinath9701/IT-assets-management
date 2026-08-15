@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="com.test.AddAssetTest" time="27.49" tests="7" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="com.test.AddAssetTest" time="58.133" tests="13" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="21"/>
     <property name="sun.cpu.isalist" value="amd64"/>
@@ -15,7 +15,7 @@
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="user.country" value="IN"/>
     <property name="sun.boot.library.path" value="C:\Program Files\Java\jdk-21.0.11\bin"/>
-    <property name="sun.java.command" value="C:\Users\konda\AppData\Local\Temp\surefire9709191809144571497\surefirebooter-20260808173833696_3.jar C:\Users\konda\AppData\Local\Temp\surefire9709191809144571497 2026-08-08T17-38-33_557-jvmRun1 surefire-20260808173833696_1tmp surefire_0-20260808173833696_2tmp"/>
+    <property name="sun.java.command" value="C:\Users\konda\AppData\Local\Temp\surefire13388874418486807254\surefirebooter-20260815164401866_3.jar C:\Users\konda\AppData\Local\Temp\surefire13388874418486807254 2026-08-15T16-44-01_722-jvmRun1 surefire-20260815164401866_1tmp surefire_0-20260815164401866_2tmp"/>
     <property name="jdk.debug" value="release"/>
     <property name="test" value="AddAssetTest"/>
     <property name="surefire.test.class.path" value="C:\Users\konda\OneDrive\Desktop\Asset\IT-assets-management\itams\src\selenium-automation\target\test-classes;C:\Users\konda\OneDrive\Desktop\Asset\IT-assets-management\itams\src\selenium-automation\target\classes;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-java\4.23.1\selenium-java-4.23.1.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-api\4.23.1\selenium-api-4.23.1.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-chrome-driver\4.23.1\selenium-chrome-driver-4.23.1.jar;C:\Users\konda\.m2\repository\com\google\auto\service\auto-service-annotations\1.1.1\auto-service-annotations-1.1.1.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-chromium-driver\4.23.1\selenium-chromium-driver-4.23.1.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-json\4.23.1\selenium-json-4.23.1.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-manager\4.23.1\selenium-manager-4.23.1.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-devtools-v125\4.23.1\selenium-devtools-v125-4.23.1.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-devtools-v126\4.23.1\selenium-devtools-v126-4.23.1.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-devtools-v127\4.23.1\selenium-devtools-v127-4.23.1.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-devtools-v85\4.23.1\selenium-devtools-v85-4.23.1.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-edge-driver\4.23.1\selenium-edge-driver-4.23.1.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-firefox-driver\4.23.1\selenium-firefox-driver-4.23.1.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-http\4.23.1\selenium-http-4.23.1.jar;C:\Users\konda\.m2\repository\dev\failsafe\failsafe\3.3.2\failsafe-3.3.2.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-ie-driver\4.23.1\selenium-ie-driver-4.23.1.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-remote-driver\4.23.1\selenium-remote-driver-4.23.1.jar;C:\Users\konda\.m2\repository\com\google\guava\guava\33.2.1-jre\guava-33.2.1-jre.jar;C:\Users\konda\.m2\repository\com\google\guava\failureaccess\1.0.2\failureaccess-1.0.2.jar;C:\Users\konda\.m2\repository\com\google\guava\listenablefuture\9999.0-empty-to-avoid-conflict-with-guava\listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar;C:\Users\konda\.m2\repository\com\google\code\findbugs\jsr305\3.0.2\jsr305-3.0.2.jar;C:\Users\konda\.m2\repository\org\checkerframework\checker-qual\3.42.0\checker-qual-3.42.0.jar;C:\Users\konda\.m2\repository\com\google\j2objc\j2objc-annotations\3.0.0\j2objc-annotations-3.0.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\semconv\opentelemetry-semconv\1.25.0-alpha\opentelemetry-semconv-1.25.0-alpha.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-api\1.40.0\opentelemetry-api-1.40.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-context\1.40.0\opentelemetry-context-1.40.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-exporter-logging\1.40.0\opentelemetry-exporter-logging-1.40.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-sdk-common\1.40.0\opentelemetry-sdk-common-1.40.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-sdk-extension-autoconfigure-spi\1.40.0\opentelemetry-sdk-extension-autoconfigure-spi-1.40.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-sdk-extension-autoconfigure\1.40.0\opentelemetry-sdk-extension-autoconfigure-1.40.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-api-incubator\1.40.0-alpha\opentelemetry-api-incubator-1.40.0-alpha.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-sdk-trace\1.40.0\opentelemetry-sdk-trace-1.40.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-sdk\1.40.0\opentelemetry-sdk-1.40.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-sdk-metrics\1.40.0\opentelemetry-sdk-metrics-1.40.0.jar;C:\Users\konda\.m2\repository\io\opentelemetry\opentelemetry-sdk-logs\1.40.0\opentelemetry-sdk-logs-1.40.0.jar;C:\Users\konda\.m2\repository\net\bytebuddy\byte-buddy\1.14.18\byte-buddy-1.14.18.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-os\4.23.1\selenium-os-4.23.1.jar;C:\Users\konda\.m2\repository\org\apache\commons\commons-exec\1.4.0\commons-exec-1.4.0.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-safari-driver\4.23.1\selenium-safari-driver-4.23.1.jar;C:\Users\konda\.m2\repository\org\seleniumhq\selenium\selenium-support\4.23.1\selenium-support-4.23.1.jar;C:\Users\konda\.m2\repository\io\github\bonigarcia\webdrivermanager\5.9.2\webdrivermanager-5.9.2.jar;C:\Users\konda\.m2\repository\org\slf4j\slf4j-api\2.0.13\slf4j-api-2.0.13.jar;C:\Users\konda\.m2\repository\com\google\code\gson\gson\2.11.0\gson-2.11.0.jar;C:\Users\konda\.m2\repository\com\google\errorprone\error_prone_annotations\2.27.0\error_prone_annotations-2.27.0.jar;C:\Users\konda\.m2\repository\com\github\docker-java\docker-java\3.4.0\docker-java-3.4.0.jar;C:\Users\konda\.m2\repository\com\github\docker-java\docker-java-core\3.4.0\docker-java-core-3.4.0.jar;C:\Users\konda\.m2\repository\com\github\docker-java\docker-java-api\3.4.0\docker-java-api-3.4.0.jar;C:\Users\konda\.m2\repository\com\fasterxml\jackson\core\jackson-annotations\2.10.3\jackson-annotations-2.10.3.jar;C:\Users\konda\.m2\repository\com\fasterxml\jackson\core\jackson-databind\2.10.3\jackson-databind-2.10.3.jar;C:\Users\konda\.m2\repository\com\fasterxml\jackson\core\jackson-core\2.10.3\jackson-core-2.10.3.jar;C:\Users\konda\.m2\repository\org\slf4j\jcl-over-slf4j\1.7.30\jcl-over-slf4j-1.7.30.jar;C:\Users\konda\.m2\repository\com\github\docker-java\docker-java-transport-httpclient5\3.4.0\docker-java-transport-httpclient5-3.4.0.jar;C:\Users\konda\.m2\repository\com\github\docker-java\docker-java-transport\3.4.0\docker-java-transport-3.4.0.jar;C:\Users\konda\.m2\repository\net\java\dev\jna\jna\5.13.0\jna-5.13.0.jar;C:\Users\konda\.m2\repository\org\brotli\dec\0.1.2\dec-0.1.2.jar;C:\Users\konda\.m2\repository\org\apache\commons\commons-lang3\3.15.0\commons-lang3-3.15.0.jar;C:\Users\konda\.m2\repository\org\apache\commons\commons-compress\1.26.2\commons-compress-1.26.2.jar;C:\Users\konda\.m2\repository\commons-codec\commons-codec\1.17.0\commons-codec-1.17.0.jar;C:\Users\konda\.m2\repository\commons-io\commons-io\2.16.1\commons-io-2.16.1.jar;C:\Users\konda\.m2\repository\org\apache\httpcomponents\client5\httpclient5\5.2.1\httpclient5-5.2.1.jar;C:\Users\konda\.m2\repository\org\apache\httpcomponents\core5\httpcore5\5.2\httpcore5-5.2.jar;C:\Users\konda\.m2\repository\org\apache\httpcomponents\core5\httpcore5-h2\5.2\httpcore5-h2-5.2.jar;C:\Users\konda\.m2\repository\junit\junit\4.13.2\junit-4.13.2.jar;C:\Users\konda\.m2\repository\org\hamcrest\hamcrest-core\1.3\hamcrest-core-1.3.jar;"/>
@@ -31,7 +31,7 @@
     <property name="line.separator" value="&#10;"/>
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
     <property name="java.specification.name" value="Java Platform API Specification"/>
-    <property name="surefire.real.class.path" value="C:\Users\konda\AppData\Local\Temp\surefire9709191809144571497\surefirebooter-20260808173833696_3.jar"/>
+    <property name="surefire.real.class.path" value="C:\Users\konda\AppData\Local\Temp\surefire13388874418486807254\surefirebooter-20260815164401866_3.jar"/>
     <property name="user.script" value=""/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="java.runtime.version" value="21.0.11+9-LTS-211"/>
@@ -59,162 +59,234 @@
     <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
     <property name="java.class.version" value="65.0"/>
   </properties>
-  <testcase name="testAssetManagementWithoutLoginCredentials" classname="com.test.AddAssetTest" time="3.669">
+  <testcase name="testAddAssetPage" classname="com.test.AddAssetTest" time="3.989">
     <system-out><![CDATA[Application opened
-==========================================
-TEST 1: Asset Management without credentials
-==========================================
-Application opened
+========== TEST 1: Add Asset Page ==========
 Clicked Login
-Username and password left empty
-Asset Mgmt button is displayed
-Clicked Asset Mgmt without credentials
-PASS: Asset Management opened without credentials
-Browser closed
-]]></system-out>
-    <system-err><![CDATA[Aug 08, 2026 5:38:35 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
-WARNING: Unable to find CDP implementation matching 151
-Aug 08, 2026 5:38:35 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
-WARNING: Unable to find version of CDP to use for 151.0.7922.76. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
-]]></system-err>
-  </testcase>
-  <testcase name="testEmptyFormValidation" classname="com.test.AddAssetTest" time="3.935">
-    <system-out><![CDATA[Application opened
-==========================================
-TEST 4: Empty form validation
-==========================================
-Clicked Login
-Login page opened
-Username and password intentionally left empty
-Clicked Asset Mgmt without credentials
+Clicked Asset Mgmt
 Asset Management page opened
 Clicked Add Asset
 Add Asset page opened successfully
-Clicked Add Asset without entering details
+PASS: Add Asset page displayed
+Browser closed
+]]></system-out>
+    <system-err><![CDATA[Aug 15, 2026 4:44:04 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 151
+Aug 15, 2026 4:44:04 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.138. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+]]></system-err>
+  </testcase>
+  <testcase name="testModelValidation" classname="com.test.AddAssetTest" time="5.145">
+    <system-out><![CDATA[Application opened
+========== TEST 7: Model Validation ==========
+Clicked Login
+Clicked Asset Mgmt
+Asset Management page opened
+Clicked Add Asset
+Add Asset page opened successfully
+Clicked Add Asset
+PASS: Model validation works
+Browser closed
+]]></system-out>
+    <system-err><![CDATA[Aug 15, 2026 4:44:07 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 151
+Aug 15, 2026 4:44:07 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.138. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+]]></system-err>
+  </testcase>
+  <testcase name="testEmptyFormValidation" classname="com.test.AddAssetTest" time="3.79">
+    <system-out><![CDATA[Application opened
+========== TEST 4: Empty Form Validation ==========
+Clicked Login
+Clicked Asset Mgmt
+Asset Management page opened
+Clicked Add Asset
+Add Asset page opened successfully
+Clicked Add Asset
 PASS: Empty form validation works
 Browser closed
 ]]></system-out>
-    <system-err><![CDATA[Aug 08, 2026 5:38:38 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+    <system-err><![CDATA[Aug 15, 2026 4:44:12 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
 WARNING: Unable to find CDP implementation matching 151
-Aug 08, 2026 5:38:38 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
-WARNING: Unable to find version of CDP to use for 151.0.7922.76. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+Aug 15, 2026 4:44:12 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.138. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
 ]]></system-err>
   </testcase>
-  <testcase name="testAddAssetFields" classname="com.test.AddAssetTest" time="3.5">
+  <testcase name="testAssetTypeDropdown" classname="com.test.AddAssetTest" time="4.775">
     <system-out><![CDATA[Application opened
-==========================================
-TEST 3: Verify Add Asset fields
-==========================================
+========== TEST 3: Asset Type Dropdown ==========
 Clicked Login
-Login page opened
-Username and password intentionally left empty
-Clicked Asset Mgmt without credentials
+Clicked Asset Mgmt
 Asset Management page opened
 Clicked Add Asset
 Add Asset page opened successfully
-Found field: Asset Name
-Found field: Asset Type
-Found field: Brand
-Found field: Warranty Expiry Date
-Found field: Purchase Cost
-PASS: All Add Asset fields are displayed
+PASS: Asset Type dropdown values are correct
 Browser closed
 ]]></system-out>
-    <system-err><![CDATA[Aug 08, 2026 5:38:42 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+    <system-err><![CDATA[Aug 15, 2026 4:44:16 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
 WARNING: Unable to find CDP implementation matching 151
-Aug 08, 2026 5:38:42 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
-WARNING: Unable to find version of CDP to use for 151.0.7922.76. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+Aug 15, 2026 4:44:16 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.138. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
 ]]></system-err>
   </testcase>
-  <testcase name="testNavigateToAddAsset" classname="com.test.AddAssetTest" time="3.127">
+  <testcase name="testAllAddAssetFields" classname="com.test.AddAssetTest" time="3.688">
     <system-out><![CDATA[Application opened
-==========================================
-TEST 2: Navigate to Add Asset
-==========================================
+========== TEST 2: Verify Fields ==========
 Clicked Login
-Login page opened
-Username and password intentionally left empty
-Clicked Asset Mgmt without credentials
+Clicked Asset Mgmt
 Asset Management page opened
 Clicked Add Asset
 Add Asset page opened successfully
-PASS: Add Asset page opened
+PASS: All Add Asset fields verified
 Browser closed
 ]]></system-out>
-    <system-err><![CDATA[Aug 08, 2026 5:38:46 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+    <system-err><![CDATA[Aug 15, 2026 4:44:21 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
 WARNING: Unable to find CDP implementation matching 151
-Aug 08, 2026 5:38:46 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
-WARNING: Unable to find version of CDP to use for 151.0.7922.76. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+Aug 15, 2026 4:44:21 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.138. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
 ]]></system-err>
   </testcase>
-  <testcase name="testBackButton" classname="com.test.AddAssetTest" time="3.86">
+  <testcase name="testBrandValidation" classname="com.test.AddAssetTest" time="4.473">
     <system-out><![CDATA[Application opened
-==========================================
-TEST 7: Back button
-==========================================
+========== TEST 6: Brand Validation ==========
 Clicked Login
-Login page opened
-Username and password intentionally left empty
-Clicked Asset Mgmt without credentials
+Clicked Asset Mgmt
+Asset Management page opened
+Clicked Add Asset
+Add Asset page opened successfully
+Clicked Add Asset
+PASS: Brand validation works
+Browser closed
+]]></system-out>
+    <system-err><![CDATA[Aug 15, 2026 4:44:24 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 151
+Aug 15, 2026 4:44:24 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.138. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+]]></system-err>
+  </testcase>
+  <testcase name="testBackButton" classname="com.test.AddAssetTest" time="3.316">
+    <system-out><![CDATA[Application opened
+========== TEST 13: Back Button ==========
+Clicked Login
+Clicked Asset Mgmt
 Asset Management page opened
 Clicked Add Asset
 Add Asset page opened successfully
 Clicked Back
-PASS: Back button works correctly
+PASS: Back button works
 Browser closed
 ]]></system-out>
-    <system-err><![CDATA[Aug 08, 2026 5:38:49 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+    <system-err><![CDATA[Aug 15, 2026 4:44:29 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
 WARNING: Unable to find CDP implementation matching 151
-Aug 08, 2026 5:38:49 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
-WARNING: Unable to find version of CDP to use for 151.0.7922.76. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+Aug 15, 2026 4:44:29 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.138. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
 ]]></system-err>
   </testcase>
-  <testcase name="testEnterValidAssetDetails" classname="com.test.AddAssetTest" time="3.777">
+  <testcase name="testEnterValidAssetDetails" classname="com.test.AddAssetTest" time="4.492">
     <system-out><![CDATA[Application opened
-==========================================
-TEST 5: Enter valid asset details
-==========================================
+========== TEST 5: Valid Asset Details ==========
 Clicked Login
-Login page opened
-Username and password intentionally left empty
-Clicked Asset Mgmt without credentials
+Clicked Asset Mgmt
 Asset Management page opened
 Clicked Add Asset
 Add Asset page opened successfully
-Entered Asset Name: Dell Laptop
-Selected Asset Type: Laptop
-Entered Brand: Dell
-Entered Warranty Expiry Date: 2027-12-31
-Entered Purchase Cost: 50000
-PASS: Valid asset details entered successfully
+PASS: Valid asset details entered
 Browser closed
 ]]></system-out>
-    <system-err><![CDATA[Aug 08, 2026 5:38:53 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+    <system-err><![CDATA[Aug 15, 2026 4:44:32 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
 WARNING: Unable to find CDP implementation matching 151
-Aug 08, 2026 5:38:53 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
-WARNING: Unable to find version of CDP to use for 151.0.7922.76. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+Aug 15, 2026 4:44:32 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.138. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
 ]]></system-err>
   </testcase>
-  <testcase name="testClearButton" classname="com.test.AddAssetTest" time="5.555">
+  <testcase name="testPurchaseDateFutureValidation" classname="com.test.AddAssetTest" time="4.895">
     <system-out><![CDATA[Application opened
-==========================================
-TEST 6: Clear button
-==========================================
+========== TEST 9: Purchase Date Validation ==========
 Clicked Login
-Login page opened
-Username and password intentionally left empty
-Clicked Asset Mgmt without credentials
+Clicked Asset Mgmt
+Asset Management page opened
+Clicked Add Asset
+Add Asset page opened successfully
+Clicked Add Asset
+PASS: Purchase Date validation works
+Browser closed
+]]></system-out>
+    <system-err><![CDATA[Aug 15, 2026 4:44:36 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 151
+Aug 15, 2026 4:44:36 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.138. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+]]></system-err>
+  </testcase>
+  <testcase name="testClearButton" classname="com.test.AddAssetTest" time="5.01">
+    <system-out><![CDATA[Application opened
+========== TEST 12: Clear Button ==========
+Clicked Login
+Clicked Asset Mgmt
 Asset Management page opened
 Clicked Add Asset
 Add Asset page opened successfully
 Clicked Clear
-PASS: Clear button works correctly
+PASS: Clear button works
 Browser closed
 ]]></system-out>
-    <system-err><![CDATA[Aug 08, 2026 5:38:57 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+    <system-err><![CDATA[Aug 15, 2026 4:44:42 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
 WARNING: Unable to find CDP implementation matching 151
-Aug 08, 2026 5:38:57 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
-WARNING: Unable to find version of CDP to use for 151.0.7922.76. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+Aug 15, 2026 4:44:42 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.138. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+]]></system-err>
+  </testcase>
+  <testcase name="testWarrantyValidation" classname="com.test.AddAssetTest" time="4.859">
+    <system-out><![CDATA[Application opened
+========== TEST 10: Warranty Validation ==========
+Clicked Login
+Clicked Asset Mgmt
+Asset Management page opened
+Clicked Add Asset
+Add Asset page opened successfully
+Clicked Add Asset
+PASS: Warranty validation works
+Browser closed
+]]></system-out>
+    <system-err><![CDATA[Aug 15, 2026 4:44:46 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 151
+Aug 15, 2026 4:44:46 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.138. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+]]></system-err>
+  </testcase>
+  <testcase name="testPurchaseCostValidation" classname="com.test.AddAssetTest" time="4.783">
+    <system-out><![CDATA[Application opened
+========== TEST 8: Purchase Cost Validation ==========
+Clicked Login
+Clicked Asset Mgmt
+Asset Management page opened
+Clicked Add Asset
+Add Asset page opened successfully
+Clicked Add Asset
+PASS: Purchase Cost validation works
+Browser closed
+]]></system-out>
+    <system-err><![CDATA[Aug 15, 2026 4:44:51 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 151
+Aug 15, 2026 4:44:51 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.138. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+]]></system-err>
+  </testcase>
+  <testcase name="testDescriptionValidation" classname="com.test.AddAssetTest" time="4.843">
+    <system-out><![CDATA[Application opened
+========== TEST 11: Description Validation ==========
+Clicked Login
+Clicked Asset Mgmt
+Asset Management page opened
+Clicked Add Asset
+Add Asset page opened successfully
+Clicked Add Asset
+PASS: Description validation works
+Browser closed
+]]></system-out>
+    <system-err><![CDATA[Aug 15, 2026 4:44:56 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 151
+Aug 15, 2026 4:44:56 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 151.0.7922.138. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.23.1` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
 ]]></system-err>
   </testcase>
 </testsuite>
