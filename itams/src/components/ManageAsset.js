@@ -32,8 +32,7 @@ const validateAssetId = (id) => {
   if (id !== id.trim()) {
     return {
       isValid: false,
-      message:
-        "Asset ID should not have leading or trailing spaces",
+      message: "Asset ID should not have leading or trailing spaces",
     };
   }
 
@@ -47,16 +46,14 @@ const validateAssetId = (id) => {
   if (/[^A-Za-z0-9]/.test(id)) {
     return {
       isValid: false,
-      message:
-        "Asset ID should not contain special characters",
+      message: "Asset ID should not contain special characters",
     };
   }
 
   if (!id.startsWith("AST")) {
     return {
       isValid: false,
-      message:
-        "Asset ID must start with 'AST' (uppercase)",
+      message: "Asset ID must start with 'AST' (uppercase)",
     };
   }
 
@@ -131,8 +128,7 @@ const validateModel = (model) => {
   if (model !== value) {
     return {
       isValid: false,
-      message:
-        "Model should not have leading or trailing spaces",
+      message: "Model should not have leading or trailing spaces",
     };
   }
 
@@ -166,16 +162,14 @@ const validateDescription = (description) => {
   if (value.length < 5) {
     return {
       isValid: false,
-      message:
-        "Description must contain at least 5 characters",
+      message: "Description must contain at least 5 characters",
     };
   }
 
   if (value.length > 500) {
     return {
       isValid: false,
-      message:
-        "Description cannot exceed 500 characters",
+      message: "Description cannot exceed 500 characters",
     };
   }
 
@@ -226,15 +220,12 @@ const validatePurchaseDate = (date) => {
   }
 
   const maxDate = new Date();
-  maxDate.setFullYear(
-    maxDate.getFullYear() - 10
-  );
+  maxDate.setFullYear(maxDate.getFullYear() - 10);
 
   if (selectedDate < maxDate) {
     return {
       isValid: false,
-      message:
-        "Purchase date cannot be older than 10 years",
+      message: "Purchase date cannot be older than 10 years",
     };
   }
 
@@ -247,10 +238,7 @@ const validatePurchaseDate = (date) => {
 // ==========================================
 // VALIDATION - WARRANTY EXPIRY
 // ==========================================
-const validateWarrantyExpiry = (
-  date,
-  purchaseDate
-) => {
+const validateWarrantyExpiry = (date, purchaseDate) => {
   if (!date) {
     return {
       isValid: false,
@@ -262,9 +250,7 @@ const validateWarrantyExpiry = (
   selectedDate.setHours(0, 0, 0, 0);
 
   const maxDate = new Date();
-  maxDate.setFullYear(
-    maxDate.getFullYear() + 5
-  );
+  maxDate.setFullYear(maxDate.getFullYear() + 5);
 
   if (selectedDate > maxDate) {
     return {
@@ -300,11 +286,7 @@ const ManageAsset = ({
   username = "username",
   onLogout,
   onBack,
-  onSidebarNavigate,
 }) => {
-  const [activeSidebar, setActiveSidebar] =
-    useState("asset-management");
-
   // ==========================================
   // SEARCH STATE
   // ==========================================
@@ -366,32 +348,6 @@ const ManageAsset = ({
   // ==========================================
   const [deleteAsset, setDeleteAsset] =
     useState(null);
-
-  // ==========================================
-  // SIDEBAR
-  // ==========================================
-  const sidebarItems = [
-    {
-      id: "dashboard",
-      label: "Dashboard",
-    },
-    {
-      id: "asset-management",
-      label: "Asset Management",
-    },
-    {
-      id: "asset-assignment",
-      label: "Asset Assignment",
-    },
-    {
-      id: "request-approval",
-      label: "Request Approval",
-    },
-    {
-      id: "maintenance",
-      label: "Maintenance",
-    },
-  ];
 
   // ==========================================
   // GET JWT TOKEN
@@ -511,22 +467,6 @@ const ManageAsset = ({
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // ==========================================
-  // SIDEBAR CLICK
-  // ==========================================
-  const handleSidebarClick = (item) => {
-    console.log(
-      "ManageAsset sidebar clicked:",
-      item.id
-    );
-
-    setActiveSidebar(item.id);
-
-    if (onSidebarNavigate) {
-      onSidebarNavigate(item.id);
-    }
-  };
 
   // ==========================================
   // SEARCH
@@ -750,9 +690,6 @@ const ManageAsset = ({
   const validateEditForm = () => {
     const newErrors = {};
 
-    // ==========================================
-    // ASSET TYPE
-    // ==========================================
     const typeResult =
       validateAssetType(editType);
 
@@ -761,9 +698,6 @@ const ManageAsset = ({
         typeResult.message;
     }
 
-    // ==========================================
-    // MODEL
-    // ==========================================
     const modelResult =
       validateModel(editModel);
 
@@ -772,9 +706,6 @@ const ManageAsset = ({
         modelResult.message;
     }
 
-    // ==========================================
-    // PURCHASE DATE
-    // ==========================================
     const purchaseResult =
       validatePurchaseDate(
         editPurchaseDate
@@ -785,9 +716,6 @@ const ManageAsset = ({
         purchaseResult.message;
     }
 
-    // ==========================================
-    // WARRANTY EXPIRY
-    // ==========================================
     const warrantyResult =
       validateWarrantyExpiry(
         editWarrantyExpiry,
@@ -799,9 +727,6 @@ const ManageAsset = ({
         warrantyResult.message;
     }
 
-    // ==========================================
-    // DESCRIPTION
-    // ==========================================
     const descriptionResult =
       validateDescription(
         editDescription
@@ -812,9 +737,6 @@ const ManageAsset = ({
         descriptionResult.message;
     }
 
-    // ==========================================
-    // SET ERRORS
-    // ==========================================
     setEditErrors(newErrors);
 
     return (
@@ -904,7 +826,6 @@ const ManageAsset = ({
 
       closeEditPage();
 
-      // Reload from database
       fetchAssets(
         appliedName,
         appliedType
@@ -988,7 +909,6 @@ const ManageAsset = ({
 
       setDeleteAsset(null);
 
-      // Reload database records
       fetchAssets(
         appliedName,
         appliedType
@@ -1014,9 +934,6 @@ const ManageAsset = ({
 
         <div className="ma-edit-page-container">
 
-          {/* =====================================
-              EDIT HEADER
-          ===================================== */}
           <div className="ma-edit-page-header">
             <h2 className="ma-edit-page-title">
               Edit Asset
@@ -1025,9 +942,7 @@ const ManageAsset = ({
 
           <div className="ma-edit-form">
 
-            {/* =================================
-                ASSET ID
-            ================================= */}
+            {/* ASSET ID */}
             <div className="ma-modal-field">
 
               <label className="ma-field-label">
@@ -1045,9 +960,7 @@ const ManageAsset = ({
 
             </div>
 
-            {/* =================================
-                ASSET TYPE
-            ================================= */}
+            {/* ASSET TYPE */}
             <div className="ma-modal-field">
 
               <label className="ma-field-label">
@@ -1104,9 +1017,7 @@ const ManageAsset = ({
 
             </div>
 
-            {/* =================================
-                MODEL
-            ================================= */}
+            {/* MODEL */}
             <div className="ma-modal-field">
 
               <label className="ma-field-label">
@@ -1136,9 +1047,7 @@ const ManageAsset = ({
 
             </div>
 
-            {/* =================================
-                PURCHASE DATE
-            ================================= */}
+            {/* PURCHASE DATE */}
             <div className="ma-modal-field">
 
               <label className="ma-field-label">
@@ -1183,9 +1092,7 @@ const ManageAsset = ({
 
             </div>
 
-            {/* =================================
-                WARRANTY EXPIRY
-            ================================= */}
+            {/* WARRANTY EXPIRY */}
             <div className="ma-modal-field">
 
               <label className="ma-field-label">
@@ -1228,9 +1135,7 @@ const ManageAsset = ({
 
             </div>
 
-            {/* =================================
-                DESCRIPTION
-            ================================= */}
+            {/* DESCRIPTION */}
             <div className="ma-modal-field">
 
               <label className="ma-field-label">
@@ -1254,7 +1159,6 @@ const ManageAsset = ({
                 }
               />
 
-              {/* Character Count */}
               <div
                 style={{
                   textAlign: "right",
@@ -1280,9 +1184,7 @@ const ManageAsset = ({
 
             </div>
 
-            {/* =================================
-                FORM ACTIONS
-            ================================= */}
+            {/* FORM ACTIONS */}
             <div className="ma-edit-actions">
 
               <button
@@ -1321,9 +1223,7 @@ const ManageAsset = ({
   return (
     <div className="ma-page-wrapper">
 
-      {/* ======================================
-          TOP NAVBAR
-      ====================================== */}
+      {/* TOP NAVBAR */}
       <nav className="ma-top-nav">
 
         <div className="ma-nav-logo">
@@ -1357,46 +1257,16 @@ const ManageAsset = ({
 
       </nav>
 
-      {/* ======================================
-          BODY
-      ====================================== */}
+      {/* MAIN CONTENT - NO SIDEBAR */}
       <div className="ma-body-wrapper">
 
-        {/* ====================================
-            SIDEBAR
-        ==================================== */}
-        <aside className="ma-sidebar">
-
-          {sidebarItems.map(
-            (item) => (
-              <div
-                key={item.id}
-                className={
-                  "ma-sidebar-item" +
-                  (
-                    activeSidebar ===
-                    item.id
-                      ? " ma-sidebar-item--active"
-                      : ""
-                  )
-                }
-                onClick={() =>
-                  handleSidebarClick(
-                    item
-                  )
-                }
-              >
-                {item.label}
-              </div>
-            )
-          )}
-
-        </aside>
-
-        {/* ====================================
-            MAIN CONTENT
-        ==================================== */}
-        <main className="ma-main-content">
+        <main
+          className="ma-main-content"
+          style={{
+            width: "100%",
+            marginLeft: "0",
+          }}
+        >
 
           <h1 className="ma-page-title">
             Manage Asset
@@ -1407,9 +1277,7 @@ const ManageAsset = ({
             in the organization.
           </p>
 
-          {/* ==================================
-              SEARCH CARD
-          ================================== */}
+          {/* SEARCH CARD */}
           <div className="ma-card">
 
             <h2 className="ma-card-heading">
@@ -1445,8 +1313,7 @@ const ManageAsset = ({
                 <div className="ma-validation-hint">
                   <small>
                     Format: AST + 3
-                    alphanumeric
-                    {" "}
+                    alphanumeric{" "}
                     (e.g., AST001,
                     ASTA12, AST1AB)
                   </small>
@@ -1510,9 +1377,7 @@ const ManageAsset = ({
 
           </div>
 
-          {/* ==================================
-              ASSET LIST
-          ================================== */}
+          {/* ASSET LIST */}
           <div className="ma-card ma-card--table">
 
             <h2 className="ma-card-heading">
@@ -1641,9 +1506,7 @@ const ManageAsset = ({
 
             </div>
 
-            {/* ==================================
-                TABLE FOOTER
-            ================================== */}
+            {/* TABLE FOOTER */}
             <div className="ma-table-footer">
 
               <button
@@ -1708,9 +1571,7 @@ const ManageAsset = ({
 
       </div>
 
-      {/* ======================================
-          DELETE MODAL
-      ====================================== */}
+      {/* DELETE MODAL */}
       {deleteAsset && (
 
         <div
