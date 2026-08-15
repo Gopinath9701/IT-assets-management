@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.test.ManageAssetTest
 -------------------------------------------------------------------------------
-Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 53.66 s -- in com.test.ManageAssetTest
+Tests run: 25, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 135.2 s -- in com.test.ManageAssetTest
