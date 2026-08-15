@@ -1,912 +1,1803 @@
-/* ============================================================
-   AddAsset.css
-   ITAMS - Add Asset Page
-   ============================================================ */
-
-
-/* ============================================================
-   GLOBAL RESET
-   ============================================================ */
-
-.aa-page-wrapper,
-.aa-page-wrapper * {
-  box-sizing: border-box;
-}
-
-.aa-page-wrapper {
-  min-height: 100vh;
-  width: 100%;
-  background-color: #ffffff;
-  font-family: "Inter", Arial, sans-serif;
-  color: #111827;
-}
-
-.aa-page-wrapper button,
-.aa-page-wrapper input,
-.aa-page-wrapper select,
-.aa-page-wrapper textarea {
-  font-family: inherit;
-}
-
-
-/* ============================================================
-   TOP NAVIGATION BAR
-   ============================================================ */
-
-.aa-top-nav {
-  width: 100%;
-  height: 145px;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  padding: 25px 40px;
-
-  background-color: #ffffff;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-
-/* ---------------- Logo ---------------- */
-
-.aa-nav-logo {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.aa-nav-logo-title {
-  font-size: 40px;
-  line-height: 1;
-  font-weight: 800;
-  color: #2563eb;
-  letter-spacing: 0.3px;
-}
-
-.aa-nav-logo-sub {
-  margin-top: 14px;
-
-  font-size: 16px;
-  line-height: 1.2;
-  font-weight: 500;
-
-  color: #111827;
-}
-
-
-/* ---------------- Right side ---------------- */
-
-.aa-nav-right {
-  display: flex;
-  align-items: center;
-  gap: 22px;
-}
-
-.aa-nav-username {
-  font-size: 16px;
-  font-weight: 600;
-  color: #111827;
-}
-
-.aa-nav-divider {
-  width: 1px;
-  height: 25px;
-  background-color: #9ca3af;
-}
-
-.aa-logout-btn {
-  border: none;
-  background: transparent;
-
-  padding: 0;
-
-  font-size: 16px;
-  font-weight: 600;
-  color: #111827;
-
-  cursor: pointer;
-
-  transition: color 0.2s ease;
-}
-
-.aa-logout-btn:hover {
-  color: #2563eb;
-}
-
-
-/* ============================================================
-   MAIN PAGE BODY
-   ============================================================ */
-
-.aa-body {
-  width: 100%;
-  max-width: 1120px;
-
-  margin: 0 auto;
-
-  padding: 44px 24px 55px;
-
-  display: flex;
-  flex-direction: column;
-}
-
-
-/* ============================================================
-   PAGE TITLE
-   ============================================================ */
-
-.aa-page-title {
-  margin: 0 0 12px;
-
-  font-size: 40px;
-  line-height: 1.2;
-  font-weight: 700;
-
-  color: #111827;
-}
-
-.aa-page-subtitle {
-  margin: 0 0 42px;
-
-  font-size: 16px;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color: #374151;
-}
-
-
-/* ============================================================
-   SUCCESS MESSAGE
-   ============================================================ */
-
-.aa-success-msg {
-  width: 100%;
-
-  margin-bottom: 20px;
-  padding: 13px 16px;
-
-  border: 1px solid #bbf7d0;
-  border-radius: 7px;
-
-  background-color: #f0fdf4;
-  color: #166534;
-
-  font-size: 14px;
-  font-weight: 600;
-}
-
-
-/* ============================================================
-   API ERROR MESSAGE
-   ============================================================ */
-
-.aa-api-error {
-  width: 100%;
-
-  margin-bottom: 20px;
-  padding: 13px 16px;
-
-  border: 1px solid #fecaca;
-  border-radius: 7px;
-
-  background-color: #fef2f2;
-  color: #b91c1c;
-
-  font-size: 14px;
-  font-weight: 500;
-}
-
-
-/* ============================================================
-   MAIN FORM CARD
-   ============================================================ */
-
-.aa-card {
-  width: 100%;
-
-  padding: 42px 32px 34px;
-
-  background-color: #ffffff;
-
-  border: 1px solid #dfe3e8;
-  border-radius: 9px;
-
-  display: flex;
-  flex-direction: column;
-
-  gap: 28px;
-
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
-}
-
-
-/* ============================================================
-   CARD HEADING
-   ============================================================ */
-
-.aa-card-heading {
-  margin: 0 0 14px;
-
-  font-size: 23px;
-  line-height: 1.3;
-  font-weight: 700;
-
-  color: #111827;
-}
-
-
-/* ============================================================
-   FULL WIDTH FIELD
-   ============================================================ */
-
-.aa-field-full {
-  width: 100%;
-
-  display: flex;
-  flex-direction: column;
-
-  gap: 9px;
-}
-
-
-/* ============================================================
-   TWO COLUMN ROW
-   ============================================================ */
-
-.aa-row {
-  width: 100%;
-
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-
-  column-gap: 52px;
-  row-gap: 24px;
-}
-
-
-/* ============================================================
-   FIELD GROUP
-   ============================================================ */
-
-.aa-field-group {
-  width: 100%;
-
-  display: flex;
-  flex-direction: column;
-
-  gap: 9px;
-}
-
-
-/* ============================================================
-   LABEL
-   ============================================================ */
-
-.aa-label {
-  display: block;
-
-  font-size: 16px;
-  line-height: 1.3;
-
-  font-weight: 600;
-
-  color: #111827;
-}
-
-
-/* ============================================================
-   INPUT
-   ============================================================ */
-
-.aa-input {
-  width: 100%;
-  height: 58px;
-
-  padding: 0 16px;
-
-  border: 1px solid #d1d5db;
-  border-radius: 7px;
-
-  background-color: #ffffff;
-
-  color: #111827;
-
-  font-size: 16px;
-  font-weight: 400;
-
-  outline: none;
-
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease,
-    background-color 0.2s ease;
-}
-
-
-/* Placeholder */
-
-.aa-input::placeholder {
-  color: #253858;
-  opacity: 1;
-}
-
-
-/* Focus */
-
-.aa-input:focus {
-  border-color: #2563eb;
-
-  box-shadow:
-    0 0 0 3px rgba(37, 99, 235, 0.10);
-}
-
-
-/* ============================================================
-   READ ONLY ASSET ID
-   ============================================================ */
-
-.aa-input--readonly {
-  width: 440px;
-  max-width: 100%;
-
-  background-color: #f3f4f6;
-
-  color: #374151;
-
-  cursor: default;
-}
-
-.aa-input--readonly:focus {
-  border-color: #d1d5db;
-
-  box-shadow: none;
-}
-
-
-/* ============================================================
-   SELECT / DROPDOWN
-   ============================================================ */
-
-.aa-select {
-  width: 100%;
-  height: 58px;
-
-  padding: 0 48px 0 16px;
-
-  border: 1px solid #d1d5db;
-  border-radius: 7px;
-
-  background-color: #ffffff;
-
-  color: #253858;
-
-  font-size: 16px;
-  font-weight: 400;
-
-  cursor: pointer;
-
-  outline: none;
-
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-
-  /* Dropdown arrow */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'%3E%3Cpath d='M1 1.5L7 7.5L13 1.5' fill='none' stroke='%23111827' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-
-  background-repeat: no-repeat;
-  background-position: right 18px center;
-  background-size: 14px 9px;
-
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-
-/* Select focus */
-
-.aa-select:focus {
-  border-color: #2563eb;
-
-  box-shadow:
-    0 0 0 3px rgba(37, 99, 235, 0.10);
-}
-
-
-/* First option */
-
-.aa-select option[value=""] {
-  color: #6b7280;
-}
-
-
-/* ============================================================
-   TEXTAREA
-   ============================================================ */
-
-.aa-textarea {
-  height: 100px;
-
-  min-height: 100px;
-
-  padding: 15px 16px;
-
-  resize: vertical;
-
-  line-height: 1.5;
-}
-
-
-/* ============================================================
-   ERROR INPUT
-   ============================================================ */
-
-.aa-input--error,
-.aa-select.aa-input--error {
-  border-color: #ef4444 !important;
-
-  background-color: #fffafa;
-}
-
-.aa-input--error:focus,
-.aa-select.aa-input--error:focus {
-  border-color: #ef4444 !important;
-
-  box-shadow:
-    0 0 0 3px rgba(239, 68, 68, 0.10);
-}
-
-
-/* ============================================================
-   VALIDATION ERROR MESSAGE
-   ============================================================ */
-
-.aa-error {
-  display: block;
-
-  margin-top: 1px;
-
-  font-size: 12px;
-  line-height: 1.4;
-
-  font-weight: 500;
-
-  color: #dc2626;
-}
-
-
-/* ============================================================
-   DIVIDER
-   ============================================================ */
-
-.aa-divider {
-  width: 100%;
-
-  margin: 2px 0 0;
-
-  border: none;
-  border-top: 1px solid #e5e7eb;
-}
-
-
-/* ============================================================
-   FORM ACTION BUTTONS
-   ============================================================ */
-
-.aa-form-actions {
-  display: flex;
-  align-items: center;
-
-  gap: 25px;
-
-  flex-wrap: wrap;
-}
-
-
-/* ============================================================
-   ADD ASSET BUTTON
-   ============================================================ */
-
-.aa-btn-primary {
-  min-width: 155px;
-  height: 56px;
-
-  padding: 0 28px;
-
-  border: none;
-  border-radius: 7px;
-
-  background-color: #2563eb;
-  color: #ffffff;
-
-  font-size: 16px;
-  font-weight: 600;
-
-  cursor: pointer;
-
-  transition:
-    background-color 0.2s ease,
-    transform 0.1s ease;
-}
-
-.aa-btn-primary:hover {
-  background-color: #1d4ed8;
-}
-
-.aa-btn-primary:active {
-  transform: translateY(1px);
-}
-
-
-/* ============================================================
-   DISABLED ADD BUTTON
-   ============================================================ */
-
-.aa-btn-primary:disabled {
-  background-color: #93c5fd;
-
-  cursor: not-allowed;
-
-  transform: none;
-}
-
-
-/* ============================================================
-   CLEAR BUTTON
-   ============================================================ */
-
-.aa-btn-outline {
-  min-width: 140px;
-  height: 56px;
-
-  padding: 0 28px;
-
-  border: 1.5px solid #d1d5db;
-  border-radius: 7px;
-
-  background-color: #ffffff;
-  color: #111827;
-
-  font-size: 16px;
-  font-weight: 600;
-
-  cursor: pointer;
-
-  transition:
-    background-color 0.2s ease,
-    border-color 0.2s ease;
-}
-
-.aa-btn-outline:hover {
-  background-color: #f9fafb;
-
-  border-color: #9ca3af;
-}
-
-
-/* ============================================================
-   DISABLED CLEAR BUTTON
-   ============================================================ */
-
-.aa-btn-outline:disabled {
-  opacity: 0.6;
-
-  cursor: not-allowed;
-}
-
-
-/* ============================================================
-   BACK BUTTON
-   ============================================================ */
-
-.aa-back-wrapper {
-  margin-top: 28px;
-}
-
-
-.aa-btn-back {
-  min-width: 145px;
-  height: 58px;
-
-  padding: 0 28px;
-
-  border: 1.5px solid #d1d5db;
-  border-radius: 7px;
-
-  background-color: #ffffff;
-  color: #111827;
-
-  font-size: 16px;
-  font-weight: 600;
-
-  cursor: pointer;
-
-  transition:
-    background-color 0.2s ease,
-    border-color 0.2s ease;
-}
-
-.aa-btn-back:hover {
-  background-color: #f9fafb;
-
-  border-color: #9ca3af;
-}
-
-
-/* ============================================================
-   DATE INPUT
-   ============================================================ */
-
-.aa-input[type="date"] {
-  color: #253858;
-
-  cursor: pointer;
-}
-
-
-/* Date placeholder-like appearance */
-
-.aa-input[type="date"]:not(:valid) {
-  color: #253858;
-}
-
-
-/* Calendar icon */
-
-.aa-input[type="date"]::-webkit-calendar-picker-indicator {
-  width: 18px;
-  height: 18px;
-
-  cursor: pointer;
-
-  opacity: 0.8;
-}
-
-
-/* ============================================================
-   NUMBER / COST INPUT
-   ============================================================ */
-
-.aa-input[inputmode="decimal"] {
-  appearance: textfield;
-  -moz-appearance: textfield;
-}
-
-
-/* ============================================================
-   REMOVE NUMBER ARROWS IF INPUT TYPE NUMBER IS USED
-   ============================================================ */
-
-.aa-input[type="number"]::-webkit-inner-spin-button,
-.aa-input[type="number"]::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-
-/* ============================================================
-   HOVER EFFECT
-   ============================================================ */
-
-.aa-input:hover,
-.aa-select:hover {
-  border-color: #9ca3af;
-}
-
-
-/* ============================================================
-   RESPONSIVE - TABLET
-   ============================================================ */
-
-@media (max-width: 900px) {
-
-  .aa-top-nav {
-    height: 120px;
-
-    padding: 22px 28px;
+import React, { useEffect, useState } from "react";
+import "./ManageAsset.css";
+
+const ASSET_TYPES = [
+  "All Assets",
+  "Monitor",
+  "Keyboard",
+  "Laptop",
+  "Mouse",
+  "Printer",
+  "Desktop",
+  "Webcam",
+  "Scanner",
+  "Projector",
+];
+
+const ROWS_PER_PAGE_OPTIONS = [10, 30, 50, "All"];
+
+const API_URL = "http://localhost:5000/api/assets";
+
+// ==========================================
+// VALIDATION - ASSET ID
+// ==========================================
+const validateAssetId = (id) => {
+  if (!id || id.trim() === "") {
+    return {
+      isValid: true,
+      message: "",
+    };
   }
 
-  .aa-nav-logo-title {
-    font-size: 34px;
+  if (id !== id.trim()) {
+    return {
+      isValid: false,
+      message:
+        "Asset ID should not have leading or trailing spaces",
+    };
   }
 
-  .aa-nav-logo-sub {
-    font-size: 14px;
+  if (/\s/.test(id)) {
+    return {
+      isValid: false,
+      message: "Asset ID should not contain spaces",
+    };
   }
 
-  .aa-body {
-    max-width: 100%;
-
-    padding: 36px 24px 48px;
+  if (/[^A-Za-z0-9]/.test(id)) {
+    return {
+      isValid: false,
+      message:
+        "Asset ID should not contain special characters",
+    };
   }
 
-  .aa-page-title {
-    font-size: 34px;
+  if (!id.startsWith("AST")) {
+    return {
+      isValid: false,
+      message:
+        "Asset ID must start with 'AST' (uppercase)",
+    };
   }
 
-  .aa-card {
-    padding: 32px 26px;
+  if (id.length !== 6) {
+    return {
+      isValid: false,
+      message:
+        "Asset ID must be exactly 6 characters long (AST + 3 alphanumeric)",
+    };
   }
 
-  .aa-row {
-    column-gap: 30px;
+  const lastThree = id.substring(3);
+
+  if (!/^[A-Za-z0-9]{3}$/.test(lastThree)) {
+    return {
+      isValid: false,
+      message:
+        "Last 3 characters must be alphanumeric (letters or numbers)",
+    };
   }
 
-}
+  return {
+    isValid: true,
+    message: "",
+  };
+};
 
-
-/* ============================================================
-   RESPONSIVE - SMALL TABLET
-   ============================================================ */
-
-@media (max-width: 720px) {
-
-  .aa-top-nav {
-    height: auto;
-
-    min-height: 100px;
-
-    padding: 20px;
-
-    gap: 20px;
+// ==========================================
+// VALIDATION - ASSET TYPE
+// ==========================================
+const validateAssetType = (type) => {
+  if (!type || type === "All Assets") {
+    return {
+      isValid: false,
+      message: "Please select a valid asset type",
+    };
   }
 
-  .aa-nav-logo-title {
-    font-size: 30px;
+  return {
+    isValid: true,
+    message: "",
+  };
+};
+
+// ==========================================
+// VALIDATION - MODEL
+// ==========================================
+const validateModel = (model) => {
+  const value = model.trim();
+
+  if (!value) {
+    return {
+      isValid: false,
+      message: "Model is required",
+    };
   }
 
-  .aa-nav-logo-sub {
-    font-size: 13px;
+  if (value.length < 2) {
+    return {
+      isValid: false,
+      message: "Model must contain at least 2 characters",
+    };
   }
 
-  .aa-nav-right {
-    gap: 12px;
+  if (value.length > 50) {
+    return {
+      isValid: false,
+      message: "Model cannot exceed 50 characters",
+    };
   }
 
-  .aa-nav-username,
-  .aa-logout-btn {
-    font-size: 14px;
+  if (model !== value) {
+    return {
+      isValid: false,
+      message:
+        "Model should not have leading or trailing spaces",
+    };
   }
 
-  .aa-body {
-    padding: 30px 18px 40px;
+  if (!/^[A-Za-z0-9 .&()/_-]+$/.test(value)) {
+    return {
+      isValid: false,
+      message:
+        "Model can contain letters, numbers, spaces and basic symbols only",
+    };
   }
 
-  .aa-page-title {
-    font-size: 30px;
+  return {
+    isValid: true,
+    message: "",
+  };
+};
+
+// ==========================================
+// VALIDATION - DESCRIPTION
+// ==========================================
+const validateDescription = (description) => {
+  const value = description.trim();
+
+  if (!value) {
+    return {
+      isValid: false,
+      message: "Description is required",
+    };
   }
 
-  .aa-page-subtitle {
-    font-size: 14px;
-
-    margin-bottom: 28px;
+  if (value.length < 5) {
+    return {
+      isValid: false,
+      message:
+        "Description must contain at least 5 characters",
+    };
   }
 
-  .aa-card {
-    padding: 28px 20px;
+  if (value.length > 500) {
+    return {
+      isValid: false,
+      message:
+        "Description cannot exceed 500 characters",
+    };
   }
 
-  .aa-row {
-    grid-template-columns: 1fr;
-
-    gap: 24px;
+  if (description !== value) {
+    return {
+      isValid: false,
+      message:
+        "Description should not have leading or trailing spaces",
+    };
   }
 
-  .aa-input--readonly {
-    width: 100%;
+  if (!/[A-Za-z0-9]/.test(value)) {
+    return {
+      isValid: false,
+      message:
+        "Description must contain at least one letter or number",
+    };
   }
 
-}
+  return {
+    isValid: true,
+    message: "",
+  };
+};
 
-
-/* ============================================================
-   RESPONSIVE - MOBILE
-   ============================================================ */
-
-@media (max-width: 480px) {
-
-  .aa-top-nav {
-    flex-direction: column;
-
-    align-items: flex-start;
-
-    padding: 18px 16px;
+// ==========================================
+// VALIDATION - PURCHASE DATE
+// ==========================================
+const validatePurchaseDate = (date) => {
+  if (!date) {
+    return {
+      isValid: false,
+      message: "Purchase date is required",
+    };
   }
 
-  .aa-nav-right {
-    width: 100%;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
-    justify-content: flex-end;
+  const selectedDate = new Date(date);
+  selectedDate.setHours(0, 0, 0, 0);
+
+  if (selectedDate > today) {
+    return {
+      isValid: false,
+      message: "Purchase date cannot be in the future",
+    };
   }
 
-  .aa-nav-logo-title {
-    font-size: 28px;
+  const maxDate = new Date();
+  maxDate.setFullYear(
+    maxDate.getFullYear() - 10
+  );
+
+  if (selectedDate < maxDate) {
+    return {
+      isValid: false,
+      message:
+        "Purchase date cannot be older than 10 years",
+    };
   }
 
-  .aa-nav-logo-sub {
-    font-size: 12px;
+  return {
+    isValid: true,
+    message: "",
+  };
+};
 
-    margin-top: 8px;
+// ==========================================
+// VALIDATION - WARRANTY EXPIRY
+// ==========================================
+const validateWarrantyExpiry = (
+  date,
+  purchaseDate
+) => {
+  if (!date) {
+    return {
+      isValid: false,
+      message: "Warranty expiry date is required",
+    };
   }
 
-  .aa-body {
-    padding: 25px 14px 35px;
+  const selectedDate = new Date(date);
+  selectedDate.setHours(0, 0, 0, 0);
+
+  const maxDate = new Date();
+  maxDate.setFullYear(
+    maxDate.getFullYear() + 5
+  );
+
+  if (selectedDate > maxDate) {
+    return {
+      isValid: false,
+      message:
+        "Warranty expiry date cannot exceed 5 years from today",
+    };
   }
 
-  .aa-page-title {
-    font-size: 27px;
+  if (purchaseDate) {
+    const purchase = new Date(purchaseDate);
+    purchase.setHours(0, 0, 0, 0);
+
+    if (selectedDate < purchase) {
+      return {
+        isValid: false,
+        message:
+          "Warranty expiry date must be after purchase date",
+      };
+    }
   }
 
-  .aa-page-subtitle {
-    margin-bottom: 24px;
+  return {
+    isValid: true,
+    message: "",
+  };
+};
+
+// ==========================================
+// MAIN COMPONENT
+// ==========================================
+const ManageAsset = ({
+  username = "username",
+  onLogout,
+  onBack,
+  onSidebarNavigate,
+}) => {
+  const [activeSidebar, setActiveSidebar] =
+    useState("asset-management");
+
+  // ==========================================
+  // SEARCH STATE
+  // ==========================================
+  const [searchName, setSearchName] = useState("");
+  const [searchType, setSearchType] =
+    useState("All Assets");
+
+  const [appliedName, setAppliedName] =
+    useState("");
+  const [appliedType, setAppliedType] =
+    useState("All Assets");
+
+  const [searchError, setSearchError] =
+    useState("");
+  const [showFieldError, setShowFieldError] =
+    useState(false);
+
+  // ==========================================
+  // DATABASE ASSETS
+  // ==========================================
+  const [assets, setAssets] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // ==========================================
+  // PAGINATION
+  // ==========================================
+  const [rowsPerPage, setRowsPerPage] =
+    useState(10);
+
+  // ==========================================
+  // EDIT STATE
+  // ==========================================
+  const [editingAssetId, setEditingAssetId] =
+    useState(null);
+
+  const [isEditPage, setIsEditPage] =
+    useState(false);
+
+  const [editType, setEditType] =
+    useState("");
+
+  const [editPurchaseDate, setEditPurchaseDate] =
+    useState("");
+
+  const [editWarrantyExpiry, setEditWarrantyExpiry] =
+    useState("");
+
+  const [editModel, setEditModel] =
+    useState("");
+
+  const [editDescription, setEditDescription] =
+    useState("");
+
+  const [editErrors, setEditErrors] =
+    useState({});
+
+  // ==========================================
+  // DELETE STATE
+  // ==========================================
+  const [deleteAsset, setDeleteAsset] =
+    useState(null);
+
+  // ==========================================
+  // SIDEBAR
+  // ==========================================
+  const sidebarItems = [
+    {
+      id: "dashboard",
+      label: "Dashboard",
+    },
+    {
+      id: "asset-management",
+      label: "Asset Management",
+    },
+    {
+      id: "asset-assignment",
+      label: "Asset Assignment",
+    },
+    {
+      id: "request-approval",
+      label: "Request Approval",
+    },
+    {
+      id: "maintenance",
+      label: "Maintenance",
+    },
+  ];
+
+  // ==========================================
+  // GET JWT TOKEN
+  // ==========================================
+  const getToken = () => {
+    return localStorage.getItem("token");
+  };
+
+  // ==========================================
+  // FETCH ASSETS FROM DATABASE
+  // ==========================================
+  const fetchAssets = async (
+    search = "",
+    type = "All Assets"
+  ) => {
+    try {
+      setLoading(true);
+
+      const token = getToken();
+
+      if (!token) {
+        alert(
+          "Login session expired. Please login again."
+        );
+        return;
+      }
+
+      const params = new URLSearchParams();
+
+      if (search.trim()) {
+        params.append("search", search.trim());
+      }
+
+      if (
+        type &&
+        type !== "All Assets"
+      ) {
+        params.append("type", type);
+      }
+
+      const queryString = params.toString();
+
+      const url = queryString
+        ? `${API_URL}?${queryString}`
+        : API_URL;
+
+      console.log("Fetching:", url);
+
+      const response = await fetch(url, {
+        method: "GET",
+
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      console.log(
+        "Get Assets Response:",
+        data
+      );
+
+      if (response.status === 401) {
+        alert(
+          "Session expired. Please login again."
+        );
+
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+
+        if (onLogout) {
+          onLogout();
+        }
+
+        return;
+      }
+
+      if (response.status === 403) {
+        alert(
+          "You do not have permission to access assets."
+        );
+
+        return;
+      }
+
+      if (!response.ok || !data.success) {
+        alert(
+          data.message ||
+            "Unable to load assets."
+        );
+
+        return;
+      }
+
+      setAssets(data.assets || []);
+    } catch (error) {
+      console.error(
+        "Fetch Assets Error:",
+        error
+      );
+
+      alert(
+        "Unable to connect to backend. Make sure the backend is running on port 5000."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ==========================================
+  // LOAD DATABASE ASSETS WHEN PAGE OPENS
+  // ==========================================
+  useEffect(() => {
+    fetchAssets();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ==========================================
+  // SIDEBAR CLICK
+  // ==========================================
+  const handleSidebarClick = (item) => {
+    console.log(
+      "ManageAsset sidebar clicked:",
+      item.id
+    );
+
+    setActiveSidebar(item.id);
+
+    if (onSidebarNavigate) {
+      onSidebarNavigate(item.id);
+    }
+  };
+
+  // ==========================================
+  // SEARCH
+  // ==========================================
+  const handleSearch = () => {
+    setSearchError("");
+    setShowFieldError(false);
+
+    const searchValue =
+      searchName.trim();
+
+    // Both empty
+    if (
+      !searchValue &&
+      searchType === "All Assets"
+    ) {
+      setSearchError(
+        "Please enter an Asset ID or select an Asset Type to search"
+      );
+
+      setShowFieldError(true);
+
+      setAppliedName("");
+      setAppliedType("All Assets");
+
+      fetchAssets();
+
+      return;
+    }
+
+    // Only type selected
+    if (
+      !searchValue &&
+      searchType !== "All Assets"
+    ) {
+      setAppliedName("");
+      setAppliedType(searchType);
+
+      fetchAssets("", searchType);
+
+      return;
+    }
+
+    // Search by Asset ID
+    if (searchValue) {
+      const result =
+        validateAssetId(searchValue);
+
+      if (!result.isValid) {
+        setSearchError(result.message);
+        setShowFieldError(true);
+
+        return;
+      }
+    }
+
+    // Apply search
+    setAppliedName(searchValue);
+    setAppliedType(searchType);
+
+    fetchAssets(
+      searchValue,
+      searchType
+    );
+  };
+
+  // ==========================================
+  // SEARCH INPUT CHANGE
+  // ==========================================
+  const handleSearchNameChange = (e) => {
+    setSearchName(e.target.value);
+    setSearchError("");
+    setShowFieldError(false);
+  };
+
+  // ==========================================
+  // ENTER KEY SEARCH
+  // ==========================================
+  const handleSearchKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleSearch();
+    }
+  };
+
+  // ==========================================
+  // TYPE CHANGE
+  // ==========================================
+  const handleSearchTypeChange = (e) => {
+    setSearchType(e.target.value);
+    setSearchError("");
+    setShowFieldError(false);
+  };
+
+  // ==========================================
+  // FRONTEND FILTER
+  // ==========================================
+  const filteredAssets = assets.filter(
+    (asset) => {
+      const idMatch = appliedName
+        ? asset.asset_id
+            ?.toLowerCase()
+            .includes(
+              appliedName.toLowerCase()
+            )
+        : true;
+
+      const typeMatch =
+        appliedType === "All Assets"
+          ? true
+          : asset.asset_type ===
+            appliedType;
+
+      return idMatch && typeMatch;
+    }
+  );
+
+  // ==========================================
+  // DISPLAY ROWS
+  // ==========================================
+  const displayedAssets =
+    rowsPerPage === "All"
+      ? filteredAssets
+      : filteredAssets.slice(
+          0,
+          rowsPerPage
+        );
+
+  // ==========================================
+  // OPEN EDIT PAGE
+  // ==========================================
+  const openEditPage = (asset) => {
+    setEditingAssetId(
+      asset.asset_id
+    );
+
+    setIsEditPage(true);
+
+    setEditType(
+      asset.asset_type || ""
+    );
+
+    setEditModel(
+      asset.model || ""
+    );
+
+    setEditDescription(
+      asset.description || ""
+    );
+
+    setEditPurchaseDate(
+      asset.purchase_date
+        ? String(
+            asset.purchase_date
+          ).substring(0, 10)
+        : ""
+    );
+
+    setEditWarrantyExpiry(
+      asset.warranty_expiry
+        ? String(
+            asset.warranty_expiry
+          ).substring(0, 10)
+        : ""
+    );
+
+    setEditErrors({});
+  };
+
+  // ==========================================
+  // CLOSE EDIT PAGE
+  // ==========================================
+  const closeEditPage = () => {
+    setIsEditPage(false);
+    setEditingAssetId(null);
+
+    setEditType("");
+    setEditModel("");
+    setEditDescription("");
+    setEditPurchaseDate("");
+    setEditWarrantyExpiry("");
+
+    setEditErrors({});
+  };
+
+  // ==========================================
+  // HANDLE EDIT MODEL CHANGE
+  // ==========================================
+  const handleEditModelChange = (e) => {
+    const value = e.target.value;
+
+    setEditModel(value);
+
+    if (editErrors.editModel) {
+      setEditErrors((prev) => ({
+        ...prev,
+        editModel: "",
+      }));
+    }
+  };
+
+  // ==========================================
+  // HANDLE EDIT DESCRIPTION CHANGE
+  // ==========================================
+  const handleEditDescriptionChange = (e) => {
+    const value = e.target.value;
+
+    setEditDescription(value);
+
+    if (editErrors.editDescription) {
+      setEditErrors((prev) => ({
+        ...prev,
+        editDescription: "",
+      }));
+    }
+  };
+
+  // ==========================================
+  // VALIDATE EDIT
+  // ==========================================
+  const validateEditForm = () => {
+    const newErrors = {};
+
+    // ==========================================
+    // ASSET TYPE
+    // ==========================================
+    const typeResult =
+      validateAssetType(editType);
+
+    if (!typeResult.isValid) {
+      newErrors.editType =
+        typeResult.message;
+    }
+
+    // ==========================================
+    // MODEL
+    // ==========================================
+    const modelResult =
+      validateModel(editModel);
+
+    if (!modelResult.isValid) {
+      newErrors.editModel =
+        modelResult.message;
+    }
+
+    // ==========================================
+    // PURCHASE DATE
+    // ==========================================
+    const purchaseResult =
+      validatePurchaseDate(
+        editPurchaseDate
+      );
+
+    if (!purchaseResult.isValid) {
+      newErrors.editPurchaseDate =
+        purchaseResult.message;
+    }
+
+    // ==========================================
+    // WARRANTY EXPIRY
+    // ==========================================
+    const warrantyResult =
+      validateWarrantyExpiry(
+        editWarrantyExpiry,
+        editPurchaseDate
+      );
+
+    if (!warrantyResult.isValid) {
+      newErrors.editWarrantyExpiry =
+        warrantyResult.message;
+    }
+
+    // ==========================================
+    // DESCRIPTION
+    // ==========================================
+    const descriptionResult =
+      validateDescription(
+        editDescription
+      );
+
+    if (!descriptionResult.isValid) {
+      newErrors.editDescription =
+        descriptionResult.message;
+    }
+
+    // ==========================================
+    // SET ERRORS
+    // ==========================================
+    setEditErrors(newErrors);
+
+    return (
+      Object.keys(newErrors).length === 0
+    );
+  };
+
+  // ==========================================
+  // SAVE EDIT TO DATABASE
+  // ==========================================
+  const saveEdit = async () => {
+    if (!validateEditForm()) {
+      setTimeout(() => {
+        const firstError =
+          document.querySelector(
+            ".ma-input--error"
+          );
+
+        if (firstError) {
+          firstError.focus();
+        }
+      }, 100);
+
+      return;
+    }
+
+    try {
+      const token = getToken();
+
+      if (!token) {
+        alert(
+          "Login session expired. Please login again."
+        );
+
+        return;
+      }
+
+      const response = await fetch(
+        `${API_URL}/${editingAssetId}`,
+        {
+          method: "PUT",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+
+            Authorization:
+              `Bearer ${token}`,
+          },
+
+          body: JSON.stringify({
+            assetType: editType,
+            model: editModel.trim(),
+            purchaseDate:
+              editPurchaseDate,
+            warrantyExpiry:
+              editWarrantyExpiry,
+            description:
+              editDescription.trim(),
+          }),
+        }
+      );
+
+      const data =
+        await response.json();
+
+      console.log(
+        "Update Asset Response:",
+        data
+      );
+
+      if (
+        !response.ok ||
+        !data.success
+      ) {
+        alert(
+          data.message ||
+            "Failed to update asset."
+        );
+
+        return;
+      }
+
+      alert(
+        `Asset ${editingAssetId} updated successfully!`
+      );
+
+      closeEditPage();
+
+      // Reload from database
+      fetchAssets(
+        appliedName,
+        appliedType
+      );
+    } catch (error) {
+      console.error(
+        "Update Asset Error:",
+        error
+      );
+
+      alert(
+        "Unable to connect to backend."
+      );
+    }
+  };
+
+  // ==========================================
+  // OPEN DELETE MODAL
+  // ==========================================
+  const openDelete = (asset) => {
+    setDeleteAsset(asset);
+  };
+
+  // ==========================================
+  // DELETE FROM DATABASE
+  // ==========================================
+  const confirmDelete = async () => {
+    if (!deleteAsset) {
+      return;
+    }
+
+    try {
+      const token = getToken();
+
+      if (!token) {
+        alert(
+          "Login session expired. Please login again."
+        );
+
+        return;
+      }
+
+      const response = await fetch(
+        `${API_URL}/${deleteAsset.asset_id}`,
+        {
+          method: "DELETE",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+
+            Authorization:
+              `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data =
+        await response.json();
+
+      console.log(
+        "Delete Asset Response:",
+        data
+      );
+
+      if (
+        !response.ok ||
+        !data.success
+      ) {
+        alert(
+          data.message ||
+            "Failed to delete asset."
+        );
+
+        return;
+      }
+
+      alert(
+        `Asset ${deleteAsset.asset_id} deleted successfully!`
+      );
+
+      setDeleteAsset(null);
+
+      // Reload database records
+      fetchAssets(
+        appliedName,
+        appliedType
+      );
+    } catch (error) {
+      console.error(
+        "Delete Asset Error:",
+        error
+      );
+
+      alert(
+        "Unable to connect to backend."
+      );
+    }
+  };
+
+  // ==========================================
+  // RENDER EDIT PAGE
+  // ==========================================
+  const renderEditPage = () => {
+    return (
+      <div className="ma-edit-page-wrapper">
+
+        <div className="ma-edit-page-container">
+
+          {/* =====================================
+              EDIT HEADER
+          ===================================== */}
+          <div className="ma-edit-page-header">
+            <h2 className="ma-edit-page-title">
+              Edit Asset
+            </h2>
+          </div>
+
+          <div className="ma-edit-form">
+
+            {/* =================================
+                ASSET ID
+            ================================= */}
+            <div className="ma-modal-field">
+
+              <label className="ma-field-label">
+                Asset ID
+              </label>
+
+              <input
+                className="ma-input ma-input--readonly"
+                type="text"
+                value={
+                  editingAssetId || ""
+                }
+                readOnly
+              />
+
+            </div>
+
+            {/* =================================
+                ASSET TYPE
+            ================================= */}
+            <div className="ma-modal-field">
+
+              <label className="ma-field-label">
+                Asset Type *
+              </label>
+
+              <select
+                className={`ma-select ${
+                  editErrors.editType
+                    ? "ma-input--error"
+                    : ""
+                }`}
+                value={editType}
+                onChange={(e) => {
+                  setEditType(
+                    e.target.value
+                  );
+
+                  setEditErrors(
+                    (prev) => ({
+                      ...prev,
+                      editType: "",
+                    })
+                  );
+                }}
+              >
+
+                <option value="">
+                  Select Asset Type
+                </option>
+
+                {ASSET_TYPES
+                  .filter(
+                    (type) =>
+                      type !==
+                      "All Assets"
+                  )
+                  .map((type) => (
+                    <option
+                      key={type}
+                      value={type}
+                    >
+                      {type}
+                    </option>
+                  ))}
+
+              </select>
+
+              {editErrors.editType && (
+                <span className="ma-error-text">
+                  ⚠️ {editErrors.editType}
+                </span>
+              )}
+
+            </div>
+
+            {/* =================================
+                MODEL
+            ================================= */}
+            <div className="ma-modal-field">
+
+              <label className="ma-field-label">
+                Model *
+              </label>
+
+              <input
+                className={`ma-input ${
+                  editErrors.editModel
+                    ? "ma-input--error"
+                    : ""
+                }`}
+                type="text"
+                value={editModel}
+                maxLength={50}
+                placeholder="Enter Model"
+                onChange={
+                  handleEditModelChange
+                }
+              />
+
+              {editErrors.editModel && (
+                <span className="ma-error-text">
+                  ⚠️ {editErrors.editModel}
+                </span>
+              )}
+
+            </div>
+
+            {/* =================================
+                PURCHASE DATE
+            ================================= */}
+            <div className="ma-modal-field">
+
+              <label className="ma-field-label">
+                Purchase Date *
+              </label>
+
+              <input
+                className={`ma-input ${
+                  editErrors.editPurchaseDate
+                    ? "ma-input--error"
+                    : ""
+                }`}
+                type="date"
+                value={
+                  editPurchaseDate
+                }
+                onChange={(e) => {
+                  setEditPurchaseDate(
+                    e.target.value
+                  );
+
+                  setEditErrors(
+                    (prev) => ({
+                      ...prev,
+                      editPurchaseDate:
+                        "",
+                      editWarrantyExpiry:
+                        "",
+                    })
+                  );
+                }}
+              />
+
+              {editErrors.editPurchaseDate && (
+                <span className="ma-error-text">
+                  ⚠️{" "}
+                  {
+                    editErrors.editPurchaseDate
+                  }
+                </span>
+              )}
+
+            </div>
+
+            {/* =================================
+                WARRANTY EXPIRY
+            ================================= */}
+            <div className="ma-modal-field">
+
+              <label className="ma-field-label">
+                Warranty Expiry Date *
+              </label>
+
+              <input
+                className={`ma-input ${
+                  editErrors.editWarrantyExpiry
+                    ? "ma-input--error"
+                    : ""
+                }`}
+                type="date"
+                value={
+                  editWarrantyExpiry
+                }
+                onChange={(e) => {
+                  setEditWarrantyExpiry(
+                    e.target.value
+                  );
+
+                  setEditErrors(
+                    (prev) => ({
+                      ...prev,
+                      editWarrantyExpiry:
+                        "",
+                    })
+                  );
+                }}
+              />
+
+              {editErrors.editWarrantyExpiry && (
+                <span className="ma-error-text">
+                  ⚠️{" "}
+                  {
+                    editErrors.editWarrantyExpiry
+                  }
+                </span>
+              )}
+
+            </div>
+
+            {/* =================================
+                DESCRIPTION
+            ================================= */}
+            <div className="ma-modal-field">
+
+              <label className="ma-field-label">
+                Description *
+              </label>
+
+              <textarea
+                className={`ma-input ${
+                  editErrors.editDescription
+                    ? "ma-input--error"
+                    : ""
+                }`}
+                rows="4"
+                maxLength={500}
+                placeholder="Enter Description"
+                value={
+                  editDescription
+                }
+                onChange={
+                  handleEditDescriptionChange
+                }
+              />
+
+              {/* Character Count */}
+              <div
+                style={{
+                  textAlign: "right",
+                  fontSize: "12px",
+                  color: "#777",
+                  marginTop: "4px",
+                }}
+              >
+                {
+                  editDescription.length
+                }
+                /500
+              </div>
+
+              {editErrors.editDescription && (
+                <span className="ma-error-text">
+                  ⚠️{" "}
+                  {
+                    editErrors.editDescription
+                  }
+                </span>
+              )}
+
+            </div>
+
+            {/* =================================
+                FORM ACTIONS
+            ================================= */}
+            <div className="ma-edit-actions">
+
+              <button
+                type="button"
+                className="ma-edit-cancel-btn"
+                onClick={
+                  closeEditPage
+                }
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                className="ma-edit-save-btn"
+                onClick={saveEdit}
+              >
+                Update Asset
+              </button>
+
+            </div>
+
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // ==========================================
+  // RENDER MAIN LIST
+  // ==========================================
+  if (isEditPage) {
+    return renderEditPage();
   }
 
-  .aa-card {
-    padding: 24px 16px;
+  return (
+    <div className="ma-page-wrapper">
 
-    gap: 22px;
+      {/* ======================================
+          TOP NAVBAR
+      ====================================== */}
+      <nav className="ma-top-nav">
 
-    border-radius: 8px;
-  }
+        <div className="ma-nav-logo">
 
-  .aa-card-heading {
-    font-size: 20px;
-  }
+          <span className="ma-nav-logo-title">
+            ITAMS
+          </span>
 
-  .aa-label {
-    font-size: 14px;
-  }
+          <span className="ma-nav-logo-sub">
+            IT Asset Management System
+          </span>
 
-  .aa-input,
-  .aa-select {
-    height: 52px;
+        </div>
 
-    font-size: 14px;
-  }
+        <div className="ma-nav-right">
 
-  .aa-textarea {
-    min-height: 100px;
-  }
+          <span className="ma-nav-username">
+            {username}
+          </span>
 
-  .aa-form-actions {
-    flex-direction: column;
+          <div className="ma-nav-divider" />
 
-    align-items: stretch;
+          <button
+            className="ma-logout-btn"
+            onClick={onLogout}
+          >
+            Logout
+          </button>
 
-    gap: 12px;
-  }
+        </div>
 
-  .aa-btn-primary,
-  .aa-btn-outline {
-    width: 100%;
-  }
+      </nav>
 
-  .aa-btn-back {
-    width: 100%;
-  }
+      {/* ======================================
+          BODY
+      ====================================== */}
+      <div className="ma-body-wrapper">
 
-}
+        {/* ====================================
+            SIDEBAR
+        ==================================== */}
+        <aside className="ma-sidebar">
 
+          {sidebarItems.map(
+            (item) => (
+              <div
+                key={item.id}
+                className={
+                  "ma-sidebar-item" +
+                  (
+                    activeSidebar ===
+                    item.id
+                      ? " ma-sidebar-item--active"
+                      : ""
+                  )
+                }
+                onClick={() =>
+                  handleSidebarClick(
+                    item
+                  )
+                }
+              >
+                {item.label}
+              </div>
+            )
+          )}
 
-/* ============================================================
-   VERY SMALL MOBILE
-   ============================================================ */
+        </aside>
 
-@media (max-width: 350px) {
+        {/* ====================================
+            MAIN CONTENT
+        ==================================== */}
+        <main className="ma-main-content">
 
-  .aa-nav-right {
-    justify-content: space-between;
-  }
+          <h1 className="ma-page-title">
+            Manage Asset
+          </h1>
 
-  .aa-page-title {
-    font-size: 24px;
-  }
+          <p className="ma-page-subtitle">
+            Edit or delete existing IT assets
+            in the organization.
+          </p>
 
-  .aa-card {
-    padding: 20px 13px;
-  }
+          {/* ==================================
+              SEARCH CARD
+          ================================== */}
+          <div className="ma-card">
 
-}
+            <h2 className="ma-card-heading">
+              Search Asset
+            </h2>
+
+            <div className="ma-search-row">
+
+              {/* Asset ID */}
+              <div className="ma-field-group">
+
+                <label className="ma-field-label">
+                  Asset ID
+                </label>
+
+                <input
+                  className={`ma-input ${
+                    showFieldError
+                      ? "ma-input--error"
+                      : ""
+                  }`}
+                  type="text"
+                  placeholder="Enter Asset ID (e.g., AST001)"
+                  value={searchName}
+                  onChange={
+                    handleSearchNameChange
+                  }
+                  onKeyDown={
+                    handleSearchKeyDown
+                  }
+                />
+
+                <div className="ma-validation-hint">
+                  <small>
+                    Format: AST + 3
+                    alphanumeric
+                    {" "}
+                    (e.g., AST001,
+                    ASTA12, AST1AB)
+                  </small>
+                </div>
+
+              </div>
+
+              {/* Asset Type */}
+              <div className="ma-field-group">
+
+                <label className="ma-field-label">
+                  Asset Type
+                </label>
+
+                <select
+                  className={`ma-select ${
+                    showFieldError
+                      ? "ma-input--error"
+                      : ""
+                  }`}
+                  value={searchType}
+                  onChange={
+                    handleSearchTypeChange
+                  }
+                >
+
+                  {ASSET_TYPES.map(
+                    (type) => (
+                      <option
+                        key={type}
+                        value={type}
+                      >
+                        {type}
+                      </option>
+                    )
+                  )}
+
+                </select>
+
+              </div>
+
+              {/* Search Button */}
+              <button
+                className="ma-search-btn"
+                onClick={handleSearch}
+              >
+                Search
+              </button>
+
+            </div>
+
+            {searchError && (
+              <div className="ma-search-error-container">
+
+                <span className="ma-error-text">
+                  ⚠️ {searchError}
+                </span>
+
+              </div>
+            )}
+
+          </div>
+
+          {/* ==================================
+              ASSET LIST
+          ================================== */}
+          <div className="ma-card ma-card--table">
+
+            <h2 className="ma-card-heading">
+              Asset List
+            </h2>
+
+            <div className="ma-table-wrapper">
+
+              <table className="ma-table">
+
+                <thead>
+
+                  <tr>
+
+                    <th>
+                      Asset ID
+                    </th>
+
+                    <th>
+                      Asset Type
+                    </th>
+
+                    <th>
+                      Actions
+                    </th>
+
+                  </tr>
+
+                </thead>
+
+                <tbody>
+
+                  {loading ? (
+
+                    <tr>
+
+                      <td
+                        colSpan={3}
+                        className="ma-no-data"
+                      >
+                        Loading assets...
+                      </td>
+
+                    </tr>
+
+                  ) : displayedAssets.length === 0 ? (
+
+                    <tr>
+
+                      <td
+                        colSpan={3}
+                        className="ma-no-data"
+                      >
+                        No assets found.
+                      </td>
+
+                    </tr>
+
+                  ) : (
+
+                    displayedAssets.map(
+                      (asset) => (
+
+                        <tr
+                          key={
+                            asset.asset_id
+                          }
+                        >
+
+                          <td>
+
+                            <span className="ma-asset-id">
+                              {
+                                asset.asset_id
+                              }
+                            </span>
+
+                          </td>
+
+                          <td>
+
+                            <span className="ma-type-badge">
+                              {
+                                asset.asset_type
+                              }
+                            </span>
+
+                          </td>
+
+                          <td className="ma-actions-cell">
+
+                            <button
+                              className="ma-btn-edit"
+                              onClick={() =>
+                                openEditPage(
+                                  asset
+                                )
+                              }
+                            >
+                              Edit
+                            </button>
+
+                            <button
+                              className="ma-btn-delete"
+                              onClick={() =>
+                                openDelete(
+                                  asset
+                                )
+                              }
+                            >
+                              Delete
+                            </button>
+
+                          </td>
+
+                        </tr>
+
+                      )
+                    )
+
+                  )}
+
+                </tbody>
+
+              </table>
+
+            </div>
+
+            {/* ==================================
+                TABLE FOOTER
+            ================================== */}
+            <div className="ma-table-footer">
+
+              <button
+                className="ma-back-btn"
+                onClick={onBack}
+              >
+                ← Back
+              </button>
+
+              <div className="ma-rows-select-group">
+
+                <span className="ma-pagination-info">
+                  Showing{" "}
+                  {
+                    displayedAssets.length
+                  }{" "}
+                  of{" "}
+                  {
+                    filteredAssets.length
+                  }{" "}
+                  assets
+                </span>
+
+                <select
+                  className="ma-rows-select"
+                  value={rowsPerPage}
+                  onChange={(e) => {
+
+                    const value =
+                      e.target.value;
+
+                    setRowsPerPage(
+                      value === "All"
+                        ? "All"
+                        : Number(value)
+                    );
+                  }}
+                >
+
+                  {ROWS_PER_PAGE_OPTIONS.map(
+                    (option) => (
+
+                      <option
+                        key={option}
+                        value={option}
+                      >
+                        {option}
+                      </option>
+
+                    )
+                  )}
+
+                </select>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </main>
+
+      </div>
+
+      {/* ======================================
+          DELETE MODAL
+      ====================================== */}
+      {deleteAsset && (
+
+        <div
+          className="ma-modal-overlay"
+          onClick={() =>
+            setDeleteAsset(null)
+          }
+        >
+
+          <div
+            className="ma-modal"
+            onClick={(e) =>
+              e.stopPropagation()
+            }
+          >
+
+            <h2 className="ma-modal-title">
+              Delete Asset
+            </h2>
+
+            <p className="ma-modal-msg">
+              Are you sure you want
+              to delete this asset?
+            </p>
+
+            <div className="ma-delete-details">
+
+              <div className="ma-delete-row">
+
+                <span className="ma-delete-label">
+                  Asset ID:
+                </span>
+
+                <span className="ma-delete-value">
+                  {
+                    deleteAsset.asset_id
+                  }
+                </span>
+
+              </div>
+
+              <div className="ma-delete-row">
+
+                <span className="ma-delete-label">
+                  Asset Type:
+                </span>
+
+                <span className="ma-delete-value">
+                  {
+                    deleteAsset.asset_type
+                  }
+                </span>
+
+              </div>
+
+            </div>
+
+            <div className="ma-modal-actions">
+
+              <button
+                className="ma-modal-cancel"
+                onClick={() =>
+                  setDeleteAsset(null)
+                }
+              >
+                No
+              </button>
+
+              <button
+                className="ma-modal-delete"
+                onClick={
+                  confirmDelete
+                }
+              >
+                Yes
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      )}
+
+    </div>
+  );
+};
+
+export default ManageAsset;
