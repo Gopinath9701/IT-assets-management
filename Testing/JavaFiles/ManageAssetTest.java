@@ -1,14 +1,16 @@
 package com.test;
 
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 
@@ -21,8 +23,11 @@ import static org.junit.Assert.assertTrue;
 
 public class ManageAssetTest {
 
-    private WebDriver driver;
+    private ChromeDriver driver;
     private WebDriverWait wait;
+
+    private final String URL = "http://localhost:3000";
+
 
     // =========================================================
     // SETUP
@@ -40,31 +45,423 @@ public class ManageAssetTest {
                 Duration.ofSeconds(15)
         );
 
-        driver.get("http://localhost:3000");
 
-        System.out.println();
-        System.out.println("==========================================");
-        System.out.println("APPLICATION STARTED");
-        System.out.println("==========================================");
-    }
+        // =====================================================
+        // FRONTEND ONLY MOCK
+        // =====================================================
 
-    // =========================================================
-    // SCROLL HELPER
-    // =========================================================
+        String mockScript = """
 
-    private void scrollToElement(WebElement element) {
+        (() => {
 
-        ((JavascriptExecutor) driver).executeScript(
-                "arguments[0].scrollIntoView({block:'center', inline:'center'});",
-                element
+            // =================================================
+            // FAKE LOGIN TOKEN
+            // =================================================
+
+            localStorage.setItem(
+                "token",
+                "frontend-test-token"
+            );
+
+            localStorage.setItem(
+                "user",
+                JSON.stringify({
+                    employee_id: "EMP001",
+                    username: "Test User",
+                    email: "test@gmail.com"
+                })
+            );
+
+
+            // =================================================
+            // SAVE ORIGINAL FETCH
+            // =================================================
+
+            const originalFetch = window.fetch;
+
+
+            // =================================================
+            // MOCK FETCH
+            // =================================================
+
+            window.fetch = async function(url, options) {
+
+                console.log(
+                    "FRONTEND MOCK FETCH:",
+                    url,
+                    options
+                );
+
+
+                // =================================================
+                // GET ASSETS
+                // =================================================
+
+                if (
+                    typeof url === "string" &&
+                    url.includes("/api/assets") &&
+                    (
+                        !options ||
+                        !options.method ||
+                        options.method.toUpperCase() === "GET"
+                    )
+                ) {
+
+                    let assets = [
+
+                        {
+                            asset_id: "AST001",
+                            asset_type: "Monitor",
+                            model: "Dell Monitor",
+                            description: "Office monitor",
+                            purchase_date: "2025-01-10",
+                            warranty_expiry: "2027-01-10"
+                        },
+
+                        {
+                            asset_id: "AST002",
+                            asset_type: "Keyboard",
+                            model: "Logitech Keyboard",
+                            description: "Wireless keyboard",
+                            purchase_date: "2025-02-15",
+                            warranty_expiry: "2027-02-15"
+                        },
+
+                        {
+                            asset_id: "AST003",
+                            asset_type: "Laptop",
+                            model: "HP Laptop",
+                            description: "Development laptop",
+                            purchase_date: "2025-03-20",
+                            warranty_expiry: "2028-03-20"
+                        },
+
+                        {
+                            asset_id: "AST004",
+                            asset_type: "Mouse",
+                            model: "Logitech Mouse",
+                            description: "Wireless mouse",
+                            purchase_date: "2025-04-10",
+                            warranty_expiry: "2027-04-10"
+                        },
+
+                        {
+                            asset_id: "AST005",
+                            asset_type: "Printer",
+                            model: "HP Printer",
+                            description: "Office printer",
+                            purchase_date: "2025-05-10",
+                            warranty_expiry: "2028-05-10"
+                        }
+
+                    ];
+
+
+                    // =============================================
+                    // SEARCH PARAMETER SUPPORT
+                    // =============================================
+
+                    try {
+
+                        const parsedUrl =
+                            new URL(url);
+
+                        const search =
+                            parsedUrl.searchParams.get(
+                                "search"
+                            );
+
+                        const type =
+                            parsedUrl.searchParams.get(
+                                "type"
+                            );
+
+
+                        if (search) {
+
+                            assets =
+                                assets.filter(
+                                    asset =>
+                                        asset.asset_id
+                                            .toLowerCase()
+                                            .includes(
+                                                search.toLowerCase()
+                                            )
+                                );
+                        }
+
+
+                        if (type) {
+
+                            assets =
+                                assets.filter(
+                                    asset =>
+                                        asset.asset_type === type
+                                );
+                        }
+
+                    } catch (e) {
+
+                        console.log(
+                            "URL parsing skipped"
+                        );
+                    }
+
+
+                    return new Response(
+
+                        JSON.stringify({
+
+                            success: true,
+
+                            assets: assets
+
+                        }),
+
+                        {
+                            status: 200,
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            }
+                        }
+
+                    );
+                }
+
+
+                // =================================================
+                // UPDATE ASSET
+                // =================================================
+
+                if (
+                    typeof url === "string" &&
+                    url.includes("/api/assets/") &&
+                    options &&
+                    options.method &&
+                    options.method.toUpperCase() === "PUT"
+                ) {
+
+                    return new Response(
+
+                        JSON.stringify({
+
+                            success: true,
+
+                            message:
+                                "Asset updated successfully"
+
+                        }),
+
+                        {
+                            status: 200,
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            }
+                        }
+
+                    );
+                }
+
+
+                // =================================================
+                // DELETE ASSET
+                // =================================================
+
+                if (
+                    typeof url === "string" &&
+                    url.includes("/api/assets/") &&
+                    options &&
+                    options.method &&
+                    options.method.toUpperCase() === "DELETE"
+                ) {
+
+                    return new Response(
+
+                        JSON.stringify({
+
+                            success: true,
+
+                            message:
+                                "Asset deleted successfully"
+
+                        }),
+
+                        {
+                            status: 200,
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            }
+                        }
+
+                    );
+                }
+
+
+                // =================================================
+                // OTHER REQUESTS
+                // =================================================
+
+                return originalFetch.apply(
+                    this,
+                    arguments
+                );
+
+            };
+
+        })();
+
+        """;
+
+
+        // =====================================================
+        // INSTALL MOCK BEFORE REACT LOADS
+        // =====================================================
+
+        Map<String, Object> params =
+                new HashMap<>();
+
+        params.put(
+                "source",
+                mockScript
         );
 
+
+        driver.executeCdpCommand(
+                "Page.addScriptToEvaluateOnNewDocument",
+                params
+        );
+
+
+        // =====================================================
+        // OPEN APPLICATION
+        // =====================================================
+
+        driver.get(URL);
+
+        System.out.println();
+        System.out.println(
+                "=========================================="
+        );
+        System.out.println(
+                "APPLICATION OPENED"
+        );
+        System.out.println(
+                "FRONTEND ONLY TEST"
+        );
+        System.out.println(
+                "BACKEND NOT REQUIRED"
+        );
+        System.out.println(
+                "=========================================="
+        );
+    }
+
+
+    // =========================================================
+    // COMMON CLICK METHOD
+    // =========================================================
+
+    private void safeClick(By locator) {
+
+        WebElement element =
+                wait.until(
+                        ExpectedConditions.elementToBeClickable(
+                                locator
+                        )
+                );
+
+
+        ((JavascriptExecutor) driver)
+                .executeScript(
+                        "arguments[0].scrollIntoView({block:'center'});",
+                        element
+                );
+
+
         try {
-            Thread.sleep(300);
+
+            element.click();
+
+        } catch (Exception e) {
+
+            ((JavascriptExecutor) driver)
+                    .executeScript(
+                            "arguments[0].click();",
+                            element
+                    );
+        }
+    }
+
+
+    // =========================================================
+    // WAIT FOR ELEMENT
+    // =========================================================
+
+    private WebElement waitForVisible(
+            By locator
+    ) {
+
+        return wait.until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        locator
+                )
+        );
+    }
+
+
+    // =========================================================
+    // PAUSE
+    // =========================================================
+
+    private void pause() {
+
+        try {
+
+            Thread.sleep(700);
+
         } catch (InterruptedException e) {
+
             Thread.currentThread().interrupt();
         }
     }
+
+
+    // =========================================================
+    // HANDLE ALERT
+    // =========================================================
+
+    private void acceptAlertIfPresent() {
+
+        try {
+
+            WebDriverWait shortWait =
+                    new WebDriverWait(
+                            driver,
+                            Duration.ofSeconds(2)
+                    );
+
+            Alert alert =
+                    shortWait.until(
+                            ExpectedConditions.alertIsPresent()
+                    );
+
+            System.out.println(
+                    "Alert: " + alert.getText()
+            );
+
+            alert.accept();
+
+        } catch (Exception ignored) {
+
+        }
+    }
+
 
     // =========================================================
     // NAVIGATION
@@ -73,7 +470,8 @@ public class ManageAssetTest {
     //   ↓
     // Login
     //   ↓
-    // No credentials entered
+    // NO USERNAME
+    // NO PASSWORD
     //   ↓
     // Asset Mgmt
     //   ↓
@@ -87,1154 +485,1706 @@ public class ManageAssetTest {
     private void navigateToManageAsset() {
 
         System.out.println();
-        System.out.println("Starting navigation...");
+        System.out.println(
+                "STARTING NAVIGATION"
+        );
 
-        // -----------------------------------------------------
-        // 1. Click Login
-        // -----------------------------------------------------
 
-        WebElement loginButton = wait.until(
-                ExpectedConditions.elementToBeClickable(
-                        By.xpath("//button[normalize-space()='Login']")
+        // =====================================================
+        // STEP 1
+        // HOME PAGE
+        // =====================================================
+
+        WebElement loginButton =
+                waitForVisible(
+                        By.xpath(
+                                "//button[normalize-space()='Login']"
+                        )
+                );
+
+
+        assertTrue(
+                "Login button should be displayed",
+                loginButton.isDisplayed()
+        );
+
+
+        safeClick(
+                By.xpath(
+                        "//button[normalize-space()='Login']"
                 )
         );
 
-        scrollToElement(loginButton);
-
-        loginButton.click();
 
         System.out.println(
                 "PASS: Login button clicked"
         );
 
-        // -----------------------------------------------------
-        // 2. DO NOT ENTER USERNAME/PASSWORD
-        // -----------------------------------------------------
 
-        System.out.println(
-                "Username and password intentionally left empty"
-        );
+        // =====================================================
+        // STEP 2
+        // LOGIN PAGE
+        // =====================================================
 
-        // -----------------------------------------------------
-        // 3. Click Asset Mgmt
-        // -----------------------------------------------------
+        wait.until(
+                ExpectedConditions.or(
 
-        WebElement assetMgmtButton = wait.until(
-                ExpectedConditions.elementToBeClickable(
-                        By.xpath("//button[normalize-space()='Asset Mgmt']")
+                        ExpectedConditions.visibilityOfElementLocated(
+                                By.name(
+                                        "employeeIdOrEmail"
+                                )
+                        ),
+
+                        ExpectedConditions.visibilityOfElementLocated(
+                                By.xpath(
+                                        "//*[normalize-space()='Login']"
+                                )
+                        )
+
                 )
         );
 
-        scrollToElement(assetMgmtButton);
 
-        assetMgmtButton.click();
+        System.out.println(
+                "PASS: Login page opened"
+        );
+
+
+        // =====================================================
+        // IMPORTANT
+        // =====================================================
+        //
+        // DO NOT ENTER USERNAME
+        // DO NOT ENTER PASSWORD
+        //
+        // Same navigation style as AddAssetTest.
+        // =====================================================
+
+
+        System.out.println(
+                "Username and password intentionally NOT entered"
+        );
+
+
+        // =====================================================
+        // STEP 3
+        // ASSET MGMT
+        // =====================================================
+
+        safeClick(
+                By.xpath(
+                        "//button[normalize-space()='Asset Mgmt']"
+                )
+        );
+
 
         System.out.println(
                 "PASS: Asset Mgmt clicked"
         );
 
-        // -----------------------------------------------------
-        // 4. Verify Asset Management page
-        // -----------------------------------------------------
 
-        WebElement assetManagementHeading = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.xpath(
-                                "//h1[normalize-space()='Asset Management']"
-                        )
+        // =====================================================
+        // STEP 4
+        // ASSET MANAGEMENT PAGE
+        // =====================================================
+
+        waitForVisible(
+                By.xpath(
+                        "//h1[normalize-space()='Asset Management']"
                 )
         );
 
-        assertTrue(
-                "Asset Management page should be displayed",
-                assetManagementHeading.isDisplayed()
-        );
 
         System.out.println(
                 "PASS: Asset Management page opened"
         );
 
-        // -----------------------------------------------------
-        // 5. Find Manage Assets button
-        // -----------------------------------------------------
 
-        WebElement manageAssetsButton = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.xpath(
-                                "//button[normalize-space()='Manage Assets']"
-                        )
+        // =====================================================
+        // STEP 5
+        // MANAGE ASSETS BUTTON
+        // =====================================================
+
+        safeClick(
+                By.xpath(
+                        "//button[normalize-space()='Manage Assets']"
                 )
         );
 
-        assertTrue(
-                "Manage Assets button should be visible",
-                manageAssetsButton.isDisplayed()
-        );
 
         System.out.println(
-                "PASS: Manage Assets button found"
+                "PASS: Manage Assets button clicked"
         );
 
-        // -----------------------------------------------------
-        // 6. Click Manage Assets
-        // -----------------------------------------------------
 
-        scrollToElement(manageAssetsButton);
+        // =====================================================
+        // STEP 6
+        // MANAGE ASSET PAGE
+        // =====================================================
 
-        wait.until(
-                ExpectedConditions.elementToBeClickable(
-                        manageAssetsButton
+        waitForVisible(
+                By.cssSelector(
+                        ".ma-page-title"
                 )
         );
 
-        manageAssetsButton.click();
 
-        System.out.println(
-                "PASS: Manage Assets clicked"
-        );
-
-        // -----------------------------------------------------
-        // 7. Verify Manage Asset page
-        // -----------------------------------------------------
-
-        WebElement manageAssetHeading = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.xpath(
-                                "//h1[normalize-space()='Manage Asset']"
+        WebElement heading =
+                waitForVisible(
+                        By.cssSelector(
+                                ".ma-page-title"
                         )
-                )
+                );
+
+
+        assertEquals(
+                "Manage Asset",
+                heading.getText().trim()
         );
 
-        assertTrue(
-                "Manage Asset page should be displayed",
-                manageAssetHeading.isDisplayed()
-        );
 
         System.out.println(
                 "PASS: Manage Asset page opened"
         );
+
+
+        pause();
     }
 
+
     // =========================================================
-    // TEST 1
-    // MANAGE ASSET PAGE
+    // TEST 01
+    // NAVIGATION
     // =========================================================
 
     @Test
-    public void testManageAssetPage() {
+    public void testNavigateToManageAsset() {
 
         System.out.println();
-        System.out.println("==========================================");
-        System.out.println("TEST 1 - MANAGE ASSET PAGE");
-        System.out.println("==========================================");
+        System.out.println(
+                "=========================================="
+        );
+        System.out.println(
+                "TEST 01 - NAVIGATION"
+        );
+        System.out.println(
+                "=========================================="
+        );
+
 
         navigateToManageAsset();
 
-        WebElement heading = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.xpath(
-                                "//h1[normalize-space()='Manage Asset']"
+
+        WebElement heading =
+                waitForVisible(
+                        By.cssSelector(
+                                ".ma-page-title"
                         )
-                )
+                );
+
+
+        assertEquals(
+                "Manage Asset",
+                heading.getText().trim()
         );
 
-        assertTrue(
-                "Manage Asset heading should be visible",
-                heading.isDisplayed()
-        );
 
         System.out.println(
-                "TEST 1 PASSED"
+                "TEST 01 PASSED"
         );
     }
 
+
     // =========================================================
-    // TEST 2
-    // SEARCH FIELDS
+    // TEST 02
+    // PAGE TITLE AND SUBTITLE
     // =========================================================
 
     @Test
-    public void testSearchFields() {
-
-        System.out.println();
-        System.out.println("==========================================");
-        System.out.println("TEST 2 - SEARCH FIELDS");
-        System.out.println("==========================================");
+    public void testPageTitleAndSubtitle() {
 
         navigateToManageAsset();
 
-        // Search input
-        WebElement searchInput = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.xpath(
-                                "//input[@placeholder='Enter asset name or ID (e.g., AST001)']"
+
+        WebElement title =
+                waitForVisible(
+                        By.cssSelector(
+                                ".ma-page-title"
                         )
-                )
+                );
+
+
+        WebElement subtitle =
+                waitForVisible(
+                        By.cssSelector(
+                                ".ma-page-subtitle"
+                        )
+                );
+
+
+        assertEquals(
+                "Manage Asset",
+                title.getText().trim()
         );
 
-        assertTrue(
-                "Search input should be visible",
-                searchInput.isDisplayed()
+
+        assertEquals(
+                "Edit or delete existing IT assets in the organization.",
+                subtitle.getText().trim()
         );
 
-        // Asset Type dropdown
-        WebElement assetType = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
+
+        System.out.println(
+                "TEST 02 PASSED - Title and subtitle"
+        );
+    }
+
+
+    // =========================================================
+    // TEST 03
+    // SEARCH SECTION
+    // =========================================================
+
+    @Test
+    public void testSearchSection() {
+
+        navigateToManageAsset();
+
+
+        WebElement searchInput =
+                waitForVisible(
+                        By.xpath(
+                                "//input[@placeholder='Enter Asset ID (e.g., AST001)']"
+                        )
+                );
+
+
+        WebElement typeDropdown =
+                waitForVisible(
                         By.cssSelector(
                                 ".ma-search-row .ma-select"
                         )
-                )
-        );
+                );
 
-        assertTrue(
-                "Asset Type dropdown should be visible",
-                assetType.isDisplayed()
-        );
 
-        // Search button
-        WebElement searchButton = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.xpath(
-                                "//button[normalize-space()='Search']"
+        WebElement searchButton =
+                waitForVisible(
+                        By.cssSelector(
+                                ".ma-search-btn"
                         )
-                )
-        );
+                );
+
 
         assertTrue(
-                "Search button should be visible",
+                searchInput.isDisplayed()
+        );
+
+
+        assertTrue(
+                typeDropdown.isDisplayed()
+        );
+
+
+        assertTrue(
                 searchButton.isDisplayed()
         );
 
+
+        assertEquals(
+                "Search",
+                searchButton.getText().trim()
+        );
+
+
         System.out.println(
-                "TEST 2 PASSED"
+                "TEST 03 PASSED - Search section"
         );
     }
 
+
     // =========================================================
-    // TEST 3
+    // TEST 04
+    // ASSET TYPE DROPDOWN
+    // =========================================================
+
+    @Test
+    public void testAssetTypeDropdown() {
+
+        navigateToManageAsset();
+
+
+        Select dropdown =
+                new Select(
+                        waitForVisible(
+                                By.cssSelector(
+                                        ".ma-search-row .ma-select"
+                                )
+                        )
+                );
+
+
+        String[] expectedOptions = {
+
+                "All Assets",
+                "Monitor",
+                "Keyboard",
+                "Laptop",
+                "Mouse",
+                "Printer",
+                "Desktop",
+                "Webcam",
+                "Scanner",
+                "Projector"
+
+        };
+
+
+        assertEquals(
+                expectedOptions.length,
+                dropdown.getOptions().size()
+        );
+
+
+        for (
+                int i = 0;
+                i < expectedOptions.length;
+                i++
+        ) {
+
+            assertEquals(
+                    expectedOptions[i],
+                    dropdown
+                            .getOptions()
+                            .get(i)
+                            .getText()
+                            .trim()
+            );
+        }
+
+
+        dropdown.selectByVisibleText(
+                "Monitor"
+        );
+
+
+        assertEquals(
+                "Monitor",
+                dropdown
+                        .getFirstSelectedOption()
+                        .getText()
+                        .trim()
+        );
+
+
+        System.out.println(
+                "TEST 04 PASSED - Asset Type dropdown"
+        );
+    }
+
+
+    // =========================================================
+    // TEST 05
     // EMPTY SEARCH VALIDATION
     // =========================================================
 
     @Test
     public void testEmptySearchValidation() {
 
-        System.out.println();
-        System.out.println("==========================================");
-        System.out.println("TEST 3 - EMPTY SEARCH VALIDATION");
-        System.out.println("==========================================");
-
         navigateToManageAsset();
 
-        WebElement searchButton = wait.until(
-                ExpectedConditions.elementToBeClickable(
+
+        WebElement searchInput =
+                waitForVisible(
                         By.xpath(
-                                "//button[normalize-space()='Search']"
+                                "//input[@placeholder='Enter Asset ID (e.g., AST001)']"
                         )
-                )
-        );
+                );
 
-        scrollToElement(searchButton);
-
-        searchButton.click();
-
-        System.out.println(
-                "Search clicked without entering data"
-        );
-
-        WebElement errorMessage = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.xpath(
-                                "//*[contains(normalize-space(),'Please enter an Asset Name/ID or select an Asset Type to search')]"
-                        )
-                )
-        );
-
-        assertTrue(
-                "Validation message should be displayed",
-                errorMessage.isDisplayed()
-        );
-
-        System.out.println(
-                "TEST 3 PASSED"
-        );
-    }
-
-    // =========================================================
-    // TEST 4
-    // SEARCH BY ASSET ID
-    // =========================================================
-
-    @Test
-    public void testSearchByAssetId() {
-
-        System.out.println();
-        System.out.println("==========================================");
-        System.out.println("TEST 4 - SEARCH BY ASSET ID");
-        System.out.println("==========================================");
-
-        navigateToManageAsset();
-
-        WebElement searchInput = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.xpath(
-                                "//input[@placeholder='Enter asset name or ID (e.g., AST001)']"
-                        )
-                )
-        );
 
         searchInput.clear();
 
-        searchInput.sendKeys("AST001");
 
-        WebElement searchButton = wait.until(
-                ExpectedConditions.elementToBeClickable(
-                        By.xpath(
-                                "//button[normalize-space()='Search']"
+        Select dropdown =
+                new Select(
+                        driver.findElement(
+                                By.cssSelector(
+                                        ".ma-search-row .ma-select"
+                                )
                         )
+                );
+
+
+        dropdown.selectByVisibleText(
+                "All Assets"
+        );
+
+
+        safeClick(
+                By.cssSelector(
+                        ".ma-search-btn"
                 )
         );
 
-        searchButton.click();
 
-        System.out.println(
-                "Searching AST001"
-        );
-
-        WebElement assetId = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
+        WebElement error =
+                waitForVisible(
                         By.xpath(
-                                "//span[normalize-space()='AST001']"
+                                "//*[contains(normalize-space(),'Please enter an Asset ID or select an Asset Type to search')]"
                         )
-                )
-        );
+                );
+
 
         assertTrue(
-                "AST001 should be displayed",
-                assetId.isDisplayed()
+                error.isDisplayed()
         );
 
+
         System.out.println(
-                "TEST 4 PASSED"
+                "TEST 05 PASSED - Empty search validation"
         );
     }
 
+
     // =========================================================
-    // TEST 5
-    // SEARCH BY ASSET TYPE
+    // TEST 06
+    // LOWERCASE AST
+    // =========================================================
+
+    @Test
+    public void testLowercaseAssetIdValidation() {
+
+        navigateToManageAsset();
+
+
+        WebElement searchInput =
+                waitForVisible(
+                        By.xpath(
+                                "//input[@placeholder='Enter Asset ID (e.g., AST001)']"
+                        )
+                );
+
+
+        searchInput.clear();
+
+        searchInput.sendKeys(
+                "ast001"
+        );
+
+
+        safeClick(
+                By.cssSelector(
+                        ".ma-search-btn"
+                )
+        );
+
+
+        WebElement error =
+                waitForVisible(
+                        By.xpath(
+                                "//*[contains(normalize-space(),\"Asset ID must start with 'AST' (uppercase)\")]"
+                        )
+                );
+
+
+        assertTrue(
+                error.isDisplayed()
+        );
+
+
+        System.out.println(
+                "TEST 06 PASSED - Lowercase validation"
+        );
+    }
+
+
+    // =========================================================
+    // TEST 07
+    // SPACE VALIDATION
+    // =========================================================
+
+    @Test
+    public void testAssetIdSpaceValidation() {
+
+        navigateToManageAsset();
+
+
+        WebElement searchInput =
+                waitForVisible(
+                        By.xpath(
+                                "//input[@placeholder='Enter Asset ID (e.g., AST001)']"
+                        )
+                );
+
+
+        searchInput.clear();
+
+        searchInput.sendKeys(
+                "AST 01"
+        );
+
+
+        safeClick(
+                By.cssSelector(
+                        ".ma-search-btn"
+                )
+        );
+
+
+        WebElement error =
+                waitForVisible(
+                        By.xpath(
+                                "//*[contains(normalize-space(),'Asset ID should not contain spaces')]"
+                        )
+                );
+
+
+        assertTrue(
+                error.isDisplayed()
+        );
+
+
+        System.out.println(
+                "TEST 07 PASSED - Space validation"
+        );
+    }
+
+
+    // =========================================================
+    // TEST 08
+    // SPECIAL CHARACTER
+    // =========================================================
+
+    @Test
+    public void testSpecialCharacterValidation() {
+
+        navigateToManageAsset();
+
+
+        WebElement searchInput =
+                waitForVisible(
+                        By.xpath(
+                                "//input[@placeholder='Enter Asset ID (e.g., AST001)']"
+                        )
+                );
+
+
+        searchInput.clear();
+
+        searchInput.sendKeys(
+                "AST@01"
+        );
+
+
+        safeClick(
+                By.cssSelector(
+                        ".ma-search-btn"
+                )
+        );
+
+
+        WebElement error =
+                waitForVisible(
+                        By.xpath(
+                                "//*[contains(normalize-space(),'Asset ID should not contain special characters')]"
+                        )
+                );
+
+
+        assertTrue(
+                error.isDisplayed()
+        );
+
+
+        System.out.println(
+                "TEST 08 PASSED - Special character validation"
+        );
+    }
+
+
+    // =========================================================
+    // TEST 09
+    // LENGTH VALIDATION
+    // =========================================================
+
+    @Test
+    public void testAssetIdLengthValidation() {
+
+        navigateToManageAsset();
+
+
+        WebElement searchInput =
+                waitForVisible(
+                        By.xpath(
+                                "//input[@placeholder='Enter Asset ID (e.g., AST001)']"
+                        )
+                );
+
+
+        searchInput.clear();
+
+        searchInput.sendKeys(
+                "AST01"
+        );
+
+
+        safeClick(
+                By.cssSelector(
+                        ".ma-search-btn"
+                )
+        );
+
+
+        WebElement error =
+                waitForVisible(
+                        By.xpath(
+                                "//*[contains(normalize-space(),'Asset ID must be exactly 6 characters long')]"
+                        )
+                );
+
+
+        assertTrue(
+                error.isDisplayed()
+        );
+
+
+        System.out.println(
+                "TEST 09 PASSED - Length validation"
+        );
+    }
+
+
+    // =========================================================
+    // TEST 10
+    // VALID SEARCH
+    // =========================================================
+
+    @Test
+    public void testValidAssetSearch() {
+
+        navigateToManageAsset();
+
+
+        WebElement searchInput =
+                waitForVisible(
+                        By.xpath(
+                                "//input[@placeholder='Enter Asset ID (e.g., AST001)']"
+                        )
+                );
+
+
+        searchInput.clear();
+
+        searchInput.sendKeys(
+                "AST001"
+        );
+
+
+        safeClick(
+                By.cssSelector(
+                        ".ma-search-btn"
+                )
+        );
+
+
+        pause();
+
+
+        WebElement assetId =
+                waitForVisible(
+                        By.cssSelector(
+                                ".ma-asset-id"
+                        )
+                );
+
+
+        assertEquals(
+                "AST001",
+                assetId.getText().trim()
+        );
+
+
+        System.out.println(
+                "TEST 10 PASSED - Valid search"
+        );
+    }
+
+
+    // =========================================================
+    // TEST 11
+    // SEARCH BY TYPE
     // =========================================================
 
     @Test
     public void testSearchByAssetType() {
 
-        System.out.println();
-        System.out.println("==========================================");
-        System.out.println("TEST 5 - SEARCH BY ASSET TYPE");
-        System.out.println("==========================================");
-
         navigateToManageAsset();
 
-        WebElement assetType = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
+
+        Select dropdown =
+                new Select(
+                        waitForVisible(
+                                By.cssSelector(
+                                        ".ma-search-row .ma-select"
+                                )
+                        )
+                );
+
+
+        dropdown.selectByVisibleText(
+                "Laptop"
+        );
+
+
+        safeClick(
+                By.cssSelector(
+                        ".ma-search-btn"
+                )
+        );
+
+
+        pause();
+
+
+        WebElement assetId =
+                waitForVisible(
                         By.cssSelector(
-                                ".ma-search-row .ma-select"
+                                ".ma-asset-id"
                         )
-                )
+                );
+
+
+        assertEquals(
+                "AST003",
+                assetId.getText().trim()
         );
 
-        Select select = new Select(assetType);
-
-        select.selectByVisibleText("Laptop");
 
         System.out.println(
-                "Laptop selected"
-        );
-
-        WebElement searchButton = wait.until(
-                ExpectedConditions.elementToBeClickable(
-                        By.xpath(
-                                "//button[normalize-space()='Search']"
-                        )
-                )
-        );
-
-        searchButton.click();
-
-        WebElement laptop = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.xpath(
-                                "//td[normalize-space()='HP Laptop']"
-                        )
-                )
-        );
-
-        assertTrue(
-                "HP Laptop should be displayed",
-                laptop.isDisplayed()
-        );
-
-        System.out.println(
-                "TEST 5 PASSED"
+                "TEST 11 PASSED - Search by Asset Type"
         );
     }
 
-    // =========================================================
-    // TEST 6
-    // SEARCH BY ASSET NAME
-    // =========================================================
-
-    @Test
-    public void testSearchByAssetName() {
-
-        System.out.println();
-        System.out.println("==========================================");
-        System.out.println("TEST 6 - SEARCH BY ASSET NAME");
-        System.out.println("==========================================");
-
-        navigateToManageAsset();
-
-        WebElement searchInput = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.xpath(
-                                "//input[@placeholder='Enter asset name or ID (e.g., AST001)']"
-                        )
-                )
-        );
-
-        searchInput.clear();
-
-        searchInput.sendKeys("Dell");
-
-        WebElement searchButton = wait.until(
-                ExpectedConditions.elementToBeClickable(
-                        By.xpath(
-                                "//button[normalize-space()='Search']"
-                        )
-                )
-        );
-
-        searchButton.click();
-
-        WebElement dellAsset = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.xpath(
-                                "//td[contains(normalize-space(),'Dell')]"
-                        )
-                )
-        );
-
-        assertTrue(
-                "Dell asset should be displayed",
-                dellAsset.isDisplayed()
-        );
-
-        System.out.println(
-                "TEST 6 PASSED"
-        );
-    }
 
     // =========================================================
-    // TEST 7
+    // TEST 12
     // ASSET TABLE
     // =========================================================
 
     @Test
-    public void testAssetTable() {
-
-        System.out.println();
-        System.out.println("==========================================");
-        System.out.println("TEST 7 - ASSET TABLE");
-        System.out.println("==========================================");
+    public void testAssetTableDisplayed() {
 
         navigateToManageAsset();
 
-        WebElement table = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.cssSelector(".ma-table")
+
+        safeClick(
+                By.cssSelector(
+                        ".ma-search-btn"
                 )
         );
 
+
+        pause();
+
+
+        WebElement table =
+                waitForVisible(
+                        By.cssSelector(
+                                ".ma-table"
+                        )
+                );
+
+
         assertTrue(
-                "Asset table should be displayed",
                 table.isDisplayed()
         );
 
-        assertTrue(
-                driver.findElement(
-                        By.xpath("//th[normalize-space()='Asset ID']")
-                ).isDisplayed()
-        );
 
         assertTrue(
-                driver.findElement(
-                        By.xpath("//th[normalize-space()='Asset Name']")
-                ).isDisplayed()
+                table.getText().contains(
+                        "AST001"
+                )
         );
 
-        assertTrue(
-                driver.findElement(
-                        By.xpath("//th[normalize-space()='Asset Type']")
-                ).isDisplayed()
-        );
 
         assertTrue(
-                driver.findElement(
-                        By.xpath("//th[normalize-space()='Purchase Date']")
-                ).isDisplayed()
+                table.getText().contains(
+                        "Monitor"
+                )
         );
 
-        assertTrue(
-                driver.findElement(
-                        By.xpath("//th[normalize-space()='Warranty Expiry']")
-                ).isDisplayed()
-        );
 
         assertTrue(
-                driver.findElement(
-                        By.xpath("//th[normalize-space()='Actions']")
-                ).isDisplayed()
+                table.getText().contains(
+                        "AST002"
+                )
         );
+
+
+        assertTrue(
+                table.getText().contains(
+                        "Keyboard"
+                )
+        );
+
 
         System.out.println(
-                "TEST 7 PASSED"
+                "TEST 12 PASSED - Asset table"
         );
     }
 
+
     // =========================================================
-    // TEST 8
+    // TEST 13
     // ROWS PER PAGE
     // =========================================================
 
     @Test
     public void testRowsPerPage() {
 
-        System.out.println();
-        System.out.println("==========================================");
-        System.out.println("TEST 8 - ROWS PER PAGE");
-        System.out.println("==========================================");
-
         navigateToManageAsset();
 
-        WebElement rowsSelect = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.cssSelector(".ma-rows-select")
-                )
+
+        Select rowsDropdown =
+                new Select(
+                        waitForVisible(
+                                By.cssSelector(
+                                        ".ma-rows-select"
+                                )
+                        )
+                );
+
+
+        rowsDropdown.selectByVisibleText(
+                "30"
         );
 
-        Select select = new Select(rowsSelect);
 
-        select.selectByVisibleText("All");
-
-        WebElement paginationInfo = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.cssSelector(".ma-pagination-info")
-                )
+        assertEquals(
+                "30",
+                rowsDropdown
+                        .getFirstSelectedOption()
+                        .getText()
+                        .trim()
         );
 
-        assertTrue(
-                "Pagination information should be displayed",
-                paginationInfo.isDisplayed()
+
+        rowsDropdown.selectByVisibleText(
+                "50"
         );
+
+
+        assertEquals(
+                "50",
+                rowsDropdown
+                        .getFirstSelectedOption()
+                        .getText()
+                        .trim()
+        );
+
+
+        rowsDropdown.selectByVisibleText(
+                "All"
+        );
+
+
+        assertEquals(
+                "All",
+                rowsDropdown
+                        .getFirstSelectedOption()
+                        .getText()
+                        .trim()
+        );
+
 
         System.out.println(
-                "Pagination: " + paginationInfo.getText()
-        );
-
-        System.out.println(
-                "TEST 8 PASSED"
+                "TEST 13 PASSED - Rows per page"
         );
     }
 
+
     // =========================================================
-    // TEST 9
-    // EDIT ASSET
-    //
-    // FIX:
-    // Asset ID is READ ONLY.
-    // Asset Name is editable.
-    //
-    // Also handles the success ALERT after Update.
+    // TEST 14
+    // EDIT BUTTON
     // =========================================================
 
     @Test
-    public void testEditAsset() {
-
-        System.out.println();
-        System.out.println("==========================================");
-        System.out.println("TEST 9 - EDIT ASSET");
-        System.out.println("==========================================");
+    public void testEditButton() {
 
         navigateToManageAsset();
 
-        // -----------------------------------------------------
-        // Find AST001 row
-        // -----------------------------------------------------
 
-        WebElement row = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.xpath(
-                                "//tr[.//span[normalize-space()='AST001']]"
+        safeClick(
+                By.cssSelector(
+                        ".ma-search-btn"
+                )
+        );
+
+
+        pause();
+
+
+        WebElement editButton =
+                waitForVisible(
+                        By.cssSelector(
+                                ".ma-btn-edit"
                         )
-                )
-        );
+                );
 
-        // -----------------------------------------------------
-        // Find Edit button
-        // -----------------------------------------------------
-
-        WebElement editButton = row.findElement(
-                By.xpath(
-                        ".//button[normalize-space()='Edit']"
-                )
-        );
-
-        scrollToElement(editButton);
-
-        wait.until(
-                ExpectedConditions.elementToBeClickable(
-                        editButton
-                )
-        );
-
-        editButton.click();
-
-        System.out.println(
-                "PASS: Edit button clicked"
-        );
-
-        // -----------------------------------------------------
-        // Verify Edit Asset modal
-        // -----------------------------------------------------
-
-        WebElement editModal = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.xpath(
-                                "//h2[normalize-space()='Edit Asset']"
-                        )
-                )
-        );
-
-        assertTrue(
-                "Edit Asset modal should be displayed",
-                editModal.isDisplayed()
-        );
-
-        System.out.println(
-                "PASS: Edit Asset modal opened"
-        );
-
-        // -----------------------------------------------------
-        // Find Asset Name
-        //
-        // IMPORTANT:
-        // DO NOT USE:
-        //
-        // //h2[normalize-space()='Edit Asset']/following::input[1]
-        //
-        // That finds read-only Asset ID.
-        // -----------------------------------------------------
-
-        WebElement assetNameInput = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.xpath(
-                                "//input[@placeholder='Enter asset name']"
-                        )
-                )
-        );
-
-        System.out.println(
-                "PASS: Asset Name field found"
-        );
-
-        // -----------------------------------------------------
-        // Verify Asset Name is editable
-        // -----------------------------------------------------
-
-        assertTrue(
-                "Asset Name should be enabled",
-                assetNameInput.isEnabled()
-        );
-
-        // -----------------------------------------------------
-        // Clear old name
-        // -----------------------------------------------------
-
-        assetNameInput.clear();
-
-        // -----------------------------------------------------
-        // Enter new name
-        // -----------------------------------------------------
-
-        assetNameInput.sendKeys(
-                "Dell Monitor Updated"
-        );
-
-        System.out.println(
-                "Entered: Dell Monitor Updated"
-        );
-
-        // -----------------------------------------------------
-        // Verify entered value
-        // -----------------------------------------------------
 
         assertEquals(
-                "Dell Monitor Updated",
-                assetNameInput.getAttribute("value")
+                "Edit",
+                editButton.getText().trim()
         );
 
-        // -----------------------------------------------------
-        // Find Update button
-        // -----------------------------------------------------
 
-        WebElement updateButton = wait.until(
-                ExpectedConditions.elementToBeClickable(
-                        By.xpath(
-                                "//button[normalize-space()='Update']"
+        safeClick(
+                By.cssSelector(
+                        ".ma-btn-edit"
+                )
+        );
+
+
+        pause();
+
+
+        WebElement editTitle =
+                waitForVisible(
+                        By.cssSelector(
+                                ".ma-edit-page-title"
                         )
-                )
+                );
+
+
+        assertEquals(
+                "Edit Asset",
+                editTitle.getText().trim()
         );
 
-        scrollToElement(updateButton);
-
-        // -----------------------------------------------------
-        // Click Update
-        // -----------------------------------------------------
-
-        updateButton.click();
 
         System.out.println(
-                "PASS: Update button clicked"
-        );
-
-        // =====================================================
-        // HANDLE SUCCESS ALERT
-        //
-        // Application displays:
-        //
-        // Asset AST001 updated successfully!
-        //
-        // =====================================================
-
-        wait.until(
-                ExpectedConditions.alertIsPresent()
-        );
-
-        String alertText =
-                driver.switchTo()
-                        .alert()
-                        .getText();
-
-        System.out.println(
-                "Alert: " + alertText
-        );
-
-        assertTrue(
-                "Update success alert should be displayed",
-                alertText.contains(
-                        "AST001 updated successfully"
-                )
-        );
-
-        // Accept alert
-        driver.switchTo()
-                .alert()
-                .accept();
-
-        System.out.println(
-                "PASS: Update alert accepted"
-        );
-
-        // -----------------------------------------------------
-        // Wait for modal to disappear
-        // -----------------------------------------------------
-
-        wait.until(
-                ExpectedConditions.invisibilityOfElementLocated(
-                        By.xpath(
-                                "//h2[normalize-space()='Edit Asset']"
-                        )
-                )
-        );
-
-        System.out.println(
-                "PASS: Edit modal closed"
-        );
-
-        // -----------------------------------------------------
-        // Verify updated asset in table
-        // -----------------------------------------------------
-
-        WebElement updatedAsset = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.xpath(
-                                "//td[normalize-space()='Dell Monitor Updated']"
-                        )
-                )
-        );
-
-        assertTrue(
-                "Updated Asset Name should be displayed",
-                updatedAsset.isDisplayed()
-        );
-
-        System.out.println(
-                "PASS: Updated asset displayed"
-        );
-
-        System.out.println();
-        System.out.println(
-                "=========================================="
-        );
-        System.out.println(
-                "TEST 9 PASSED"
-        );
-        System.out.println(
-                "=========================================="
+                "TEST 14 PASSED - Edit button"
         );
     }
 
+
     // =========================================================
-    // TEST 10
+    // TEST 15
+    // EDIT PAGE FIELDS
+    // =========================================================
+
+    @Test
+    public void testEditPageFields() {
+
+        navigateToManageAsset();
+
+
+        safeClick(
+                By.cssSelector(
+                        ".ma-search-btn"
+                )
+        );
+
+
+        pause();
+
+
+        safeClick(
+                By.cssSelector(
+                        ".ma-btn-edit"
+                )
+        );
+
+
+        pause();
+
+
+        WebElement assetId =
+                waitForVisible(
+                        By.cssSelector(
+                                ".ma-input--readonly"
+                        )
+                );
+
+
+        assertEquals(
+                "AST001",
+                assetId.getAttribute(
+                        "value"
+                )
+        );
+
+
+        WebElement assetType =
+                waitForVisible(
+                        By.cssSelector(
+                                ".ma-edit-form .ma-select"
+                        )
+                );
+
+
+        assertTrue(
+                assetType.isDisplayed()
+        );
+
+
+        WebElement model =
+                waitForVisible(
+                        By.xpath(
+                                "//input[@placeholder='Enter Model']"
+                        )
+                );
+
+
+        assertTrue(
+                model.isDisplayed()
+        );
+
+
+        WebElement purchaseDate =
+                waitForVisible(
+                        By.cssSelector(
+                                "input[type='date']"
+                        )
+                );
+
+
+        assertTrue(
+                purchaseDate.isDisplayed()
+        );
+
+
+        WebElement description =
+                waitForVisible(
+                        By.xpath(
+                                "//textarea[@placeholder='Enter Description']"
+                        )
+                );
+
+
+        assertTrue(
+                description.isDisplayed()
+        );
+
+
+        System.out.println(
+                "TEST 15 PASSED - Edit fields"
+        );
+    }
+
+
+    // =========================================================
+    // TEST 16
+    // MODEL VALIDATION
+    // =========================================================
+
+    @Test
+    public void testModelValidation() {
+
+        navigateToManageAsset();
+
+
+        safeClick(
+                By.cssSelector(
+                        ".ma-search-btn"
+                )
+        );
+
+
+        pause();
+
+
+        safeClick(
+                By.cssSelector(
+                        ".ma-btn-edit"
+                )
+        );
+
+
+        pause();
+
+
+        WebElement model =
+                waitForVisible(
+                        By.xpath(
+                                "//input[@placeholder='Enter Model']"
+                        )
+                );
+
+
+        model.clear();
+
+        model.sendKeys(
+                "A"
+        );
+
+
+        safeClick(
+                By.cssSelector(
+                        ".ma-edit-save-btn"
+                )
+        );
+
+
+        WebElement error =
+                waitForVisible(
+                        By.xpath(
+                                "//*[contains(normalize-space(),'Model must contain at least 2 characters')]"
+                        )
+                );
+
+
+        assertTrue(
+                error.isDisplayed()
+        );
+
+
+        System.out.println(
+                "TEST 16 PASSED - Model validation"
+        );
+    }
+
+
+    // =========================================================
+    // TEST 17
+    // DESCRIPTION VALIDATION
+    // =========================================================
+
+    @Test
+    public void testDescriptionValidation() {
+
+        navigateToManageAsset();
+
+
+        safeClick(
+                By.cssSelector(
+                        ".ma-search-btn"
+                )
+        );
+
+
+        pause();
+
+
+        safeClick(
+                By.cssSelector(
+                        ".ma-btn-edit"
+                )
+        );
+
+
+        pause();
+
+
+        WebElement description =
+                waitForVisible(
+                        By.xpath(
+                                "//textarea[@placeholder='Enter Description']"
+                        )
+                );
+
+
+        description.clear();
+
+        description.sendKeys(
+                "Test"
+        );
+
+
+        safeClick(
+                By.cssSelector(
+                        ".ma-edit-save-btn"
+                )
+        );
+
+
+        WebElement error =
+                waitForVisible(
+                        By.xpath(
+                                "//*[contains(normalize-space(),'Description must contain at least 5 characters')]"
+                        )
+                );
+
+
+        assertTrue(
+                error.isDisplayed()
+        );
+
+
+        System.out.println(
+                "TEST 17 PASSED - Description validation"
+        );
+    }
+
+
+    // =========================================================
+    // TEST 18
     // CANCEL EDIT
     // =========================================================
 
     @Test
     public void testCancelEdit() {
 
-        System.out.println();
-        System.out.println("==========================================");
-        System.out.println("TEST 10 - CANCEL EDIT");
-        System.out.println("==========================================");
-
         navigateToManageAsset();
 
-        WebElement row = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.xpath(
-                                "//tr[.//span[normalize-space()='AST002']]"
+
+        safeClick(
+                By.cssSelector(
+                        ".ma-search-btn"
+                )
+        );
+
+
+        pause();
+
+
+        safeClick(
+                By.cssSelector(
+                        ".ma-btn-edit"
+                )
+        );
+
+
+        pause();
+
+
+        WebElement editTitle =
+                waitForVisible(
+                        By.cssSelector(
+                                ".ma-edit-page-title"
                         )
+                );
+
+
+        assertEquals(
+                "Edit Asset",
+                editTitle.getText().trim()
+        );
+
+
+        safeClick(
+                By.cssSelector(
+                        ".ma-edit-cancel-btn"
                 )
         );
 
-        WebElement editButton = row.findElement(
-                By.xpath(
-                        ".//button[normalize-space()='Edit']"
-                )
-        );
 
-        scrollToElement(editButton);
+        pause();
 
-        wait.until(
-                ExpectedConditions.elementToBeClickable(
-                        editButton
-                )
-        );
 
-        editButton.click();
-
-        // Wait for modal
-        wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.xpath(
-                                "//h2[normalize-space()='Edit Asset']"
+        WebElement mainTitle =
+                waitForVisible(
+                        By.cssSelector(
+                                ".ma-page-title"
                         )
-                )
+                );
+
+
+        assertEquals(
+                "Manage Asset",
+                mainTitle.getText().trim()
         );
 
-        // Find Cancel
-        WebElement cancelButton = wait.until(
-                ExpectedConditions.elementToBeClickable(
-                        By.xpath(
-                                "//button[normalize-space()='Cancel']"
-                        )
-                )
-        );
-
-        scrollToElement(cancelButton);
-
-        cancelButton.click();
-
-        // Verify modal closed
-        wait.until(
-                ExpectedConditions.invisibilityOfElementLocated(
-                        By.xpath(
-                                "//h2[normalize-space()='Edit Asset']"
-                        )
-                )
-        );
 
         System.out.println(
-                "TEST 10 PASSED"
+                "TEST 18 PASSED - Cancel Edit"
         );
     }
 
+
     // =========================================================
-    // TEST 11
-    // DELETE CANCEL
+    // TEST 19
+    // DELETE BUTTON
     // =========================================================
 
     @Test
-    public void testDeleteCancel() {
-
-        System.out.println();
-        System.out.println("==========================================");
-        System.out.println("TEST 11 - DELETE CANCEL");
-        System.out.println("==========================================");
+    public void testDeleteButton() {
 
         navigateToManageAsset();
 
-        // Find AST003
-        WebElement row = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.xpath(
-                                "//tr[.//span[normalize-space()='AST003']]"
+
+        safeClick(
+                By.cssSelector(
+                        ".ma-search-btn"
+                )
+        );
+
+
+        pause();
+
+
+        WebElement deleteButton =
+                waitForVisible(
+                        By.cssSelector(
+                                ".ma-btn-delete"
                         )
+                );
+
+
+        assertEquals(
+                "Delete",
+                deleteButton.getText().trim()
+        );
+
+
+        safeClick(
+                By.cssSelector(
+                        ".ma-btn-delete"
                 )
         );
 
-        // Find Delete button
-        WebElement deleteButton = row.findElement(
-                By.xpath(
-                        ".//button[normalize-space()='Delete']"
-                )
-        );
 
-        scrollToElement(deleteButton);
+        pause();
 
-        wait.until(
-                ExpectedConditions.elementToBeClickable(
-                        deleteButton
-                )
-        );
 
-        deleteButton.click();
-
-        System.out.println(
-                "Delete button clicked"
-        );
-
-        // Delete modal
-        WebElement deleteModal = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.xpath(
-                                "//h2[normalize-space()='Delete Asset']"
+        WebElement modal =
+                waitForVisible(
+                        By.cssSelector(
+                                ".ma-modal-overlay"
                         )
-                )
-        );
+                );
+
 
         assertTrue(
-                "Delete modal should be displayed",
-                deleteModal.isDisplayed()
+                modal.isDisplayed()
         );
 
-        // Click No
-        WebElement noButton = wait.until(
-                ExpectedConditions.elementToBeClickable(
-                        By.xpath(
-                                "//button[normalize-space()='No']"
-                        )
-                )
-        );
-
-        scrollToElement(noButton);
-
-        noButton.click();
-
-        // Verify modal closed
-        wait.until(
-                ExpectedConditions.invisibilityOfElementLocated(
-                        By.xpath(
-                                "//h2[normalize-space()='Delete Asset']"
-                        )
-                )
-        );
-
-        // Verify AST003 still exists
-        WebElement assetStillExists = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.xpath(
-                                "//span[normalize-space()='AST003']"
-                        )
-                )
-        );
-
-        assertTrue(
-                "AST003 should still exist",
-                assetStillExists.isDisplayed()
-        );
 
         System.out.println(
-                "TEST 11 PASSED"
+                "TEST 19 PASSED - Delete button"
         );
     }
 
+
     // =========================================================
-    // TEST 12
-    // DELETE ASSET
+    // TEST 20
+    // DELETE MODAL
     // =========================================================
 
     @Test
-    public void testDeleteAsset() {
-
-        System.out.println();
-        System.out.println("==========================================");
-        System.out.println("TEST 12 - DELETE ASSET");
-        System.out.println("==========================================");
+    public void testDeleteConfirmationModal() {
 
         navigateToManageAsset();
 
-        // Find AST004
-        WebElement row = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.xpath(
-                                "//tr[.//span[normalize-space()='AST004']]"
+
+        safeClick(
+                By.cssSelector(
+                        ".ma-search-btn"
+                )
+        );
+
+
+        pause();
+
+
+        safeClick(
+                By.cssSelector(
+                        ".ma-btn-delete"
+                )
+        );
+
+
+        pause();
+
+
+        WebElement modalTitle =
+                waitForVisible(
+                        By.cssSelector(
+                                ".ma-modal-title"
                         )
-                )
+                );
+
+
+        assertEquals(
+                "Delete Asset",
+                modalTitle.getText().trim()
         );
 
-        // Delete button
-        WebElement deleteButton = row.findElement(
-                By.xpath(
-                        ".//button[normalize-space()='Delete']"
-                )
-        );
 
-        scrollToElement(deleteButton);
-
-        wait.until(
-                ExpectedConditions.elementToBeClickable(
-                        deleteButton
-                )
-        );
-
-        deleteButton.click();
-
-        System.out.println(
-                "Delete button clicked"
-        );
-
-        // Verify delete modal
-        WebElement deleteModal = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.xpath(
-                                "//h2[normalize-space()='Delete Asset']"
+        WebElement message =
+                waitForVisible(
+                        By.cssSelector(
+                                ".ma-modal-msg"
                         )
-                )
-        );
+                );
+
 
         assertTrue(
-                "Delete modal should be displayed",
-                deleteModal.isDisplayed()
-        );
-
-        // Click Yes
-        WebElement yesButton = wait.until(
-                ExpectedConditions.elementToBeClickable(
-                        By.xpath(
-                                "//button[normalize-space()='Yes']"
-                        )
+                message.getText().contains(
+                        "Are you sure you want"
                 )
         );
 
-        scrollToElement(yesButton);
 
-        yesButton.click();
-
-        System.out.println(
-                "Yes clicked"
-        );
-
-        // -----------------------------------------------------
-        // Handle browser alert
-        // -----------------------------------------------------
-
-        try {
-
-            wait.until(
-                    ExpectedConditions.alertIsPresent()
-            );
-
-            String alertText =
-                    driver.switchTo()
-                            .alert()
-                            .getText();
-
-            System.out.println(
-                    "Delete Alert: " + alertText
-            );
-
-            driver.switchTo()
-                    .alert()
-                    .accept();
-
-        } catch (Exception e) {
-
-            System.out.println(
-                    "No delete alert displayed"
-            );
-        }
-
-        // -----------------------------------------------------
-        // Verify AST004 deleted
-        // -----------------------------------------------------
-
-        wait.until(
-                ExpectedConditions.invisibilityOfElementLocated(
-                        By.xpath(
-                                "//span[normalize-space()='AST004']"
+        WebElement yesButton =
+                waitForVisible(
+                        By.cssSelector(
+                                ".ma-modal-delete"
                         )
-                )
+                );
+
+
+        WebElement noButton =
+                waitForVisible(
+                        By.cssSelector(
+                                ".ma-modal-cancel"
+                        )
+                );
+
+
+        assertEquals(
+                "Yes",
+                yesButton.getText().trim()
         );
 
-        System.out.println(
-                "PASS: AST004 deleted"
+
+        assertEquals(
+                "No",
+                noButton.getText().trim()
         );
 
+
         System.out.println(
-                "TEST 12 PASSED"
+                "TEST 20 PASSED - Delete confirmation modal"
         );
     }
 
+
     // =========================================================
-    // TEST 13
+    // TEST 21
+    // DELETE NO
+    // =========================================================
+
+    @Test
+    public void testDeleteNoButton() {
+
+        navigateToManageAsset();
+
+
+        safeClick(
+                By.cssSelector(
+                        ".ma-search-btn"
+                )
+        );
+
+
+        pause();
+
+
+        safeClick(
+                By.cssSelector(
+                        ".ma-btn-delete"
+                )
+        );
+
+
+        pause();
+
+
+        safeClick(
+                By.cssSelector(
+                        ".ma-modal-cancel"
+                )
+        );
+
+
+        pause();
+
+
+        boolean modalPresent =
+                !driver.findElements(
+                        By.cssSelector(
+                                ".ma-modal-overlay"
+                        )
+                ).isEmpty();
+
+
+        assertTrue(
+                "Delete modal should close after clicking No",
+                !modalPresent
+        );
+
+
+        System.out.println(
+                "TEST 21 PASSED - Delete No"
+        );
+    }
+
+
+    // =========================================================
+    // TEST 22
     // BACK BUTTON
     // =========================================================
 
     @Test
     public void testBackButton() {
 
-        System.out.println();
-        System.out.println("==========================================");
-        System.out.println("TEST 13 - BACK BUTTON");
-        System.out.println("==========================================");
+        navigateToManageAsset();
+
+
+        WebElement backButton =
+                waitForVisible(
+                        By.cssSelector(
+                                ".ma-back-btn"
+                        )
+                );
+
+
+        assertEquals(
+                "← Back",
+                backButton.getText().trim()
+        );
+
+
+        safeClick(
+                By.cssSelector(
+                        ".ma-back-btn"
+                )
+        );
+
+
+        pause();
+
+
+        WebElement assetManagement =
+                waitForVisible(
+                        By.xpath(
+                                "//h1[normalize-space()='Asset Management']"
+                        )
+                );
+
+
+        assertTrue(
+                assetManagement.isDisplayed()
+        );
+
+
+        System.out.println(
+                "TEST 22 PASSED - Back button"
+        );
+    }
+
+
+    // =========================================================
+    // TEST 23
+    // LOGOUT BUTTON
+    // =========================================================
+
+    @Test
+    public void testLogoutButtonDisplayed() {
 
         navigateToManageAsset();
 
-        WebElement backButton = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.xpath(
-                                "//button[contains(normalize-space(),'Back')]"
+
+        WebElement logout =
+                waitForVisible(
+                        By.cssSelector(
+                                ".ma-logout-btn"
                         )
-                )
+                );
+
+
+        assertTrue(
+                logout.isDisplayed()
         );
 
-        scrollToElement(backButton);
 
-        wait.until(
-                ExpectedConditions.elementToBeClickable(
-                        backButton
-                )
+        assertEquals(
+                "Logout",
+                logout.getText().trim()
         );
 
-        backButton.click();
 
         System.out.println(
-                "Back button clicked"
-        );
-
-        System.out.println(
-                "TEST 13 PASSED"
+                "TEST 23 PASSED - Logout button"
         );
     }
+
+
+    // =========================================================
+    // TEST 24
+    // USERNAME
+    // =========================================================
+
+    @Test
+    public void testUsernameDisplayed() {
+
+        navigateToManageAsset();
+
+
+        WebElement username =
+                waitForVisible(
+                        By.cssSelector(
+                                ".ma-nav-username"
+                        )
+                );
+
+
+        assertTrue(
+                username.isDisplayed()
+        );
+
+
+        System.out.println(
+                "TEST 24 PASSED - Username displayed"
+        );
+    }
+
+
+    // =========================================================
+    // TEST 25
+    // ASSET TYPE SEARCH
+    // =========================================================
+
+    @Test
+    public void testMonitorSearch() {
+
+        navigateToManageAsset();
+
+
+        Select dropdown =
+                new Select(
+                        waitForVisible(
+                                By.cssSelector(
+                                        ".ma-search-row .ma-select"
+                                )
+                        )
+                );
+
+
+        dropdown.selectByVisibleText(
+                "Monitor"
+        );
+
+
+        safeClick(
+                By.cssSelector(
+                        ".ma-search-btn"
+                )
+        );
+
+
+        pause();
+
+
+        WebElement assetId =
+                waitForVisible(
+                        By.cssSelector(
+                                ".ma-asset-id"
+                        )
+                );
+
+
+        assertEquals(
+                "AST001",
+                assetId.getText().trim()
+        );
+
+
+        System.out.println(
+                "TEST 25 PASSED - Monitor search"
+        );
+    }
+
 
     // =========================================================
     // TEARDOWN
@@ -1248,9 +2198,9 @@ public class ManageAssetTest {
             driver.quit();
 
             System.out.println();
-            System.out.println("==========================================");
-            System.out.println("BROWSER CLOSED");
-            System.out.println("==========================================");
+            System.out.println(
+                    "Browser closed"
+            );
         }
     }
 }
