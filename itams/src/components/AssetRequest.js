@@ -1,38 +1,44 @@
 import React, { useState } from "react";
 import "./AssetRequest.css";
 
+// =====================================================
+// INITIAL REQUEST DATA
+// =====================================================
+
 const INITIAL_REQUESTS = [
   {
     id: "AR001 (Automatic Generated)",
     assetType: "Laptop",
-    employeeId: "EMP001",
+    employeeId: "260820001",
     status: "Pending",
     date: "01-07-2026",
   },
   {
     id: "AR002 (Automatic Generated)",
     assetType: "Monitor",
-    employeeId: "EMP002",
+    employeeId: "250615002",
     status: "Approved",
     date: "28-06-2026",
   },
   {
     id: "AR003 (Automatic Generated)",
     assetType: "Keyboard",
-    employeeId: "EMP003",
+    employeeId: "251025003",
     status: "Rejected",
     date: "25-06-2026",
   },
   {
     id: "AR004 (Automatic Generated)",
     assetType: "Printer",
-    employeeId: "EMP004",
+    employeeId: "240920004",
     status: "Pending",
     date: "20-06-2026",
   },
 ];
 
-const VALID_EMPLOYEE_IDS = ["EMP001", "EMP002", "EMP003", "EMP004", "EMP005"];
+// =====================================================
+// ASSET TYPES
+// =====================================================
 
 const ASSET_TYPES = [
   "Laptop",
@@ -45,313 +51,1049 @@ const ASSET_TYPES = [
   "Webcam",
 ];
 
+// =====================================================
+// PAGE SIZE OPTIONS
+// =====================================================
+
 const PAGE_SIZE_OPTIONS = [10, 30, 50, "All"];
 
-// Validation function for Employee ID
+// =====================================================
+// VALIDATION - EMPLOYEE ID
+// =====================================================
+//
+// Format:
+// YYDDMM + 3 digit employee number
+//
+// Example:
+// 260820001
+//  ^^^^^^ ^^^
+//  YYDDMM EMP NO
+//
+// IMPORTANT:
+// We DO NOT compare YYDDMM with today's date.
+// Old employees are allowed.
+// =====================================================
+
 const validateEmployeeId = (id) => {
-  if (!id || id.trim() === "") {
-    return { isValid: false, message: "Employee ID is required" };
+  // Empty
+  if (id.length === 0) {
+    return {
+      isValid: false,
+      message: "Employee ID is required",
+    };
   }
-  if (id !== id.trim()) {
-    return { isValid: false, message: "Employee ID should not have leading or trailing spaces" };
-  }
+
+  // Spaces
   if (/\s/.test(id)) {
-    return { isValid: false, message: "Employee ID should not contain spaces" };
+    return {
+      isValid: false,
+      message: "Employee ID should not contain spaces",
+    };
   }
-  if (/[^A-Za-z0-9]/.test(id)) {
-    return { isValid: false, message: "Employee ID should not contain special characters" };
+
+  // Special characters / letters
+  if (!/^[0-9]+$/.test(id)) {
+    return {
+      isValid: false,
+      message: "Employee ID must contain numbers only",
+    };
   }
-  if (!id.startsWith("EMP")) {
-    return { isValid: false, message: "Employee ID must start with 'EMP'" };
+
+  // Exact length
+  if (id.length !== 9) {
+    return {
+      isValid: false,
+      message:
+        "Employee ID must be exactly 9 digits (YYDDMM + 3-digit employee number)",
+    };
   }
-  if (id.length !== 6) {
-    return { isValid: false, message: "Employee ID must be exactly 6 characters long (EMP + 3 alphanumeric characters)" };
+
+  // First 6 digits = YYDDMM
+  const datePart = id.substring(0, 6);
+
+  if (!/^[0-9]{6}$/.test(datePart)) {
+    return {
+      isValid: false,
+      message:
+        "First 6 digits must be in YYDDMM format",
+    };
   }
-  const lastThree = id.substring(3);
-  if (!/^[A-Za-z0-9]{3}$/.test(lastThree)) {
-    return { isValid: false, message: "Last 3 characters must be alphanumeric (letters or numbers)" };
+
+  // Extract YY DD MM
+  const year = Number(datePart.substring(0, 2));
+  const day = Number(datePart.substring(2, 4));
+  const month = Number(datePart.substring(4, 6));
+
+  // Validate month
+  if (month < 1 || month > 12) {
+    return {
+      isValid: false,
+      message:
+        "Invalid month in Employee ID. Month must be between 01 and 12",
+    };
   }
-  // Check if employee exists in database
-  if (!VALID_EMPLOYEE_IDS.includes(id.toUpperCase())) {
-    return { isValid: false, message: "Employee ID does not exist in the database" };
+
+  // Validate day
+  if (day < 1 || day > 31) {
+    return {
+      isValid: false,
+      message:
+        "Invalid day in Employee ID. Day must be between 01 and 31",
+    };
   }
-  return { isValid: true, message: "" };
+
+  // Check actual calendar date
+  // We use 2000 + YY only to validate the day/month combination.
+  const fullYear = 2000 + year;
+
+  const date = new Date(
+    fullYear,
+    month - 1,
+    day
+  );
+
+  if (
+    date.getFullYear() !== fullYear ||
+    date.getMonth() !== month - 1 ||
+    date.getDate() !== day
+  ) {
+    return {
+      isValid: false,
+      message:
+        "Invalid date in Employee ID. Please use a valid YYDDMM date",
+    };
+  }
+
+  // Last 3 digits = employee number
+  const employeeNumber = id.substring(6);
+
+  if (!/^[0-9]{3}$/.test(employeeNumber)) {
+    return {
+      isValid: false,
+      message:
+        "Last 3 characters must be a 3-digit employee number",
+    };
+  }
+
+  // Employee number cannot be 000
+  if (employeeNumber === "000") {
+    return {
+      isValid: false,
+      message:
+        "Employee number cannot be 000",
+    };
+  }
+
+  return {
+    isValid: true,
+    message: "",
+  };
 };
 
-// Validation function for Purpose
+// =====================================================
+// VALIDATION - PURPOSE
+// =====================================================
+
 const validatePurpose = (purpose) => {
-  if (!purpose || purpose.trim() === "") {
-    return { isValid: false, message: "Purpose is required" };
+  // Empty
+  if (purpose.length === 0) {
+    return {
+      isValid: false,
+      message: "Purpose is required",
+    };
   }
+
+  // Only spaces
+  if (purpose.trim() === "") {
+    return {
+      isValid: false,
+      message: "Purpose cannot contain only spaces",
+    };
+  }
+
+  // Leading spaces
+  if (purpose !== purpose.trimStart()) {
+    return {
+      isValid: false,
+      message:
+        "Purpose should not start with spaces",
+    };
+  }
+
+  // Trailing spaces
+  if (purpose !== purpose.trimEnd()) {
+    return {
+      isValid: false,
+      message:
+        "Purpose should not end with spaces",
+    };
+  }
+
+  // Minimum 10 characters
   if (purpose.trim().length < 10) {
-    return { isValid: false, message: "Purpose must be at least 10 characters long" };
+    return {
+      isValid: false,
+      message:
+        "Purpose must be at least 10 characters long",
+    };
   }
-  if (purpose.trim().length > 500) {
-    return { isValid: false, message: "Purpose cannot exceed 500 characters" };
+
+  // Maximum 500 characters
+  if (purpose.length > 500) {
+    return {
+      isValid: false,
+      message:
+        "Purpose cannot exceed 500 characters",
+    };
   }
-  if (!/^[A-Za-z0-9 ,.()-]+$/.test(purpose.trim())) {
-    return { isValid: false, message: "Purpose contains invalid characters" };
+
+  // Multiple spaces ARE ALLOWED.
+  //
+  // Allowed:
+  // Letters
+  // Numbers
+  // Spaces
+  // . , ( ) -
+  //
+  if (!/^[A-Za-z0-9\s.,()-]+$/.test(purpose)) {
+    return {
+      isValid: false,
+      message:
+        "Purpose should contain only letters, numbers, spaces, comma, full stop, brackets and hyphen",
+    };
   }
-  return { isValid: true, message: "" };
+
+  return {
+    isValid: true,
+    message: "",
+  };
 };
 
-// Validation function for Required Date
-const validateRequiredDate = (date) => {
-  if (!date) {
-    return { isValid: false, message: "Required Date is required" };
+// =====================================================
+// VALIDATION - REQUIRED DATE
+// =====================================================
+
+const validateRequiredDate = (dateValue) => {
+  // Empty
+  if (!dateValue) {
+    return {
+      isValid: false,
+      message: "Required Date is required",
+    };
   }
+
+  // Today
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const selectedDate = new Date(date);
-  selectedDate.setHours(0, 0, 0, 0);
-  const maxDate = new Date();
-  maxDate.setFullYear(maxDate.getFullYear() + 1);
 
+  // Selected date
+  const selectedDate = new Date(
+    `${dateValue}T00:00:00`
+  );
+
+  // Invalid date
+  if (Number.isNaN(selectedDate.getTime())) {
+    return {
+      isValid: false,
+      message: "Please select a valid date",
+    };
+  }
+
+  selectedDate.setHours(0, 0, 0, 0);
+
+  // Maximum date = 1 year from today
+  const maxDate = new Date(today);
+  maxDate.setFullYear(
+    maxDate.getFullYear() + 1
+  );
+  maxDate.setHours(0, 0, 0, 0);
+
+  // Past date
   if (selectedDate < today) {
-    return { isValid: false, message: "Required Date cannot be a past date" };
+    return {
+      isValid: false,
+      message:
+        "Required Date cannot be a past date",
+    };
   }
+
+  // More than one year
   if (selectedDate > maxDate) {
-    return { isValid: false, message: "Required Date cannot exceed one year from today" };
+    return {
+      isValid: false,
+      message:
+        "Required Date cannot exceed one year from today",
+    };
   }
-  return { isValid: true, message: "" };
+
+  return {
+    isValid: true,
+    message: "",
+  };
 };
 
-const AssetRequest = ({ username = "username", onLogout, onBack }) => {
-  const [employeeId, setEmployeeId] = useState("");
-  const [assetType, setAssetType] = useState("");
-  const [purpose, setPurpose] = useState("");
-  const [requiredDate, setRequiredDate] = useState("");
-  const [errors, setErrors] = useState({});
-  const [searchInput, setSearchInput] = useState("");
-  const [searchId, setSearchId] = useState("");
-  const [searchError, setSearchError] = useState("");
-  const [requests, setRequests] = useState(INITIAL_REQUESTS);
-  const [pageSize, setPageSize] = useState(10);
+// =====================================================
+// GET TODAY DATE
+// =====================================================
 
-  // Validate form
+const getTodayDate = () => {
+  const today = new Date();
+
+  const year = today.getFullYear();
+
+  const month = String(
+    today.getMonth() + 1
+  ).padStart(2, "0");
+
+  const day = String(
+    today.getDate()
+  ).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+};
+
+// =====================================================
+// GET MAX DATE
+// =====================================================
+
+const getMaxDate = () => {
+  const maxDate = new Date();
+
+  maxDate.setFullYear(
+    maxDate.getFullYear() + 1
+  );
+
+  const year = maxDate.getFullYear();
+
+  const month = String(
+    maxDate.getMonth() + 1
+  ).padStart(2, "0");
+
+  const day = String(
+    maxDate.getDate()
+  ).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+};
+
+// =====================================================
+// MAIN COMPONENT
+// =====================================================
+
+const AssetRequest = ({
+  username = "username",
+  onLogout,
+  onBack,
+}) => {
+  // ===================================================
+  // FORM STATES
+  // ===================================================
+
+  const [employeeId, setEmployeeId] =
+    useState("");
+
+  const [assetType, setAssetType] =
+    useState("");
+
+  const [purpose, setPurpose] =
+    useState("");
+
+  const [requiredDate, setRequiredDate] =
+    useState("");
+
+  // ===================================================
+  // FORM ERRORS
+  // ===================================================
+
+  const [errors, setErrors] =
+    useState({});
+
+  // ===================================================
+  // SEARCH STATES
+  // ===================================================
+
+  const [searchInput, setSearchInput] =
+    useState("");
+
+  const [searchId, setSearchId] =
+    useState("");
+
+  const [searchError, setSearchError] =
+    useState("");
+
+  // ===================================================
+  // REQUEST DATA
+  // ===================================================
+
+  const [requests, setRequests] =
+    useState(INITIAL_REQUESTS);
+
+  // ===================================================
+  // PAGINATION
+  // ===================================================
+
+  const [pageSize, setPageSize] =
+    useState(10);
+
+  // ===================================================
+  // VALIDATE COMPLETE FORM
+  // ===================================================
+
   const validateForm = () => {
     const newErrors = {};
 
-    // Validate Employee ID
-    const empResult = validateEmployeeId(employeeId);
-    if (!empResult.isValid) {
-      newErrors.employeeId = empResult.message;
+    // Employee ID
+    const employeeResult =
+      validateEmployeeId(employeeId);
+
+    if (!employeeResult.isValid) {
+      newErrors.employeeId =
+        employeeResult.message;
     }
 
-    // Validate Asset Type
-    if (!assetType) {
-      newErrors.assetType = "Asset Type is required";
+    // Asset Type
+    if (assetType === "") {
+      newErrors.assetType =
+        "Asset Type is required";
     }
 
-    // Validate Purpose
-    const purposeResult = validatePurpose(purpose);
+    // Purpose
+    const purposeResult =
+      validatePurpose(purpose);
+
     if (!purposeResult.isValid) {
-      newErrors.purpose = purposeResult.message;
+      newErrors.purpose =
+        purposeResult.message;
     }
 
-    // Validate Required Date
-    const dateResult = validateRequiredDate(requiredDate);
+    // Required Date
+    const dateResult =
+      validateRequiredDate(requiredDate);
+
     if (!dateResult.isValid) {
-      newErrors.requiredDate = dateResult.message;
+      newErrors.requiredDate =
+        dateResult.message;
     }
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+
+    return (
+      Object.keys(newErrors).length === 0
+    );
   };
 
-  const validateSearch = () => {
-    if (!searchInput.trim()) {
-      setSearchError("Employee ID is required.");
-      return false;
-    }
+  // ===================================================
+  // HANDLE EMPLOYEE ID CHANGE
+  // ===================================================
 
-    if (!searchInput.startsWith("EMP")) {
-      setSearchError("Employee ID must start with uppercase EMP.");
-      return false;
-    }
+  const handleEmployeeIdChange = (e) => {
+    const value = e.target.value;
 
-    if (searchInput.length !== 6) {
-      setSearchError("Employee ID must be exactly 6 characters.");
-      return false;
-    }
+    setEmployeeId(value);
 
-    if (!/^EMP[A-Za-z0-9]{3}$/.test(searchInput)) {
-      setSearchError("Invalid Employee ID format.");
-      return false;
-    }
+    const result =
+      validateEmployeeId(value);
 
-    if (!VALID_EMPLOYEE_IDS.includes(searchInput.toUpperCase())) {
-      setSearchError("Employee ID does not exist in the database.");
-      return false;
-    }
-
-    setSearchError("");
-    return true;
+    setErrors((previous) => ({
+      ...previous,
+      employeeId:
+        value === ""
+          ? ""
+          : result.isValid
+          ? ""
+          : result.message,
+    }));
   };
+
+  // ===================================================
+  // HANDLE ASSET TYPE CHANGE
+  // ===================================================
+
+  const handleAssetTypeChange = (e) => {
+    const value = e.target.value;
+
+    setAssetType(value);
+
+    setErrors((previous) => ({
+      ...previous,
+      assetType:
+        value === ""
+          ? "Asset Type is required"
+          : "",
+    }));
+  };
+
+  // ===================================================
+  // HANDLE PURPOSE CHANGE
+  // ===================================================
+
+  const handlePurposeChange = (e) => {
+    const value = e.target.value;
+
+    setPurpose(value);
+
+    const result =
+      validatePurpose(value);
+
+    setErrors((previous) => ({
+      ...previous,
+      purpose:
+        value === ""
+          ? ""
+          : result.isValid
+          ? ""
+          : result.message,
+    }));
+  };
+
+  // ===================================================
+  // HANDLE DATE CHANGE
+  // ===================================================
+
+  const handleDateChange = (e) => {
+    const value = e.target.value;
+
+    setRequiredDate(value);
+
+    const result =
+      validateRequiredDate(value);
+
+    setErrors((previous) => ({
+      ...previous,
+      requiredDate:
+        value === ""
+          ? ""
+          : result.isValid
+          ? ""
+          : result.message,
+    }));
+  };
+
+  // ===================================================
+  // SUBMIT REQUEST
+  // ===================================================
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!validateForm()) {
+    const isValid =
+      validateForm();
+
+    if (!isValid) {
       return;
     }
 
+    // Generate request ID
+    const nextNumber =
+      requests.length + 1;
+
+    const requestNumber =
+      String(nextNumber).padStart(3, "0");
+
     const newRequest = {
-      id: `AR00${requests.length + 1} (Automatic Generated)`,
-      assetType,
-      employeeId: employeeId.toUpperCase(),
+      id: `AR${requestNumber} (Automatic Generated)`,
+
+      assetType: assetType,
+
+      employeeId: employeeId,
+
       status: "Pending",
-      date: new Date().toLocaleDateString("en-GB").replace(/\//g, "-"),
+
+      date: new Date()
+        .toLocaleDateString("en-GB")
+        .replace(/\//g, "-"),
     };
 
-    setRequests([newRequest, ...requests]);
-    alert("✅ Asset Request Submitted Successfully!");
+    // Add request
+    setRequests((previous) => [
+      newRequest,
+      ...previous,
+    ]);
+
+    alert(
+      "✅ Asset Request Submitted Successfully!"
+    );
+
+    // Clear form
     handleCancel();
   };
+
+  // ===================================================
+  // CANCEL FORM
+  // ===================================================
 
   const handleCancel = () => {
     setEmployeeId("");
     setAssetType("");
     setPurpose("");
     setRequiredDate("");
+
     setErrors({});
   };
 
-  const handleSearch = () => {
-    if (!validateSearch()) {
-      return;
+  // ===================================================
+  // SEARCH VALIDATION
+  // ===================================================
+
+  const validateSearch = (value) => {
+    // Empty
+    if (value.length === 0) {
+      return {
+        isValid: false,
+        message: "Employee ID is required",
+      };
     }
-    setSearchId(searchInput.toUpperCase());
+
+    // Spaces
+    if (/\s/.test(value)) {
+      return {
+        isValid: false,
+        message:
+          "Employee ID should not contain spaces",
+      };
+    }
+
+    // Numbers only
+    if (!/^[0-9]+$/.test(value)) {
+      return {
+        isValid: false,
+        message:
+          "Employee ID must contain numbers only",
+      };
+    }
+
+    // 9 digits
+    if (value.length !== 9) {
+      return {
+        isValid: false,
+        message:
+          "Employee ID must be exactly 9 digits",
+      };
+    }
+
+    // Validate date part
+    const datePart =
+      value.substring(0, 6);
+
+    const year =
+      Number(datePart.substring(0, 2));
+
+    const day =
+      Number(datePart.substring(2, 4));
+
+    const month =
+      Number(datePart.substring(4, 6));
+
+    if (
+      month < 1 ||
+      month > 12
+    ) {
+      return {
+        isValid: false,
+        message:
+          "Invalid month in Employee ID",
+      };
+    }
+
+    if (
+      day < 1 ||
+      day > 31
+    ) {
+      return {
+        isValid: false,
+        message:
+          "Invalid day in Employee ID",
+      };
+    }
+
+    const fullYear =
+      2000 + year;
+
+    const date = new Date(
+      fullYear,
+      month - 1,
+      day
+    );
+
+    if (
+      date.getFullYear() !== fullYear ||
+      date.getMonth() !== month - 1 ||
+      date.getDate() !== day
+    ) {
+      return {
+        isValid: false,
+        message:
+          "Invalid date in Employee ID",
+      };
+    }
+
+    // Last 3 digits
+    const employeeNumber =
+      value.substring(6);
+
+    if (
+      employeeNumber === "000"
+    ) {
+      return {
+        isValid: false,
+        message:
+          "Employee number cannot be 000",
+      };
+    }
+
+    return {
+      isValid: true,
+      message: "",
+    };
   };
 
-  // Handle field change and clear error
-  const handleFieldChange = (setter, field) => (e) => {
-    setter(e.target.value);
-    setErrors({ ...errors, [field]: "" });
+  // ===================================================
+  // HANDLE SEARCH
+  // ===================================================
+
+  const handleSearch = () => {
+    const result =
+      validateSearch(searchInput);
+
+    if (!result.isValid) {
+      setSearchError(
+        result.message
+      );
+
+      setSearchId("");
+
+      return;
+    }
+
+    setSearchError("");
+
+    setSearchId(searchInput);
   };
+
+  // ===================================================
+  // SEARCH INPUT CHANGE
+  // ===================================================
+
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+
+    setSearchInput(value);
+
+    setSearchError("");
+  };
+
+  // ===================================================
+  // SEARCH ENTER KEY
+  // ===================================================
+
+  const handleSearchKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+
+      handleSearch();
+    }
+  };
+
+  // ===================================================
+  // FILTER REQUESTS
+  // ===================================================
 
   const filteredRequests =
     searchId.trim() === ""
       ? requests
-      : requests.filter((req) =>
-          req.employeeId.toLowerCase().includes(searchId.toLowerCase())
+      : requests.filter(
+          (request) =>
+            request.employeeId
+              .toLowerCase()
+              .includes(
+                searchId.toLowerCase()
+              )
         );
+
+  // ===================================================
+  // PAGINATION
+  // ===================================================
 
   const visibleRequests =
     pageSize === "All"
       ? filteredRequests
-      : filteredRequests.slice(0, Number(pageSize));
+      : filteredRequests.slice(
+          0,
+          Number(pageSize)
+        );
 
-  const getStatusClass = (status) => {
+  // ===================================================
+  // STATUS CLASS
+  // ===================================================
+
+  const getStatusClass = (
+    status
+  ) => {
     return `ar-status-${status.toLowerCase()}`;
   };
 
+  // ===================================================
+  // RENDER
+  // ===================================================
+
   return (
     <div className="ar-page">
+
+      {/* =================================================
+          NAVBAR
+      ================================================= */}
+
       <nav className="ar-nav">
+
         <div className="ar-nav-logo">
-          <span className="ar-nav-title">ITAMS</span>
-          <span className="ar-nav-sub">IT Asset Management System</span>
+
+          <span className="ar-nav-title">
+            ITAMS
+          </span>
+
+          <span className="ar-nav-sub">
+            IT Asset Management System
+          </span>
+
         </div>
+
         <div className="ar-nav-right">
-          <span className="ar-nav-user">{username}</span>
-          <span className="ar-nav-divider">|</span>
-          <button className="ar-logout-btn" onClick={onLogout}>
+
+          <span className="ar-nav-user">
+            {username}
+          </span>
+
+          <span className="ar-nav-divider">
+            |
+          </span>
+
+          <button
+            className="ar-logout-btn"
+            onClick={onLogout}
+          >
             Logout
           </button>
+
         </div>
+
       </nav>
 
+      {/* =================================================
+          BODY
+      ================================================= */}
+
       <div className="ar-body">
-        <h1 className="ar-page-title">Asset Request</h1>
+
+        <h1 className="ar-page-title">
+          Asset Request
+        </h1>
+
         <p className="ar-page-sub">
-          Request a new IT asset from the Asset Manager.
+          Request a new IT asset from the
+          Asset Manager.
         </p>
 
-        <div className="ar-card">
-          <h2 className="ar-card-title">Asset Request Details</h2>
+        {/* =================================================
+            REQUEST FORM
+        ================================================= */}
 
-          <form onSubmit={handleSubmit} noValidate>
-            {/* Employee ID */}
+        <div className="ar-card">
+
+          <h2 className="ar-card-title">
+            Asset Request Details
+          </h2>
+
+          <form
+            onSubmit={handleSubmit}
+            noValidate
+          >
+
+            {/* =================================================
+                EMPLOYEE ID
+            ================================================= */}
+
             <div className="ar-form-group">
-              <label className="ar-label">Employee ID *</label>
+
+              <label className="ar-label">
+                Employee ID *
+              </label>
+
               <input
                 type="text"
-                className={`ar-input ${errors.employeeId ? "ar-input-error" : ""}`}
-                placeholder="Enter Employee ID (e.g., EMP001)"
+                className={`ar-input ${
+                  errors.employeeId
+                    ? "ar-input-error"
+                    : ""
+                }`}
+                placeholder="Enter Employee ID (e.g., 260820001)"
                 value={employeeId}
-                onChange={handleFieldChange(setEmployeeId, "employeeId")}
+                maxLength={9}
+                inputMode="numeric"
+                onChange={
+                  handleEmployeeIdChange
+                }
               />
+
               {errors.employeeId && (
-                <span className="ar-error-text">⚠️ {errors.employeeId}</span>
+                <span className="ar-error-text">
+                  ⚠️ {errors.employeeId}
+                </span>
               )}
+
               <div className="ar-validation-hint">
-                <small>Format: EMP + 3 alphanumeric characters (e.g., EMP001, EMPA12, EMP1AB)</small>
+                <small>
+                  Format: YYDDMM + 3-digit
+                  employee number
+                  (e.g., 260820001).
+                  Old employee IDs are also
+                  accepted.
+                </small>
               </div>
+
             </div>
 
-            {/* Asset Type */}
+            {/* =================================================
+                ASSET TYPE
+            ================================================= */}
+
             <div className="ar-form-group">
-              <label className="ar-label">Asset Type *</label>
+
+              <label className="ar-label">
+                Asset Type *
+              </label>
+
               <select
-                className={`ar-select ${errors.assetType ? "ar-input-error" : ""}`}
+                className={`ar-select ${
+                  errors.assetType
+                    ? "ar-input-error"
+                    : ""
+                }`}
                 value={assetType}
-                onChange={handleFieldChange(setAssetType, "assetType")}
+                onChange={
+                  handleAssetTypeChange
+                }
               >
-                <option value="">Select Asset Type</option>
-                {ASSET_TYPES.map((type) => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
-                ))}
+
+                <option value="">
+                  Select Asset Type
+                </option>
+
+                {ASSET_TYPES.map(
+                  (type) => (
+                    <option
+                      key={type}
+                      value={type}
+                    >
+                      {type}
+                    </option>
+                  )
+                )}
+
               </select>
+
               {errors.assetType && (
-                <span className="ar-error-text">⚠️ {errors.assetType}</span>
+                <span className="ar-error-text">
+                  ⚠️ {errors.assetType}
+                </span>
               )}
+
             </div>
 
-            {/* Purpose */}
+            {/* =================================================
+                PURPOSE
+            ================================================= */}
+
             <div className="ar-form-group">
-              <label className="ar-label">Purpose *</label>
+
+              <label className="ar-label">
+                Purpose *
+              </label>
+
               <textarea
-                className={`ar-textarea ${errors.purpose ? "ar-input-error" : ""}`}
-                placeholder="Enter Purpose (min 10 characters)"
+                className={`ar-textarea ${
+                  errors.purpose
+                    ? "ar-input-error"
+                    : ""
+                }`}
+                placeholder="Enter Purpose (minimum 10 characters)"
                 rows={4}
+                maxLength={500}
                 value={purpose}
-                onChange={handleFieldChange(setPurpose, "purpose")}
+                onChange={
+                  handlePurposeChange
+                }
               />
+
               {errors.purpose && (
-                <span className="ar-error-text">⚠️ {errors.purpose}</span>
+                <span className="ar-error-text">
+                  ⚠️ {errors.purpose}
+                </span>
               )}
+
               <div className="ar-character-count">
                 {purpose.length > 0 && (
-                  <small>{purpose.length} / 500 characters</small>
+                  <small>
+                    {purpose.length} / 500
+                    characters
+                  </small>
                 )}
               </div>
+
             </div>
 
-            {/* Required Date */}
+            {/* =================================================
+                REQUIRED DATE
+            ================================================= */}
+
             <div className="ar-form-group">
-              <label className="ar-label">Required Date *</label>
+
+              <label className="ar-label">
+                Required Date *
+              </label>
+
               <input
                 type="date"
-                className={`ar-input ${errors.requiredDate ? "ar-input-error" : ""}`}
+                className={`ar-input ${
+                  errors.requiredDate
+                    ? "ar-input-error"
+                    : ""
+                }`}
                 value={requiredDate}
-                onChange={handleFieldChange(setRequiredDate, "requiredDate")}
-                min={new Date().toISOString().split('T')[0]}
+                onChange={
+                  handleDateChange
+                }
+                min={getTodayDate()}
+                max={getMaxDate()}
               />
+
               {errors.requiredDate && (
-                <span className="ar-error-text">⚠️ {errors.requiredDate}</span>
+                <span className="ar-error-text">
+                  ⚠️ {errors.requiredDate}
+                </span>
               )}
+
               <div className="ar-validation-hint">
-                <small>Date must be today or within the next year</small>
+                <small>
+                  Date must be today or
+                  within the next year
+                </small>
               </div>
+
             </div>
 
+            {/* =================================================
+                BUTTONS
+            ================================================= */}
+
             <div className="ar-btn-row">
-              <button type="submit" className="ar-submit-btn">
+
+              <button
+                type="submit"
+                className="ar-submit-btn"
+              >
                 Submit Request
               </button>
+
               <button
                 type="button"
                 className="ar-cancel-btn"
@@ -359,99 +1101,237 @@ const AssetRequest = ({ username = "username", onLogout, onBack }) => {
               >
                 Cancel
               </button>
+
             </div>
+
           </form>
+
         </div>
 
+        {/* =================================================
+            SEARCH EMPLOYEE
+        ================================================= */}
+
         <div className="ar-card">
-          <h2 className="ar-card-title">Search Employee</h2>
+
+          <h2 className="ar-card-title">
+            Search Employee
+          </h2>
+
           <div className="ar-form-group">
-            <label className="ar-label">Employee ID</label>
+
+            <label className="ar-label">
+              Employee ID
+            </label>
+
             <div className="ar-search-row">
+
               <input
                 type="text"
-                className={`ar-input ${searchError ? "ar-input-error" : ""}`}
+                className={`ar-input ${
+                  searchError
+                    ? "ar-input-error"
+                    : ""
+                }`}
                 placeholder="Enter Employee ID"
                 value={searchInput}
-                onChange={(e) => {
-                  setSearchInput(e.target.value);
-                  setSearchError("");
-                }}
+                maxLength={9}
+                inputMode="numeric"
+                onChange={
+                  handleSearchChange
+                }
+                onKeyDown={
+                  handleSearchKeyDown
+                }
               />
-              <button type="button" className="ar-search-btn" onClick={handleSearch}>
+
+              <button
+                type="button"
+                className="ar-search-btn"
+                onClick={handleSearch}
+              >
                 Search
               </button>
+
             </div>
+
             {searchError && (
-              <span className="ar-error-text">⚠️ {searchError}</span>
+              <span className="ar-error-text">
+                ⚠️ {searchError}
+              </span>
             )}
+
           </div>
+
         </div>
 
+        {/* =================================================
+            REQUEST HISTORY
+        ================================================= */}
+
         <div className="ar-card">
-          <h2 className="ar-card-title">Request History</h2>
+
+          <h2 className="ar-card-title">
+            Request History
+          </h2>
 
           <div className="ar-table-wrapper">
+
             <table className="ar-table">
+
               <thead>
+
                 <tr>
-                  <th>Request ID</th>
-                  <th>Asset Type</th>
-                  <th>Employee ID</th>
-                  <th>Status</th>
-                  <th>Request Date</th>
+
+                  <th>
+                    Request ID
+                  </th>
+
+                  <th>
+                    Asset Type
+                  </th>
+
+                  <th>
+                    Employee ID
+                  </th>
+
+                  <th>
+                    Status
+                  </th>
+
+                  <th>
+                    Request Date
+                  </th>
+
                 </tr>
+
               </thead>
+
               <tbody>
-                {visibleRequests.length > 0 ? (
-                  visibleRequests.map((req) => (
-                    <tr key={req.id}>
-                      <td>{req.id}</td>
-                      <td>{req.assetType}</td>
-                      <td>
-                        <span className="ar-employee-id">{req.employeeId}</span>
-                      </td>
-                      <td>
-                        <span className={`ar-status-badge ${getStatusClass(req.status)}`}>
-                          {req.status}
-                        </span>
-                      </td>
-                      <td>{req.date}</td>
-                    </tr>
-                  ))
+
+                {visibleRequests.length >
+                0 ? (
+
+                  visibleRequests.map(
+                    (request) => (
+
+                      <tr
+                        key={request.id}
+                      >
+
+                        <td>
+                          {request.id}
+                        </td>
+
+                        <td>
+                          {request.assetType}
+                        </td>
+
+                        <td>
+
+                          <span className="ar-employee-id">
+                            {request.employeeId}
+                          </span>
+
+                        </td>
+
+                        <td>
+
+                          <span
+                            className={`ar-status-badge ${getStatusClass(
+                              request.status
+                            )}`}
+                          >
+                            {request.status}
+                          </span>
+
+                        </td>
+
+                        <td>
+                          {request.date}
+                        </td>
+
+                      </tr>
+
+                    )
+                  )
+
                 ) : (
+
                   <tr>
-                    <td colSpan="5" className="ar-no-data">
+
+                    <td
+                      colSpan="5"
+                      className="ar-no-data"
+                    >
                       No Requests Found
                     </td>
+
                   </tr>
+
                 )}
+
               </tbody>
+
             </table>
+
           </div>
 
+          {/* =================================================
+              PAGE SIZE
+          ================================================= */}
+
           <div className="ar-pagination-row">
+
             <select
               className="ar-page-size"
               value={pageSize}
               onChange={(e) => {
-                const v = e.target.value;
-                setPageSize(v === "All" ? "All" : Number(v));
+
+                const value =
+                  e.target.value;
+
+                setPageSize(
+                  value === "All"
+                    ? "All"
+                    : Number(value)
+                );
+
               }}
             >
-              {PAGE_SIZE_OPTIONS.map((o) => (
-                <option key={o} value={o}>
-                  {o}
-                </option>
-              ))}
+
+              {PAGE_SIZE_OPTIONS.map(
+                (option) => (
+
+                  <option
+                    key={option}
+                    value={option}
+                  >
+                    {option}
+                  </option>
+
+                )
+              )}
+
             </select>
+
           </div>
+
         </div>
 
-        <button className="ar-back-btn" onClick={onBack}>
+        {/* =================================================
+            BACK BUTTON
+        ================================================= */}
+
+        <button
+          className="ar-back-btn"
+          onClick={onBack}
+        >
           ← Back
         </button>
+
       </div>
+
     </div>
   );
 };
