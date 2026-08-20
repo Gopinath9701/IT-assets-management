@@ -2,14 +2,140 @@ import React, { useState } from "react";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import "../App.css";
 
-export default function Login({ onForgotPasswordClick }) {
+// ========================================
+// GENERATE EMPLOYEE ID
+// Format: YYMMDD + 3-digit employee number
+// Example: 260819001
+// ========================================
+
+const generateEmployeeId = (employeeNumber = 1) => {
+  const date = new Date();
+
+  const year = String(date.getFullYear()).slice(-2);
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  const employeeNumberFormatted =
+    String(employeeNumber).padStart(3, "0");
+
+  return `${year}${month}${day}${employeeNumberFormatted}`;
+};
+
+// ========================================
+// VALIDATE EMPLOYEE ID / EMAIL
+// ========================================
+
+const validateEmployeeIdOrEmail = (value) => {
+  // Empty
+  if (value.length === 0) {
+    return "Please enter Employee ID or Email.";
+  }
+
+  // No spaces or whitespace anywhere
+  if (/\s/.test(value)) {
+    return "Spaces are not allowed.";
+  }
+
+  // ----------------------------------------
+  // EMPLOYEE ID
+  // Exactly 9 digits
+  // Format: YYMMDD001
+  // ----------------------------------------
+
+  if (/^\d+$/.test(value)) {
+    if (!/^\d{9}$/.test(value)) {
+      return "Employee ID must be exactly 9 digits.";
+    }
+
+    return "";
+  }
+
+  // ----------------------------------------
+  // EMAIL
+  // Exactly:
+  // 9 digits + @gmail.com
+  // Example: 260819001@gmail.com
+  // ----------------------------------------
+
+  if (value.includes("@")) {
+    if (!/^\d{9}@gmail\.com$/.test(value)) {
+      return "Email must be in this format: 260819001@gmail.com";
+    }
+
+    return "";
+  }
+
+  // Anything else is invalid
+  return "Enter a valid Employee ID or Email.";
+};
+
+// ========================================
+// VALIDATE PASSWORD
+// ========================================
+
+const validatePassword = (password) => {
+  // Empty
+  if (password.length === 0) {
+    return "Please enter Password.";
+  }
+
+  // No spaces
+  if (/\s/.test(password)) {
+    return "Password cannot contain spaces.";
+  }
+
+  // Minimum 8 characters
+  if (password.length < 8) {
+    return "Password must contain at least 8 characters.";
+  }
+
+  // Uppercase
+  if (!/[A-Z]/.test(password)) {
+    return "Password must contain at least one uppercase letter.";
+  }
+
+  // Lowercase
+  if (!/[a-z]/.test(password)) {
+    return "Password must contain at least one lowercase letter.";
+  }
+
+  // Number
+  if (!/[0-9]/.test(password)) {
+    return "Password must contain at least one number.";
+  }
+
+  // Special character
+  if (!/[!@#$%^&*(),.?":{}|<>_\-\\[\]/`~+=;']/.test(password)) {
+    return "Password must contain at least one special character.";
+  }
+
+  return "";
+};
+
+// ========================================
+// LOGIN COMPONENT
+// ========================================
+
+export default function Login({
+  onForgotPasswordClick,
+  onLoginSuccess,
+}) {
+
+  // ========================================
+  // FORM DATA
+  // ========================================
 
   const [formData, setFormData] = useState({
-    employeeIdOrEmail: "",
+    employeeIdOrEmail: generateEmployeeId(1),
     password: "",
   });
 
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  // ========================================
+  // HANDLE INPUT CHANGE
+  // ========================================
 
   const handleChange = (e) => {
     setFormData({
@@ -18,190 +144,173 @@ export default function Login({ onForgotPasswordClick }) {
     });
   };
 
-  const handleSubmit = async (e) => {
+  // ========================================
+  // HANDLE LOGIN
+  // ========================================
 
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const input = formData.employeeIdOrEmail.trim();
+    // IMPORTANT:
+    // Do NOT trim before validation.
+    // This makes spaces at the beginning/end invalid.
+
+    const identifier = formData.employeeIdOrEmail;
     const password = formData.password;
 
-    // Empty Validation
+    // ========================================
+    // EMPLOYEE ID / EMAIL VALIDATION
+    // ========================================
 
-    if (!input) {
-      alert("Please enter Employee ID or Email.");
+    const identifierError =
+      validateEmployeeIdOrEmail(identifier);
+
+    if (identifierError) {
+      alert(identifierError);
       return;
     }
 
-    if (!password) {
-      alert("Please enter Password.");
+    // ========================================
+    // PASSWORD VALIDATION
+    // ========================================
+
+    const passwordError =
+      validatePassword(password);
+
+    if (passwordError) {
+      alert(passwordError);
       return;
     }
 
-    // Maximum Length
-
-    if (input.length > 100) {
-      alert("Input is too long.");
-      return;
-    }
-
-    // Spaces
-
-    if (/\s/.test(input)) {
-      alert("Spaces are not allowed.");
-      return;
-    }
-
-    // Dangerous Characters
-
-    if (/[<>'"`;(){}[\]\\]/.test(input)) {
-      alert("Invalid characters are not allowed.");
-      return;
-    }
-
-    // ================= EMAIL =================
-
-    if (input.includes("@")) {
-
-      if (!input.endsWith("@itam.com")) {
-        alert("Email must end with @itam.com.");
-        return;
-      }
-
-      const username = input.split("@")[0];
-
-      if (username.length < 3) {
-        alert("Email username must contain at least 3 characters.");
-        return;
-      }
-
-      if (input.includes("..")) {
-        alert("Email cannot contain consecutive dots.");
-        return;
-      }
-
-      const emailRegex =
-        /^[A-Za-z0-9._%+-]{3,}@itam\.com$/;
-
-      if (!emailRegex.test(input)) {
-        alert("Please enter a valid Gmail address.");
-        return;
-      }
-
-    }
-
-    // ================= EMPLOYEE ID =================
-
-    else {
-
-      if (!input.startsWith("EMP")) {
-        alert("Employee ID must start with 'EMP' in uppercase.");
-        return;
-      }
-
-      if (input.length < 6) {
-        alert("Employee ID must be exactly 6 characters long.");
-        return;
-      }
-
-      if (input.length > 6) {
-        alert("Employee ID cannot exceed 6 characters.");
-        return;
-      }
-
-      const lastThree = input.substring(3);
-
-      if (!/^[A-Za-z0-9]{3}$/.test(lastThree)) {
-        alert("Last 3 characters can contain only letters and numbers.");
-        return;
-      }
-
-    }
-
-    // Password Validation
-
-    if (password.length < 6) {
-      alert("Password must contain at least 6 characters.");
-      return;
-    }
-
-    if (password.length > 20) {
-      alert("Password cannot exceed 20 characters.");
-      return;
-    }
+    // ========================================
+    // LOGIN REQUEST
+    // Only reaches here if ALL validation passes
+    // ========================================
 
     try {
+      setLoading(true);
 
-      const response = await fetch("http://localhost:5000/api/login", {
+      const response = await fetch(
+        "http://localhost:5000/api/login",
+        {
+          method: "POST",
 
-        method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
 
-        headers: {
-          "Content-Type": "application/json",
-        },
-
-        body: JSON.stringify({
-          employeeIdOrEmail: input,
-          password: password,
-        }),
-
-      });
+          body: JSON.stringify({
+            employeeIdOrEmail: identifier,
+            password: password,
+          }),
+        }
+      );
 
       const data = await response.json();
 
-      if (response.ok) {
+      console.log(
+        "LOGIN RESPONSE:",
+        data
+      );
+
+      // ========================================
+      // LOGIN SUCCESS
+      // ========================================
+
+      if (response.ok && data.success) {
+
+        localStorage.setItem(
+          "token",
+          data.token
+        );
+
+        localStorage.setItem(
+          "user",
+          JSON.stringify(data.user)
+        );
+
+        console.log(
+          "Logged in user:",
+          data.user
+        );
 
         alert("Login Successful");
 
-        localStorage.setItem("token", data.token);
-
-        localStorage.setItem("user", JSON.stringify(data.user));
-
-        console.log(data.user);
-
-        // window.location.href="/dashboard";
-
+        // Send user information to App.js
+        if (onLoginSuccess) {
+          onLoginSuccess(data.user);
+        }
       }
+
+      // ========================================
+      // LOGIN FAILED
+      // ========================================
 
       else {
-
-        alert(data.message);
-
+        alert(
+          data.message ||
+          "Invalid credentials."
+        );
       }
 
+    } catch (error) {
+
+      console.error(
+        "Login error:",
+        error
+      );
+
+      alert(
+        "Unable to connect to server. Please make sure the backend is running."
+      );
+
+    } finally {
+
+      setLoading(false);
+
     }
-
-    catch (error) {
-
-      console.error(error);
-
-      alert("Unable to connect to server.");
-
-    }
-
   };
-    return (
+
+  // ========================================
+  // LOGIN UI
+  // ========================================
+
+  return (
     <div className="login-card">
+
       <h2>Login</h2>
 
       <form onSubmit={handleSubmit}>
 
-        <label>Employee ID or Email</label>
+        {/* EMPLOYEE ID OR EMAIL */}
+
+        <label>
+          Employee ID or Email
+        </label>
 
         <input
           type="text"
           name="employeeIdOrEmail"
-          placeholder="Enter your Employee ID or Gmail"
+          placeholder="Enter your Employee ID or Email"
           value={formData.employeeIdOrEmail}
           onChange={handleChange}
           required
         />
 
-        <label>Password</label>
+        {/* PASSWORD */}
+
+        <label>
+          Password
+        </label>
 
         <div className="password-input-container">
 
           <input
-            type={showPassword ? "text" : "password"}
+            type={
+              showPassword
+                ? "text"
+                : "password"
+            }
             name="password"
             placeholder="Enter your Password"
             value={formData.password}
@@ -212,13 +321,27 @@ export default function Login({ onForgotPasswordClick }) {
           <button
             type="button"
             className="password-toggle-btn"
-            onClick={() => setShowPassword(!showPassword)}
-            aria-label={showPassword ? "Hide Password" : "Show Password"}
+            onClick={() =>
+              setShowPassword(
+                !showPassword
+              )
+            }
+            aria-label={
+              showPassword
+                ? "Hide Password"
+                : "Show Password"
+            }
           >
-            {showPassword ? <FaRegEyeSlash /> : <FaRegEye />}
+            {
+              showPassword
+                ? <FaRegEyeSlash />
+                : <FaRegEye />
+            }
           </button>
 
         </div>
+
+        {/* FORGOT PASSWORD */}
 
         <a
           href="/forgot-password"
@@ -234,13 +357,21 @@ export default function Login({ onForgotPasswordClick }) {
           Forgot Password?
         </a>
 
-        <button type="submit">
-          Login
+        {/* LOGIN BUTTON */}
+
+        <button
+          type="submit"
+          disabled={loading}
+        >
+          {
+            loading
+              ? "Logging in..."
+              : "Login"
+          }
         </button>
 
       </form>
 
     </div>
   );
-
 }
