@@ -1,348 +1,509 @@
 import React, { useState } from "react";
 import "./AddEmployee.css";
 
-const AddEmployee = () => {
+const DEPARTMENTS = [
+  "IT",
+  "HR",
+  "Finance",
+  "Marketing",
+  "Sales",
+  "Operations",
+];
 
-  const [employee, setEmployee] = useState({
-    employeeName: "",
-    employeeId: "",
-    email: "",
-    department: "",
-    designation: "",
-    phone: "",
-    joiningDate: "",
-  });
+const AddEmployee = ({ username = "username", onLogout, onBack }) => {
+  const [employeeName, setEmployeeName] = useState("");
+  const [employeeId, setEmployeeId] = useState("");
+  const [email, setEmail] = useState("");
+  const [department, setDepartment] = useState("");
+  const [designation, setDesignation] = useState("");
+  const [phone, setPhone] = useState("");
+  const [dateOfJoining, setDateOfJoining] = useState("");
 
   const [errors, setErrors] = useState({});
 
-  // ==========================
-  // Regular Expressions
-  // ==========================
+  // =========================================================
+  // DATE HELPERS
+  // =========================================================
 
-  const nameRegex = /^[A-Za-z ]+$/;
-  const empIdRegex = /^EMP\d{3}$/;
-  const emailRegex = /^[A-Za-z0-9._%+-]{3,}@gmail\.com$/;
-  const designationRegex = /^[A-Za-z ]+$/;
+  const formatDateForId = (dateValue) => {
+    if (!dateValue) return "";
 
-  // Updated to match Selenium Test
-  const phoneRegex = /^[6-9]\d{9}$/;
+    const [year, month, day] = dateValue.split("-");
 
-  // ==========================
-  // Handle Change
-  // ==========================
-
-  const handleChange = (e) => {
-
-    const { name, value } = e.target;
-
-    setEmployee((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-
-    setErrors((prev) => ({
-      ...prev,
-      [name]: "",
-    }));
+    return (
+      year.substring(2, 4) +
+      month.padStart(2, "0") +
+      day.padStart(2, "0")
+    );
   };
 
-  // ==========================
-  // Validation
-  // ==========================
+  const getToday = () => {
+    const date = new Date();
+    date.setHours(0, 0, 0, 0);
+    return date;
+  };
+
+  const getPreviousSevenDays = () => {
+    const date = getToday();
+    date.setDate(date.getDate() - 7);
+    return date;
+  };
+
+  const getDateString = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  };
+
+  // =========================================================
+  // EMPLOYEE NAME VALIDATION
+  // =========================================================
+
+  const validateEmployeeName = (value) => {
+    if (!value || value.length === 0) {
+      return "Employee Name is required.";
+    }
+
+    if (value.startsWith(" ")) {
+      return "Employee Name cannot start with a space.";
+    }
+
+    if (value.endsWith(" ")) {
+      return "Employee Name cannot end with a space.";
+    }
+
+    if (value.trim().length < 4) {
+      return "Employee Name must contain at least 4 characters.";
+    }
+
+    if (!/^[A-Za-z ]+$/.test(value)) {
+      return "Employee Name can contain only letters and spaces.";
+    }
+
+    return "";
+  };
+
+  // =========================================================
+  // EMPLOYEE ID VALIDATION
+  // =========================================================
+
+  const validateEmployeeId = (value, joiningDate) => {
+    if (!value) {
+      return "Employee ID is required.";
+    }
+
+    if (/\s/.test(value)) {
+      return "Employee ID cannot contain spaces.";
+    }
+
+    if (!/^\d+$/.test(value)) {
+      return "Employee ID must contain only numbers.";
+    }
+
+    if (!/^\d{9}$/.test(value)) {
+      return "Employee ID must contain exactly 9 digits.";
+    }
+
+    // YYMMDD + 3 digit employee number
+    const employeeNumber = value.substring(6);
+
+    if (!/^\d{3}$/.test(employeeNumber)) {
+      return "Last 3 digits must be the employee number.";
+    }
+
+    if (!joiningDate) {
+      return "Select Date of Joining before entering Employee ID.";
+    }
+
+    const expectedDatePart = formatDateForId(joiningDate);
+    const enteredDatePart = value.substring(0, 6);
+
+    if (enteredDatePart !== expectedDatePart) {
+      return `Employee ID must start with ${expectedDatePart}, matching Date of Joining.`;
+    }
+
+    return "";
+  };
+
+  // =========================================================
+  // EMAIL VALIDATION
+  // =========================================================
+
+  const validateEmail = (value, id) => {
+    if (!value) {
+      return "Email is required.";
+    }
+
+    if (/\s/.test(value)) {
+      return "Email cannot contain spaces.";
+    }
+
+    if (!id) {
+      return "Enter Employee ID before entering Email.";
+    }
+
+    // EXACTLY employeeID@gmail.com
+    const expectedEmail = `${id}@gmail.com`;
+
+    if (value !== expectedEmail) {
+      return `Email must be ${expectedEmail}.`;
+    }
+
+    if (!/^\d{9}@gmail\.com$/.test(value)) {
+      return "Email must be in EmployeeID@gmail.com format.";
+    }
+
+    return "";
+  };
+
+  // =========================================================
+  // DEPARTMENT VALIDATION
+  // =========================================================
+
+  const validateDepartment = (value) => {
+    if (!value) {
+      return "Please select Department.";
+    }
+
+    return "";
+  };
+
+  // =========================================================
+  // DESIGNATION VALIDATION
+  // =========================================================
+
+  const validateDesignation = (value) => {
+    if (!value || value.length === 0) {
+      return "Designation is required.";
+    }
+
+    if (value.startsWith(" ")) {
+      return "Designation cannot start with a space.";
+    }
+
+    if (value.endsWith(" ")) {
+      return "Designation cannot end with a space.";
+    }
+
+    if (value.trim().length < 2) {
+      return "Designation must contain at least 2 characters.";
+    }
+
+    if (!/^[A-Za-z0-9 ]+$/.test(value)) {
+      return "Designation can contain only letters, numbers and spaces.";
+    }
+
+    return "";
+  };
+
+  // =========================================================
+  // PHONE VALIDATION
+  // =========================================================
+
+  const validatePhone = (value) => {
+    if (!value) {
+      return "Phone Number is required.";
+    }
+
+    if (!/^\d+$/.test(value)) {
+      return "Phone Number must contain only digits.";
+    }
+
+    if (value.length !== 10) {
+      return "Phone Number must contain exactly 10 digits.";
+    }
+
+    // Indian mobile number should start with 6,7,8,9
+    if (!/^[6-9]\d{9}$/.test(value)) {
+      return "Enter a valid 10-digit Indian mobile number.";
+    }
+
+    return "";
+  };
+
+  // =========================================================
+  // DATE OF JOINING VALIDATION
+  // =========================================================
+
+  const validateJoiningDate = (value) => {
+    if (!value) {
+      return "Date of Joining is required.";
+    }
+
+    const selectedDate = new Date(`${value}T00:00:00`);
+
+    if (Number.isNaN(selectedDate.getTime())) {
+      return "Please enter a valid Date of Joining.";
+    }
+
+    const today = getToday();
+    const sevenDaysAgo = getPreviousSevenDays();
+
+    if (selectedDate > today) {
+      return "Date of Joining cannot be a future date.";
+    }
+
+    if (selectedDate < sevenDaysAgo) {
+      return "Date of Joining can only be today or within the previous 7 days.";
+    }
+
+    if (employeeId) {
+      const expectedDatePart = formatDateForId(value);
+      const enteredDatePart = employeeId.substring(0, 6);
+
+      if (
+        /^\d{9}$/.test(employeeId) &&
+        enteredDatePart !== expectedDatePart
+      ) {
+        return `Date of Joining must match Employee ID (${enteredDatePart}).`;
+      }
+    }
+
+    return "";
+  };
+
+  // =========================================================
+  // FULL FORM VALIDATION
+  // =========================================================
 
   const validateForm = () => {
+    const newErrors = {};
 
-    let newErrors = {};
-
-    // ----------------------------
-    // Employee Name
-    // ----------------------------
-
-    if (!employee.employeeName.trim()) {
-
-      newErrors.employeeName =
-        "Employee Name is required.";
-
+    const nameError = validateEmployeeName(employeeName);
+    if (nameError) {
+      newErrors.employeeName = nameError;
     }
 
-    else if (employee.employeeName.trim().length < 4) {
-
-      newErrors.employeeName =
-        "Employee Name must contain at least 4 characters.";
-
+    const dateError = validateJoiningDate(dateOfJoining);
+    if (dateError) {
+      newErrors.dateOfJoining = dateError;
     }
 
-    else if (employee.employeeName.trim().length > 20) {
-
-      newErrors.employeeName =
-        "Employee Name cannot exceed 20 characters.";
-
+    const idError = validateEmployeeId(employeeId, dateOfJoining);
+    if (idError) {
+      newErrors.employeeId = idError;
     }
 
-    else if (!nameRegex.test(employee.employeeName)) {
-
-      newErrors.employeeName =
-        "Only alphabets and spaces are allowed.";
-
+    const emailError = validateEmail(email, employeeId);
+    if (emailError) {
+      newErrors.email = emailError;
     }
 
-    // ----------------------------
-    // Employee ID
-    // ----------------------------
-
-    if (!employee.employeeId.trim()) {
-
-      newErrors.employeeId =
-        "Employee ID is required.";
-
+    const departmentError = validateDepartment(department);
+    if (departmentError) {
+      newErrors.department = departmentError;
     }
 
-    else if (employee.employeeId.includes(" ")) {
-
-      newErrors.employeeId =
-        "Spaces are not allowed.";
-
+    const designationError = validateDesignation(designation);
+    if (designationError) {
+      newErrors.designation = designationError;
     }
 
-    else if (employee.employeeId.length !== 6) {
-
-      newErrors.employeeId =
-        "Employee ID must be exactly 6 characters.";
-
-    }
-
-    else if (!employee.employeeId.startsWith("EMP")) {
-
-      newErrors.employeeId =
-        "Employee ID must start with EMP.";
-
-    }
-
-    else if (!empIdRegex.test(employee.employeeId)) {
-
-      newErrors.employeeId =
-        "Employee ID must be EMP followed by 3 digits.";
-
-    }
-
-    // ----------------------------
-    // Email
-    // ----------------------------
-
-    if (!employee.email.trim()) {
-
-      newErrors.email =
-        "Email is required.";
-
-    }
-
-    else if (employee.email.includes(" ")) {
-
-      newErrors.email =
-        "Spaces are not allowed.";
-
-    }
-
-    else if (employee.email.length > 60) {
-
-      newErrors.email =
-        "Email is too long.";
-
-    }
-
-    else if (!employee.email.endsWith("@gmail.com")) {
-
-      newErrors.email =
-        "Email must end with @gmail.com.";
-
-    }
-
-    else if (!emailRegex.test(employee.email)) {
-
-      newErrors.email =
-        "Please enter a valid Gmail address.";
-
-    }
-
-    // ----------------------------
-    // Department
-    // ----------------------------
-
-    if (!employee.department) {
-
-      newErrors.department =
-        "Please select Department.";
-
-    }
-
-    // ----------------------------
-    // Designation
-    // ----------------------------
-
-    if (!employee.designation.trim()) {
-
-      newErrors.designation =
-        "Designation is required.";
-
-    }
-
-    else if (employee.designation.trim().length < 4) {
-
-      newErrors.designation =
-        "Designation must contain at least 4 characters.";
-
-    }
-
-    else if (employee.designation.trim().length > 20) {
-
-      newErrors.designation =
-        "Designation cannot exceed 20 characters.";
-
-    }
-
-    else if (!designationRegex.test(employee.designation)) {
-
-      newErrors.designation =
-        "Only alphabets and spaces are allowed.";
-
-    }
-
-    // ----------------------------
-    // Phone
-    // ----------------------------
-
-    if (!employee.phone.trim()) {
-
-      newErrors.phone =
-        "Phone Number is required.";
-
-    }
-
-    else if (employee.phone.includes(" ")) {
-
-      newErrors.phone =
-        "Spaces are not allowed.";
-
-    }
-
-    else if (!phoneRegex.test(employee.phone)) {
-
-      newErrors.phone =
-        "Enter a valid 10-digit mobile number.";
-
-    }
-
-    // ----------------------------
-    // Joining Date
-    // ----------------------------
-
-    if (!employee.joiningDate) {
-
-      newErrors.joiningDate =
-        "Date of Joining is required.";
-
-    }
-
-    else {
-
-      const today = new Date();
-      today.setHours(0,0,0,0);
-
-      const joiningDate =
-        new Date(employee.joiningDate);
-
-      joiningDate.setHours(0,0,0,0);
-
-      const companyStartDate =
-        new Date("2000-01-01");
-
-      if (joiningDate > today) {
-
-        newErrors.joiningDate =
-          "Date of Joining cannot be a future date.";
-
-      }
-
-      else if (joiningDate < companyStartDate) {
-
-        newErrors.joiningDate =
-          "Please enter a valid Date of Joining.";
-
-      }
-
+    const phoneError = validatePhone(phone);
+    if (phoneError) {
+      newErrors.phone = phoneError;
     }
 
     setErrors(newErrors);
 
     return Object.keys(newErrors).length === 0;
-
   };
-    // ==========================
-  // Handle Submit
-  // ==========================
+
+  // =========================================================
+  // FIELD CHANGE HANDLERS
+  // =========================================================
+
+  const handleNameChange = (e) => {
+    const value = e.target.value;
+
+    setEmployeeName(value);
+
+    setErrors((prev) => ({
+      ...prev,
+      employeeName: validateEmployeeName(value),
+    }));
+  };
+
+  const handleEmployeeIdChange = (e) => {
+    const value = e.target.value.replace(/\D/g, "");
+
+    const limitedValue = value.substring(0, 9);
+
+    setEmployeeId(limitedValue);
+
+    setErrors((prev) => ({
+      ...prev,
+      employeeId: limitedValue
+        ? validateEmployeeId(limitedValue, dateOfJoining)
+        : "Employee ID is required.",
+      email: email
+        ? validateEmail(email, limitedValue)
+        : prev.email,
+    }));
+  };
+
+  const handleEmailChange = (e) => {
+    const value = e.target.value;
+
+    setEmail(value);
+
+    setErrors((prev) => ({
+      ...prev,
+      email: validateEmail(value, employeeId),
+    }));
+  };
+
+  const handleDepartmentChange = (e) => {
+    const value = e.target.value;
+
+    setDepartment(value);
+
+    setErrors((prev) => ({
+      ...prev,
+      department: validateDepartment(value),
+    }));
+  };
+
+  const handleDesignationChange = (e) => {
+    const value = e.target.value;
+
+    setDesignation(value);
+
+    setErrors((prev) => ({
+      ...prev,
+      designation: validateDesignation(value),
+    }));
+  };
+
+  const handlePhoneChange = (e) => {
+    // ONLY digits
+    const value = e.target.value.replace(/\D/g, "");
+
+    // Maximum 10 digits
+    const limitedValue = value.substring(0, 10);
+
+    setPhone(limitedValue);
+
+    setErrors((prev) => ({
+      ...prev,
+      phone: limitedValue
+        ? validatePhone(limitedValue)
+        : "Phone Number is required.",
+    }));
+  };
+
+  const handleDateChange = (e) => {
+    const value = e.target.value;
+
+    setDateOfJoining(value);
+
+    const dateError = validateJoiningDate(value);
+
+    setErrors((prev) => ({
+      ...prev,
+      dateOfJoining: dateError,
+      employeeId: employeeId
+        ? validateEmployeeId(employeeId, value)
+        : prev.employeeId,
+    }));
+  };
+
+  // =========================================================
+  // SUBMIT
+  // =========================================================
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!validateForm()) return;
+    if (!validateForm()) {
+      return;
+    }
 
-    alert("Employee Added Successfully!");
+    const employeeData = {
+      employeeName: employeeName,
+      employeeId: employeeId,
+      email: email,
+      department: department,
+      designation: designation,
+      phone: `+91${phone}`,
+      dateOfJoining: dateOfJoining,
+    };
 
-    console.log(employee);
+    console.log("Employee saved:", employeeData);
 
-    setEmployee({
-      employeeName: "",
-      employeeId: "",
-      email: "",
-      department: "",
-      designation: "",
-      phone: "",
-      joiningDate: "",
-    });
+    alert("✅ Employee saved successfully!");
 
+    // Reset form
+    setEmployeeName("");
+    setEmployeeId("");
+    setEmail("");
+    setDepartment("");
+    setDesignation("");
+    setPhone("");
+    setDateOfJoining("");
     setErrors({});
   };
 
-  // ==========================
-  // Handle Cancel
-  // ==========================
+  // =========================================================
+  // CANCEL
+  // =========================================================
 
   const handleCancel = () => {
-    setEmployee({
-      employeeName: "",
-      employeeId: "",
-      email: "",
-      department: "",
-      designation: "",
-      phone: "",
-      joiningDate: "",
-    });
-
+    setEmployeeName("");
+    setEmployeeId("");
+    setEmail("");
+    setDepartment("");
+    setDesignation("");
+    setPhone("");
+    setDateOfJoining("");
     setErrors({});
   };
+
+  // =========================================================
+  // DATE LIMITS
+  // =========================================================
+
+  const todayString = getDateString(getToday());
+  const minDateString = getDateString(getPreviousSevenDays());
+
+  // =========================================================
+  // UI — SAME STRUCTURE
+  // =========================================================
 
   return (
     <div className="add-employee-page">
 
+      {/* HEADER */}
       <header className="employee-header">
 
         <div className="logo-section">
-          <h1>ITAMS</h1>
-          <p>IT Asset Management System</p>
+          <div className="logo">ITAMS</div>
+
+          <div className="logo-subtitle">
+            IT Asset Management System
+          </div>
         </div>
 
         <div className="user-section">
-          <span>username</span>
+          <span>{username}</span>
+
           <span className="divider">|</span>
 
-          <button className="logout-btn">
+          <button
+            type="button"
+            className="logout-btn"
+            onClick={onLogout}
+          >
             Logout
           </button>
         </div>
 
       </header>
 
-      <div className="employee-container">
+      {/* MAIN */}
+      <main className="employee-container">
 
         <h1>Add Employee</h1>
 
@@ -350,208 +511,278 @@ const AddEmployee = () => {
           Fill in the employee details below.
         </p>
 
-        <form
-          className="employee-card"
-          onSubmit={handleSubmit}
-        >
+        <div className="employee-card">
 
           <h2>Employee Information</h2>
 
-          <div className="form-grid">
+          <hr />
 
-            {/* Employee Name */}
+          <form onSubmit={handleSubmit} noValidate>
 
-            <div className="form-group">
+            <div className="form-grid">
 
-              <label>Employee Name</label>
+              {/* EMPLOYEE NAME */}
+              <div className="form-group">
 
-              <input
-                type="text"
-                name="employeeName"
-                placeholder="Enter full name"
-                value={employee.employeeName}
-                onChange={handleChange}
-                className={errors.employeeName ? "input-error" : ""}
-              />
+                <label>
+                  Employee Name *
+                </label>
 
-              {errors.employeeName && (
-                <span className="error">
-                  {errors.employeeName}
-                </span>
-              )}
+                <input
+                  type="text"
+                  placeholder="Enter full name"
+                  value={employeeName}
+                  onChange={handleNameChange}
+                  className={
+                    errors.employeeName ? "input-error" : ""
+                  }
+                />
 
-            </div>
+                {errors.employeeName && (
+                  <div className="error">
+                    {errors.employeeName}
+                  </div>
+                )}
 
-            {/* Employee ID */}
-
-            <div className="form-group">
-
-              <label>Employee ID</label>
-
-              <input
-                type="text"
-                name="employeeId"
-                placeholder="Enter employee ID"
-                value={employee.employeeId}
-                onChange={handleChange}
-                className={errors.employeeId ? "input-error" : ""}
-              />
-
-              {errors.employeeId && (
-                <span className="error">
-                  {errors.employeeId}
-                </span>
-              )}
-
-            </div>
-
-            {/* Email */}
-
-            <div className="form-group">
-
-              <label>Email</label>
-
-              <input
-                type="email"
-                name="email"
-                placeholder="Enter email address"
-                value={employee.email}
-                onChange={handleChange}
-                className={errors.email ? "input-error" : ""}
-              />
-
-              {errors.email && (
-                <span className="error">
-                  {errors.email}
-                </span>
-              )}
-
-            </div>
-
-            {/* Department */}
-
-            <div className="form-group">
-
-              <label>Department</label>
-
-              <select
-                name="department"
-                value={employee.department}
-                onChange={handleChange}
-                className={errors.department ? "input-error" : ""}
-              >
-                <option value="">Select Department</option>
-                <option value="HR">HR</option>
-                <option value="Asset Manager">Asset Manager</option>
-                <option value="Inventory">Inventory</option>
-                <option value="IT">IT</option>
-                <option value="Finance">Finance</option>
-                <option value="Marketing">Marketing</option>
-                <option value="Sales">Sales</option>
-                <option value="Administration">Administration</option>
-              </select>
-
-              {errors.department && (
-                <span className="error">
-                  {errors.department}
-                </span>
-              )}
-
-            </div>
-
-            {/* Designation */}
-
-            <div className="form-group">
-
-              <label>Designation</label>
-
-              <input
-                type="text"
-                name="designation"
-                placeholder="Enter designation"
-                value={employee.designation}
-                onChange={handleChange}
-                className={errors.designation ? "input-error" : ""}
-              />
-
-              {errors.designation && (
-                <span className="error">
-                  {errors.designation}
-                </span>
-              )}
-
-            </div>
-
-            {/* Phone */}
-
-            <div className="form-group">
-
-              <label>Phone Number</label>
-
-              <input
-                type="text"
-                name="phone"
-                placeholder="Enter phone number"
-                value={employee.phone}
-                onChange={handleChange}
-                maxLength={10}
-                className={errors.phone ? "input-error" : ""}
-              />
-
-              {errors.phone && (
-                <span className="error">
-                  {errors.phone}
-                </span>
-              )}
-
-            </div>
-
-            {/* Date of Joining */}
-
-            <div className="form-group">
-
-              <label>Date of Joining</label>
-
-              <input
-                type="date"
-                name="joiningDate"
-                value={employee.joiningDate}
-                onChange={handleChange}
-                max={new Date().toISOString().split("T")[0]}
-                className={errors.joiningDate ? "input-error" : ""}
-              />
-
-              {errors.joiningDate && (
-                <span className="error">
-                  {errors.joiningDate}
-                </span>
-              )}
-
-            </div>
-
-          </div>
-
-          <div className="button-group">
-
-            <button
-              type="submit"
-              className="save-btn"
-            >
-              Save Employee
-            </button>
-
-            <button
-              type="button"
-              className="cancel-btn"
-              onClick={handleCancel}
-            >
-              Cancel
-            </button>
-
-          </div>
-
-        </form>
               </div>
+
+              {/* EMPLOYEE ID */}
+              <div className="form-group">
+
+                <label>
+                  Employee ID *
+                </label>
+
+                <input
+                  type="text"
+                  placeholder="YYMMDD001"
+                  value={employeeId}
+                  onChange={handleEmployeeIdChange}
+                  maxLength={9}
+                  inputMode="numeric"
+                  className={
+                    errors.employeeId ? "input-error" : ""
+                  }
+                />
+
+                {errors.employeeId && (
+                  <div className="error">
+                    {errors.employeeId}
+                  </div>
+                )}
+
+              </div>
+
+              {/* EMAIL */}
+              <div className="form-group">
+
+                <label>
+                  Email *
+                </label>
+
+                <input
+                  type="email"
+                  placeholder="YYMMDD001@gmail.com"
+                  value={email}
+                  onChange={handleEmailChange}
+                  className={
+                    errors.email ? "input-error" : ""
+                  }
+                />
+
+                {errors.email && (
+                  <div className="error">
+                    {errors.email}
+                  </div>
+                )}
+
+              </div>
+
+              {/* DEPARTMENT */}
+              <div className="form-group">
+
+                <label>
+                  Department *
+                </label>
+
+                <select
+                  value={department}
+                  onChange={handleDepartmentChange}
+                  className={
+                    errors.department ? "input-error" : ""
+                  }
+                >
+
+                  <option value="">
+                    Select Department
+                  </option>
+
+                  {DEPARTMENTS.map((dept) => (
+                    <option
+                      key={dept}
+                      value={dept}
+                    >
+                      {dept}
+                    </option>
+                  ))}
+
+                </select>
+
+                {errors.department && (
+                  <div className="error">
+                    {errors.department}
+                  </div>
+                )}
+
+              </div>
+
+              {/* DESIGNATION */}
+              <div className="form-group">
+
+                <label>
+                  Designation *
+                </label>
+
+                <input
+                  type="text"
+                  placeholder="Enter designation"
+                  value={designation}
+                  onChange={handleDesignationChange}
+                  className={
+                    errors.designation ? "input-error" : ""
+                  }
+                />
+
+                {errors.designation && (
+                  <div className="error">
+                    {errors.designation}
+                  </div>
+                )}
+
+              </div>
+
+              {/* PHONE */}
+              <div className="form-group">
+
+                <label>
+                  Phone Number *
+                </label>
+
+                {/* ONLY PHONE UI CHANGED */}
+                <div
+                  style={{
+                    position: "relative",
+                    width: "100%",
+                  }}
+                >
+
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: "14px",
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      fontSize: "16px",
+                      color: "#1f2937",
+                      zIndex: 1,
+                      pointerEvents: "none",
+                    }}
+                  >
+                    +91
+                  </span>
+
+                  <input
+                    type="text"
+                    placeholder="Enter 10-digit number"
+                    value={phone}
+                    onChange={handlePhoneChange}
+                    maxLength={10}
+                    inputMode="numeric"
+                    style={{
+                      paddingLeft: "50px",
+                      width: "100%",
+                      boxSizing: "border-box",
+                    }}
+                    className={
+                      errors.phone ? "input-error" : ""
+                    }
+                  />
+
+                </div>
+
+                {errors.phone && (
+                  <div className="error">
+                    {errors.phone}
+                  </div>
+                )}
+
+              </div>
+
+              {/* DATE OF JOINING */}
+              <div className="form-group">
+
+                <label>
+                  Date of Joining *
+                </label>
+
+                <input
+                  type="date"
+                  value={dateOfJoining}
+                  onChange={handleDateChange}
+                  min={minDateString}
+                  max={todayString}
+                  className={
+                    errors.dateOfJoining ? "input-error" : ""
+                  }
+                />
+
+                {errors.dateOfJoining && (
+                  <div className="error">
+                    {errors.dateOfJoining}
+                  </div>
+                )}
+
+              </div>
+
+            </div>
+
+            {/* BUTTONS */}
+            <div className="button-group">
+
+              <button
+                type="submit"
+                className="save-btn"
+              >
+                Save Employee
+              </button>
+
+              <button
+                type="button"
+                className="cancel-btn"
+                onClick={handleCancel}
+              >
+                Cancel
+              </button>
+
+            </div>
+
+          </form>
+
+        </div>
+
+        {/* BACK */}
+        {onBack && (
+          <button
+            type="button"
+            onClick={onBack}
+            className="back-btn"
+          >
+            ← Back
+          </button>
+        )}
+
+      </main>
+
     </div>
   );
 };
