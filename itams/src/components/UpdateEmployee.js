@@ -1,201 +1,441 @@
 import React, { useState } from "react";
 import "./UpdateEmployee.css";
 
-// ==========================================
+// ======================================================
 // VALIDATION FUNCTIONS
-// ==========================================
+// ======================================================
 
-// Validation for Employee ID
+// Employee ID must be exactly YYMMDD001
+// Example: 260819001
 const validateEmployeeId = (id) => {
   if (!id || id.trim() === "") {
-    return { isValid: false, message: "Employee ID is required" };
+    return {
+      isValid: false,
+      message: "Employee ID is required.",
+    };
   }
+
   if (id !== id.trim()) {
-    return { isValid: false, message: "Employee ID should not have leading or trailing spaces" };
+    return {
+      isValid: false,
+      message: "Employee ID must not have leading or trailing spaces.",
+    };
   }
+
   if (/\s/.test(id)) {
-    return { isValid: false, message: "Employee ID should not contain spaces" };
+    return {
+      isValid: false,
+      message: "Employee ID must not contain spaces.",
+    };
   }
-  if (/[^A-Za-z0-9]/.test(id)) {
-    return { isValid: false, message: "Employee ID should not contain special characters" };
+
+  if (!/^\d{9}$/.test(id)) {
+    return {
+      isValid: false,
+      message: "Employee ID must contain exactly 9 digits (YYMMDD001).",
+    };
   }
-  if (!id.startsWith("EMP")) {
-    return { isValid: false, message: "Employee ID must start with 'EMP'" };
+
+  const year = Number(id.substring(0, 2));
+  const month = Number(id.substring(2, 4));
+  const day = Number(id.substring(4, 6));
+  const employeeNumber = Number(id.substring(6, 9));
+
+  if (month < 1 || month > 12) {
+    return {
+      isValid: false,
+      message: "Employee ID contains an invalid month.",
+    };
   }
-  if (id.length !== 6) {
-    return { isValid: false, message: "Employee ID must be exactly 6 characters long (EMP + 3 alphanumeric characters)" };
+
+  if (day < 1 || day > 31) {
+    return {
+      isValid: false,
+      message: "Employee ID contains an invalid day.",
+    };
   }
-  const lastThree = id.substring(3);
-  if (!/^[A-Za-z0-9]{3}$/.test(lastThree)) {
-    return { isValid: false, message: "Last 3 characters must be alphanumeric (letters or numbers)" };
+
+  if (employeeNumber < 1 || employeeNumber > 999) {
+    return {
+      isValid: false,
+      message: "Last 3 digits must be between 001 and 999.",
+    };
   }
-  return { isValid: true, message: "" };
+
+  // Check that the date itself is valid.
+  const fullYear = 2000 + year;
+  const date = new Date(fullYear, month - 1, day);
+
+  if (
+    date.getFullYear() !== fullYear ||
+    date.getMonth() !== month - 1 ||
+    date.getDate() !== day
+  ) {
+    return {
+      isValid: false,
+      message: "Employee ID contains an invalid date.",
+    };
+  }
+
+  return {
+    isValid: true,
+    message: "",
+  };
 };
 
-// Validation for Employee Name
+// ======================================================
+// EMPLOYEE NAME VALIDATION
+// ======================================================
+
 const validateEmployeeName = (name) => {
-  if (!name || name.trim() === "") {
-    return { isValid: false, message: "Employee name is required" };
+  if (!name || name === "") {
+    return {
+      isValid: false,
+      message: "Employee name is required.",
+    };
   }
-  if (name.trim().length < 2) {
-    return { isValid: false, message: "Employee name must be at least 2 characters long" };
+
+  if (name !== name.trim()) {
+    return {
+      isValid: false,
+      message: "Employee name must not start or end with a space.",
+    };
   }
-  if (name.trim().length > 100) {
-    return { isValid: false, message: "Employee name cannot exceed 100 characters" };
+
+  if (/\s{2,}/.test(name)) {
+    return {
+      isValid: false,
+      message: "Multiple spaces are not allowed.",
+    };
   }
-  if (/[^A-Za-z\s]/.test(name.trim())) {
-    return { isValid: false, message: "Employee name should only contain letters and spaces" };
+
+  if (!/^[A-Za-z]+(?: [A-Za-z]+)*$/.test(name)) {
+    return {
+      isValid: false,
+      message: "Employee name should contain only letters and single spaces.",
+    };
   }
-  return { isValid: true, message: "" };
+
+  if (name.length < 2) {
+    return {
+      isValid: false,
+      message: "Employee name must be at least 2 characters long.",
+    };
+  }
+
+  if (name.length > 100) {
+    return {
+      isValid: false,
+      message: "Employee name cannot exceed 100 characters.",
+    };
+  }
+
+  return {
+    isValid: true,
+    message: "",
+  };
 };
 
-// Validation for Department
-const validateDepartment = (dept) => {
-  if (!dept || dept.trim() === "") {
-    return { isValid: false, message: "Department is required" };
+// ======================================================
+// EMAIL VALIDATION
+// ======================================================
+
+const validateEmail = (email, employeeId) => {
+  if (!email || email === "") {
+    return {
+      isValid: false,
+      message: "Email is required.",
+    };
   }
-  if (dept.trim().length < 2) {
-    return { isValid: false, message: "Department must be at least 2 characters long" };
+
+  if (email !== email.trim()) {
+    return {
+      isValid: false,
+      message: "Email must not have leading or trailing spaces.",
+    };
   }
-  if (/[^A-Za-z0-9\s&-]/.test(dept.trim())) {
-    return { isValid: false, message: "Department contains invalid characters" };
+
+  if (/\s/.test(email)) {
+    return {
+      isValid: false,
+      message: "Spaces are not allowed in email.",
+    };
   }
-  return { isValid: true, message: "" };
+
+  const expectedEmail = `${employeeId}@gmail.com`;
+
+  if (email !== expectedEmail) {
+    return {
+      isValid: false,
+      message: `Email must match Employee ID: ${expectedEmail}`,
+    };
+  }
+
+  if (!/^\d{9}@gmail\.com$/.test(email)) {
+    return {
+      isValid: false,
+      message: "Email must end with @gmail.com and match Employee ID.",
+    };
+  }
+
+  return {
+    isValid: true,
+    message: "",
+  };
 };
 
-// Validation for Designation
+// ======================================================
+// DEPARTMENT VALIDATION
+// ======================================================
+
+const validateDepartment = (department) => {
+  if (!department || department.trim() === "") {
+    return {
+      isValid: false,
+      message: "Department is required.",
+    };
+  }
+
+  return {
+    isValid: true,
+    message: "",
+  };
+};
+
+// ======================================================
+// DESIGNATION VALIDATION
+// ======================================================
+
 const validateDesignation = (designation) => {
   if (!designation || designation.trim() === "") {
-    return { isValid: false, message: "Designation is required" };
+    return {
+      isValid: false,
+      message: "Designation is required.",
+    };
   }
-  if (designation.trim().length < 2) {
-    return { isValid: false, message: "Designation must be at least 2 characters long" };
-  }
-  if (/[^A-Za-z0-9\s-]/.test(designation.trim())) {
-    return { isValid: false, message: "Designation contains invalid characters" };
-  }
-  return { isValid: true, message: "" };
+
+  return {
+    isValid: true,
+    message: "",
+  };
 };
 
-// Validation for Phone Number
+// ======================================================
+// PHONE VALIDATION
+// ======================================================
+
 const validatePhoneNumber = (phone) => {
-  if (!phone || phone.trim() === "") {
-    return { isValid: false, message: "Phone number is required" };
+  if (!phone || phone === "") {
+    return {
+      isValid: false,
+      message: "Phone number is required.",
+    };
   }
-  const phoneStr = phone.trim();
-  if (!/^[0-9]{10}$/.test(phoneStr)) {
-    return { isValid: false, message: "Phone number must be exactly 10 digits" };
+
+  if (phone !== phone.trim()) {
+    return {
+      isValid: false,
+      message: "Phone number must not contain spaces.",
+    };
   }
-  return { isValid: true, message: "" };
+
+  if (!/^\d{10}$/.test(phone)) {
+    return {
+      isValid: false,
+      message: "Phone number must contain exactly 10 digits.",
+    };
+  }
+
+  if (phone[0] === "0") {
+    return {
+      isValid: false,
+      message: "Indian mobile number cannot start with 0.",
+    };
+  }
+
+  return {
+    isValid: true,
+    message: "",
+  };
 };
 
-// ==========================================
+// ======================================================
 // SAMPLE EMPLOYEE DATA
-// ==========================================
+// IMPORTANT: NEW YYMMDD001 FORMAT
+// ======================================================
+
 const EMPLOYEE_DATA = {
-  "EMP001": {
-    id: "EMP001",
+  "260819001": {
+    id: "260819001",
     name: "Emp1",
+    email: "260819001@gmail.com",
     department: "IT",
     designation: "Developer",
     phone: "9876543210",
   },
-  "EMP002": {
-    id: "EMP002",
+
+  "260819002": {
+    id: "260819002",
     name: "Emp2",
+    email: "260819002@gmail.com",
     department: "HR",
     designation: "Manager",
     phone: "9876543211",
   },
-  "EMP003": {
-    id: "EMP003",
+
+  "260819003": {
+    id: "260819003",
     name: "Emp3",
+    email: "260819003@gmail.com",
     department: "Finance",
     designation: "Accountant",
     phone: "9876543212",
   },
 };
 
-const DEPARTMENTS = ["IT", "HR", "Finance", "Marketing", "Sales", "Operations", "Administration"];
-const DESIGNATIONS = ["Developer", "Manager", "Accountant", "Analyst", "Executive", "Assistant", "Lead", "Director"];
+// ======================================================
+// DEPARTMENTS
+// ======================================================
 
-// ==========================================
+const DEPARTMENTS = [
+  "IT",
+  "HR",
+  "Finance",
+  "Marketing",
+  "Sales",
+  "Operations",
+  "Administration",
+];
+
+// ======================================================
+// DESIGNATIONS
+// ======================================================
+
+const DESIGNATIONS = [
+  "Developer",
+  "Manager",
+  "Accountant",
+  "Analyst",
+  "Executive",
+  "Assistant",
+  "Lead",
+  "Director",
+];
+
+// ======================================================
 // MAIN COMPONENT
-// ==========================================
-const UpdateEmployee = ({ username = "username", onLogout, onBack }) => {
+// ======================================================
+
+const UpdateEmployee = ({
+  username = "username",
+  onLogout,
+  onBack,
+}) => {
   const [searchInput, setSearchInput] = useState("");
   const [searchError, setSearchError] = useState("");
   const [isSearchValid, setIsSearchValid] = useState(true);
   const [isSearchTouched, setIsSearchTouched] = useState(false);
 
   const [employee, setEmployee] = useState(null);
+
   const [formData, setFormData] = useState({
     id: "",
     name: "",
+    email: "",
     department: "",
     designation: "",
     phone: "",
   });
+
   const [formErrors, setFormErrors] = useState({});
   const [updateSuccess, setUpdateSuccess] = useState(false);
 
-  // Handle search input change with validation
+  // ====================================================
+  // SEARCH INPUT
+  // ====================================================
+
   const handleSearchChange = (e) => {
     const value = e.target.value;
+
     setSearchInput(value);
     setIsSearchTouched(false);
     setSearchError("");
+    setEmployee(null);
+    setUpdateSuccess(false);
 
-    if (value.trim() === "") {
+    if (value === "") {
       setIsSearchValid(true);
       return;
     }
 
     const result = validateEmployeeId(value);
+
     setIsSearchValid(result.isValid);
+
     if (!result.isValid) {
       setSearchError(result.message);
     }
   };
 
-  // Handle search
+  // ====================================================
+  // SEARCH EMPLOYEE
+  // ====================================================
+
   const handleSearch = () => {
     setIsSearchTouched(true);
     setSearchError("");
+    setUpdateSuccess(false);
 
-    if (searchInput.trim() === "") {
-      setSearchError("Please enter an Employee ID to search");
+    if (searchInput === "") {
+      setSearchError("Employee ID is required.");
       setIsSearchValid(false);
       setEmployee(null);
       return;
     }
 
-    const result = validateEmployeeId(searchInput);
-    if (!result.isValid) {
-      setSearchError(result.message);
+    const validationResult = validateEmployeeId(searchInput);
+
+    if (!validationResult.isValid) {
+      setSearchError(validationResult.message);
       setIsSearchValid(false);
       setEmployee(null);
       return;
     }
 
-    // Check if employee exists
-    const empId = searchInput.trim().toUpperCase();
-    const foundEmployee = EMPLOYEE_DATA[empId];
-    if (foundEmployee) {
-      setEmployee(foundEmployee);
-      setFormData({ ...foundEmployee });
-      setFormErrors({});
-      setUpdateSuccess(false);
-      setSearchError("");
-      setIsSearchValid(true);
-    } else {
-      setSearchError(`Employee ID "${empId}" not found in the system`);
+    const employeeId = searchInput;
+
+    const foundEmployee = EMPLOYEE_DATA[employeeId];
+
+    if (!foundEmployee) {
+      setSearchError(
+        `Employee ID "${employeeId}" was not found in the system.`
+      );
       setIsSearchValid(false);
       setEmployee(null);
+      return;
     }
+
+    setEmployee(foundEmployee);
+
+    setFormData({
+      id: foundEmployee.id,
+      name: foundEmployee.name,
+      email: foundEmployee.email,
+      department: foundEmployee.department,
+      designation: foundEmployee.designation,
+      phone: foundEmployee.phone,
+    });
+
+    setFormErrors({});
+    setUpdateSuccess(false);
+    setSearchError("");
+    setIsSearchValid(true);
   };
 
-  // Handle Enter key press
+  // ====================================================
+  // ENTER KEY SEARCH
+  // ====================================================
+
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -203,207 +443,489 @@ const UpdateEmployee = ({ username = "username", onLogout, onBack }) => {
     }
   };
 
-  // Handle form field change
+  // ====================================================
+  // FORM CHANGE
+  // ====================================================
+
   const handleFormChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-    setFormErrors({ ...formErrors, [name]: "" });
+
+    setFormData((previous) => ({
+      ...previous,
+      [name]: value,
+    }));
+
+    setFormErrors((previous) => ({
+      ...previous,
+      [name]: "",
+    }));
+
     setUpdateSuccess(false);
   };
 
-  // Validate form
+  // ====================================================
+  // VALIDATE COMPLETE FORM
+  // ====================================================
+
   const validateForm = () => {
     const errors = {};
 
+    // Employee ID
+    const idResult = validateEmployeeId(formData.id);
+
+    if (!idResult.isValid) {
+      errors.id = idResult.message;
+    }
+
+    // Employee name
     const nameResult = validateEmployeeName(formData.name);
-    if (!nameResult.isValid) errors.name = nameResult.message;
 
-    const deptResult = validateDepartment(formData.department);
-    if (!deptResult.isValid) errors.department = deptResult.message;
+    if (!nameResult.isValid) {
+      errors.name = nameResult.message;
+    }
 
-    const desigResult = validateDesignation(formData.designation);
-    if (!desigResult.isValid) errors.designation = desigResult.message;
+    // Email
+    const emailResult = validateEmail(
+      formData.email,
+      formData.id
+    );
 
-    const phoneResult = validatePhoneNumber(formData.phone);
-    if (!phoneResult.isValid) errors.phone = phoneResult.message;
+    if (!emailResult.isValid) {
+      errors.email = emailResult.message;
+    }
+
+    // Department
+    const departmentResult = validateDepartment(
+      formData.department
+    );
+
+    if (!departmentResult.isValid) {
+      errors.department = departmentResult.message;
+    }
+
+    // Designation
+    const designationResult = validateDesignation(
+      formData.designation
+    );
+
+    if (!designationResult.isValid) {
+      errors.designation = designationResult.message;
+    }
+
+    // Phone
+    const phoneResult = validatePhoneNumber(
+      formData.phone
+    );
+
+    if (!phoneResult.isValid) {
+      errors.phone = phoneResult.message;
+    }
 
     setFormErrors(errors);
+
     return Object.keys(errors).length === 0;
   };
 
-  // Handle update
+  // ====================================================
+  // UPDATE EMPLOYEE
+  // ====================================================
+
   const handleUpdate = () => {
-    if (!validateForm()) {
+    const isValid = validateForm();
+
+    if (!isValid) {
+      setUpdateSuccess(false);
       return;
     }
 
-    // Update employee data (in real app, this would be an API call)
-    EMPLOYEE_DATA[formData.id] = { ...formData };
-    setEmployee({ ...formData });
+    EMPLOYEE_DATA[formData.id] = {
+      ...formData,
+    };
+
+    setEmployee({
+      ...formData,
+    });
+
     setUpdateSuccess(true);
-    alert(`✅ Employee ${formData.id} updated successfully!`);
+
+    alert(
+      `✅ Employee ${formData.id} updated successfully!`
+    );
   };
 
-  // Handle cancel
+  // ====================================================
+  // CANCEL
+  // ====================================================
+
   const handleCancel = () => {
-    if (employee) {
-      setFormData({ ...employee });
-      setFormErrors({});
-      setUpdateSuccess(false);
+    if (!employee) {
+      return;
     }
+
+    setFormData({
+      id: employee.id,
+      name: employee.name,
+      email: employee.email,
+      department: employee.department,
+      designation: employee.designation,
+      phone: employee.phone,
+    });
+
+    setFormErrors({});
+    setUpdateSuccess(false);
   };
+
+  // ====================================================
+  // RENDER
+  // ====================================================
 
   return (
     <div className="update-page">
 
-      {/* ── Top Navbar ── */}
+      {/* NAVBAR */}
       <header className="update-header">
         <div className="logo-section">
           <h1>ITAMS</h1>
           <p>IT Asset Management System</p>
         </div>
+
         <div className="user-section">
           <span>{username}</span>
+
           <span className="divider">|</span>
-          <button className="logout-btn" onClick={onLogout}>Logout</button>
+
+          <button
+            className="logout-btn"
+            onClick={onLogout}
+          >
+            Logout
+          </button>
         </div>
       </header>
 
-      {/* ── Main Container ── */}
+      {/* MAIN */}
       <div className="update-container">
 
         <h1>Update Employee Details</h1>
-        <p>Search and update employee information.</p>
 
-        {/* ── Search Card ── */}
+        <p>
+          Search and update employee information.
+        </p>
+
+        {/* SEARCH CARD */}
         <div className="search-card">
+
           <h2>Search Employee</h2>
+
           <div className="search-row">
+
             <input
-              className={`search-input ${(!isSearchValid && isSearchTouched) || (searchError && isSearchTouched) ? "input-error" : ""}`}
+              className={`search-input ${
+                !isSearchValid && isSearchTouched
+                  ? "input-error"
+                  : ""
+              }`}
               type="text"
-              placeholder="Enter Employee ID (e.g., EMP001)"
+              placeholder="Enter Employee ID (e.g., 260819001)"
               value={searchInput}
               onChange={handleSearchChange}
               onKeyDown={handleKeyDown}
             />
-            <button className="search-btn" onClick={handleSearch}>
+
+            <button
+              className="search-btn"
+              onClick={handleSearch}
+            >
               Search
             </button>
+
           </div>
+
           {searchError && isSearchTouched && (
-            <div className="search-error">⚠️ {searchError}</div>
+            <div className="search-error">
+              ⚠️ {searchError}
+            </div>
           )}
+
           <div className="search-hint">
-            <small>Format: EMP + 3 alphanumeric characters (e.g., EMP001, EMPA12, EMP1AB)</small>
+            <small>
+              Format: YYMMDD001 (e.g., 260819001)
+            </small>
           </div>
+
         </div>
 
-        {/* ── Employee Details Card ── */}
+        {/* EMPLOYEE DETAILS */}
         <div className="employee-card">
+
           <h2>Employee Details</h2>
 
           {employee ? (
+
             <div className="employee-form">
+
               <div className="form-grid">
-                {/* Employee ID - Read Only */}
+
+                {/* EMPLOYEE ID */}
                 <div className="form-group">
-                  <label>Employee ID (Read Only)</label>
+
+                  <label>
+                    Employee ID (Read Only)
+                  </label>
+
                   <input
                     type="text"
+                    name="id"
                     value={formData.id}
                     readOnly
                     className="readonly-input"
                   />
+
+                  {formErrors.id && (
+                    <span className="field-error">
+                      {formErrors.id}
+                    </span>
+                  )}
+
                 </div>
 
-                {/* Employee Name - Editable */}
+                {/* EMPLOYEE NAME */}
                 <div className="form-group">
-                  <label>Employee Name (Editable) *</label>
+
+                  <label>
+                    Employee Name *
+                  </label>
+
                   <input
-                    className={`${formErrors.name ? "input-error" : ""}`}
+                    className={
+                      formErrors.name
+                        ? "input-error"
+                        : ""
+                    }
                     type="text"
                     name="name"
                     value={formData.name}
                     onChange={handleFormChange}
                     placeholder="Enter employee name"
                   />
-                  {formErrors.name && <span className="field-error">{formErrors.name}</span>}
+
+                  {formErrors.name && (
+                    <span className="field-error">
+                      {formErrors.name}
+                    </span>
+                  )}
+
                 </div>
 
-                {/* Department - Editable */}
+                {/* EMAIL */}
                 <div className="form-group">
-                  <label>Department (Editable) *</label>
+
+                  <label>
+                    Email *
+                  </label>
+
+                  <input
+                    className={
+                      formErrors.email
+                        ? "input-error"
+                        : ""
+                    }
+                    type="text"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleFormChange}
+                    placeholder="YYMMDD001@gmail.com"
+                  />
+
+                  {formErrors.email && (
+                    <span className="field-error">
+                      {formErrors.email}
+                    </span>
+                  )}
+
+                </div>
+
+                {/* DEPARTMENT */}
+                <div className="form-group">
+
+                  <label>
+                    Department *
+                  </label>
+
                   <select
-                    className={`${formErrors.department ? "input-error" : ""}`}
+                    className={
+                      formErrors.department
+                        ? "input-error"
+                        : ""
+                    }
                     name="department"
                     value={formData.department}
                     onChange={handleFormChange}
                   >
-                    <option value="">Select Department</option>
-                    {DEPARTMENTS.map((dept) => (
-                      <option key={dept} value={dept}>{dept}</option>
+
+                    <option value="">
+                      Select Department
+                    </option>
+
+                    {DEPARTMENTS.map((department) => (
+                      <option
+                        key={department}
+                        value={department}
+                      >
+                        {department}
+                      </option>
                     ))}
+
                   </select>
-                  {formErrors.department && <span className="field-error">{formErrors.department}</span>}
+
+                  {formErrors.department && (
+                    <span className="field-error">
+                      {formErrors.department}
+                    </span>
+                  )}
+
                 </div>
 
-                {/* Designation - Editable */}
+                {/* DESIGNATION */}
                 <div className="form-group">
-                  <label>Designation (Editable) *</label>
+
+                  <label>
+                    Designation *
+                  </label>
+
                   <select
-                    className={`${formErrors.designation ? "input-error" : ""}`}
+                    className={
+                      formErrors.designation
+                        ? "input-error"
+                        : ""
+                    }
                     name="designation"
                     value={formData.designation}
                     onChange={handleFormChange}
                   >
-                    <option value="">Select Designation</option>
-                    {DESIGNATIONS.map((desig) => (
-                      <option key={desig} value={desig}>{desig}</option>
+
+                    <option value="">
+                      Select Designation
+                    </option>
+
+                    {DESIGNATIONS.map((designation) => (
+                      <option
+                        key={designation}
+                        value={designation}
+                      >
+                        {designation}
+                      </option>
                     ))}
+
                   </select>
-                  {formErrors.designation && <span className="field-error">{formErrors.designation}</span>}
+
+                  {formErrors.designation && (
+                    <span className="field-error">
+                      {formErrors.designation}
+                    </span>
+                  )}
+
                 </div>
 
-                {/* Phone Number - Editable */}
+                {/* PHONE */}
                 <div className="form-group">
-                  <label>Phone Number (Editable) *</label>
-                  <input
-                    className={`${formErrors.phone ? "input-error" : ""}`}
-                    type="text"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleFormChange}
-                    placeholder="Enter 10-digit phone number"
-                  />
-                  {formErrors.phone && <span className="field-error">{formErrors.phone}</span>}
-                </div>
+
+                  <label>
+                    Phone Number *
+                  </label>
+
+                  <div className="phone-wrapper">
+
+                    <span className="country-code">
+                      +91
+                    </span>
+
+                    <input
+                      className={
+                        formErrors.phone
+                          ? "input-error"
+                          : ""
+                      }
+                      type="text"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={(e) => {
+                        const onlyNumbers =
+                          e.target.value.replace(/\D/g, "");
+
+                        handleFormChange({
+                          target: {
+                            name: "phone",
+                            value: onlyNumbers.slice(0, 10),
+                          },
+                        });
+                      }}
+                      placeholder="Enter 10-digit number"
+                      maxLength={10}
+                    />
+
+                  </div>
+
+                  {formErrors.phone && (
+                    <span className="field-error">
+                      {formErrors.phone}
+                    </span>
+                  )}
+
                 </div>
 
+              </div>
+
+              {/* SUCCESS */}
               {updateSuccess && (
                 <div className="success-message">
                   ✅ Employee details updated successfully!
                 </div>
               )}
 
+              {/* BUTTONS */}
               <div className="button-group">
-                <button className="update-btn" onClick={handleUpdate}>
+
+                <button
+                  className="update-btn"
+                  onClick={handleUpdate}
+                >
                   Update Details
                 </button>
-                <button className="cancel-btn" onClick={handleCancel}>
+
+                <button
+                  className="cancel-btn"
+                  onClick={handleCancel}
+                >
                   Cancel
                 </button>
+
               </div>
+
             </div>
+
           ) : (
+
             <div className="no-employee-message">
-              <p>🔍 Search for an employee to view and update details.</p>
+
+              <p>
+                🔍 Search for an employee to view and
+                update details.
+              </p>
+
             </div>
+
           )}
+
         </div>
 
-        {/* ── Back Button ── */}
-        <button className="back-btn" onClick={onBack}>← Back</button>
+        {/* BACK */}
+        <button
+          className="back-btn"
+          onClick={onBack}
+        >
+          ← Back
+        </button>
 
       </div>
     </div>
