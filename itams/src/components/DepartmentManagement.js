@@ -1,135 +1,517 @@
 import React, { useState } from "react";
 import "./DepartmentManagement.css";
 
-// Validation function for Department Name
+// =====================================================
+// VALIDATION - DEPARTMENT NAME
+// =====================================================
 const validateDepartmentName = (name) => {
-  if (!name || name.trim() === "") {
-    return { isValid: false, message: "Department name is required" };
+  if (name.length === 0) {
+    return {
+      isValid: false,
+      message: "Department Name is required",
+    };
   }
-  if (name.trim().length < 2) {
-    return { isValid: false, message: "Department name must be at least 2 characters long" };
+
+  if (name.trim() === "") {
+    return {
+      isValid: false,
+      message: "Department Name cannot contain only spaces",
+    };
   }
-  if (/[^A-Za-z0-9\s()-]/.test(name.trim())) {
-    return { isValid: false, message: "Department name contains invalid characters" };
+
+  if (name !== name.trim()) {
+    return {
+      isValid: false,
+      message:
+        "Department Name should not have leading or trailing spaces",
+    };
   }
-  return { isValid: true, message: "" };
+
+  // No multiple consecutive spaces
+  if (/\s{2,}/.test(name)) {
+    return {
+      isValid: false,
+      message:
+        "Department Name should not contain multiple consecutive spaces",
+    };
+  }
+
+  if (name.length < 2) {
+    return {
+      isValid: false,
+      message:
+        "Department Name must be at least 2 characters",
+    };
+  }
+
+  if (name.length > 100) {
+    return {
+      isValid: false,
+      message:
+        "Department Name cannot exceed 100 characters",
+    };
+  }
+
+  // Only letters, numbers, spaces, brackets, &, hyphen
+  if (!/^[A-Za-z0-9\s()&-]+$/.test(name)) {
+    return {
+      isValid: false,
+      message:
+        "Department Name should contain only letters, numbers, spaces, brackets, & and hyphen",
+    };
+  }
+
+  return {
+    isValid: true,
+    message: "",
+  };
 };
 
-// Validation function for Department Head - Letters, spaces, and numbers ONLY
+// =====================================================
+// VALIDATION - DEPARTMENT HEAD
+// =====================================================
 const validateDepartmentHead = (head) => {
-  if (!head || head.trim() === "") {
-    return { isValid: false, message: "Department head is required" };
+  if (head.length === 0) {
+    return {
+      isValid: false,
+      message: "Department Head is required",
+    };
   }
-  if (head.trim().length < 2) {
-    return { isValid: false, message: "Department head must be at least 2 characters long" };
+
+  if (head.trim() === "") {
+    return {
+      isValid: false,
+      message: "Department Head cannot contain only spaces",
+    };
   }
-  if (!/^[A-Za-z0-9\s]+$/.test(head.trim())) {
-    return { isValid: false, message: "Department head should only contain letters, numbers, and spaces" };
+
+  if (head !== head.trim()) {
+    return {
+      isValid: false,
+      message:
+        "Department Head should not have leading or trailing spaces",
+    };
   }
-  return { isValid: true, message: "" };
+
+  // No multiple consecutive spaces
+  if (/\s{2,}/.test(head)) {
+    return {
+      isValid: false,
+      message:
+        "Department Head should not contain multiple consecutive spaces",
+    };
+  }
+
+  if (head.length < 2) {
+    return {
+      isValid: false,
+      message:
+        "Department Head must be at least 2 characters",
+    };
+  }
+
+  if (head.length > 100) {
+    return {
+      isValid: false,
+      message:
+        "Department Head cannot exceed 100 characters",
+    };
+  }
+
+  // Letters, numbers and spaces only
+  if (!/^[A-Za-z0-9\s]+$/.test(head)) {
+    return {
+      isValid: false,
+      message:
+        "Department Head should contain only letters, numbers and spaces",
+    };
+  }
+
+  return {
+    isValid: true,
+    message: "",
+  };
 };
 
-// Validation function for Employee Count
+// =====================================================
+// VALIDATION - EMPLOYEE COUNT
+// =====================================================
 const validateEmployeeCount = (count) => {
-  if (!count || count.trim() === "") {
-    return { isValid: false, message: "Number of employees is required" };
+  if (count.length === 0) {
+    return {
+      isValid: false,
+      message: "Number of Employees is required",
+    };
   }
-  const num = Number(count);
-  if (isNaN(num) || !Number.isInteger(num)) {
-    return { isValid: false, message: "Employee count must be a valid number" };
+
+  if (count.trim() === "") {
+    return {
+      isValid: false,
+      message:
+        "Number of Employees cannot contain only spaces",
+    };
   }
-  if (num < 0) {
-    return { isValid: false, message: "Employee count cannot be negative" };
+
+  if (count !== count.trim()) {
+    return {
+      isValid: false,
+      message:
+        "Number of Employees should not have leading or trailing spaces",
+    };
   }
-  if (num > 1000) {
-    return { isValid: false, message: "Employee count cannot exceed 1000" };
+
+  // Numbers only
+  if (!/^[0-9]+$/.test(count)) {
+    return {
+      isValid: false,
+      message:
+        "Number of Employees must contain numbers only",
+    };
   }
-  return { isValid: true, message: "" };
+
+  const number = Number(count);
+
+  if (number > 1000) {
+    return {
+      isValid: false,
+      message:
+        "Number of Employees cannot exceed 1000",
+    };
+  }
+
+  return {
+    isValid: true,
+    message: "",
+  };
 };
 
+// =====================================================
+// VALIDATION - SEARCH
+// =====================================================
+const validateSearch = (search) => {
+  if (search.length === 0) {
+    return {
+      isValid: false,
+      message:
+        "Department Name is required for search",
+    };
+  }
+
+  if (search.trim() === "") {
+    return {
+      isValid: false,
+      message:
+        "Search cannot contain only spaces",
+    };
+  }
+
+  if (search !== search.trim()) {
+    return {
+      isValid: false,
+      message:
+        "Search should not have leading or trailing spaces",
+    };
+  }
+
+  // No multiple consecutive spaces
+  if (/\s{2,}/.test(search)) {
+    return {
+      isValid: false,
+      message:
+        "Search should not contain multiple consecutive spaces",
+    };
+  }
+
+  if (search.length < 2) {
+    return {
+      isValid: false,
+      message:
+        "Search must contain at least 2 characters",
+    };
+  }
+
+  if (search.length > 100) {
+    return {
+      isValid: false,
+      message:
+        "Search cannot exceed 100 characters",
+    };
+  }
+
+  if (!/^[A-Za-z0-9\s()&-]+$/.test(search)) {
+    return {
+      isValid: false,
+      message:
+        "Search should contain only letters, numbers, spaces, brackets, & and hyphen",
+    };
+  }
+
+  return {
+    isValid: true,
+    message: "",
+  };
+};
+
+// =====================================================
+// MAIN COMPONENT
+// =====================================================
 const DepartmentManagement = ({
   username = "username",
   onLogout,
   onBack,
 }) => {
-
+  // =====================================================
+  // SEARCH STATES
+  // =====================================================
   const [search, setSearch] = useState("");
   const [searchApplied, setSearchApplied] = useState("");
+  const [searchError, setSearchError] = useState("");
+  const [searchTouched, setSearchTouched] = useState(false);
 
+  // =====================================================
+  // FORM STATES
+  // =====================================================
   const [departmentName, setDepartmentName] = useState("");
   const [departmentHead, setDepartmentHead] = useState("");
   const [employeeCount, setEmployeeCount] = useState("");
 
   const [errors, setErrors] = useState({});
 
+  // =====================================================
+  // DEPARTMENT DATA
+  // =====================================================
   const [departments, setDepartments] = useState([
-    { id: "DEP001", name: "Information Technology (IT)", head: "Head 1", employees: 25 },
-    { id: "DEP002", name: "Human Resources (HR)", head: "Head 2", employees: 10 },
-    { id: "DEP003", name: "Finance", head: "Head 3", employees: 15 },
-    { id: "DEP004", name: "Marketing", head: "Head 4", employees: 12 },
-    { id: "DEP005", name: "Sales", head: "Head 5", employees: 20 },
-    { id: "DEP006", name: "Administration", head: "Head 6", employees: 18 },
+    {
+      id: "DEP001",
+      name: "Information Technology (IT)",
+      head: "Head 1",
+      employees: 25,
+    },
+    {
+      id: "DEP002",
+      name: "Human Resources (HR)",
+      head: "Head 2",
+      employees: 10,
+    },
+    {
+      id: "DEP003",
+      name: "Finance",
+      head: "Head 3",
+      employees: 15,
+    },
+    {
+      id: "DEP004",
+      name: "Marketing",
+      head: "Head 4",
+      employees: 12,
+    },
+    {
+      id: "DEP005",
+      name: "Sales",
+      head: "Head 5",
+      employees: 20,
+    },
+    {
+      id: "DEP006",
+      name: "Administration",
+      head: "Head 6",
+      employees: 18,
+    },
   ]);
 
+  // =====================================================
+  // GENERATE DEPARTMENT ID
+  // =====================================================
   const generateDepartmentId = () => {
-    const count = departments.length + 1;
-    return `DEP${String(count).padStart(3, "0")}`;
+    const nextNumber = departments.length + 1;
+
+    return `DEP${String(nextNumber).padStart(3, "0")}`;
   };
 
-  const filteredDepartments = departments.filter((dept) =>
-    dept.name.toLowerCase().includes(searchApplied.toLowerCase())
-  );
+  // =====================================================
+  // SEARCH INPUT CHANGE
+  // =====================================================
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
 
+    setSearch(value);
+    setSearchTouched(false);
+
+    if (value === "") {
+      setSearchError("");
+      setSearchApplied("");
+      return;
+    }
+
+    const result = validateSearch(value);
+
+    if (!result.isValid) {
+      setSearchError(result.message);
+    } else {
+      setSearchError("");
+    }
+  };
+
+  // =====================================================
+  // SEARCH
+  // =====================================================
+  const handleSearch = () => {
+    setSearchTouched(true);
+
+    const result = validateSearch(search);
+
+    if (!result.isValid) {
+      setSearchError(result.message);
+      setSearchApplied(null);
+      return;
+    }
+
+    setSearchError("");
+    setSearchApplied(search);
+  };
+
+  // =====================================================
+  // SEARCH ENTER KEY
+  // =====================================================
   const handleSearchKeyDown = (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      setSearchApplied(search);
+      handleSearch();
     }
   };
 
+  // =====================================================
+  // FILTER DEPARTMENTS
+  // =====================================================
+  const filteredDepartments =
+    searchApplied === null
+      ? []
+      : departments.filter((dept) =>
+          dept.name
+            .toLowerCase()
+            .includes(
+              (searchApplied || "").toLowerCase()
+            )
+        );
+
+  // =====================================================
+  // FORM VALIDATION
+  // =====================================================
   const validateForm = () => {
     const newErrors = {};
 
-    const nameResult = validateDepartmentName(departmentName);
+    const nameResult =
+      validateDepartmentName(departmentName);
+
     if (!nameResult.isValid) {
-      newErrors.departmentName = nameResult.message;
+      newErrors.departmentName =
+        nameResult.message;
     }
 
-    const headResult = validateDepartmentHead(departmentHead);
+    const headResult =
+      validateDepartmentHead(departmentHead);
+
     if (!headResult.isValid) {
-      newErrors.departmentHead = headResult.message;
+      newErrors.departmentHead =
+        headResult.message;
     }
 
-    const countResult = validateEmployeeCount(employeeCount);
+    const countResult =
+      validateEmployeeCount(employeeCount);
+
     if (!countResult.isValid) {
-      newErrors.employeeCount = countResult.message;
+      newErrors.employeeCount =
+        countResult.message;
     }
 
     setErrors(newErrors);
+
     return Object.keys(newErrors).length === 0;
   };
 
+  // =====================================================
+  // FIELD CHANGE HANDLER
+  // =====================================================
+  const handleFieldChange =
+    (setter, field, validator) => (e) => {
+      const value = e.target.value;
+
+      setter(value);
+
+      // Empty field - don't show error until Add
+      if (value === "") {
+        setErrors((prev) => ({
+          ...prev,
+          [field]: "",
+        }));
+        return;
+      }
+
+      const result = validator(value);
+
+      setErrors((prev) => ({
+        ...prev,
+        [field]: result.isValid
+          ? ""
+          : result.message,
+      }));
+    };
+
+  // =====================================================
+  // ADD DEPARTMENT
+  // =====================================================
   const addDepartment = () => {
+    // Validate all fields
     if (!validateForm()) {
       return;
     }
 
+    // Check duplicate department
+    const duplicate = departments.some(
+      (dept) =>
+        dept.name.toLowerCase() ===
+        departmentName.trim().toLowerCase()
+    );
+
+    if (duplicate) {
+      setErrors((prev) => ({
+        ...prev,
+        departmentName:
+          "This Department already exists",
+      }));
+
+      return;
+    }
+
+    // Generate ID
     const newId = generateDepartmentId();
-    const newDept = {
+
+    // Create department
+    const newDepartment = {
       id: newId,
       name: departmentName.trim(),
       head: departmentHead.trim(),
-      employees: parseInt(employeeCount)
+      employees: Number(employeeCount),
     };
 
-    setDepartments([...departments, newDept]);
+    // Add department
+    setDepartments((prev) => [
+      ...prev,
+      newDepartment,
+    ]);
+
+    // Clear form
     setDepartmentName("");
     setDepartmentHead("");
     setEmployeeCount("");
     setErrors({});
+
     alert("✅ Department added successfully!");
   };
 
+  // =====================================================
+  // CANCEL
+  // =====================================================
   const handleCancel = () => {
     setDepartmentName("");
     setDepartmentHead("");
@@ -137,112 +519,226 @@ const DepartmentManagement = ({
     setErrors({});
   };
 
-  const handleFieldChange = (setter, field) => (e) => {
-    setter(e.target.value);
-    setErrors({ ...errors, [field]: "" });
-  };
-
+  // =====================================================
+  // UI
+  // =====================================================
   return (
     <div className="dm-page">
 
+      {/* NAVBAR */}
       <nav className="dm-nav">
+
         <div className="dm-nav-logo">
-          <span className="dm-nav-title">ITAMS</span>
-          <span className="dm-nav-sub">IT Asset Management System</span>
+          <span className="dm-nav-title">
+            ITAMS
+          </span>
+
+          <span className="dm-nav-sub">
+            IT Asset Management System
+          </span>
         </div>
+
         <div className="dm-nav-right">
-          <span className="dm-nav-user">{username}</span>
-          <span className="dm-nav-divider">|</span>
-          <button className="dm-logout-btn" onClick={onLogout}>Logout</button>
+
+          <span className="dm-nav-user">
+            {username}
+          </span>
+
+          <span className="dm-nav-divider">
+            |
+          </span>
+
+          <button
+            className="dm-logout-btn"
+            onClick={onLogout}
+          >
+            Logout
+          </button>
+
         </div>
+
       </nav>
 
+      {/* BODY */}
       <div className="dm-body">
 
-        <h1 className="dm-page-title">Department Management</h1>
-        <p className="dm-page-sub">Manage organization departments.</p>
+        <h1 className="dm-page-title">
+          Department Management
+        </h1>
 
-        {/* Search Card */}
+        <p className="dm-page-sub">
+          Manage organization departments.
+        </p>
+
+        {/* SEARCH CARD */}
         <div className="dm-card">
-          <h2 className="dm-card-title">Search Department</h2>
+
+          <h2 className="dm-card-title">
+            Search Department
+          </h2>
+
           <div className="dm-search-row">
-            <input
-              className="dm-input"
-              type="text"
-              placeholder="Enter Department Name"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              onKeyDown={handleSearchKeyDown}
-            />
+
+            <div className="dm-search-input-wrapper">
+
+              <input
+                className={`dm-input ${
+                  searchError && searchTouched
+                    ? "dm-input-error"
+                    : ""
+                }`}
+                type="text"
+                placeholder="Enter Department Name"
+                value={search}
+                onChange={handleSearchChange}
+                onKeyDown={handleSearchKeyDown}
+              />
+
+              {searchError &&
+                searchTouched && (
+                  <span className="dm-error-text">
+                    ⚠️ {searchError}
+                  </span>
+                )}
+
+            </div>
+
             <button
               className="dm-btn-primary"
-              onClick={() => setSearchApplied(search)}
+              onClick={handleSearch}
             >
               Search
             </button>
+
           </div>
+
         </div>
 
-        {/* Add Department Card */}
+        {/* ADD NEW DEPARTMENT */}
         <div className="dm-card">
-          <h2 className="dm-card-title">Add New Department</h2>
-          
+
+          <h2 className="dm-card-title">
+            Add New Department
+          </h2>
+
           <div className="dm-add-form">
+
+            {/* DEPARTMENT NAME */}
             <div className="dm-form-group">
+
               <input
-                className={`dm-input ${errors.departmentName ? "dm-input-error" : ""}`}
+                className={`dm-input ${
+                  errors.departmentName
+                    ? "dm-input-error"
+                    : ""
+                }`}
                 type="text"
                 placeholder="Department Name"
                 value={departmentName}
-                onChange={handleFieldChange(setDepartmentName, "departmentName")}
+                onChange={handleFieldChange(
+                  setDepartmentName,
+                  "departmentName",
+                  validateDepartmentName
+                )}
               />
+
               {errors.departmentName && (
-                <span className="dm-error-text">⚠️ {errors.departmentName}</span>
+                <span className="dm-error-text">
+                  ⚠️ {errors.departmentName}
+                </span>
               )}
+
             </div>
 
+            {/* DEPARTMENT HEAD */}
             <div className="dm-form-group">
+
               <input
-                className={`dm-input ${errors.departmentHead ? "dm-input-error" : ""}`}
+                className={`dm-input ${
+                  errors.departmentHead
+                    ? "dm-input-error"
+                    : ""
+                }`}
                 type="text"
                 placeholder="Department Head"
                 value={departmentHead}
-                onChange={handleFieldChange(setDepartmentHead, "departmentHead")}
+                onChange={handleFieldChange(
+                  setDepartmentHead,
+                  "departmentHead",
+                  validateDepartmentHead
+                )}
               />
+
               {errors.departmentHead && (
-                <span className="dm-error-text">⚠️ {errors.departmentHead}</span>
+                <span className="dm-error-text">
+                  ⚠️ {errors.departmentHead}
+                </span>
               )}
+
             </div>
 
+            {/* NUMBER OF EMPLOYEES */}
             <div className="dm-form-group">
+
               <input
-                className={`dm-input ${errors.employeeCount ? "dm-input-error" : ""}`}
-                type="number"
+                className={`dm-input ${
+                  errors.employeeCount
+                    ? "dm-input-error"
+                    : ""
+                }`}
+                type="text"
+                inputMode="numeric"
                 placeholder="Number of Employees"
                 value={employeeCount}
-                onChange={handleFieldChange(setEmployeeCount, "employeeCount")}
+                onChange={handleFieldChange(
+                  setEmployeeCount,
+                  "employeeCount",
+                  validateEmployeeCount
+                )}
               />
+
               {errors.employeeCount && (
-                <span className="dm-error-text">⚠️ {errors.employeeCount}</span>
+                <span className="dm-error-text">
+                  ⚠️ {errors.employeeCount}
+                </span>
               )}
+
             </div>
 
+            {/* BUTTONS */}
             <div className="dm-btn-row">
-              <button className="dm-btn-add" onClick={addDepartment}>
+
+              <button
+                className="dm-btn-add"
+                onClick={addDepartment}
+              >
                 Add
               </button>
-              <button className="dm-btn-cancel" onClick={handleCancel}>
+
+              <button
+                className="dm-btn-cancel"
+                onClick={handleCancel}
+              >
                 Cancel
               </button>
+
             </div>
+
           </div>
+
         </div>
 
-        {/* Department List */}
+        {/* DEPARTMENT LIST */}
         <div className="dm-card">
-          <h2 className="dm-card-title">Department List</h2>
+
+          <h2 className="dm-card-title">
+            Department List
+          </h2>
+
           <div className="dm-table-wrapper">
+
             <table className="dm-table">
+
               <thead>
                 <tr>
                   <th>Department Name</th>
@@ -250,28 +746,64 @@ const DepartmentManagement = ({
                   <th>Number of Employees</th>
                 </tr>
               </thead>
+
               <tbody>
+
                 {filteredDepartments.length > 0 ? (
-                  filteredDepartments.map((dept) => (
-                    <tr key={dept.id}>
-                      <td>{dept.name}</td>
-                      <td>{dept.head}</td>
-                      <td>{dept.employees}</td>
-                    </tr>
-                  ))
+
+                  filteredDepartments.map(
+                    (dept) => (
+                      <tr key={dept.id}>
+
+                        <td>
+                          {dept.name}
+                        </td>
+
+                        <td>
+                          {dept.head}
+                        </td>
+
+                        <td>
+                          {dept.employees}
+                        </td>
+
+                      </tr>
+                    )
+                  )
+
                 ) : (
+
                   <tr>
-                    <td colSpan="3" className="dm-no-data">No Department Found</td>
+
+                    <td
+                      colSpan="3"
+                      className="dm-no-data"
+                    >
+                      No Department Found
+                    </td>
+
                   </tr>
+
                 )}
+
               </tbody>
+
             </table>
+
           </div>
+
         </div>
 
-        <button className="dm-back-btn" onClick={onBack}>Back</button>
+        {/* BACK BUTTON */}
+        <button
+          className="dm-back-btn"
+          onClick={onBack}
+        >
+          ← Back
+        </button>
 
       </div>
+
     </div>
   );
 };
