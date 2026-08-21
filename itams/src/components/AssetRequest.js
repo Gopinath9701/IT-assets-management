@@ -70,8 +70,8 @@ const PAGE_SIZE_OPTIONS = [10, 30, 50, "All"];
 //  YYDDMM EMP NO
 //
 // IMPORTANT:
-// We DO NOT compare YYDDMM with today's date.
-// Old employees are allowed.
+// Past employee IDs are allowed.
+// Future employee IDs are NOT allowed.
 // =====================================================
 
 const validateEmployeeId = (id) => {
@@ -143,7 +143,6 @@ const validateEmployeeId = (id) => {
   }
 
   // Check actual calendar date
-  // We use 2000 + YY only to validate the day/month combination.
   const fullYear = 2000 + year;
 
   const date = new Date(
@@ -161,6 +160,23 @@ const validateEmployeeId = (id) => {
       isValid: false,
       message:
         "Invalid date in Employee ID. Please use a valid YYDDMM date",
+    };
+  }
+
+  // =====================================================
+  // FUTURE DATE CHECK
+  // =====================================================
+
+  const today = new Date();
+
+  today.setHours(0, 0, 0, 0);
+  date.setHours(0, 0, 0, 0);
+
+  if (date > today) {
+    return {
+      isValid: false,
+      message:
+        "Future employee IDs are not allowed",
     };
   }
 
@@ -193,6 +209,22 @@ const validateEmployeeId = (id) => {
 // =====================================================
 // VALIDATION - PURPOSE
 // =====================================================
+//
+// Allowed:
+// Letters
+// Spaces
+//
+// Multiple spaces between words are allowed.
+//
+// Not allowed:
+// Numbers
+// . , ; ' " ( ) { } [ ]
+// * & ^ % $ # @ !
+// and all other special characters.
+//
+// Minimum: 10 characters
+// Maximum: 500 characters
+// =====================================================
 
 const validatePurpose = (purpose) => {
   // Empty
@@ -207,7 +239,8 @@ const validatePurpose = (purpose) => {
   if (purpose.trim() === "") {
     return {
       isValid: false,
-      message: "Purpose cannot contain only spaces",
+      message:
+        "Purpose cannot contain only spaces",
     };
   }
 
@@ -247,19 +280,13 @@ const validatePurpose = (purpose) => {
     };
   }
 
-  // Multiple spaces ARE ALLOWED.
-  //
-  // Allowed:
-  // Letters
-  // Numbers
-  // Spaces
-  // . , ( ) -
-  //
-  if (!/^[A-Za-z0-9\s.,()-]+$/.test(purpose)) {
+  // Letters and spaces ONLY.
+  // Multiple consecutive spaces are allowed.
+  if (!/^[A-Za-z\s]+$/.test(purpose)) {
     return {
       isValid: false,
       message:
-        "Purpose should contain only letters, numbers, spaces, comma, full stop, brackets and hyphen",
+        "Purpose should contain letters and spaces only",
     };
   }
 
@@ -727,6 +754,23 @@ const AssetRequest = ({
       };
     }
 
+    // =================================================
+    // FUTURE DATE CHECK FOR SEARCH
+    // =================================================
+
+    const today = new Date();
+
+    today.setHours(0, 0, 0, 0);
+    date.setHours(0, 0, 0, 0);
+
+    if (date > today) {
+      return {
+        isValid: false,
+        message:
+          "Future employee IDs are not allowed",
+      };
+    }
+
     // Last 3 digits
     const employeeNumber =
       value.substring(6);
@@ -945,8 +989,9 @@ const AssetRequest = ({
                   Format: YYDDMM + 3-digit
                   employee number
                   (e.g., 260820001).
-                  Old employee IDs are also
-                  accepted.
+                  Past employee IDs are
+                  accepted. Future employee
+                  IDs are not accepted.
                 </small>
               </div>
 
