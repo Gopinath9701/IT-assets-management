@@ -5,11 +5,11 @@ import "./ReportMaintenance.css";
 // EMPLOYEE ID VALIDATION
 //
 // FORMAT:
-// YYDDMMXXX
+// YYMMDDXXX
 //
 // YY  = Year
-// DD  = Day
 // MM  = Month
+// DD  = Day
 // XXX = Employee Number (001 - 999)
 //
 // Past dates  -> ALLOWED
@@ -60,35 +60,35 @@ const validateEmployeeId = (id) => {
     return {
       isValid: false,
       message:
-        "Employee ID must be exactly 9 digits (YYDDMMXXX)",
+        "Employee ID must be exactly 9 digits (YYMMDDXXX)",
     };
   }
 
   // =====================================================
   // SPLIT
-  // YY DD MM XXX
+  // YY MM DD XXX
   // =====================================================
   const yearShort = Number(id.substring(0, 2));
-  const day = Number(id.substring(2, 4));
-  const month = Number(id.substring(4, 6));
+  const month = Number(id.substring(2, 4));
+  const day = Number(id.substring(4, 6));
   const employeeNumber = Number(id.substring(6, 9));
 
   // YEAR
   const fullYear = 2000 + yearShort;
-
-  // DAY
-  if (day < 1 || day > 31) {
-    return {
-      isValid: false,
-      message: "Employee ID contains an invalid day",
-    };
-  }
 
   // MONTH
   if (month < 1 || month > 12) {
     return {
       isValid: false,
       message: "Employee ID contains an invalid month",
+    };
+  }
+
+  // DAY
+  if (day < 1 || day > 31) {
+    return {
+      isValid: false,
+      message: "Employee ID contains an invalid day",
     };
   }
 
@@ -609,7 +609,7 @@ const ReportMaintenance = ({
               )}
 
               <small>
-                Format: YYDDMM + 3 employee numbers
+                Format: YYMMDD + 3 employee numbers
               </small>
 
             </div>
