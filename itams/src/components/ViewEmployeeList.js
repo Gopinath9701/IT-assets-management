@@ -7,16 +7,16 @@ const PAGE_SIZE_OPTIONS = [10, 30, 50, "All"];
 // EMPLOYEE ID VALIDATION
 //
 // FORMAT:
-// YYDDMMXXX
+// YYMMDDXXX
 //
 // YY  = Year
-// DD  = Day
 // MM  = Month
+// DD  = Day
 // XXX = Employee number (001 - 999)
 //
 // EXAMPLES:
 //
-// 250808001 -> 08-08-2025 -> ALLOWED
+// 260101001 -> 01-01-2026 -> ALLOWED
 // 260808001 -> 08-08-2026 -> ALLOWED
 // 260821001 -> 21-08-2026 -> ALLOWED (TODAY)
 // 260822001 -> 22-08-2026 -> NOT ALLOWED
@@ -53,33 +53,22 @@ const validateEmployeeId = (id) => {
     return {
       isValid: false,
       message:
-        "Employee ID must be exactly 9 digits (YYDDMMXXX).",
+        "Employee ID must be exactly 9 digits (YYMMDDXXX).",
     };
   }
 
   // ===================================================
   // SPLIT ID
-  // YY DD MM XXX
+  // YY MM DD XXX
   // ===================================================
 
   const yearShort = Number(id.substring(0, 2));
-  const day = Number(id.substring(2, 4));
-  const month = Number(id.substring(4, 6));
+  const month = Number(id.substring(2, 4));
+  const day = Number(id.substring(4, 6));
   const employeeNumber = Number(id.substring(6, 9));
 
   // YY -> Actual year
   const fullYear = 2000 + yearShort;
-
-  // ===================================================
-  // DAY
-  // ===================================================
-
-  if (day < 1 || day > 31) {
-    return {
-      isValid: false,
-      message: "Employee ID contains an invalid day.",
-    };
-  }
 
   // ===================================================
   // MONTH
@@ -89,6 +78,17 @@ const validateEmployeeId = (id) => {
     return {
       isValid: false,
       message: "Employee ID contains an invalid month.",
+    };
+  }
+
+  // ===================================================
+  // DAY
+  // ===================================================
+
+  if (day < 1 || day > 31) {
+    return {
+      isValid: false,
+      message: "Employee ID contains an invalid day.",
     };
   }
 
@@ -162,8 +162,8 @@ const validateEmployeeId = (id) => {
 
 const getDateFromEmployeeId = (id) => {
   const year = 2000 + Number(id.substring(0, 2));
-  const day = Number(id.substring(2, 4));
-  const month = Number(id.substring(4, 6));
+  const month = Number(id.substring(2, 4));
+  const day = Number(id.substring(4, 6));
 
   return new Date(year, month - 1, day);
 };
@@ -181,11 +181,27 @@ const formatDate = (date) => {
 };
 
 // =====================================================
+// EMPLOYEE NAMES
+// =====================================================
+
+const EMPLOYEE_NAMES = [
+  "Rahul Sharma",
+  "Priya Reddy",
+  "Arjun Kumar",
+  "Sneha Rani",
+  "Kiran Rao",
+  "Ananya Patel",
+  "Rohit Varma",
+  "Neha Reddy",
+  "Vikram Singh",
+  "Pooja Sharma",
+];
+
+// =====================================================
 // CREATE EMPLOYEE AUTOMATICALLY
 //
 // If the ID is valid but not already stored,
-// a basic employee record is created so the
-// valid past/today employee can still be opened.
+// a basic employee record is created.
 // =====================================================
 
 const createEmployeeFromId = (id) => {
@@ -204,9 +220,14 @@ const createEmployeeFromId = (id) => {
   const department =
     departments[(employeeNumber - 1) % departments.length];
 
+  const name =
+    EMPLOYEE_NAMES[
+      (employeeNumber - 1) % EMPLOYEE_NAMES.length
+    ];
+
   return {
     id: id,
-    name: `Employee ${id.substring(6, 9)}`,
+    name: name,
     department: department,
     status: "Active",
     phone: "9876543210",
@@ -224,7 +245,7 @@ const createEmployeeFromId = (id) => {
 const EMPLOYEES = [
   {
     id: "260101001",
-    name: "Emp1",
+    name: "Rahul Sharma",
     department: "IT",
     status: "Active",
     phone: "9876543210",
@@ -252,7 +273,7 @@ const EMPLOYEES = [
 
   {
     id: "260202002",
-    name: "Emp2",
+    name: "Priya Reddy",
     department: "HR",
     status: "Active",
     phone: "9876543211",
@@ -270,7 +291,7 @@ const EMPLOYEES = [
 
   {
     id: "260503003",
-    name: "Emp3",
+    name: "Arjun Kumar",
     department: "Finance",
     status: "On Leave",
     phone: "9876543212",
@@ -288,7 +309,7 @@ const EMPLOYEES = [
 
   {
     id: "260704004",
-    name: "Emp4",
+    name: "Sneha Rani",
     department: "IT",
     status: "Inactive",
     phone: "9876543213",
@@ -300,7 +321,7 @@ const EMPLOYEES = [
 
   {
     id: "260805005",
-    name: "Emp5",
+    name: "Kiran Rao",
     department: "HR",
     status: "Active",
     phone: "9876543214",
@@ -316,7 +337,7 @@ const EMPLOYEES = [
 
   {
     id: "250808001",
-    name: "Emp6",
+    name: "Ananya Patel",
     department: "IT",
     status: "Active",
     phone: "9876543215",
@@ -334,7 +355,7 @@ const EMPLOYEES = [
 
   {
     id: "260808001",
-    name: "Emp7",
+    name: "Rohit Varma",
     department: "HR",
     status: "Active",
     phone: "9876543216",
@@ -356,7 +377,7 @@ const EMPLOYEES = [
 
   {
     id: "260821001",
-    name: "Emp8",
+    name: "Neha Reddy",
     department: "Finance",
     status: "Active",
     phone: "9876543217",
@@ -430,7 +451,7 @@ const ViewEmployeeList = ({
       setIsSearchValid(false);
 
       setValidationError(
-        "Employee ID must be exactly 9 digits (YYDDMMXXX)."
+        "Employee ID must be exactly 9 digits (YYMMDDXXX)."
       );
 
       return;
@@ -496,18 +517,7 @@ const ViewEmployeeList = ({
       );
 
     // ===================================================
-    // IMPORTANT:
-    //
-    // If ID is a valid past/today ID but not
-    // already stored, create an employee record.
-    //
-    // Therefore:
-    //
-    // 250808001 -> opens
-    // 260808001 -> opens
-    // 260821001 -> opens
-    //
-    // Future IDs still cannot open.
+    // CREATE EMPLOYEE IF NOT STORED
     // ===================================================
 
     if (!foundEmployee) {
@@ -527,9 +537,6 @@ const ViewEmployeeList = ({
 
     setIsSearchValid(true);
 
-    // IMPORTANT:
-    // Open the employee immediately after
-    // searching a valid past/today ID.
     setSelectedEmployee(foundEmployee);
   };
 
@@ -570,9 +577,6 @@ const ViewEmployeeList = ({
 
   // =====================================================
   // VIEW EMPLOYEE
-  //
-  // Clicking View opens any valid
-  // past/today employee.
   // =====================================================
 
   const handleViewEmployee = (
@@ -764,7 +768,7 @@ const ViewEmployeeList = ({
             <div className="vel-validation-hint">
 
               <small>
-                Format: YYDDMMXXX — exactly 9 digits,
+                Format: YYMMDDXXX — exactly 9 digits,
                 no spaces. Past and today's dates are
                 allowed. Future dates are not allowed.
                 Last 3 digits: 001–999.
