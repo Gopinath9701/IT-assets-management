@@ -62,15 +62,20 @@ const PAGE_SIZE_OPTIONS = [10, 30, 50, "All"];
 // =====================================================
 //
 // Format:
-// YYDDMM + 3 digit employee number
+// YYMMDD + 3 digit employee number
 //
 // Example:
-// 260820001
+// 260821001
 //  ^^^^^^ ^^^
-//  YYDDMM EMP NO
+//  YYMMDD EMP NO
 //
-// IMPORTANT:
+// 26 = Year
+// 08 = Month
+// 21 = Day
+// 001 = Employee Number
+//
 // Past employee IDs are allowed.
+// Today's employee ID is allowed.
 // Future employee IDs are NOT allowed.
 // =====================================================
 
@@ -104,25 +109,25 @@ const validateEmployeeId = (id) => {
     return {
       isValid: false,
       message:
-        "Employee ID must be exactly 9 digits (YYDDMM + 3-digit employee number)",
+        "Employee ID must be exactly 9 digits (YYMMDD + 3-digit employee number)",
     };
   }
 
-  // First 6 digits = YYDDMM
+  // First 6 digits = YYMMDD
   const datePart = id.substring(0, 6);
 
   if (!/^[0-9]{6}$/.test(datePart)) {
     return {
       isValid: false,
       message:
-        "First 6 digits must be in YYDDMM format",
+        "First 6 digits must be in YYMMDD format",
     };
   }
 
-  // Extract YY DD MM
+  // Extract YY MM DD
   const year = Number(datePart.substring(0, 2));
-  const day = Number(datePart.substring(2, 4));
-  const month = Number(datePart.substring(4, 6));
+  const month = Number(datePart.substring(2, 4));
+  const day = Number(datePart.substring(4, 6));
 
   // Validate month
   if (month < 1 || month > 12) {
@@ -159,7 +164,7 @@ const validateEmployeeId = (id) => {
     return {
       isValid: false,
       message:
-        "Invalid date in Employee ID. Please use a valid YYDDMM date",
+        "Invalid date in Employee ID. Please use a valid YYMMDD date",
     };
   }
 
@@ -299,6 +304,13 @@ const validatePurpose = (purpose) => {
 // =====================================================
 // VALIDATION - REQUIRED DATE
 // =====================================================
+//
+// Required Date:
+// Today is allowed.
+// Maximum next 10 days is allowed.
+// More than 10 days is NOT allowed.
+// Past dates are NOT allowed.
+// =====================================================
 
 const validateRequiredDate = (dateValue) => {
   // Empty
@@ -328,11 +340,9 @@ const validateRequiredDate = (dateValue) => {
 
   selectedDate.setHours(0, 0, 0, 0);
 
-  // Maximum date = 1 year from today
+  // Maximum date = 10 days from today
   const maxDate = new Date(today);
-  maxDate.setFullYear(
-    maxDate.getFullYear() + 1
-  );
+  maxDate.setDate(maxDate.getDate() + 10);
   maxDate.setHours(0, 0, 0, 0);
 
   // Past date
@@ -344,12 +354,12 @@ const validateRequiredDate = (dateValue) => {
     };
   }
 
-  // More than one year
+  // More than 10 days
   if (selectedDate > maxDate) {
     return {
       isValid: false,
       message:
-        "Required Date cannot exceed one year from today",
+        "Required Date cannot exceed 10 days from today",
     };
   }
 
@@ -386,8 +396,8 @@ const getTodayDate = () => {
 const getMaxDate = () => {
   const maxDate = new Date();
 
-  maxDate.setFullYear(
-    maxDate.getFullYear() + 1
+  maxDate.setDate(
+    maxDate.getDate() + 10
   );
 
   const year = maxDate.getFullYear();
@@ -699,16 +709,17 @@ const AssetRequest = ({
     }
 
     // Validate date part
+    // YYMMDD
     const datePart =
       value.substring(0, 6);
 
     const year =
       Number(datePart.substring(0, 2));
 
-    const day =
+    const month =
       Number(datePart.substring(2, 4));
 
-    const month =
+    const day =
       Number(datePart.substring(4, 6));
 
     if (
@@ -969,7 +980,7 @@ const AssetRequest = ({
                     ? "ar-input-error"
                     : ""
                 }`}
-                placeholder="Enter Employee ID (e.g., 260820001)"
+                placeholder="Enter Employee ID (e.g., 260821001)"
                 value={employeeId}
                 maxLength={9}
                 inputMode="numeric"
@@ -986,9 +997,9 @@ const AssetRequest = ({
 
               <div className="ar-validation-hint">
                 <small>
-                  Format: YYDDMM + 3-digit
+                  Format: YYMMDD + 3-digit
                   employee number
-                  (e.g., 260820001).
+                  (e.g., 260821001).
                   Past employee IDs are
                   accepted. Future employee
                   IDs are not accepted.
@@ -1120,7 +1131,7 @@ const AssetRequest = ({
               <div className="ar-validation-hint">
                 <small>
                   Date must be today or
-                  within the next year
+                  within the next 10 days
                 </small>
               </div>
 
