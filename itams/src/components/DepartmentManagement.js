@@ -52,12 +52,12 @@ const validateDepartmentName = (name) => {
     };
   }
 
-  // Only letters, numbers, spaces, brackets, &, hyphen
-  if (!/^[A-Za-z0-9\s()&-]+$/.test(name)) {
+  // ONLY LETTERS AND SPACES
+  if (!/^[A-Za-z\s]+$/.test(name)) {
     return {
       isValid: false,
       message:
-        "Department Name should contain only letters, numbers, spaces, brackets, & and hyphen",
+        "Department Name should contain only letters and spaces",
     };
   }
 
@@ -118,12 +118,12 @@ const validateDepartmentHead = (head) => {
     };
   }
 
-  // Letters, numbers and spaces only
-  if (!/^[A-Za-z0-9\s]+$/.test(head)) {
+  // ONLY LETTERS AND SPACES
+  if (!/^[A-Za-z\s]+$/.test(head)) {
     return {
       isValid: false,
       message:
-        "Department Head should contain only letters, numbers and spaces",
+        "Department Head should contain only letters and spaces",
     };
   }
 
@@ -221,7 +221,7 @@ const validateSearch = (search) => {
   // Example:
   // Information Technology       Department
   // is allowed.
-  
+
   if (search.length < 2) {
     return {
       isValid: false,
@@ -288,37 +288,37 @@ const DepartmentManagement = ({
     {
       id: "DEP001",
       name: "Information Technology (IT)",
-      head: "Head 1",
+      head: "Rahul Sharma",
       employees: 25,
     },
     {
       id: "DEP002",
       name: "Human Resources (HR)",
-      head: "Head 2",
+      head: "Priya Reddy",
       employees: 10,
     },
     {
       id: "DEP003",
       name: "Finance",
-      head: "Head 3",
+      head: "Arjun Kumar",
       employees: 15,
     },
     {
       id: "DEP004",
       name: "Marketing",
-      head: "Head 4",
+      head: "Sneha Rao",
       employees: 12,
     },
     {
       id: "DEP005",
       name: "Sales",
-      head: "Head 5",
+      head: "Vikram Singh",
       employees: 20,
     },
     {
       id: "DEP006",
       name: "Administration",
-      head: "Head 6",
+      head: "Ananya Sharma",
       employees: 18,
     },
   ]);
