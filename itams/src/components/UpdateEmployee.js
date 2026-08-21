@@ -265,7 +265,7 @@ const validatePhoneNumber = (phone) => {
 const EMPLOYEE_DATA = {
   "260819001": {
     id: "260819001",
-    name: "Emp1",
+    name: "Rahul Sharma",
     email: "260819001@gmail.com",
     department: "IT",
     designation: "Developer",
@@ -274,7 +274,7 @@ const EMPLOYEE_DATA = {
 
   "260819002": {
     id: "260819002",
-    name: "Emp2",
+    name: "Priya Reddy",
     email: "260819002@gmail.com",
     department: "HR",
     designation: "Manager",
@@ -283,7 +283,7 @@ const EMPLOYEE_DATA = {
 
   "260819003": {
     id: "260819003",
-    name: "Emp3",
+    name: "Arjun Kumar",
     email: "260819003@gmail.com",
     department: "Finance",
     designation: "Accountant",
@@ -492,9 +492,26 @@ const UpdateEmployee = ({
         9000000000 + employeeNumber
       );
 
+      const employeeNames = [
+        "Rahul Sharma",
+        "Priya Reddy",
+        "Arjun Kumar",
+        "Sneha Rao",
+        "Vikram Singh",
+        "Ananya Reddy",
+        "Kiran Kumar",
+        "Pooja Sharma",
+        "Rohit Verma",
+        "Neha Reddy",
+      ];
+
       foundEmployee = {
         id: employeeId,
-        name: `Emp${employeeNumber}`,
+        name:
+          employeeNames[
+            (employeeNumber - 1) %
+              employeeNames.length
+          ],
         email: `${employeeId}@gmail.com`,
         department: department,
         designation: designation,
