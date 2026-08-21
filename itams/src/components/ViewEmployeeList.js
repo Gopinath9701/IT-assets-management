@@ -5,9 +5,22 @@ const PAGE_SIZE_OPTIONS = [10, 30, 50, "All"];
 
 // =====================================================
 // EMPLOYEE ID VALIDATION
-// Required format: YYDDMM001
-// Example: 261908001
-//           YY DD MM 001
+//
+// FORMAT:
+// YYDDMMXXX
+//
+// YY  = Year
+// DD  = Day
+// MM  = Month
+// XXX = Employee number (001 - 999)
+//
+// EXAMPLES:
+//
+// 250808001 -> 08-08-2025 -> ALLOWED
+// 260808001 -> 08-08-2026 -> ALLOWED
+// 260821001 -> 21-08-2026 -> ALLOWED (TODAY)
+// 260822001 -> 22-08-2026 -> NOT ALLOWED
+// 270808001 -> 08-08-2027 -> NOT ALLOWED
 // =====================================================
 
 const validateEmployeeId = (id) => {
@@ -19,23 +32,7 @@ const validateEmployeeId = (id) => {
     };
   }
 
-  // Leading space
-  if (id !== id.trimStart()) {
-    return {
-      isValid: false,
-      message: "Spaces before Employee ID are not allowed.",
-    };
-  }
-
-  // Trailing space
-  if (id !== id.trimEnd()) {
-    return {
-      isValid: false,
-      message: "Spaces after Employee ID are not allowed.",
-    };
-  }
-
-  // Any space inside
+  // Spaces
   if (/\s/.test(id)) {
     return {
       isValid: false,
@@ -43,7 +40,7 @@ const validateEmployeeId = (id) => {
     };
   }
 
-  // Only numbers
+  // Numbers only
   if (!/^\d+$/.test(id)) {
     return {
       isValid: false,
@@ -55,55 +52,74 @@ const validateEmployeeId = (id) => {
   if (id.length !== 9) {
     return {
       isValid: false,
-      message: "Employee ID must be exactly 9 digits (YYDDMM001).",
+      message:
+        "Employee ID must be exactly 9 digits (YYDDMMXXX).",
     };
   }
 
-  // Split ID
-  const year = id.substring(0, 2);
-  const day = id.substring(2, 4);
-  const month = id.substring(4, 6);
-  const employeeNumber = id.substring(6, 9);
+  // ===================================================
+  // SPLIT ID
+  // YY DD MM XXX
+  // ===================================================
 
-  // Current year = 2026 -> 26
-  const currentYear = new Date().getFullYear();
-  const currentYearShort = String(currentYear).slice(-2);
+  const yearShort = Number(id.substring(0, 2));
+  const day = Number(id.substring(2, 4));
+  const month = Number(id.substring(4, 6));
+  const employeeNumber = Number(id.substring(6, 9));
 
-  if (year !== currentYearShort) {
-    return {
-      isValid: false,
-      message: `Employee ID must use the current year (${currentYearShort}).`,
-    };
-  }
+  // YY -> Actual year
+  const fullYear = 2000 + yearShort;
 
-  const dayNumber = Number(day);
-  const monthNumber = Number(month);
-  const employeeNumberValue = Number(employeeNumber);
+  // ===================================================
+  // DAY
+  // ===================================================
 
-  // Month validation
-  if (monthNumber < 1 || monthNumber > 12) {
-    return {
-      isValid: false,
-      message: "Employee ID contains an invalid month.",
-    };
-  }
-
-  // Day validation
-  if (dayNumber < 1 || dayNumber > 31) {
+  if (day < 1 || day > 31) {
     return {
       isValid: false,
       message: "Employee ID contains an invalid day.",
     };
   }
 
-  // Check actual calendar date
-  const fullYear = currentYear;
-  const date = new Date(fullYear, monthNumber - 1, dayNumber);
+  // ===================================================
+  // MONTH
+  // ===================================================
+
+  if (month < 1 || month > 12) {
+    return {
+      isValid: false,
+      message: "Employee ID contains an invalid month.",
+    };
+  }
+
+  // ===================================================
+  // EMPLOYEE NUMBER
+  // ===================================================
+
+  if (employeeNumber < 1 || employeeNumber > 999) {
+    return {
+      isValid: false,
+      message:
+        "Employee number must be between 001 and 999.",
+    };
+  }
+
+  // ===================================================
+  // VALID CALENDAR DATE
+  // ===================================================
+
+  const employeeDate = new Date(
+    fullYear,
+    month - 1,
+    day
+  );
+
+  employeeDate.setHours(0, 0, 0, 0);
 
   if (
-    date.getFullYear() !== fullYear ||
-    date.getMonth() !== monthNumber - 1 ||
-    date.getDate() !== dayNumber
+    employeeDate.getFullYear() !== fullYear ||
+    employeeDate.getMonth() !== month - 1 ||
+    employeeDate.getDate() !== day
   ) {
     return {
       isValid: false,
@@ -111,11 +127,26 @@ const validateEmployeeId = (id) => {
     };
   }
 
-  // Employee number must be 001 - 999
-  if (employeeNumberValue < 1 || employeeNumberValue > 999) {
+  // ===================================================
+  // TODAY
+  // ===================================================
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // ===================================================
+  // FUTURE DATE CHECK
+  //
+  // Past  -> ALLOWED
+  // Today -> ALLOWED
+  // Future -> NOT ALLOWED
+  // ===================================================
+
+  if (employeeDate > today) {
     return {
       isValid: false,
-      message: "Employee number must be between 001 and 999.",
+      message:
+        "Future dates are not allowed. Employee ID must contain a past or today's date.",
     };
   }
 
@@ -126,8 +157,68 @@ const validateEmployeeId = (id) => {
 };
 
 // =====================================================
+// CONVERT EMPLOYEE ID DATE
+// =====================================================
+
+const getDateFromEmployeeId = (id) => {
+  const year = 2000 + Number(id.substring(0, 2));
+  const day = Number(id.substring(2, 4));
+  const month = Number(id.substring(4, 6));
+
+  return new Date(year, month - 1, day);
+};
+
+// =====================================================
+// FORMAT DATE
+// =====================================================
+
+const formatDate = (date) => {
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+
+  return `${day}-${month}-${year}`;
+};
+
+// =====================================================
+// CREATE EMPLOYEE AUTOMATICALLY
+//
+// If the ID is valid but not already stored,
+// a basic employee record is created so the
+// valid past/today employee can still be opened.
+// =====================================================
+
+const createEmployeeFromId = (id) => {
+  const employeeDate = getDateFromEmployeeId(id);
+
+  const employeeNumber = Number(
+    id.substring(6, 9)
+  );
+
+  const departments = [
+    "IT",
+    "HR",
+    "Finance",
+  ];
+
+  const department =
+    departments[(employeeNumber - 1) % departments.length];
+
+  return {
+    id: id,
+    name: `Employee ${id.substring(6, 9)}`,
+    department: department,
+    status: "Active",
+    phone: "9876543210",
+    email: `${id}@gmail.com`,
+    joiningDate: formatDate(employeeDate),
+
+    assets: [],
+  };
+};
+
+// =====================================================
 // SAMPLE EMPLOYEE DATA
-// Format: YYDDMM001
 // =====================================================
 
 const EMPLOYEES = [
@@ -137,8 +228,9 @@ const EMPLOYEES = [
     department: "IT",
     status: "Active",
     phone: "9876543210",
-    email: "emp1@gmail.com",
+    email: "260101001@gmail.com",
     joiningDate: "01-01-2026",
+
     assets: [
       {
         assetId: "AST001",
@@ -164,8 +256,9 @@ const EMPLOYEES = [
     department: "HR",
     status: "Active",
     phone: "9876543211",
-    email: "emp2@gmail.com",
+    email: "260202002@gmail.com",
     joiningDate: "02-02-2026",
+
     assets: [
       {
         assetId: "AST021",
@@ -181,8 +274,9 @@ const EMPLOYEES = [
     department: "Finance",
     status: "On Leave",
     phone: "9876543212",
-    email: "emp3@gmail.com",
+    email: "260503003@gmail.com",
     joiningDate: "03-05-2026",
+
     assets: [
       {
         assetId: "AST033",
@@ -198,8 +292,9 @@ const EMPLOYEES = [
     department: "IT",
     status: "Inactive",
     phone: "9876543213",
-    email: "emp4@gmail.com",
+    email: "260704004@gmail.com",
     joiningDate: "04-07-2026",
+
     assets: [],
   },
 
@@ -209,30 +304,65 @@ const EMPLOYEES = [
     department: "HR",
     status: "Active",
     phone: "9876543214",
-    email: "emp5@gmail.com",
+    email: "260805005@gmail.com",
     joiningDate: "05-08-2026",
+
     assets: [],
   },
 
+  // ===================================================
+  // PAST EMPLOYEE
+  // ===================================================
+
   {
-    id: "261006006",
+    id: "250808001",
     name: "Emp6",
-    department: "Finance",
+    department: "IT",
     status: "Active",
     phone: "9876543215",
-    email: "emp6@gmail.com",
-    joiningDate: "06-10-2026",
-    assets: [],
+    email: "250808001@gmail.com",
+    joiningDate: "08-08-2025",
+
+    assets: [
+      {
+        assetId: "AST040",
+        assetType: "Laptop",
+        assignedDate: "10-08-2025",
+      },
+    ],
   },
 
   {
-    id: "261207007",
+    id: "260808001",
     name: "Emp7",
-    department: "IT",
-    status: "On Leave",
+    department: "HR",
+    status: "Active",
     phone: "9876543216",
-    email: "emp7@gmail.com",
-    joiningDate: "07-12-2026",
+    email: "260808001@gmail.com",
+    joiningDate: "08-08-2026",
+
+    assets: [
+      {
+        assetId: "AST041",
+        assetType: "Desktop",
+        assignedDate: "09-08-2026",
+      },
+    ],
+  },
+
+  // ===================================================
+  // TODAY'S EMPLOYEE
+  // ===================================================
+
+  {
+    id: "260821001",
+    name: "Emp8",
+    department: "Finance",
+    status: "Active",
+    phone: "9876543217",
+    email: "260821001@gmail.com",
+    joiningDate: "21-08-2026",
+
     assets: [],
   },
 ];
@@ -246,41 +376,81 @@ const ViewEmployeeList = ({
   onLogout,
   onBack,
 }) => {
-  const [searchInput, setSearchInput] = useState("");
-  const [searchId, setSearchId] = useState("");
-  const [selectedEmployee, setSelectedEmployee] = useState(null);
-  const [pageSize, setPageSize] = useState(10);
+  const [searchInput, setSearchInput] =
+    useState("");
 
-  const [validationError, setValidationError] = useState("");
-  const [isSearchValid, setIsSearchValid] = useState(true);
-  const [searchTouched, setSearchTouched] = useState(false);
+  const [searchId, setSearchId] =
+    useState("");
+
+  const [selectedEmployee, setSelectedEmployee] =
+    useState(null);
+
+  const [pageSize, setPageSize] =
+    useState(10);
+
+  const [validationError, setValidationError] =
+    useState("");
+
+  const [isSearchValid, setIsSearchValid] =
+    useState(true);
+
+  const [searchTouched, setSearchTouched] =
+    useState(false);
 
   // =====================================================
-  // SEARCH INPUT
+  // SEARCH INPUT CHANGE
   // =====================================================
 
   const handleSearchInputChange = (e) => {
-    const value = e.target.value;
+    // Only numbers
+    // Maximum 9 digits
+
+    const value = e.target.value
+      .replace(/\D/g, "")
+      .slice(0, 9);
 
     setSearchInput(value);
+
     setSearchTouched(false);
+
     setSearchId("");
+
     setSelectedEmployee(null);
 
+    setValidationError("");
+
+    // Empty
     if (value === "") {
-      setValidationError("");
       setIsSearchValid(true);
       return;
     }
 
-    const result = validateEmployeeId(value);
+    // Less than 9 digits
+    if (value.length < 9) {
+      setIsSearchValid(false);
+
+      setValidationError(
+        "Employee ID must be exactly 9 digits (YYDDMMXXX)."
+      );
+
+      return;
+    }
+
+    // Validate
+    const result =
+      validateEmployeeId(value);
 
     setIsSearchValid(result.isValid);
-    setValidationError(result.message);
+
+    if (!result.isValid) {
+      setValidationError(
+        result.message
+      );
+    }
   };
 
   // =====================================================
-  // SEARCH
+  // SEARCH EMPLOYEE
   // =====================================================
 
   const handleSearch = () => {
@@ -288,44 +458,79 @@ const ViewEmployeeList = ({
 
     // Empty
     if (searchInput === "") {
-      setValidationError("Please enter an Employee ID.");
+      setValidationError(
+        "Please enter an Employee ID."
+      );
+
       setIsSearchValid(false);
       setSearchId("");
       setSelectedEmployee(null);
+
       return;
     }
 
-    // Validate ID
-    const result = validateEmployeeId(searchInput);
+    // Validate
+    const result =
+      validateEmployeeId(searchInput);
 
     if (!result.isValid) {
-      setValidationError(result.message);
+      setValidationError(
+        result.message
+      );
+
       setIsSearchValid(false);
       setSearchId("");
       setSelectedEmployee(null);
+
       return;
     }
 
-    // Exact ID search
-    const foundEmployee = EMPLOYEES.find(
-      (employee) => employee.id === searchInput
-    );
+    // ===================================================
+    // FIND EMPLOYEE
+    // ===================================================
+
+    let foundEmployee =
+      EMPLOYEES.find(
+        (employee) =>
+          employee.id === searchInput
+      );
+
+    // ===================================================
+    // IMPORTANT:
+    //
+    // If ID is a valid past/today ID but not
+    // already stored, create an employee record.
+    //
+    // Therefore:
+    //
+    // 250808001 -> opens
+    // 260808001 -> opens
+    // 260821001 -> opens
+    //
+    // Future IDs still cannot open.
+    // ===================================================
 
     if (!foundEmployee) {
-      setValidationError(
-        `Employee ID "${searchInput}" was not found.`
-      );
-      setIsSearchValid(false);
-      setSearchId("");
-      setSelectedEmployee(null);
-      return;
+      foundEmployee =
+        createEmployeeFromId(
+          searchInput
+        );
     }
 
-    // Success
-    setSearchId(searchInput);
+    // ===================================================
+    // SUCCESS
+    // ===================================================
+
+    setSearchId(foundEmployee.id);
+
     setValidationError("");
+
     setIsSearchValid(true);
-    setSelectedEmployee(null);
+
+    // IMPORTANT:
+    // Open the employee immediately after
+    // searching a valid past/today ID.
+    setSelectedEmployee(foundEmployee);
   };
 
   // =====================================================
@@ -340,14 +545,15 @@ const ViewEmployeeList = ({
   };
 
   // =====================================================
-  // FILTER
+  // FILTER EMPLOYEES
   // =====================================================
 
   const filteredEmployees =
     searchId === ""
       ? EMPLOYEES
       : EMPLOYEES.filter(
-          (employee) => employee.id === searchId
+          (employee) =>
+            employee.id === searchId
         );
 
   // =====================================================
@@ -357,14 +563,69 @@ const ViewEmployeeList = ({
   const visibleEmployees =
     pageSize === "All"
       ? filteredEmployees
-      : filteredEmployees.slice(0, Number(pageSize));
+      : filteredEmployees.slice(
+          0,
+          Number(pageSize)
+        );
 
   // =====================================================
   // VIEW EMPLOYEE
+  //
+  // Clicking View opens any valid
+  // past/today employee.
   // =====================================================
 
-  const handleViewEmployee = (employee) => {
-    setSelectedEmployee(employee);
+  const handleViewEmployee = (
+    employee
+  ) => {
+    // Validate ID first
+    const validation =
+      validateEmployeeId(
+        employee.id
+      );
+
+    // Future/invalid employee cannot open
+    if (!validation.isValid) {
+      setValidationError(
+        validation.message
+      );
+
+      setSearchTouched(true);
+
+      return;
+    }
+
+    // Find exact employee
+    let exactEmployee =
+      EMPLOYEES.find(
+        (emp) =>
+          emp.id === employee.id
+      );
+
+    // If not stored, create it
+    if (!exactEmployee) {
+      exactEmployee =
+        createEmployeeFromId(
+          employee.id
+        );
+    }
+
+    // Open exact employee
+    setSelectedEmployee(
+      exactEmployee
+    );
+
+    setSearchInput(
+      exactEmployee.id
+    );
+
+    setSearchId(
+      exactEmployee.id
+    );
+
+    setValidationError("");
+
+    setIsSearchValid(true);
   };
 
   // =====================================================
@@ -385,7 +646,9 @@ const ViewEmployeeList = ({
       {/* ================= NAVBAR ================= */}
 
       <nav className="vel-nav">
+
         <div className="vel-nav-logo">
+
           <span className="vel-nav-title">
             ITAMS
           </span>
@@ -393,9 +656,11 @@ const ViewEmployeeList = ({
           <span className="vel-nav-sub">
             IT Asset Management System
           </span>
+
         </div>
 
         <div className="vel-nav-right">
+
           <span className="vel-nav-user">
             {username}
           </span>
@@ -410,7 +675,9 @@ const ViewEmployeeList = ({
           >
             Logout
           </button>
+
         </div>
+
       </nav>
 
       {/* ================= BODY ================= */}
@@ -447,29 +714,39 @@ const ViewEmployeeList = ({
 
                 <input
                   className={`vel-input ${
-                    !isSearchValid && searchTouched
+                    !isSearchValid &&
+                    searchTouched
                       ? "vel-input-error"
                       : ""
                   }`}
                   type="text"
-                  placeholder="Enter Employee ID (e.g., 261908001)"
-                  value={searchInput}
-                  onChange={handleSearchInputChange}
-                  onKeyDown={handleKeyDown}
+                  inputMode="numeric"
                   maxLength={9}
-                  aria-invalid={!isSearchValid}
+                  placeholder="Enter Employee ID (e.g., 260805005)"
+                  value={searchInput}
+                  onChange={
+                    handleSearchInputChange
+                  }
+                  onKeyDown={
+                    handleKeyDown
+                  }
+                  aria-invalid={
+                    !isSearchValid
+                  }
                 />
 
-                {/* VALIDATION MESSAGE */}
+                {/* ================= VALIDATION ================= */}
 
-                {validationError && searchTouched && (
-                  <div
-                    className="vel-validation-error"
-                    role="alert"
-                  >
-                    ⚠️ {validationError}
-                  </div>
-                )}
+                {validationError &&
+                  searchTouched && (
+
+                    <div
+                      className="vel-validation-error"
+                      role="alert"
+                    >
+                      ⚠️ {validationError}
+                    </div>
+                  )}
 
                 <button
                   className="vel-btn-primary"
@@ -479,15 +756,20 @@ const ViewEmployeeList = ({
                 </button>
 
               </div>
+
             </div>
 
-            {/* FORMAT HINT */}
+            {/* ================= FORMAT HINT ================= */}
 
             <div className="vel-validation-hint">
+
               <small>
-                Format: YYDDMM001 — 9 digits.
-                Example: 261908001
+                Format: YYDDMMXXX — exactly 9 digits,
+                no spaces. Past and today's dates are
+                allowed. Future dates are not allowed.
+                Last 3 digits: 001–999.
               </small>
+
             </div>
 
           </div>
@@ -505,74 +787,105 @@ const ViewEmployeeList = ({
               <table className="vel-table">
 
                 <thead>
+
                   <tr>
-                    <th>Employee ID</th>
-                    <th>Department</th>
-                    <th>Status</th>
-                    <th>Action</th>
+
+                    <th>
+                      Employee ID
+                    </th>
+
+                    <th>
+                      Department
+                    </th>
+
+                    <th>
+                      Status
+                    </th>
+
+                    <th>
+                      Action
+                    </th>
+
                   </tr>
+
                 </thead>
 
                 <tbody>
 
                   {visibleEmployees.length > 0 ? (
 
-                    visibleEmployees.map((emp) => (
+                    visibleEmployees.map(
+                      (emp) => (
 
-                      <tr
-                        key={emp.id}
-                        className={
-                          selectedEmployee?.id === emp.id
-                            ? "vel-row-active"
-                            : ""
-                        }
-                      >
+                        <tr
+                          key={emp.id}
+                          className={
+                            selectedEmployee?.id ===
+                            emp.id
+                              ? "vel-row-active"
+                              : ""
+                          }
+                        >
 
-                        <td>
-                          <span className="vel-employee-id">
-                            {emp.id}
-                          </span>
-                        </td>
+                          <td>
 
-                        <td>
-                          {emp.department}
-                        </td>
+                            <span className="vel-employee-id">
+                              {emp.id}
+                            </span>
 
-                        <td>
-                          <span
-                            className={`vel-status-badge vel-status-${emp.status
-                              .toLowerCase()
-                              .replace(" ", "-")}`}
-                          >
-                            {emp.status}
-                          </span>
-                        </td>
+                          </td>
 
-                        <td>
-                          <button
-                            className="vel-view-btn"
-                            onClick={() =>
-                              handleViewEmployee(emp)
-                            }
-                          >
-                            View
-                          </button>
-                        </td>
+                          <td>
+                            {emp.department}
+                          </td>
 
-                      </tr>
-                    ))
+                          <td>
+
+                            <span
+                              className={`vel-status-badge vel-status-${emp.status
+                                .toLowerCase()
+                                .replace(
+                                  " ",
+                                  "-"
+                                )}`}
+                            >
+                              {emp.status}
+                            </span>
+
+                          </td>
+
+                          <td>
+
+                            <button
+                              className="vel-view-btn"
+                              onClick={() =>
+                                handleViewEmployee(
+                                  emp
+                                )
+                              }
+                            >
+                              View
+                            </button>
+
+                          </td>
+
+                        </tr>
+                      )
+
+                    )
 
                   ) : (
 
                     <tr>
+
                       <td
                         colSpan="4"
                         className="vel-no-data"
                       >
                         No Employee Found
                       </td>
-                    </tr>
 
+                    </tr>
                   )}
 
                 </tbody>
@@ -586,32 +899,43 @@ const ViewEmployeeList = ({
             <div className="vel-pagination-row">
 
               <span className="vel-pagination-info">
-                Showing {visibleEmployees.length} of{" "}
-                {filteredEmployees.length} employees
+
+                Showing{" "}
+                {visibleEmployees.length} of{" "}
+                {filteredEmployees.length}{" "}
+                employees
+
               </span>
 
               <select
                 className="vel-page-size"
                 value={pageSize}
                 onChange={(e) => {
-                  const value = e.target.value;
+
+                  const value =
+                    e.target.value;
 
                   setPageSize(
                     value === "All"
                       ? "All"
                       : Number(value)
                   );
+
                 }}
               >
 
-                {PAGE_SIZE_OPTIONS.map((option) => (
-                  <option
-                    key={option}
-                    value={option}
-                  >
-                    {option}
-                  </option>
-                ))}
+                {PAGE_SIZE_OPTIONS.map(
+                  (option) => (
+
+                    <option
+                      key={option}
+                      value={option}
+                    >
+                      {option}
+                    </option>
+
+                  )
+                )}
 
               </select>
 
@@ -630,7 +954,9 @@ const ViewEmployeeList = ({
 
         </div>
 
-        {/* ================= DETAILS PANEL ================= */}
+        {/* =================================================
+            EMPLOYEE DETAILS PANEL
+        ================================================= */}
 
         {selectedEmployee && (
 
@@ -640,6 +966,8 @@ const ViewEmployeeList = ({
             aria-label="Employee Details"
           >
 
+            {/* ================= HEADER ================= */}
+
             <div className="vel-details-header">
 
               <h2 className="vel-details-title">
@@ -648,7 +976,9 @@ const ViewEmployeeList = ({
 
               <button
                 className="vel-close-btn"
-                onClick={handleCloseDetails}
+                onClick={
+                  handleCloseDetails
+                }
                 aria-label="Close"
               >
                 ✕
@@ -658,7 +988,7 @@ const ViewEmployeeList = ({
 
             <div className="vel-details-body">
 
-              {/* PERSONAL INFORMATION */}
+              {/* ================= PERSONAL INFORMATION ================= */}
 
               <div className="vel-details-section">
 
@@ -671,58 +1001,66 @@ const ViewEmployeeList = ({
                     "Employee ID",
                     selectedEmployee.id,
                   ],
+
                   [
                     "Employee Name",
                     selectedEmployee.name,
                   ],
+
                   [
                     "Department",
                     selectedEmployee.department,
                   ],
+
                   [
                     "Phone Number",
                     selectedEmployee.phone,
                   ],
+
                   [
                     "Email ID",
                     selectedEmployee.email,
                   ],
+
                   [
                     "Date of Joining",
                     selectedEmployee.joiningDate,
                   ],
+
                   [
                     "Status",
                     selectedEmployee.status,
                   ],
-                ].map(([label, value]) => (
 
-                  <div
-                    className="vel-detail-row"
-                    key={label}
-                  >
+                ].map(
+                  ([label, value]) => (
 
-                    <span className="vel-detail-label">
-                      {label}
-                    </span>
+                    <div
+                      className="vel-detail-row"
+                      key={label}
+                    >
 
-                    <span className="vel-detail-colon">
-                      :
-                    </span>
+                      <span className="vel-detail-label">
+                        {label}
+                      </span>
 
-                    <span className="vel-detail-value">
-                      {value}
-                    </span>
+                      <span className="vel-detail-colon">
+                        :
+                      </span>
 
-                  </div>
+                      <span className="vel-detail-value">
+                        {value}
+                      </span>
 
-                ))}
+                    </div>
+                  )
+                )}
 
               </div>
 
               <hr className="vel-divider" />
 
-              {/* ASSIGNED ASSETS */}
+              {/* ================= ASSIGNED ASSETS ================= */}
 
               <div className="vel-details-section">
 
@@ -735,22 +1073,37 @@ const ViewEmployeeList = ({
                   <table className="vel-asset-table">
 
                     <thead>
+
                       <tr>
-                        <th>Asset ID</th>
-                        <th>Asset Type</th>
-                        <th>Assigned Date</th>
+
+                        <th>
+                          Asset ID
+                        </th>
+
+                        <th>
+                          Asset Type
+                        </th>
+
+                        <th>
+                          Assigned Date
+                        </th>
+
                       </tr>
+
                     </thead>
 
                     <tbody>
 
                       {selectedEmployee.assets &&
-                      selectedEmployee.assets.length > 0 ? (
+                      selectedEmployee.assets.length >
+                        0 ? (
 
                         selectedEmployee.assets.map(
                           (asset, index) => (
 
-                            <tr key={index}>
+                            <tr
+                              key={index}
+                            >
 
                               <td>
                                 {asset.assetId}
@@ -765,7 +1118,6 @@ const ViewEmployeeList = ({
                               </td>
 
                             </tr>
-
                           )
                         )
 
@@ -781,7 +1133,6 @@ const ViewEmployeeList = ({
                           </td>
 
                         </tr>
-
                       )}
 
                     </tbody>
@@ -792,13 +1143,15 @@ const ViewEmployeeList = ({
 
               </div>
 
-              {/* CLOSE */}
+              {/* ================= CLOSE ================= */}
 
               <div className="vel-close-row">
 
                 <button
                   className="vel-close-panel-btn"
-                  onClick={handleCloseDetails}
+                  onClick={
+                    handleCloseDetails
+                  }
                 >
                   Close
                 </button>
@@ -808,7 +1161,6 @@ const ViewEmployeeList = ({
             </div>
 
           </div>
-
         )}
 
       </div>
