@@ -7,11 +7,11 @@ const PAGE_SIZE_OPTIONS = [10, 30, 50, "All"];
 // EMPLOYEE ID VALIDATION
 //
 // FORMAT:
-// YYDDMMXXX
+// YYMMDDXXX
 //
-// YY  = Actual year
-// DD  = Day
+// YY  = Year
 // MM  = Month
+// DD  = Day
 // XXX = Employee number (001 - 999)
 //
 // EXAMPLES:
@@ -19,7 +19,7 @@ const PAGE_SIZE_OPTIONS = [10, 30, 50, "All"];
 // 250808001 -> 08-08-2025 -> ALLOWED
 // 260808001 -> 08-08-2026 -> ALLOWED
 // 260821001 -> 21-08-2026 -> ALLOWED (TODAY)
-// 261006001 -> 10-06-2026 -> ALLOWED (PAST)
+// 261006001 -> 06-10-2026 -> FUTURE if today is 21-08-2026
 // 260822001 -> 22-08-2026 -> NOT ALLOWED
 // 270808001 -> 08-08-2027 -> NOT ALLOWED
 //
@@ -77,41 +77,26 @@ const validateEmployeeId = (id) => {
     return {
       isValid: false,
       message:
-        "Employee ID must be exactly 9 digits (YYDDMMXXX).",
+        "Employee ID must be exactly 9 digits (YYMMDDXXX).",
     };
   }
 
   // ====================================================
   // SPLIT ID
   //
-  // YY DD MM XXX
+  // YY MM DD XXX
   // ====================================================
 
   const yearShort = Number(id.substring(0, 2));
-  const day = Number(id.substring(2, 4));
-  const month = Number(id.substring(4, 6));
+  const month = Number(id.substring(2, 4));
+  const day = Number(id.substring(4, 6));
   const employeeNumber = Number(id.substring(6, 9));
 
   // ====================================================
   // ACTUAL YEAR
-  //
-  // 25 -> 2025
-  // 26 -> 2026
-  // 27 -> 2027
   // ====================================================
 
   const fullYear = 2000 + yearShort;
-
-  // ====================================================
-  // DAY
-  // ====================================================
-
-  if (day < 1 || day > 31) {
-    return {
-      isValid: false,
-      message: "Employee ID contains an invalid day.",
-    };
-  }
 
   // ====================================================
   // MONTH
@@ -121,6 +106,17 @@ const validateEmployeeId = (id) => {
     return {
       isValid: false,
       message: "Employee ID contains an invalid month.",
+    };
+  }
+
+  // ====================================================
+  // DAY
+  // ====================================================
+
+  if (day < 1 || day > 31) {
+    return {
+      isValid: false,
+      message: "Employee ID contains an invalid day.",
     };
   }
 
@@ -157,8 +153,8 @@ const validateEmployeeId = (id) => {
   // PREVENT INVALID DATES
   //
   // Example:
-  // 260231001 -> 31 February
-  // 260431001 -> 31 April
+  // 260231001 -> February 31
+  // 260431001 -> April 31
   // ====================================================
 
   if (
@@ -221,11 +217,6 @@ const looksLikeEmployeeId = (value) => {
     return true;
   }
 
-  // Old EMP format should also be treated as ID input
-  if (/^emp/i.test(value)) {
-    return true;
-  }
-
   return false;
 };
 
@@ -233,19 +224,8 @@ const looksLikeEmployeeId = (value) => {
 // ======================================================
 // CREATE EMPLOYEE FOR A VALID ID
 //
-// IMPORTANT:
-//
-// If the ID is valid and is not already in the
-// employee list, create a temporary employee record.
-//
-// Example:
-//
-// 261006001
-//
-// This is:
-// 10-06-2026
-//
-// Since it is a past date, it is ALLOWED.
+// FORMAT:
+// YYMMDDXXX
 // ======================================================
 
 const createEmployeeFromId = (employeeId) => {
@@ -253,9 +233,23 @@ const createEmployeeFromId = (employeeId) => {
     employeeId.substring(6, 9)
   );
 
+  const names = [
+    "Arjun Reddy",
+    "Sneha Sharma",
+    "Rahul Kumar",
+    "Priya Reddy",
+    "Vikram Singh",
+    "Ananya Rao",
+    "Kiran Kumar",
+    "Neha Patel",
+    "Rohit Sharma",
+    "Pooja Reddy",
+  ];
+
   return {
     id: employeeId,
-    name: `Employee ${employeeNumber}`,
+    name:
+      names[(employeeNumber - 1) % names.length],
     department: "IT",
     status: "Active",
   };
@@ -303,90 +297,91 @@ const EmployeeStatus = ({
   // ====================================================
   // EMPLOYEE DATA
   //
-  // Past + today's IDs are allowed.
+  // FORMAT:
+  // YYMMDDXXX
   // ====================================================
 
   const [employees, setEmployees] = useState([
     {
       id: "250808001",
-      name: "Employee 1",
+      name: "Arjun Reddy",
       department: "IT",
       status: "On Leave",
     },
 
     {
       id: "260808001",
-      name: "Employee 2",
+      name: "Sneha Sharma",
       department: "HR",
       status: "Active",
     },
 
     {
       id: "260812001",
-      name: "Employee 3",
+      name: "Rahul Kumar",
       department: "IT",
       status: "Active",
     },
 
     {
       id: "260813002",
-      name: "Employee 4",
+      name: "Priya Reddy",
       department: "HR",
       status: "On Leave",
     },
 
     {
       id: "260814003",
-      name: "Employee 5",
+      name: "Vikram Singh",
       department: "Finance",
       status: "Inactive",
     },
 
     {
       id: "260815004",
-      name: "Employee 6",
+      name: "Ananya Rao",
       department: "Marketing",
       status: "Active",
     },
 
     {
       id: "260816005",
-      name: "Employee 7",
+      name: "Kiran Kumar",
       department: "IT",
       status: "On Leave",
     },
 
     {
       id: "260817006",
-      name: "Employee 8",
+      name: "Neha Patel",
       department: "Sales",
       status: "Inactive",
     },
 
     {
       id: "260818007",
-      name: "Employee 9",
+      name: "Rohit Sharma",
       department: "Operations",
       status: "Active",
     },
 
     {
       id: "260819008",
-      name: "Employee 10",
+      name: "Pooja Reddy",
       department: "Finance",
       status: "On Leave",
     },
 
     {
       id: "260820009",
-      name: "Employee 11",
+      name: "Sandeep Kumar",
       department: "IT",
       status: "Active",
     },
 
     {
       id: "260821010",
-      name: "Employee 12",
+      name: "Divya Rao",
       department: "HR",
       status: "Active",
     },
@@ -394,11 +389,6 @@ const EmployeeStatus = ({
 
   // ====================================================
   // PENDING STATUS CHANGES
-  //
-  // Dropdown changes are stored here temporarily.
-  //
-  // The real employee status changes ONLY after
-  // clicking Update.
   // ====================================================
 
   const [pendingStatuses, setPendingStatuses] =
@@ -407,13 +397,6 @@ const EmployeeStatus = ({
 
   // ====================================================
   // SEARCH INPUT CHANGE
-  //
-  // Employee ID:
-  // - Numbers only
-  // - Maximum 9 digits
-  //
-  // Names:
-  // - Letters allowed
   // ====================================================
 
   const handleSearchChange = (e) => {
@@ -421,11 +404,7 @@ const EmployeeStatus = ({
     const value = e.target.value;
 
     // ==================================================
-    // If user starts with a number,
-    // treat it as Employee ID.
-    //
-    // Only numbers allowed.
-    // Maximum 9 digits.
+    // EMPLOYEE ID SEARCH
     // ==================================================
 
     if (/^\d/.test(value)) {
@@ -440,7 +419,7 @@ const EmployeeStatus = ({
     } else {
 
       // ==================================================
-      // Name search
+      // NAME SEARCH
       // ==================================================
 
       setSearch(value);
@@ -490,10 +469,6 @@ const EmployeeStatus = ({
 
     if (looksLikeEmployeeId(rawValue)) {
 
-      // ==================================================
-      // VALIDATE ID
-      // ==================================================
-
       const result =
         validateEmployeeId(rawValue);
 
@@ -516,8 +491,6 @@ const EmployeeStatus = ({
 
       // ==================================================
       // VALID ID
-      //
-      // Past/today ID is allowed.
       // ==================================================
 
       const employeeId = rawValue;
@@ -530,16 +503,7 @@ const EmployeeStatus = ({
 
 
       // ==================================================
-      // IMPORTANT CHANGE
-      //
-      // If valid ID is NOT already in employee list,
-      // create an employee record automatically.
-      //
-      // Therefore:
-      //
-      // 261006001
-      //
-      // will be accepted and shown.
+      // CREATE IF NOT FOUND
       // ==================================================
 
       if (!foundEmployee) {
@@ -726,12 +690,6 @@ const EmployeeStatus = ({
 
   // ====================================================
   // DROPDOWN CHANGE
-  //
-  // IMPORTANT:
-  //
-  // This DOES NOT update the employee status.
-  //
-  // It only stores the selected value temporarily.
   // ====================================================
 
   const handleStatusChange = (
@@ -748,10 +706,6 @@ const EmployeeStatus = ({
 
   // ====================================================
   // UPDATE BUTTON
-  //
-  // IMPORTANT:
-  //
-  // Status changes ONLY here.
   // ====================================================
 
   const handleUpdateStatus = (
@@ -776,7 +730,7 @@ const EmployeeStatus = ({
 
 
     // ==================================================
-    // UPDATE REAL EMPLOYEE DATA
+    // UPDATE EMPLOYEE
     // ==================================================
 
     setEmployees((prev) =>
@@ -819,12 +773,6 @@ const EmployeeStatus = ({
 
   // ====================================================
   // GET DISPLAY STATUS
-  //
-  // IMPORTANT:
-  //
-  // The badge always displays the REAL saved status.
-  //
-  // Changing dropdown alone does NOT change this badge.
   // ====================================================
 
   const getDisplayStatus = (emp) => {
@@ -835,8 +783,6 @@ const EmployeeStatus = ({
 
   // ====================================================
   // GET DROPDOWN VALUE
-  //
-  // Dropdown can show temporary selection.
   // ====================================================
 
   const getDropdownStatus = (emp) => {
@@ -946,8 +892,8 @@ const EmployeeStatus = ({
                     : ""
                 }`}
                 type="text"
-                inputMode="numeric"
-                maxLength={9}
+                inputMode="text"
+                maxLength={50}
                 placeholder="Enter Employee ID or Employee Name"
                 value={search}
                 onChange={
@@ -997,7 +943,7 @@ const EmployeeStatus = ({
             <div className="es-validation-hint">
 
               <small>
-                Employee ID format: YYDDMMXXX — exactly
+                Employee ID format: YYMMDDXXX — exactly
                 9 digits. Past and today's dates are
                 allowed. Future dates are not allowed.
                 Last 3 digits: 001–999.
