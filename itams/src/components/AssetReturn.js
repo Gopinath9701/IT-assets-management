@@ -26,7 +26,7 @@ const AssetReturn = () => {
   const [returnHistory, setReturnHistory] = useState([
     {
       assetId: "LAP001",
-      employeeId: "250815001",
+      employeeId: "260808001",
       assetType: "Laptop",
       returnDate: "18-08-2026",
       condition: "Good",
@@ -34,7 +34,7 @@ const AssetReturn = () => {
     },
     {
       assetId: "MON001",
-      employeeId: "250815002",
+      employeeId: "260808002",
       assetType: "Monitor",
       returnDate: "18-08-2026",
       condition: "Damaged",
@@ -42,7 +42,7 @@ const AssetReturn = () => {
     },
     {
       assetId: "KEY001",
-      employeeId: "250817001",
+      employeeId: "260817001",
       assetType: "Keyboard",
       returnDate: "17-08-2026",
       condition: "Good",
@@ -65,56 +65,66 @@ const AssetReturn = () => {
 
   // =====================================================
   // EMPLOYEE ID VALIDATION
-  // FORMAT: YYDDMM + LAST 3 DIGITS
+  //
+  // FORMAT:
+  // YYDDMM + 3 DIGITS
   //
   // Example:
-  // 261908001
+  // 260808001
   //
-  // 26 = Year
-  // 19 = Day
-  // 08 = Month
+  // 26  = Year
+  // 08  = Day
+  // 08  = Month
   // 001 = Employee Number
+  //
+  // RULES:
+  // - Exactly 9 digits
+  // - Numbers only
+  // - No spaces
+  // - Employee number cannot be 000
+  // - Valid calendar date
+  // - Date cannot be future
   // =====================================================
 
   const validateEmployeeId = (id) => {
-    if (id.length === 0) {
-      return "Employee ID is required";
+    // Empty
+    if (!id || id.length === 0) {
+      return "Employee ID is required.";
     }
 
     // Leading / trailing spaces
     if (id.trim() !== id) {
-      return "Employee ID should not have spaces before or after the ID.";
+      return "Employee ID should not have leading or trailing spaces.";
     }
 
-    // Any spaces inside
+    // Any spaces
     if (/\s/.test(id)) {
       return "Employee ID should not contain spaces.";
     }
 
     // Numbers only
     if (!/^\d+$/.test(id)) {
-      return "Employee ID must contain only numbers.";
+      return "Employee ID must contain numbers only.";
     }
 
     // Exactly 9 digits
     if (id.length !== 9) {
-      return "Employee ID must be exactly 9 digits in YYDDMM001 format.";
+      return "Employee ID must be exactly 9 digits.";
     }
 
-    // =================================================
-    // YYDDMM001
-    // =================================================
+    // =====================================================
+    // SPLIT ID
+    // =====================================================
 
     const yy = id.substring(0, 2);
     const dd = id.substring(2, 4);
     const mm = id.substring(4, 6);
     const employeeNumber = id.substring(6, 9);
 
-    const year = Number(yy);
-    const day = Number(dd);
-    const month = Number(mm);
+    // =====================================================
+    // EMPLOYEE NUMBER
+    // =====================================================
 
-    // Employee number
     if (!/^\d{3}$/.test(employeeNumber)) {
       return "Last 3 digits must be the employee number.";
     }
@@ -123,21 +133,39 @@ const AssetReturn = () => {
       return "Employee number cannot be 000.";
     }
 
-    // Day validation
-    if (day < 1 || day > 31) {
-      return "Employee ID contains an invalid day.";
+    // =====================================================
+    // YEAR
+    // =====================================================
+
+    if (!/^\d{2}$/.test(yy)) {
+      return "First 2 digits must represent YY.";
     }
 
-    // Month validation
-    if (month < 1 || month > 12) {
-      return "Employee ID contains an invalid month.";
+    // =====================================================
+    // DAY
+    // =====================================================
+
+    const day = Number(dd);
+
+    if (!/^\d{2}$/.test(dd) || day < 1 || day > 31) {
+      return "DD must be between 01 and 31.";
     }
 
-    // =================================================
-    // ACTUAL CALENDAR DATE
-    // =================================================
+    // =====================================================
+    // MONTH
+    // =====================================================
 
-    const fullYear = 2000 + year;
+    const month = Number(mm);
+
+    if (!/^\d{2}$/.test(mm) || month < 1 || month > 12) {
+      return "MM must be between 01 and 12.";
+    }
+
+    // =====================================================
+    // CREATE ACTUAL DATE
+    // =====================================================
+
+    const fullYear = 2000 + Number(yy);
 
     const employeeDate = new Date(
       fullYear,
@@ -147,6 +175,13 @@ const AssetReturn = () => {
 
     employeeDate.setHours(0, 0, 0, 0);
 
+    // =====================================================
+    // CHECK REAL CALENDAR DATE
+    // Example:
+    // 260231001 -> invalid
+    // because February cannot have 31 days
+    // =====================================================
+
     if (
       employeeDate.getFullYear() !== fullYear ||
       employeeDate.getMonth() !== month - 1 ||
@@ -155,16 +190,21 @@ const AssetReturn = () => {
       return "Employee ID contains an invalid calendar date.";
     }
 
-    // =================================================
+    // =====================================================
     // DATE CANNOT BE FUTURE
-    // =================================================
+    // =====================================================
 
     const today = new Date();
+
     today.setHours(0, 0, 0, 0);
 
     if (employeeDate > today) {
       return "Employee ID date cannot be in the future.";
     }
+
+    // =====================================================
+    // VALID
+    // =====================================================
 
     return "";
   };
@@ -306,6 +346,7 @@ const AssetReturn = () => {
     }
 
     const today = new Date();
+
     today.setHours(0, 0, 0, 0);
 
     if (selectedDate > today) {
@@ -393,9 +434,9 @@ const AssetReturn = () => {
       return;
     }
 
-    // -----------------------------------------------
+    // =====================================================
     // EMPLOYEE ID
-    // -----------------------------------------------
+    // =====================================================
 
     const employeeError =
       validateEmployeeId(employeeId);
@@ -407,9 +448,9 @@ const AssetReturn = () => {
 
     setEmployeeIdError("");
 
-    // -----------------------------------------------
+    // =====================================================
     // RETURN DATE
-    // -----------------------------------------------
+    // =====================================================
 
     const dateError =
       validateReturnDate(returnForm.returnDate);
@@ -421,9 +462,9 @@ const AssetReturn = () => {
 
     setReturnDateError("");
 
-    // -----------------------------------------------
+    // =====================================================
     // CONDITION
-    // -----------------------------------------------
+    // =====================================================
 
     const conditionErrorMessage =
       validateCondition(returnForm.condition);
@@ -435,9 +476,9 @@ const AssetReturn = () => {
 
     setConditionError("");
 
-    // -----------------------------------------------
+    // =====================================================
     // REMARKS
-    // -----------------------------------------------
+    // =====================================================
 
     const remarksErrorMessage =
       validateRemarks(returnForm.remarks);
@@ -449,9 +490,9 @@ const AssetReturn = () => {
 
     setRemarksError("");
 
-    // -----------------------------------------------
+    // =====================================================
     // CREATE HISTORY
-    // -----------------------------------------------
+    // =====================================================
 
     const newHistory = {
       assetId: selectedAsset.assetId,
@@ -573,7 +614,13 @@ const AssetReturn = () => {
                   setEmployeeIdError("");
                   setSuccessMessage("");
                 }}
-                placeholder="Enter Employee ID (e.g. 261908001)"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleSearch();
+                  }
+                }}
+                placeholder="Enter Employee ID (e.g. 260808001)"
                 maxLength={9}
               />
 
@@ -584,7 +631,8 @@ const AssetReturn = () => {
               )}
 
               <div className="validation-hint">
-                Format: YYDDMM001 (e.g., 261908001)
+                Format: YYDDMM + 3 employee digits
+                (e.g., 260808001)
               </div>
 
             </div>
