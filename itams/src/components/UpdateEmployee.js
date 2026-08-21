@@ -62,7 +62,6 @@ const validateEmployeeId = (id) => {
     };
   }
 
-  // Check that the date itself is valid.
   const fullYear = 2000 + year;
   const date = new Date(fullYear, month - 1, day);
 
@@ -261,7 +260,6 @@ const validatePhoneNumber = (phone) => {
 
 // ======================================================
 // SAMPLE EMPLOYEE DATA
-// IMPORTANT: NEW YYMMDD001 FORMAT
 // ======================================================
 
 const EMPLOYEE_DATA = {
@@ -355,20 +353,32 @@ const UpdateEmployee = ({
   // ====================================================
 
   const handleSearchChange = (e) => {
-    const value = e.target.value;
+    // ONLY NUMBERS
+    // MAXIMUM 9 DIGITS
+    const onlyNumbers = e.target.value
+      .replace(/\D/g, "")
+      .slice(0, 9);
 
-    setSearchInput(value);
+    setSearchInput(onlyNumbers);
     setIsSearchTouched(false);
     setSearchError("");
     setEmployee(null);
     setUpdateSuccess(false);
 
-    if (value === "") {
+    if (onlyNumbers === "") {
       setIsSearchValid(true);
       return;
     }
 
-    const result = validateEmployeeId(value);
+    if (onlyNumbers.length < 9) {
+      setIsSearchValid(false);
+      setSearchError(
+        "Employee ID must contain exactly 9 digits (YYMMDD001)."
+      );
+      return;
+    }
+
+    const result = validateEmployeeId(onlyNumbers);
 
     setIsSearchValid(result.isValid);
 
@@ -404,9 +414,26 @@ const UpdateEmployee = ({
 
     const employeeId = searchInput;
 
-    const foundEmployee = EMPLOYEE_DATA[employeeId];
+    // ==================================================
+    // FUTURE DATE CHECK
+    // ==================================================
 
-    if (!foundEmployee) {
+    const year = Number(employeeId.substring(0, 2));
+    const month = Number(employeeId.substring(2, 4));
+    const day = Number(employeeId.substring(4, 6));
+
+    const employeeDate = new Date(
+      2000 + year,
+      month - 1,
+      day
+    );
+
+    employeeDate.setHours(0, 0, 0, 0);
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (employeeDate > today) {
       setSearchError(
         `Employee ID "${employeeId}" was not found in the system.`
       );
@@ -414,6 +441,72 @@ const UpdateEmployee = ({
       setEmployee(null);
       return;
     }
+
+    // ==================================================
+    // FIND EXISTING EMPLOYEE
+    // ==================================================
+
+    let foundEmployee = EMPLOYEE_DATA[employeeId];
+
+    // ==================================================
+    // PAST / CURRENT DATE EMPLOYEE
+    // ==================================================
+
+    if (!foundEmployee) {
+      const employeeNumber = Number(
+        employeeId.substring(6, 9)
+      );
+
+      const departments = [
+        "IT",
+        "HR",
+        "Finance",
+        "Marketing",
+        "Sales",
+        "Operations",
+        "Administration",
+      ];
+
+      const designations = [
+        "Developer",
+        "Manager",
+        "Accountant",
+        "Analyst",
+        "Executive",
+        "Assistant",
+        "Lead",
+        "Director",
+      ];
+
+      const department =
+        departments[
+          (employeeNumber - 1) % departments.length
+        ];
+
+      const designation =
+        designations[
+          (employeeNumber - 1) % designations.length
+        ];
+
+      const phoneNumber = String(
+        9000000000 + employeeNumber
+      );
+
+      foundEmployee = {
+        id: employeeId,
+        name: `Emp${employeeNumber}`,
+        email: `${employeeId}@gmail.com`,
+        department: department,
+        designation: designation,
+        phone: phoneNumber,
+      };
+
+      EMPLOYEE_DATA[employeeId] = foundEmployee;
+    }
+
+    // ==================================================
+    // SHOW EMPLOYEE
+    // ==================================================
 
     setEmployee(foundEmployee);
 
@@ -470,21 +563,18 @@ const UpdateEmployee = ({
   const validateForm = () => {
     const errors = {};
 
-    // Employee ID
     const idResult = validateEmployeeId(formData.id);
 
     if (!idResult.isValid) {
       errors.id = idResult.message;
     }
 
-    // Employee name
     const nameResult = validateEmployeeName(formData.name);
 
     if (!nameResult.isValid) {
       errors.name = nameResult.message;
     }
 
-    // Email
     const emailResult = validateEmail(
       formData.email,
       formData.id
@@ -494,7 +584,6 @@ const UpdateEmployee = ({
       errors.email = emailResult.message;
     }
 
-    // Department
     const departmentResult = validateDepartment(
       formData.department
     );
@@ -503,7 +592,6 @@ const UpdateEmployee = ({
       errors.department = departmentResult.message;
     }
 
-    // Designation
     const designationResult = validateDesignation(
       formData.designation
     );
@@ -512,7 +600,6 @@ const UpdateEmployee = ({
       errors.designation = designationResult.message;
     }
 
-    // Phone
     const phoneResult = validatePhoneNumber(
       formData.phone
     );
@@ -626,10 +713,51 @@ const UpdateEmployee = ({
                   : ""
               }`}
               type="text"
+              inputMode="numeric"
+              maxLength={9}
+              autoComplete="off"
               placeholder="Enter Employee ID (e.g., 260819001)"
               value={searchInput}
               onChange={handleSearchChange}
               onKeyDown={handleKeyDown}
+              onPaste={(e) => {
+                e.preventDefault();
+
+                const pastedText =
+                  e.clipboardData.getData("text");
+
+                const onlyNumbers = pastedText
+                  .replace(/\D/g, "")
+                  .slice(0, 9);
+
+                setSearchInput(onlyNumbers);
+                setIsSearchTouched(false);
+                setSearchError("");
+                setEmployee(null);
+                setUpdateSuccess(false);
+
+                if (onlyNumbers === "") {
+                  setIsSearchValid(true);
+                  return;
+                }
+
+                if (onlyNumbers.length < 9) {
+                  setIsSearchValid(false);
+                  setSearchError(
+                    "Employee ID must contain exactly 9 digits (YYMMDD001)."
+                  );
+                  return;
+                }
+
+                const result =
+                  validateEmployeeId(onlyNumbers);
+
+                setIsSearchValid(result.isValid);
+
+                if (!result.isValid) {
+                  setSearchError(result.message);
+                }
+              }}
             />
 
             <button
