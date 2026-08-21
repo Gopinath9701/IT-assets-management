@@ -3,10 +3,26 @@ import "./ReportMaintenance.css";
 
 // =====================================================
 // EMPLOYEE ID VALIDATION
-// FORMAT: YYMMDD + 3 EMPLOYEE NUMBERS
-// EXAMPLE: 260819001
+//
+// FORMAT:
+// YYDDMMXXX
+//
+// YY  = Year
+// DD  = Day
+// MM  = Month
+// XXX = Employee Number (001 - 999)
+//
+// Past dates  -> ALLOWED
+// Today's date -> ALLOWED
+// Future dates -> NOT ALLOWED
+//
+// No spaces:
+// Before ID -> NOT ALLOWED
+// After ID  -> NOT ALLOWED
+// Inside ID -> NOT ALLOWED
 // =====================================================
 const validateEmployeeId = (id) => {
+  // EMPTY
   if (!id || id.length === 0) {
     return {
       isValid: false,
@@ -14,6 +30,7 @@ const validateEmployeeId = (id) => {
     };
   }
 
+  // LEADING / TRAILING SPACES
   if (id !== id.trim()) {
     return {
       isValid: false,
@@ -22,6 +39,7 @@ const validateEmployeeId = (id) => {
     };
   }
 
+  // ANY SPACE INSIDE
   if (/\s/.test(id)) {
     return {
       isValid: false,
@@ -29,24 +47,44 @@ const validateEmployeeId = (id) => {
     };
   }
 
-  if (!/^[0-9]+$/.test(id)) {
+  // NUMBERS ONLY
+  if (!/^\d+$/.test(id)) {
     return {
       isValid: false,
       message: "Employee ID must contain numbers only",
     };
   }
 
+  // EXACTLY 9 DIGITS
   if (id.length !== 9) {
     return {
       isValid: false,
       message:
-        "Employee ID must be exactly 9 digits (YYMMDD + 3 numbers)",
+        "Employee ID must be exactly 9 digits (YYDDMMXXX)",
     };
   }
 
-  const month = Number(id.substring(2, 4));
-  const day = Number(id.substring(4, 6));
+  // =====================================================
+  // SPLIT
+  // YY DD MM XXX
+  // =====================================================
+  const yearShort = Number(id.substring(0, 2));
+  const day = Number(id.substring(2, 4));
+  const month = Number(id.substring(4, 6));
+  const employeeNumber = Number(id.substring(6, 9));
 
+  // YEAR
+  const fullYear = 2000 + yearShort;
+
+  // DAY
+  if (day < 1 || day > 31) {
+    return {
+      isValid: false,
+      message: "Employee ID contains an invalid day",
+    };
+  }
+
+  // MONTH
   if (month < 1 || month > 12) {
     return {
       isValid: false,
@@ -54,10 +92,53 @@ const validateEmployeeId = (id) => {
     };
   }
 
-  if (day < 1 || day > 31) {
+  // EMPLOYEE NUMBER
+  // 001 - 999
+  if (employeeNumber < 1 || employeeNumber > 999) {
     return {
       isValid: false,
-      message: "Employee ID contains an invalid day",
+      message:
+        "Employee number must be between 001 and 999",
+    };
+  }
+
+  // =====================================================
+  // VALID CALENDAR DATE
+  // =====================================================
+  const employeeDate = new Date(
+    fullYear,
+    month - 1,
+    day
+  );
+
+  employeeDate.setHours(0, 0, 0, 0);
+
+  // Prevent invalid dates such as:
+  // 260231001 -> 31 February
+  // 260431001 -> 31 April
+  if (
+    employeeDate.getFullYear() !== fullYear ||
+    employeeDate.getMonth() !== month - 1 ||
+    employeeDate.getDate() !== day
+  ) {
+    return {
+      isValid: false,
+      message: "Employee ID contains an invalid date",
+    };
+  }
+
+  // =====================================================
+  // FUTURE DATE CHECK
+  // =====================================================
+  const today = new Date();
+
+  today.setHours(0, 0, 0, 0);
+
+  if (employeeDate > today) {
+    return {
+      isValid: false,
+      message:
+        "Future dates are not allowed. Employee ID must contain a past or today's date.",
     };
   }
 
@@ -442,6 +523,7 @@ const ReportMaintenance = ({
       <nav className="report-nav">
 
         <div className="report-nav-logo">
+
           <span className="report-nav-title">
             ITAMS
           </span>
@@ -449,6 +531,7 @@ const ReportMaintenance = ({
           <span className="report-nav-sub">
             IT Asset Management System
           </span>
+
         </div>
 
         <div className="report-nav-right">
@@ -515,7 +598,7 @@ const ReportMaintenance = ({
                   "employeeId",
                   validateEmployeeId
                 )}
-                placeholder="Enter Employee ID (e.g., 260819001)"
+                placeholder="Enter Employee ID (e.g., 260821001)"
                 maxLength={9}
               />
 
@@ -526,7 +609,7 @@ const ReportMaintenance = ({
               )}
 
               <small>
-                Format: YYMMDD + 3 employee numbers
+                Format: YYDDMM + 3 employee numbers
               </small>
 
             </div>
