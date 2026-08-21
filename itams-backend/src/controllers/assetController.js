@@ -1,5 +1,6 @@
 const { pool } = require("../config/db");
 const { generateAssetId } = require("../utils/idGenerator");
+const { validateAssetPayload } = require("../utils/validators");
 
 const ASSET_ID_REGEX = /^AST[A-Za-z0-9]{3}$/;
 
@@ -79,61 +80,36 @@ async function getAssetById(req, res, next) {
 // ======================================================
 async function addAsset(req, res, next) {
   try {
-
     const {
       assetType,
       brand,
+      model,
+      purchaseCost,
+      purchaseDate,
       warrantyExpiry,
-      purchaseCost
+      description,
+      assetId: providedAssetId,
     } = req.body;
 
+    const validationError = validateAssetPayload({
+      assetType,
+      brand,
+      model,
+      purchaseCost,
+      purchaseDate,
+      warrantyExpiry,
+      description,
+    });
 
-    // ------------------------------------------
-    // Validate Asset Type
-    // ------------------------------------------
-    if (!assetType) {
+    if (validationError) {
       return res.status(400).json({
         success: false,
-        message: "Asset Type is required"
+        message: validationError,
       });
     }
 
+    const assetId = providedAssetId || (await generateAssetId());
 
-    // ------------------------------------------
-    // Validate Brand
-    // ------------------------------------------
-    if (!brand || brand.trim().length < 2) {
-      return res.status(400).json({
-        success: false,
-        message: "Brand is required"
-      });
-    }
-
-
-    // ------------------------------------------
-    // Validate Purchase Cost
-    // ------------------------------------------
-    if (
-      purchaseCost === undefined ||
-      purchaseCost === null ||
-      Number(purchaseCost) <= 0
-    ) {
-      return res.status(400).json({
-        success: false,
-        message: "Purchase cost must be greater than 0"
-      });
-    }
-
-
-    // ------------------------------------------
-    // Generate Asset ID
-    // ------------------------------------------
-    const assetId = await generateAssetId();
-
-
-    // ------------------------------------------
-    // Insert into PostgreSQL
-    // ------------------------------------------
     await pool.query(
       `
       INSERT INTO assets
@@ -142,41 +118,37 @@ async function addAsset(req, res, next) {
         asset_name,
         asset_type,
         brand,
+        model,
+        purchase_date,
         warranty_expiry,
-        purchase_cost
+        purchase_cost,
+        description,
+        status
       )
       VALUES
-      ($1, $2, $3, $4, $5, $6)
+      ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'Not In Use')
       `,
       [
         assetId,
-
-        // Your database requires asset_name.
-        // Since you don't want an Asset Name field,
-        // store Asset ID here.
         assetId,
-
         assetType,
         brand.trim(),
+        model.trim(),
+        purchaseDate || null,
         warrantyExpiry || null,
-        Number(purchaseCost)
+        Number(purchaseCost),
+        description.trim(),
       ]
     );
 
-
-    // ------------------------------------------
-    // Send success response
-    // ------------------------------------------
     res.status(201).json({
       success: true,
       message: "Asset added successfully",
-      assetId: assetId
+      assetId,
     });
 
   } catch (err) {
-
     console.error("Add Asset Error:", err);
-
     next(err);
   }
 }
@@ -188,45 +160,69 @@ async function addAsset(req, res, next) {
 // ======================================================
 async function updateAsset(req, res, next) {
   try {
-
     const { assetId } = req.params;
-
     const {
       assetType,
+      brand,
+      model,
+      purchaseCost,
       purchaseDate,
-      warrantyExpiry
+      warrantyExpiry,
+      description,
     } = req.body;
 
+    const validationError = validateAssetPayload({
+      assetType,
+      brand,
+      model,
+      purchaseCost,
+      purchaseDate,
+      warrantyExpiry,
+      description,
+    });
+
+    if (validationError) {
+      return res.status(400).json({
+        success: false,
+        message: validationError,
+      });
+    }
 
     const result = await pool.query(
       `
       UPDATE assets
       SET
         asset_type = $1,
-        purchase_date = $2,
-        warranty_expiry = $3
-      WHERE asset_id = $4
+        brand = $2,
+        model = $3,
+        purchase_date = $4,
+        warranty_expiry = $5,
+        purchase_cost = $6,
+        description = $7
+      WHERE asset_id = $8
       `,
       [
         assetType,
+        brand.trim(),
+        model.trim(),
         purchaseDate || null,
         warrantyExpiry || null,
-        assetId
+        Number(purchaseCost),
+        description.trim(),
+        assetId,
       ]
     );
-
 
     if (result.rowCount === 0) {
       return res.status(404).json({
         success: false,
-        message: "Asset not found"
+        message: "Asset not found",
       });
     }
 
-
     res.json({
       success: true,
-      message: "Asset updated successfully"
+      message: "Asset updated successfully",
     });
 
   } catch (err) {

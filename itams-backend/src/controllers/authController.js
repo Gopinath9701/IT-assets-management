@@ -15,6 +15,12 @@ async function findUserByIdentifier(identifier) {
 
 // ---------------- LOGIN ----------------
 // POST /api/login  { employeeIdOrEmail, password }  <- field name matches Login.js exactly
+function normalizeRole(role) {
+  if (role === "AssetInventory") return "InventoryManager";
+  if (role === "InventoryManager") return "InventoryManager";
+  return role;
+}
+
 async function login(req, res, next) {
   try {
     const { employeeIdOrEmail: identifier, password } = req.body;
@@ -33,8 +39,10 @@ async function login(req, res, next) {
       return res.status(401).json({ success: false, message: "Invalid credentials" });
     }
 
+    const role = normalizeRole(user.role);
+
     const token = jwt.sign(
-      { id: user.id, loginId: user.login_id, role: user.role, name: user.name, email: user.email },
+      { id: user.id, loginId: user.login_id, role, name: user.name, email: user.email },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || "8h" }
     );
@@ -47,7 +55,7 @@ async function login(req, res, next) {
         loginId: user.login_id,
         name: user.name,
         email: user.email,
-        role: user.role, // 'HR' or 'AssetManager' -> frontend routes to the right dashboard
+        role, // 'HR', 'AssetManager', or 'InventoryManager' -> frontend routes to the right dashboard
         department: user.department,
       },
     });
