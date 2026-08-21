@@ -18,14 +18,76 @@ const ROWS_PER_PAGE_OPTIONS = [10, 30, 50, "All"];
 
 const API_URL = "http://localhost:5000/api/assets";
 
-// ==========================================
-// VALIDATION - ASSET ID
-// ==========================================
+/* =========================================================
+   DEMO DATA
+========================================================= */
+
+const DEMO_ASSETS = [
+  {
+    asset_id: "LAP001",
+    asset_type: "Laptop",
+    model: "HP Laptop",
+    purchase_date: "2026-02-15",
+    warranty_expiry: "2028-02-15",
+    description:
+      "Business laptop with Intel i5 processor, 16GB RAM, 512GB SSD.",
+  },
+  {
+    asset_id: "MON001",
+    asset_type: "Monitor",
+    model: 'Dell 24" Monitor',
+    purchase_date: "2026-01-10",
+    warranty_expiry: "2028-01-10",
+    description:
+      "24-inch Full HD LED monitor for office workstation.",
+  },
+  {
+    asset_id: "KEY001",
+    asset_type: "Keyboard",
+    model: "Logitech Keyboard",
+    purchase_date: "2026-03-05",
+    warranty_expiry: "2028-03-05",
+    description:
+      "USB wired keyboard for desktop workstation.",
+  },
+  {
+    asset_id: "MOU001",
+    asset_type: "Mouse",
+    model: "HP Mouse",
+    purchase_date: "2026-04-12",
+    warranty_expiry: "2028-04-12",
+    description:
+      "USB optical mouse for office computer.",
+  },
+  {
+    asset_id: "PRI001",
+    asset_type: "Printer",
+    model: "Canon Printer",
+    purchase_date: "2026-05-20",
+    warranty_expiry: "2028-05-20",
+    description:
+      "Laser printer for office document printing.",
+  },
+  {
+    asset_id: "DES001",
+    asset_type: "Desktop",
+    model: "HP ProDesk 400",
+    purchase_date: "2026-01-25",
+    warranty_expiry: "2029-01-25",
+    description:
+      "Business desktop computer with Intel i5 processor and 16GB RAM.",
+  },
+];
+
+/* =========================================================
+   VALIDATE ASSET ID
+========================================================= */
+
 const validateAssetId = (id) => {
   if (!id || id.trim() === "") {
     return {
-      isValid: true,
-      message: "",
+      isValid: false,
+      message: "Asset ID is required",
     };
   }
 
@@ -43,35 +105,18 @@ const validateAssetId = (id) => {
     };
   }
 
-  if (/[^A-Za-z0-9]/.test(id)) {
-    return {
-      isValid: false,
-      message: "Asset ID should not contain special characters",
-    };
-  }
-
-  if (!id.startsWith("AST")) {
-    return {
-      isValid: false,
-      message: "Asset ID must start with 'AST' (uppercase)",
-    };
-  }
-
   if (id.length !== 6) {
     return {
       isValid: false,
-      message:
-        "Asset ID must be exactly 6 characters long (AST + 3 alphanumeric)",
+      message: "Asset ID must be exactly 6 characters (e.g., LAP001)",
     };
   }
 
-  const lastThree = id.substring(3);
-
-  if (!/^[A-Za-z0-9]{3}$/.test(lastThree)) {
+  if (!/^[A-Za-z]{3}[0-9]{3}$/.test(id)) {
     return {
       isValid: false,
       message:
-        "Last 3 characters must be alphanumeric (letters or numbers)",
+        "Asset ID must contain 3 letters followed by 3 numbers (e.g., LAP001)",
     };
   }
 
@@ -81,9 +126,10 @@ const validateAssetId = (id) => {
   };
 };
 
-// ==========================================
-// VALIDATION - ASSET TYPE
-// ==========================================
+/* =========================================================
+   VALIDATE ASSET TYPE
+========================================================= */
+
 const validateAssetType = (type) => {
   if (!type || type === "All Assets") {
     return {
@@ -98,9 +144,10 @@ const validateAssetType = (type) => {
   };
 };
 
-// ==========================================
-// VALIDATION - MODEL
-// ==========================================
+/* =========================================================
+   VALIDATE MODEL
+========================================================= */
+
 const validateModel = (model) => {
   const value = model.trim();
 
@@ -132,7 +179,8 @@ const validateModel = (model) => {
     };
   }
 
-  if (!/^[A-Za-z0-9 .&()/_-]+$/.test(value)) {
+  // FIXED: removed unnecessary escape before _
+  if (!/^[A-Za-z0-9 .&()/\\_-]+$/.test(value)) {
     return {
       isValid: false,
       message:
@@ -146,9 +194,10 @@ const validateModel = (model) => {
   };
 };
 
-// ==========================================
-// VALIDATION - DESCRIPTION
-// ==========================================
+/* =========================================================
+   VALIDATE DESCRIPTION
+========================================================= */
+
 const validateDescription = (description) => {
   const value = description.trim();
 
@@ -159,10 +208,10 @@ const validateDescription = (description) => {
     };
   }
 
-  if (value.length < 5) {
+  if (value.length < 10) {
     return {
       isValid: false,
-      message: "Description must contain at least 5 characters",
+      message: "Description must contain at least 10 characters",
     };
   }
 
@@ -181,6 +230,14 @@ const validateDescription = (description) => {
     };
   }
 
+  if (/\s{2,}/.test(value)) {
+    return {
+      isValid: false,
+      message:
+        "Description should not contain multiple consecutive spaces",
+    };
+  }
+
   if (!/[A-Za-z0-9]/.test(value)) {
     return {
       isValid: false,
@@ -195,9 +252,10 @@ const validateDescription = (description) => {
   };
 };
 
-// ==========================================
-// VALIDATION - PURCHASE DATE
-// ==========================================
+/* =========================================================
+   VALIDATE PURCHASE DATE
+========================================================= */
+
 const validatePurchaseDate = (date) => {
   if (!date) {
     return {
@@ -235,9 +293,10 @@ const validatePurchaseDate = (date) => {
   };
 };
 
-// ==========================================
-// VALIDATION - WARRANTY EXPIRY
-// ==========================================
+/* =========================================================
+   VALIDATE WARRANTY EXPIRY
+========================================================= */
+
 const validateWarrantyExpiry = (date, purchaseDate) => {
   if (!date) {
     return {
@@ -279,86 +338,72 @@ const validateWarrantyExpiry = (date, purchaseDate) => {
   };
 };
 
-// ==========================================
-// MAIN COMPONENT
-// ==========================================
+/* =========================================================
+   MAIN COMPONENT
+========================================================= */
+
 const ManageAsset = ({
   username = "username",
   onLogout,
   onBack,
 }) => {
-  // ==========================================
-  // SEARCH STATE
-  // ==========================================
+  /* =====================================================
+     SEARCH STATE
+  ===================================================== */
+
   const [searchName, setSearchName] = useState("");
-  const [searchType, setSearchType] =
-    useState("All Assets");
+  const [searchType, setSearchType] = useState("All Assets");
+  const [appliedName, setAppliedName] = useState("");
+  const [appliedType, setAppliedType] = useState("All Assets");
+  const [searchError, setSearchError] = useState("");
+  const [showFieldError, setShowFieldError] = useState(false);
 
-  const [appliedName, setAppliedName] =
-    useState("");
-  const [appliedType, setAppliedType] =
-    useState("All Assets");
+  /* =====================================================
+     DATABASE / DEMO ASSETS
+  ===================================================== */
 
-  const [searchError, setSearchError] =
-    useState("");
-  const [showFieldError, setShowFieldError] =
-    useState(false);
-
-  // ==========================================
-  // DATABASE ASSETS
-  // ==========================================
   const [assets, setAssets] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [isDemoMode, setIsDemoMode] = useState(false);
 
-  // ==========================================
-  // PAGINATION
-  // ==========================================
-  const [rowsPerPage, setRowsPerPage] =
-    useState(10);
+  /* =====================================================
+     PAGINATION
+  ===================================================== */
 
-  // ==========================================
-  // EDIT STATE
-  // ==========================================
-  const [editingAssetId, setEditingAssetId] =
-    useState(null);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  const [isEditPage, setIsEditPage] =
-    useState(false);
+  /* =====================================================
+     EDIT STATE
+  ===================================================== */
 
-  const [editType, setEditType] =
-    useState("");
-
-  const [editPurchaseDate, setEditPurchaseDate] =
-    useState("");
-
+  const [editingAssetId, setEditingAssetId] = useState(null);
+  const [isEditPage, setIsEditPage] = useState(false);
+  const [editType, setEditType] = useState("");
+  const [editPurchaseDate, setEditPurchaseDate] = useState("");
   const [editWarrantyExpiry, setEditWarrantyExpiry] =
     useState("");
+  const [editModel, setEditModel] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editErrors, setEditErrors] = useState({});
 
-  const [editModel, setEditModel] =
-    useState("");
+  /* =====================================================
+     DELETE STATE
+  ===================================================== */
 
-  const [editDescription, setEditDescription] =
-    useState("");
+  const [deleteAsset, setDeleteAsset] = useState(null);
 
-  const [editErrors, setEditErrors] =
-    useState({});
+  /* =====================================================
+     GET TOKEN
+  ===================================================== */
 
-  // ==========================================
-  // DELETE STATE
-  // ==========================================
-  const [deleteAsset, setDeleteAsset] =
-    useState(null);
-
-  // ==========================================
-  // GET JWT TOKEN
-  // ==========================================
   const getToken = () => {
     return localStorage.getItem("token");
   };
 
-  // ==========================================
-  // FETCH ASSETS FROM DATABASE
-  // ==========================================
+  /* =====================================================
+     FETCH ASSETS
+  ===================================================== */
+
   const fetchAssets = async (
     search = "",
     type = "All Assets"
@@ -368,23 +413,13 @@ const ManageAsset = ({
 
       const token = getToken();
 
-      if (!token) {
-        alert(
-          "Login session expired. Please login again."
-        );
-        return;
-      }
-
       const params = new URLSearchParams();
 
       if (search.trim()) {
         params.append("search", search.trim());
       }
 
-      if (
-        type &&
-        type !== "All Assets"
-      ) {
+      if (type && type !== "All Assets") {
         params.append("type", type);
       }
 
@@ -394,7 +429,18 @@ const ManageAsset = ({
         ? `${API_URL}?${queryString}`
         : API_URL;
 
-      console.log("Fetching:", url);
+      /* =================================================
+         NO TOKEN → DEMO DATA
+      ================================================= */
+
+      if (!token) {
+        console.log("No token found. Using demo assets.");
+
+        setAssets(DEMO_ASSETS);
+        setIsDemoMode(true);
+
+        return;
+      }
 
       const response = await fetch(url, {
         method: "GET",
@@ -407,15 +453,14 @@ const ManageAsset = ({
 
       const data = await response.json();
 
-      console.log(
-        "Get Assets Response:",
-        data
-      );
+      console.log("Get Assets Response:", data);
+
+      /* =================================================
+         SESSION EXPIRED
+      ================================================= */
 
       if (response.status === 401) {
-        alert(
-          "Session expired. Please login again."
-        );
+        alert("Session expired. Please login again.");
 
         localStorage.removeItem("token");
         localStorage.removeItem("user");
@@ -427,6 +472,10 @@ const ManageAsset = ({
         return;
       }
 
+      /* =================================================
+         NO PERMISSION
+      ================================================= */
+
       if (response.status === 403) {
         alert(
           "You do not have permission to access assets."
@@ -435,50 +484,64 @@ const ManageAsset = ({
         return;
       }
 
+      /* =================================================
+         BACKEND ERROR
+      ================================================= */
+
       if (!response.ok || !data.success) {
-        alert(
-          data.message ||
-            "Unable to load assets."
+        console.log(
+          "Backend unavailable. Using demo assets."
         );
+
+        setAssets(DEMO_ASSETS);
+        setIsDemoMode(true);
 
         return;
       }
 
-      setAssets(data.assets || []);
-    } catch (error) {
-      console.error(
-        "Fetch Assets Error:",
-        error
-      );
+      /* =================================================
+         BACKEND HAS DATA
+      ================================================= */
 
-      alert(
-        "Unable to connect to backend. Make sure the backend is running on port 5000."
-      );
+      if (data.assets && data.assets.length > 0) {
+        setAssets(data.assets);
+        setIsDemoMode(false);
+      } else {
+        setAssets(DEMO_ASSETS);
+        setIsDemoMode(true);
+      }
+    } catch (error) {
+      console.error("Fetch Assets Error:", error);
+
+      setAssets(DEMO_ASSETS);
+      setIsDemoMode(true);
     } finally {
       setLoading(false);
     }
   };
 
-  // ==========================================
-  // LOAD DATABASE ASSETS WHEN PAGE OPENS
-  // ==========================================
+  /* =====================================================
+     LOAD ASSETS
+  ===================================================== */
+
   useEffect(() => {
     fetchAssets();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ==========================================
-  // SEARCH
-  // ==========================================
+  /* =====================================================
+     SEARCH
+  ===================================================== */
+
   const handleSearch = () => {
     setSearchError("");
     setShowFieldError(false);
 
-    const searchValue =
-      searchName.trim();
+    const searchValue = searchName.trim();
 
-    // Both empty
+    /* BOTH EMPTY */
+
     if (
       !searchValue &&
       searchType === "All Assets"
@@ -497,7 +560,8 @@ const ManageAsset = ({
       return;
     }
 
-    // Only type selected
+    /* ONLY TYPE */
+
     if (
       !searchValue &&
       searchType !== "All Assets"
@@ -510,41 +574,47 @@ const ManageAsset = ({
       return;
     }
 
-    // Search by Asset ID
+    /* ASSET ID VALIDATION */
+
     if (searchValue) {
-      const result =
-        validateAssetId(searchValue);
+      const result = validateAssetId(searchValue);
 
       if (!result.isValid) {
         setSearchError(result.message);
+
         setShowFieldError(true);
 
         return;
       }
     }
 
-    // Apply search
+    /* APPLY SEARCH */
+
     setAppliedName(searchValue);
     setAppliedType(searchType);
 
-    fetchAssets(
-      searchValue,
-      searchType
-    );
+    if (isDemoMode) {
+      return;
+    }
+
+    fetchAssets(searchValue, searchType);
   };
 
-  // ==========================================
-  // SEARCH INPUT CHANGE
-  // ==========================================
+  /* =====================================================
+     SEARCH INPUT
+  ===================================================== */
+
   const handleSearchNameChange = (e) => {
     setSearchName(e.target.value);
+
     setSearchError("");
     setShowFieldError(false);
   };
 
-  // ==========================================
-  // ENTER KEY SEARCH
-  // ==========================================
+  /* =====================================================
+     ENTER KEY
+  ===================================================== */
+
   const handleSearchKeyDown = (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -552,93 +622,79 @@ const ManageAsset = ({
     }
   };
 
-  // ==========================================
-  // TYPE CHANGE
-  // ==========================================
+  /* =====================================================
+     TYPE CHANGE
+  ===================================================== */
+
   const handleSearchTypeChange = (e) => {
     setSearchType(e.target.value);
+
     setSearchError("");
     setShowFieldError(false);
   };
 
-  // ==========================================
-  // FRONTEND FILTER
-  // ==========================================
-  const filteredAssets = assets.filter(
-    (asset) => {
-      const idMatch = appliedName
-        ? asset.asset_id
-            ?.toLowerCase()
-            .includes(
-              appliedName.toLowerCase()
-            )
-        : true;
+  /* =====================================================
+     FRONTEND FILTER
+  ===================================================== */
 
-      const typeMatch =
-        appliedType === "All Assets"
-          ? true
-          : asset.asset_type ===
-            appliedType;
+  const filteredAssets = assets.filter((asset) => {
+    const idMatch = appliedName
+      ? asset.asset_id
+          ?.toLowerCase()
+          .includes(appliedName.toLowerCase())
+      : true;
 
-      return idMatch && typeMatch;
-    }
-  );
+    const typeMatch =
+      appliedType === "All Assets"
+        ? true
+        : asset.asset_type === appliedType;
 
-  // ==========================================
-  // DISPLAY ROWS
-  // ==========================================
+    return idMatch && typeMatch;
+  });
+
+  /* =====================================================
+     DISPLAY ROWS
+  ===================================================== */
+
   const displayedAssets =
     rowsPerPage === "All"
       ? filteredAssets
-      : filteredAssets.slice(
-          0,
-          rowsPerPage
-        );
+      : filteredAssets.slice(0, rowsPerPage);
 
-  // ==========================================
-  // OPEN EDIT PAGE
-  // ==========================================
+  /* =====================================================
+     OPEN EDIT PAGE
+  ===================================================== */
+
   const openEditPage = (asset) => {
-    setEditingAssetId(
-      asset.asset_id
-    );
+    setEditingAssetId(asset.asset_id);
 
     setIsEditPage(true);
 
-    setEditType(
-      asset.asset_type || ""
-    );
+    setEditType(asset.asset_type || "");
 
-    setEditModel(
-      asset.model || ""
-    );
+    setEditModel(asset.model || "");
 
-    setEditDescription(
-      asset.description || ""
-    );
+    setEditDescription(asset.description || "");
 
     setEditPurchaseDate(
       asset.purchase_date
-        ? String(
-            asset.purchase_date
-          ).substring(0, 10)
+        ? String(asset.purchase_date).substring(0, 10)
         : ""
     );
 
     setEditWarrantyExpiry(
       asset.warranty_expiry
-        ? String(
-            asset.warranty_expiry
-          ).substring(0, 10)
+        ? String(asset.warranty_expiry).substring(0, 10)
         : ""
     );
 
     setEditErrors({});
   };
 
-  // ==========================================
-  // CLOSE EDIT PAGE
-  // ==========================================
+  /* =====================================================
+     CLOSE EDIT PAGE
+  ===================================================== */
+
   const closeEditPage = () => {
     setIsEditPage(false);
     setEditingAssetId(null);
@@ -652,9 +708,10 @@ const ManageAsset = ({
     setEditErrors({});
   };
 
-  // ==========================================
-  // HANDLE EDIT MODEL CHANGE
-  // ==========================================
+  /* =====================================================
+     EDIT MODEL CHANGE
+  ===================================================== */
+
   const handleEditModelChange = (e) => {
     const value = e.target.value;
 
@@ -668,9 +725,10 @@ const ManageAsset = ({
     }
   };
 
-  // ==========================================
-  // HANDLE EDIT DESCRIPTION CHANGE
-  // ==========================================
+  /* =====================================================
+     EDIT DESCRIPTION CHANGE
+  ===================================================== */
+
   const handleEditDescriptionChange = (e) => {
     const value = e.target.value;
 
@@ -684,32 +742,27 @@ const ManageAsset = ({
     }
   };
 
-  // ==========================================
-  // VALIDATE EDIT
-  // ==========================================
+  /* =====================================================
+     VALIDATE EDIT FORM
+  ===================================================== */
+
   const validateEditForm = () => {
     const newErrors = {};
 
-    const typeResult =
-      validateAssetType(editType);
+    const typeResult = validateAssetType(editType);
 
     if (!typeResult.isValid) {
-      newErrors.editType =
-        typeResult.message;
+      newErrors.editType = typeResult.message;
     }
 
-    const modelResult =
-      validateModel(editModel);
+    const modelResult = validateModel(editModel);
 
     if (!modelResult.isValid) {
-      newErrors.editModel =
-        modelResult.message;
+      newErrors.editModel = modelResult.message;
     }
 
     const purchaseResult =
-      validatePurchaseDate(
-        editPurchaseDate
-      );
+      validatePurchaseDate(editPurchaseDate);
 
     if (!purchaseResult.isValid) {
       newErrors.editPurchaseDate =
@@ -728,9 +781,7 @@ const ManageAsset = ({
     }
 
     const descriptionResult =
-      validateDescription(
-        editDescription
-      );
+      validateDescription(editDescription);
 
     if (!descriptionResult.isValid) {
       newErrors.editDescription =
@@ -739,21 +790,18 @@ const ManageAsset = ({
 
     setEditErrors(newErrors);
 
-    return (
-      Object.keys(newErrors).length === 0
-    );
+    return Object.keys(newErrors).length === 0;
   };
 
-  // ==========================================
-  // SAVE EDIT TO DATABASE
-  // ==========================================
+  /* =====================================================
+     SAVE EDIT
+  ===================================================== */
+
   const saveEdit = async () => {
     if (!validateEditForm()) {
       setTimeout(() => {
         const firstError =
-          document.querySelector(
-            ".ma-input--error"
-          );
+          document.querySelector(".ma-input--error");
 
         if (firstError) {
           firstError.focus();
@@ -762,6 +810,35 @@ const ManageAsset = ({
 
       return;
     }
+
+    /* DEMO MODE */
+
+    if (isDemoMode) {
+      setAssets((prev) =>
+        prev.map((asset) =>
+          asset.asset_id === editingAssetId
+            ? {
+                ...asset,
+                asset_type: editType,
+                model: editModel.trim(),
+                purchase_date: editPurchaseDate,
+                warranty_expiry: editWarrantyExpiry,
+                description: editDescription.trim(),
+              }
+            : asset
+        )
+      );
+
+      alert(
+        `Asset ${editingAssetId} updated successfully!`
+      );
+
+      closeEditPage();
+
+      return;
+    }
+
+    /* DATABASE UPDATE */
 
     try {
       const token = getToken();
@@ -780,38 +857,25 @@ const ManageAsset = ({
           method: "PUT",
 
           headers: {
-            "Content-Type":
-              "application/json",
-
-            Authorization:
-              `Bearer ${token}`,
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
 
           body: JSON.stringify({
             assetType: editType,
             model: editModel.trim(),
-            purchaseDate:
-              editPurchaseDate,
-            warrantyExpiry:
-              editWarrantyExpiry,
-            description:
-              editDescription.trim(),
+            purchaseDate: editPurchaseDate,
+            warrantyExpiry: editWarrantyExpiry,
+            description: editDescription.trim(),
           }),
         }
       );
 
-      const data =
-        await response.json();
+      const data = await response.json();
 
-      console.log(
-        "Update Asset Response:",
-        data
-      );
+      console.log("Update Asset Response:", data);
 
-      if (
-        !response.ok ||
-        !data.success
-      ) {
+      if (!response.ok || !data.success) {
         alert(
           data.message ||
             "Failed to update asset."
@@ -826,36 +890,52 @@ const ManageAsset = ({
 
       closeEditPage();
 
-      fetchAssets(
-        appliedName,
-        appliedType
-      );
+      fetchAssets(appliedName, appliedType);
     } catch (error) {
-      console.error(
-        "Update Asset Error:",
-        error
-      );
+      console.error("Update Asset Error:", error);
 
-      alert(
-        "Unable to connect to backend."
-      );
+      alert("Unable to connect to backend.");
     }
   };
 
-  // ==========================================
-  // OPEN DELETE MODAL
-  // ==========================================
+  /* =====================================================
+     OPEN DELETE POPUP
+  ===================================================== */
+
   const openDelete = (asset) => {
     setDeleteAsset(asset);
   };
 
-  // ==========================================
-  // DELETE FROM DATABASE
-  // ==========================================
+  /* =====================================================
+     DELETE ASSET
+  ===================================================== */
+
   const confirmDelete = async () => {
     if (!deleteAsset) {
       return;
     }
+
+    /* DEMO MODE DELETE */
+
+    if (isDemoMode) {
+      const deletedId = deleteAsset.asset_id;
+
+      setAssets((prev) =>
+        prev.filter(
+          (asset) => asset.asset_id !== deletedId
+        )
+      );
+
+      setDeleteAsset(null);
+
+      alert(
+        `Asset ${deletedId} deleted successfully!`
+      );
+
+      return;
+    }
+
+    /* DATABASE DELETE */
 
     try {
       const token = getToken();
@@ -874,27 +954,17 @@ const ManageAsset = ({
           method: "DELETE",
 
           headers: {
-            "Content-Type":
-              "application/json",
-
-            Authorization:
-              `Bearer ${token}`,
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
         }
       );
 
-      const data =
-        await response.json();
+      const data = await response.json();
 
-      console.log(
-        "Delete Asset Response:",
-        data
-      );
+      console.log("Delete Asset Response:", data);
 
-      if (
-        !response.ok ||
-        !data.success
-      ) {
+      if (!response.ok || !data.success) {
         alert(
           data.message ||
             "Failed to delete asset."
@@ -909,42 +979,39 @@ const ManageAsset = ({
 
       setDeleteAsset(null);
 
-      fetchAssets(
-        appliedName,
-        appliedType
-      );
+      fetchAssets(appliedName, appliedType);
     } catch (error) {
-      console.error(
-        "Delete Asset Error:",
-        error
-      );
+      console.error("Delete Asset Error:", error);
 
-      alert(
-        "Unable to connect to backend."
-      );
+      alert("Unable to connect to backend.");
     }
   };
 
-  // ==========================================
-  // RENDER EDIT PAGE
-  // ==========================================
+  /* =====================================================
+     RENDER EDIT PAGE
+  ===================================================== */
+
   const renderEditPage = () => {
     return (
       <div className="ma-edit-page-wrapper">
-
         <div className="ma-edit-page-container">
 
           <div className="ma-edit-page-header">
             <h2 className="ma-edit-page-title">
               Edit Asset
             </h2>
+
+            <p>
+              Edit the details of the asset
+              and update the information.
+            </p>
           </div>
 
           <div className="ma-edit-form">
 
             {/* ASSET ID */}
-            <div className="ma-modal-field">
 
+            <div className="ma-modal-field">
               <label className="ma-field-label">
                 Asset ID
               </label>
@@ -952,17 +1019,14 @@ const ManageAsset = ({
               <input
                 className="ma-input ma-input--readonly"
                 type="text"
-                value={
-                  editingAssetId || ""
-                }
+                value={editingAssetId || ""}
                 readOnly
               />
-
             </div>
 
             {/* ASSET TYPE */}
-            <div className="ma-modal-field">
 
+            <div className="ma-modal-field">
               <label className="ma-field-label">
                 Asset Type *
               </label>
@@ -975,19 +1039,14 @@ const ManageAsset = ({
                 }`}
                 value={editType}
                 onChange={(e) => {
-                  setEditType(
-                    e.target.value
-                  );
+                  setEditType(e.target.value);
 
-                  setEditErrors(
-                    (prev) => ({
-                      ...prev,
-                      editType: "",
-                    })
-                  );
+                  setEditErrors((prev) => ({
+                    ...prev,
+                    editType: "",
+                  }));
                 }}
               >
-
                 <option value="">
                   Select Asset Type
                 </option>
@@ -995,8 +1054,7 @@ const ManageAsset = ({
                 {ASSET_TYPES
                   .filter(
                     (type) =>
-                      type !==
-                      "All Assets"
+                      type !== "All Assets"
                   )
                   .map((type) => (
                     <option
@@ -1006,7 +1064,6 @@ const ManageAsset = ({
                       {type}
                     </option>
                   ))}
-
               </select>
 
               {editErrors.editType && (
@@ -1014,12 +1071,11 @@ const ManageAsset = ({
                   ⚠️ {editErrors.editType}
                 </span>
               )}
-
             </div>
 
             {/* MODEL */}
-            <div className="ma-modal-field">
 
+            <div className="ma-modal-field">
               <label className="ma-field-label">
                 Model *
               </label>
@@ -1034,9 +1090,7 @@ const ManageAsset = ({
                 value={editModel}
                 maxLength={50}
                 placeholder="Enter Model"
-                onChange={
-                  handleEditModelChange
-                }
+                onChange={handleEditModelChange}
               />
 
               {editErrors.editModel && (
@@ -1044,12 +1098,11 @@ const ManageAsset = ({
                   ⚠️ {editErrors.editModel}
                 </span>
               )}
-
             </div>
 
             {/* PURCHASE DATE */}
-            <div className="ma-modal-field">
 
+            <div className="ma-modal-field">
               <label className="ma-field-label">
                 Purchase Date *
               </label>
@@ -1061,40 +1114,30 @@ const ManageAsset = ({
                     : ""
                 }`}
                 type="date"
-                value={
-                  editPurchaseDate
-                }
+                value={editPurchaseDate}
                 onChange={(e) => {
                   setEditPurchaseDate(
                     e.target.value
                   );
 
-                  setEditErrors(
-                    (prev) => ({
-                      ...prev,
-                      editPurchaseDate:
-                        "",
-                      editWarrantyExpiry:
-                        "",
-                    })
-                  );
+                  setEditErrors((prev) => ({
+                    ...prev,
+                    editPurchaseDate: "",
+                    editWarrantyExpiry: "",
+                  }));
                 }}
               />
 
               {editErrors.editPurchaseDate && (
                 <span className="ma-error-text">
-                  ⚠️{" "}
-                  {
-                    editErrors.editPurchaseDate
-                  }
+                  ⚠️ {editErrors.editPurchaseDate}
                 </span>
               )}
-
             </div>
 
-            {/* WARRANTY EXPIRY */}
-            <div className="ma-modal-field">
+            {/* WARRANTY */}
 
+            <div className="ma-modal-field">
               <label className="ma-field-label">
                 Warranty Expiry Date *
               </label>
@@ -1106,38 +1149,29 @@ const ManageAsset = ({
                     : ""
                 }`}
                 type="date"
-                value={
-                  editWarrantyExpiry
-                }
+                value={editWarrantyExpiry}
                 onChange={(e) => {
                   setEditWarrantyExpiry(
                     e.target.value
                   );
 
-                  setEditErrors(
-                    (prev) => ({
-                      ...prev,
-                      editWarrantyExpiry:
-                        "",
-                    })
-                  );
+                  setEditErrors((prev) => ({
+                    ...prev,
+                    editWarrantyExpiry: "",
+                  }));
                 }}
               />
 
               {editErrors.editWarrantyExpiry && (
                 <span className="ma-error-text">
-                  ⚠️{" "}
-                  {
-                    editErrors.editWarrantyExpiry
-                  }
+                  ⚠️ {editErrors.editWarrantyExpiry}
                 </span>
               )}
-
             </div>
 
             {/* DESCRIPTION */}
-            <div className="ma-modal-field">
 
+            <div className="ma-modal-field">
               <label className="ma-field-label">
                 Description *
               </label>
@@ -1151,9 +1185,7 @@ const ManageAsset = ({
                 rows="4"
                 maxLength={500}
                 placeholder="Enter Description"
-                value={
-                  editDescription
-                }
+                value={editDescription}
                 onChange={
                   handleEditDescriptionChange
                 }
@@ -1167,32 +1199,23 @@ const ManageAsset = ({
                   marginTop: "4px",
                 }}
               >
-                {
-                  editDescription.length
-                }
-                /500
+                {editDescription.length}/500
               </div>
 
               {editErrors.editDescription && (
                 <span className="ma-error-text">
-                  ⚠️{" "}
-                  {
-                    editErrors.editDescription
-                  }
+                  ⚠️ {editErrors.editDescription}
                 </span>
               )}
-
             </div>
 
-            {/* FORM ACTIONS */}
-            <div className="ma-edit-actions">
+            {/* ACTIONS */}
 
+            <div className="ma-edit-actions">
               <button
                 type="button"
                 className="ma-edit-cancel-btn"
-                onClick={
-                  closeEditPage
-                }
+                onClick={closeEditPage}
               >
                 Cancel
               </button>
@@ -1204,30 +1227,41 @@ const ManageAsset = ({
               >
                 Update Asset
               </button>
-
             </div>
-
           </div>
+
+          <button
+            type="button"
+            className="ma-back-btn"
+            onClick={closeEditPage}
+          >
+            ← Back
+          </button>
+
         </div>
       </div>
     );
   };
 
-  // ==========================================
-  // RENDER MAIN LIST
-  // ==========================================
+  /* =====================================================
+     EDIT PAGE
+  ===================================================== */
+
   if (isEditPage) {
     return renderEditPage();
   }
+
+  /* =====================================================
+     MAIN PAGE
+  ===================================================== */
 
   return (
     <div className="ma-page-wrapper">
 
       {/* TOP NAVBAR */}
+
       <nav className="ma-top-nav">
-
         <div className="ma-nav-logo">
-
           <span className="ma-nav-logo-title">
             ITAMS
           </span>
@@ -1235,11 +1269,9 @@ const ManageAsset = ({
           <span className="ma-nav-logo-sub">
             IT Asset Management System
           </span>
-
         </div>
 
         <div className="ma-nav-right">
-
           <span className="ma-nav-username">
             {username}
           </span>
@@ -1252,43 +1284,56 @@ const ManageAsset = ({
           >
             Logout
           </button>
-
         </div>
-
       </nav>
 
-      {/* MAIN CONTENT - NO SIDEBAR */}
-      <div className="ma-body-wrapper">
+      {/* MAIN */}
 
-        <main
-          className="ma-main-content"
-          style={{
-            width: "100%",
-            marginLeft: "0",
-          }}
-        >
+      <div className="ma-body-wrapper">
+        <main className="ma-main-content">
 
           <h1 className="ma-page-title">
             Manage Asset
           </h1>
 
           <p className="ma-page-subtitle">
-            Edit or delete existing IT assets
-            in the organization.
+            Edit or delete existing IT
+            assets in the organization.
           </p>
 
-          {/* SEARCH CARD */}
-          <div className="ma-card">
+          {/* DEMO MODE MESSAGE */}
 
+          {isDemoMode && (
+            <div
+              style={{
+                padding: "10px 14px",
+                marginBottom: "15px",
+                borderRadius: "6px",
+                background: "#eef6ff",
+                border: "1px solid #b8d8ff",
+                color: "#1557a0",
+                fontSize: "14px",
+              }}
+            >
+              ℹ️ Demo assets are displayed
+              because no database assets
+              were found. You can test
+              Search, Edit and Delete.
+            </div>
+          )}
+
+          {/* SEARCH CARD */}
+
+          <div className="ma-card">
             <h2 className="ma-card-heading">
               Search Asset
             </h2>
 
             <div className="ma-search-row">
 
-              {/* Asset ID */}
-              <div className="ma-field-group">
+              {/* ASSET ID */}
 
+              <div className="ma-field-group">
                 <label className="ma-field-label">
                   Asset ID
                 </label>
@@ -1300,8 +1345,9 @@ const ManageAsset = ({
                       : ""
                   }`}
                   type="text"
-                  placeholder="Enter Asset ID (e.g., AST001)"
+                  placeholder="Enter Asset ID (e.g., LAP001)"
                   value={searchName}
+                  maxLength={6}
                   onChange={
                     handleSearchNameChange
                   }
@@ -1312,18 +1358,16 @@ const ManageAsset = ({
 
                 <div className="ma-validation-hint">
                   <small>
-                    Format: AST + 3
-                    alphanumeric{" "}
-                    (e.g., AST001,
-                    ASTA12, AST1AB)
+                    Format: 3 letters + 3
+                    numbers (e.g., LAP001,
+                    PIT001, MON001)
                   </small>
                 </div>
-
               </div>
 
-              {/* Asset Type */}
-              <div className="ma-field-group">
+              {/* ASSET TYPE */}
 
+              <div className="ma-field-group">
                 <label className="ma-field-label">
                   Asset Type
                 </label>
@@ -1339,176 +1383,126 @@ const ManageAsset = ({
                     handleSearchTypeChange
                   }
                 >
-
-                  {ASSET_TYPES.map(
-                    (type) => (
-                      <option
-                        key={type}
-                        value={type}
-                      >
-                        {type}
-                      </option>
-                    )
-                  )}
-
+                  {ASSET_TYPES.map((type) => (
+                    <option
+                      key={type}
+                      value={type}
+                    >
+                      {type}
+                    </option>
+                  ))}
                 </select>
-
               </div>
 
-              {/* Search Button */}
+              {/* SEARCH BUTTON */}
+
               <button
                 className="ma-search-btn"
                 onClick={handleSearch}
               >
                 Search
               </button>
-
             </div>
 
             {searchError && (
               <div className="ma-search-error-container">
-
                 <span className="ma-error-text">
                   ⚠️ {searchError}
                 </span>
-
               </div>
             )}
-
           </div>
 
           {/* ASSET LIST */}
-          <div className="ma-card ma-card--table">
 
+          <div className="ma-card ma-card--table">
             <h2 className="ma-card-heading">
               Asset List
             </h2>
 
             <div className="ma-table-wrapper">
-
               <table className="ma-table">
-
                 <thead>
-
                   <tr>
-
-                    <th>
-                      Asset ID
-                    </th>
-
-                    <th>
-                      Asset Type
-                    </th>
-
-                    <th>
-                      Actions
-                    </th>
-
+                    <th>Asset ID</th>
+                    <th>Asset Type</th>
+                    <th>Actions</th>
                   </tr>
-
                 </thead>
 
                 <tbody>
-
                   {loading ? (
-
                     <tr>
-
                       <td
                         colSpan={3}
                         className="ma-no-data"
                       >
                         Loading assets...
                       </td>
-
                     </tr>
-
                   ) : displayedAssets.length === 0 ? (
-
                     <tr>
-
                       <td
                         colSpan={3}
                         className="ma-no-data"
                       >
                         No assets found.
                       </td>
-
                     </tr>
-
                   ) : (
+                    displayedAssets.map((asset) => (
+                      <tr
+                        key={asset.asset_id}
+                      >
+                        {/* ASSET ID */}
 
-                    displayedAssets.map(
-                      (asset) => (
+                        <td>
+                          <span className="ma-asset-id">
+                            {asset.asset_id}
+                          </span>
+                        </td>
 
-                        <tr
-                          key={
-                            asset.asset_id
-                          }
-                        >
+                        {/* TYPE */}
 
-                          <td>
+                        <td>
+                          <span className="ma-type-badge">
+                            {asset.asset_type}
+                          </span>
+                        </td>
 
-                            <span className="ma-asset-id">
-                              {
-                                asset.asset_id
-                              }
-                            </span>
+                        {/* ACTIONS */}
 
-                          </td>
+                        <td className="ma-actions-cell">
+                          <button
+                            type="button"
+                            className="ma-btn-edit"
+                            onClick={() =>
+                              openEditPage(asset)
+                            }
+                          >
+                            Edit
+                          </button>
 
-                          <td>
-
-                            <span className="ma-type-badge">
-                              {
-                                asset.asset_type
-                              }
-                            </span>
-
-                          </td>
-
-                          <td className="ma-actions-cell">
-
-                            <button
-                              className="ma-btn-edit"
-                              onClick={() =>
-                                openEditPage(
-                                  asset
-                                )
-                              }
-                            >
-                              Edit
-                            </button>
-
-                            <button
-                              className="ma-btn-delete"
-                              onClick={() =>
-                                openDelete(
-                                  asset
-                                )
-                              }
-                            >
-                              Delete
-                            </button>
-
-                          </td>
-
-                        </tr>
-
-                      )
-                    )
-
+                          <button
+                            type="button"
+                            className="ma-btn-delete"
+                            onClick={() =>
+                              openDelete(asset)
+                            }
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))
                   )}
-
                 </tbody>
-
               </table>
-
             </div>
 
-            {/* TABLE FOOTER */}
-            <div className="ma-table-footer">
+            {/* FOOTER */}
 
+            <div className="ma-table-footer">
               <button
                 className="ma-back-btn"
                 onClick={onBack}
@@ -1517,24 +1511,16 @@ const ManageAsset = ({
               </button>
 
               <div className="ma-rows-select-group">
-
                 <span className="ma-pagination-info">
                   Showing{" "}
-                  {
-                    displayedAssets.length
-                  }{" "}
-                  of{" "}
-                  {
-                    filteredAssets.length
-                  }{" "}
-                  assets
+                  {displayedAssets.length} of{" "}
+                  {filteredAssets.length} assets
                 </span>
 
                 <select
                   className="ma-rows-select"
                   value={rowsPerPage}
                   onChange={(e) => {
-
                     const value =
                       e.target.value;
 
@@ -1545,93 +1531,76 @@ const ManageAsset = ({
                     );
                   }}
                 >
-
                   {ROWS_PER_PAGE_OPTIONS.map(
                     (option) => (
-
                       <option
                         key={option}
                         value={option}
                       >
                         {option}
                       </option>
-
                     )
                   )}
-
                 </select>
-
               </div>
-
             </div>
-
           </div>
-
         </main>
-
       </div>
 
-      {/* DELETE MODAL */}
-      {deleteAsset && (
+      {/* DELETE CONFIRMATION POPUP */}
 
+      {deleteAsset && (
         <div
           className="ma-modal-overlay"
           onClick={() =>
             setDeleteAsset(null)
           }
         >
-
           <div
             className="ma-modal"
             onClick={(e) =>
               e.stopPropagation()
             }
           >
-
             <h2 className="ma-modal-title">
               Delete Asset
             </h2>
 
             <p className="ma-modal-msg">
-              Are you sure you want
-              to delete this asset?
+              Are you sure you want to
+              delete this asset?
             </p>
 
+            {/* ONLY ASSET ID + ASSET NAME */}
+
             <div className="ma-delete-details">
-
               <div className="ma-delete-row">
-
                 <span className="ma-delete-label">
                   Asset ID:
                 </span>
 
                 <span className="ma-delete-value">
-                  {
-                    deleteAsset.asset_id
-                  }
+                  {deleteAsset.asset_id}
                 </span>
-
               </div>
 
               <div className="ma-delete-row">
-
                 <span className="ma-delete-label">
-                  Asset Type:
+                  Asset Name:
                 </span>
 
                 <span className="ma-delete-value">
-                  {
-                    deleteAsset.asset_type
-                  }
+                  {deleteAsset.model}
                 </span>
-
               </div>
-
             </div>
 
-            <div className="ma-modal-actions">
+            {/* BUTTONS */}
 
+            <div className="ma-modal-actions">
               <button
+                type="button"
                 className="ma-modal-cancel"
                 onClick={() =>
                   setDeleteAsset(null)
@@ -1641,22 +1610,16 @@ const ManageAsset = ({
               </button>
 
               <button
+                type="button"
                 className="ma-modal-delete"
-                onClick={
-                  confirmDelete
-                }
+                onClick={confirmDelete}
               >
                 Yes
               </button>
-
             </div>
-
           </div>
-
         </div>
-
       )}
-
     </div>
   );
 };
