@@ -213,15 +213,15 @@ const validateSearch = (search) => {
     };
   }
 
-  // No multiple consecutive spaces
-  if (/\s{2,}/.test(search)) {
-    return {
-      isValid: false,
-      message:
-        "Search should not contain multiple consecutive spaces",
-    };
-  }
+  // ===================================================
+  // MULTIPLE SPACES ARE ALLOWED
+  // ===================================================
 
+  // NO multiple-space validation here.
+  // Example:
+  // Information Technology       Department
+  // is allowed.
+  
   if (search.length < 2) {
     return {
       isValid: false,
@@ -238,11 +238,15 @@ const validateSearch = (search) => {
     };
   }
 
-  if (!/^[A-Za-z0-9\s()&-]+$/.test(search)) {
+  // ===================================================
+  // ONLY LETTERS AND SPACES
+  // ===================================================
+
+  if (!/^[A-Za-z ]+$/.test(search)) {
     return {
       isValid: false,
       message:
-        "Search should contain only letters, numbers, spaces, brackets, & and hyphen",
+        "Search should contain only letters and spaces",
     };
   }
 
@@ -333,6 +337,16 @@ const DepartmentManagement = ({
   // =====================================================
   const handleSearchChange = (e) => {
     const value = e.target.value;
+
+    // ===================================================
+    // ONLY LETTERS AND SPACES ARE ALLOWED WHILE TYPING
+    // Numbers and special characters are automatically
+    // rejected.
+    // ===================================================
+
+    if (!/^[A-Za-z ]*$/.test(value)) {
+      return;
+    }
 
     setSearch(value);
     setSearchTouched(false);
