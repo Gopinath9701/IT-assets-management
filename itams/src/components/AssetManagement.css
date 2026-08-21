@@ -1,18 +1,17 @@
 /* ============================================================
-   AssetManagement.css — matches PDF design exactly
+   AssetAssignment.css — Complete with Validation & Modal Styles
    ============================================================ */
 
-/* Scoped reset so App.css margin:10px doesn't break layout */
-.am-page-wrapper *,
-.am-page-wrapper *::before,
-.am-page-wrapper *::after {
+.asa-page-wrapper *,
+.asa-page-wrapper *::before,
+.asa-page-wrapper *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
 /* ── Page Wrapper ── */
-.am-page-wrapper {
+.asa-page-wrapper {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -23,7 +22,7 @@
 /* ─────────────────────────────────────────
    TOP NAVBAR
 ───────────────────────────────────────── */
-.am-top-nav {
+.asa-top-nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -36,47 +35,45 @@
   z-index: 100;
 }
 
-.am-nav-logo {
+.asa-nav-logo {
   display: flex;
   flex-direction: column;
-}
-
-.am-nav-logo-title {
-  font-size: 22px;
-  font-weight: 800;
-  color: #2563eb;        /* blue — matches PDF */
-  letter-spacing: 0.5px;
   line-height: 1.2;
 }
 
-.am-nav-logo-sub {
+.asa-nav-logo-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #2563eb;
+  letter-spacing: 0.5px;
+}
+
+.asa-nav-logo-sub {
   font-size: 11px;
   color: #6b7280;
   font-weight: 400;
   margin-top: 2px;
-  line-height: 1.2;
 }
 
-.am-nav-right {
+.asa-nav-right {
   display: flex;
   align-items: center;
   gap: 16px;
 }
 
-.am-nav-username {
+.asa-nav-username {
   font-size: 14px;
   font-weight: 500;
   color: #111827;
 }
 
-/* vertical line between username and Logout */
-.am-nav-divider {
+.asa-nav-divider {
   width: 1px;
   height: 20px;
   background-color: #d1d5db;
 }
 
-.am-logout-btn {
+.asa-logout-btn {
   background: none;
   border: none;
   font-size: 14px;
@@ -88,14 +85,14 @@
   transition: color 0.15s;
 }
 
-.am-logout-btn:hover {
+.asa-logout-btn:hover {
   color: #2563eb;
 }
 
 /* ─────────────────────────────────────────
-   BODY  (sidebar + main side by side)
+   BODY
 ───────────────────────────────────────── */
-.am-body-wrapper {
+.asa-body-wrapper {
   display: flex;
   flex: 1;
 }
@@ -103,7 +100,7 @@
 /* ─────────────────────────────────────────
    SIDEBAR
 ───────────────────────────────────────── */
-.am-sidebar {
+.asa-sidebar {
   width: 210px;
   min-width: 210px;
   border-right: 1px solid #e5e7eb;
@@ -111,7 +108,7 @@
   background-color: #ffffff;
 }
 
-.am-sidebar-item {
+.asa-sidebar-item {
   padding: 10px 20px;
   font-size: 14px;
   font-weight: 500;
@@ -123,12 +120,11 @@
   white-space: nowrap;
 }
 
-.am-sidebar-item:hover:not(.am-sidebar-item--active) {
+.asa-sidebar-item:hover:not(.asa-sidebar-item--active) {
   background-color: #f3f4f6;
 }
 
-/* Active item — solid blue pill, white text */
-.am-sidebar-item--active {
+.asa-sidebar-item--active {
   background-color: #2563eb;
   color: #ffffff;
   font-weight: 600;
@@ -137,114 +133,526 @@
 /* ─────────────────────────────────────────
    MAIN CONTENT
 ───────────────────────────────────────── */
-.am-main-content {
+.asa-main-content {
   flex: 1;
-  padding: 40px 44px;
+  padding: 36px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
 }
 
-.am-page-title {
+.asa-page-title {
   font-size: 28px;
   font-weight: 700;
   color: #111827;
-  margin-bottom: 6px;
 }
 
-.am-page-subtitle {
+.asa-page-subtitle {
   font-size: 14px;
   color: #6b7280;
-  margin-bottom: 32px;
+  margin-top: -16px;
 }
 
 /* ─────────────────────────────────────────
-   CARDS GRID
-   3 columns → 4 cards:
-   row 1 → Add Asset | Manage Assets | Asset Details
-   row 2 → Employee Status (sits in col 1 alone)
+   SEARCH SECTION
 ───────────────────────────────────────── */
-.am-cards-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-}
-
-/* ─────────────────────────────────────────
-   SINGLE CARD
-───────────────────────────────────────── */
-.am-card {
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 36px 24px 28px;
-  background-color: #ffffff;
+.asa-search-section {
   display: flex;
   flex-direction: column;
+  gap: 8px;
+}
+
+.asa-search-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.asa-search-row {
+  display: flex;
   align-items: center;
-  text-align: center;
-  gap: 10px;
-  transition: box-shadow 0.2s ease;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
-.am-card:hover {
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+.asa-input {
+  height: 40px;
+  padding: 0 14px;
+  border: 2px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #111827;
+  background-color: #ffffff;
+  outline: none;
+  width: 280px;
+  max-width: 100%;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
-.am-card-title {
+.asa-input::placeholder {
+  color: #9ca3af;
+}
+
+.asa-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.asa-search-btn {
+  height: 40px;
+  padding: 0 28px;
+  background-color: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.15s;
+  flex-shrink: 0;
+}
+
+.asa-search-btn:hover {
+  background-color: #1d4ed8;
+}
+
+/* ── SEARCH VALIDATION STYLES ── */
+.asa-input-error {
+  border-color: #dc3545 !important;
+  background-color: #fff8f8;
+}
+
+.asa-input-error:focus {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25) !important;
+}
+
+.asa-search-error {
+  color: #dc3545;
+  font-size: 0.875rem;
+  padding: 8px 12px;
+  background-color: #f8d7da;
+  border-radius: 6px;
+  border: 1px solid #f5c6cb;
+  width: 100%;
+  animation: asaShake 0.3s ease-in-out;
+}
+
+@keyframes asaShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+
+.asa-validation-hint {
+  margin-top: 4px;
+  color: #6c757d;
+  font-size: 0.8rem;
+}
+
+.asa-validation-hint small {
+  display: block;
+  padding: 4px 10px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  border-left: 3px solid #2563eb;
+  color: #495057;
+}
+
+/* ─────────────────────────────────────────
+   CARDS
+───────────────────────────────────────── */
+.asa-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 24px 28px 16px;
+  background-color: #ffffff;
+}
+
+.asa-card-heading {
   font-size: 15px;
   font-weight: 700;
   color: #111827;
+  margin-bottom: 16px;
 }
 
-.am-card-desc {
+/* ─────────────────────────────────────────
+   TABLES
+───────────────────────────────────────── */
+.asa-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.asa-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+  min-width: 700px;
+}
+
+.asa-table thead tr {
+  border-top: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+}
+
+.asa-table th {
+  padding: 12px 14px;
+  text-align: center;
+  font-weight: 600;
+  color: #374151;
+  font-size: 13.5px;
+  white-space: nowrap;
+}
+
+.asa-table td {
+  padding: 13px 14px;
+  text-align: center;
+  color: #374151;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 13.5px;
+  white-space: nowrap;
+}
+
+.asa-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.asa-table tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+.asa-no-data {
+  text-align: center;
+  color: #9ca3af;
+  padding: 28px;
+  font-size: 14px;
+}
+
+/* ── Employee ID Styling ── */
+.asa-employee-id {
+  font-family: "Courier New", monospace;
+  font-weight: 700;
+  color: #2563eb;
+  background: #eff6ff;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+/* ── Blue Assign button ── */
+.asa-assign-btn {
+  padding: 6px 20px;
+  background-color: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 5px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.15s;
+}
+
+.asa-assign-btn:hover {
+  background-color: #1d4ed8;
+}
+
+/* ── Status badge ── */
+.asa-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.asa-badge--assigned {
+  background-color: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+/* Rows-per-page right-aligned inside card */
+.asa-rows-right {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 14px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.asa-pagination-info {
   font-size: 13px;
   color: #6b7280;
-  line-height: 1.65;
-  flex: 1;
+  font-weight: 500;
 }
 
-/* Outlined button — white bg, dark border (matches PDF exactly) */
-.am-card-btn {
-  margin-top: 16px;
-  padding: 9px 0;
-  width: 100%;
-  border: 1.5px solid #111827;
+.asa-rows-select {
+  height: 36px;
+  padding: 0 32px 0 12px;
+  border: 1px solid #d1d5db;
   border-radius: 6px;
-  background-color: #ffffff;
   font-size: 13px;
+  font-family: inherit;
+  color: #111827;
+  background-color: #ffffff;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236b7280' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  cursor: pointer;
+  outline: none;
+}
+
+.asa-rows-select:focus {
+  border-color: #2563eb;
+}
+
+/* ─────────────────────────────────────────
+   MODAL STYLES
+───────────────────────────────────────── */
+.asa-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.asa-modal {
+  background: #ffffff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  animation: asaModalFadeIn 0.3s ease-out;
+}
+
+@keyframes asaModalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.asa-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.asa-modal-title {
+  font-size: 18px;
   font-weight: 700;
   color: #111827;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background-color 0.15s ease,
-              color 0.15s ease,
-              border-color 0.15s ease;
+  margin: 0;
 }
 
-.am-card-btn:hover {
-  background-color: #eff6ff;
+.asa-modal-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background 0.15s;
+}
+
+.asa-modal-close:hover {
+  background: #f3f4f6;
+}
+
+.asa-modal-body {
+  padding: 20px 24px;
+}
+
+.asa-modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+
+.asa-modal-field:last-of-type {
+  margin-bottom: 0;
+}
+
+.asa-modal-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.asa-modal-value {
+  font-size: 14px;
+  color: #111827;
+  padding: 8px 12px;
+  background-color: #f9fafb;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+}
+
+.asa-modal-input {
+  padding: 10px 14px;
+  border: 2px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #111827;
+  background: #ffffff;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.asa-modal-input:focus {
   border-color: #2563eb;
-  color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.asa-modal-input.asa-input-error {
+  border-color: #dc3545 !important;
+  background-color: #fff8f8;
+}
+
+.asa-modal-input.asa-input-error:focus {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25) !important;
+}
+
+.asa-modal-error {
+  color: #dc3545;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 8px;
+  background-color: #fef2f2;
+  border-radius: 4px;
+  border-left: 3px solid #dc3545;
+  animation: asaFadeIn 0.2s ease-out;
+}
+
+@keyframes asaFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.asa-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px 20px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.asa-modal-cancel {
+  padding: 10px 24px;
+  background: #ffffff;
+  color: #374151;
+  border: 1.5px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  font-family: inherit;
+}
+
+.asa-modal-cancel:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.asa-modal-confirm {
+  padding: 10px 24px;
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+  font-family: inherit;
+}
+
+.asa-modal-confirm:hover {
+  background: #1d4ed8;
+}
+
+/* ─────────────────────────────────────────
+   FOOTER (Back button)
+───────────────────────────────────────── */
+.asa-footer-row {
+  display: flex;
+  align-items: center;
+}
+
+.asa-back-btn {
+  padding: 8px 24px;
+  background-color: #ffffff;
+  border: 1.5px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  color: #111827;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.asa-back-btn:hover {
+  background-color: #f3f4f6;
 }
 
 /* ─────────────────────────────────────────
    RESPONSIVE
 ───────────────────────────────────────── */
 
-/* Tablet — 2 columns */
+/* Tablet */
 @media (max-width: 960px) {
-  .am-cards-grid {
-    grid-template-columns: repeat(2, 1fr);
+  .asa-main-content {
+    padding: 24px 20px;
   }
-  .am-main-content {
-    padding: 28px 24px;
+
+  .asa-input {
+    width: 220px;
   }
 }
 
-/* Mobile — 1 column, sidebar becomes horizontal bar */
+/* Mobile */
 @media (max-width: 640px) {
-  .am-body-wrapper {
+  .asa-body-wrapper {
     flex-direction: column;
   }
 
-  .am-sidebar {
+  .asa-sidebar {
     width: 100%;
     min-width: unset;
     border-right: none;
@@ -255,27 +663,81 @@
     gap: 4px;
   }
 
-  .am-sidebar-item {
+  .asa-sidebar-item {
     margin: 0;
     font-size: 13px;
   }
 
-  .am-main-content {
-    padding: 20px 16px;
+  .asa-main-content {
+    padding: 16px;
   }
 
-  .am-cards-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .am-top-nav {
+  .asa-top-nav {
     padding: 10px 16px;
     height: auto;
     flex-wrap: wrap;
     gap: 8px;
   }
 
-  .am-page-title {
+  .asa-page-title {
     font-size: 22px;
+  }
+
+  .asa-input {
+    width: 100%;
+  }
+
+  .asa-search-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .asa-search-btn {
+    width: 100%;
+  }
+
+  .asa-card {
+    padding: 16px;
+  }
+
+  .asa-rows-right {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .asa-rows-select {
+    width: 100%;
+  }
+
+  /* Modal Responsive */
+  .asa-modal {
+    margin: 0 16px;
+    max-width: 100%;
+  }
+
+  .asa-modal-footer {
+    flex-direction: column;
+  }
+
+  .asa-modal-cancel,
+  .asa-modal-confirm {
+    width: 100%;
+    text-align: center;
+  }
+
+  .asa-modal-header {
+    padding: 16px 20px 12px;
+  }
+
+  .asa-modal-body {
+    padding: 16px 20px;
+  }
+
+  .asa-modal-footer {
+    padding: 12px 20px 16px;
+  }
+
+  .asa-employee-id {
+    font-size: 10px;
   }
 }
