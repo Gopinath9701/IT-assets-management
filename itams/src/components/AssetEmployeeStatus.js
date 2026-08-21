@@ -3,58 +3,132 @@ import "./EmployeeStatus.css";
 
 const PAGE_SIZE_OPTIONS = [10, 30, 50, "All"];
 
-// Validation function for Employee ID
+// ======================================================
+// EMPLOYEE ID VALIDATION
+//
+// FORMAT:
+// YYDDMMXXX
+//
+// YY  = Actual year
+// DD  = Day
+// MM  = Month
+// XXX = Employee number (001 - 999)
+//
+// RULES:
+// 1. Exactly 9 digits
+// 2. Numbers only
+// 3. No spaces
+// 4. Valid calendar date
+// 5. Past dates allowed
+// 6. Today's date allowed
+// 7. Future dates NOT allowed
+// 8. Last 3 digits must be 001 - 999
+// ======================================================
+
 const validateEmployeeId = (id) => {
-  if (!id || id.trim() === "") {
+
+  // EMPTY
+  if (!id || id.length === 0) {
     return {
       isValid: false,
-      message: "Employee ID is required",
+      message: "Employee ID is required.",
     };
   }
 
-  if (id !== id.trim()) {
-    return {
-      isValid: false,
-      message: "Employee ID should not have leading or trailing spaces",
-    };
-  }
-
+  // SPACES
   if (/\s/.test(id)) {
     return {
       isValid: false,
-      message: "Employee ID should not contain spaces",
+      message: "Employee ID must not contain spaces.",
     };
   }
 
-  if (/[^A-Za-z0-9]/.test(id)) {
+  // ONLY NUMBERS
+  if (!/^\d+$/.test(id)) {
     return {
       isValid: false,
-      message: "Employee ID should not contain special characters",
+      message: "Employee ID must contain only numbers.",
     };
   }
 
-  if (!id.startsWith("EMP")) {
-    return {
-      isValid: false,
-      message: "Employee ID must start with 'EMP'",
-    };
-  }
-
-  if (id.length !== 6) {
+  // EXACTLY 9 DIGITS
+  if (id.length !== 9) {
     return {
       isValid: false,
       message:
-        "Employee ID must be exactly 6 characters long (EMP + 3 alphanumeric characters)",
+        "Employee ID must be exactly 9 digits (YYDDMMXXX).",
     };
   }
 
-  const lastThree = id.substring(3);
+  // SPLIT ID
+  const yearShort = Number(id.substring(0, 2));
+  const day = Number(id.substring(2, 4));
+  const month = Number(id.substring(4, 6));
+  const employeeNumber = Number(id.substring(6, 9));
 
-  if (!/^[A-Za-z0-9]{3}$/.test(lastThree)) {
+  // ACTUAL YEAR
+  const fullYear = 2000 + yearShort;
+
+  // DAY
+  if (day < 1 || day > 31) {
+    return {
+      isValid: false,
+      message: "Employee ID contains an invalid day.",
+    };
+  }
+
+  // MONTH
+  if (month < 1 || month > 12) {
+    return {
+      isValid: false,
+      message: "Employee ID contains an invalid month.",
+    };
+  }
+
+  // EMPLOYEE NUMBER
+  if (
+    employeeNumber < 1 ||
+    employeeNumber > 999
+  ) {
     return {
       isValid: false,
       message:
-        "Last 3 characters must be alphanumeric (letters or numbers)",
+        "Employee number must be between 001 and 999.",
+    };
+  }
+
+  // VALID CALENDAR DATE
+  const employeeDate = new Date(
+    fullYear,
+    month - 1,
+    day
+  );
+
+  employeeDate.setHours(0, 0, 0, 0);
+
+  // PREVENT INVALID DATES
+  if (
+    employeeDate.getFullYear() !== fullYear ||
+    employeeDate.getMonth() !== month - 1 ||
+    employeeDate.getDate() !== day
+  ) {
+    return {
+      isValid: false,
+      message: "Employee ID contains an invalid date.",
+    };
+  }
+
+  // TODAY
+  const today = new Date();
+
+  today.setHours(0, 0, 0, 0);
+
+  // FUTURE DATE CHECK
+  if (employeeDate > today) {
+    return {
+      isValid: false,
+      message:
+        "Future dates are not allowed. Employee ID must contain a past or today's date.",
     };
   }
 
@@ -64,203 +138,465 @@ const validateEmployeeId = (id) => {
   };
 };
 
-// Check if input looks like an Employee ID
-const isEmployeeIdFormat = (value) => {
-  return value.startsWith("EMP") || value.length >= 3;
+
+// ======================================================
+// CHECK WHETHER SEARCH IS AN EMPLOYEE ID
+// ======================================================
+
+const looksLikeEmployeeId = (value) => {
+
+  if (!value) {
+    return false;
+  }
+
+  // Starts with a number
+  if (/^\d/.test(value)) {
+    return true;
+  }
+
+  // Old EMP format
+  if (/^emp/i.test(value)) {
+    return true;
+  }
+
+  return false;
 };
+
+
+// ======================================================
+// CREATE EMPLOYEE FOR A VALID ID
+// ======================================================
+
+const createEmployeeFromId = (employeeId) => {
+
+  const employeeNumber = Number(
+    employeeId.substring(6, 9)
+  );
+
+  return {
+    id: employeeId,
+    name: `Employee ${employeeNumber}`,
+    department: "IT",
+    status: "Active",
+  };
+};
+
+
+// ======================================================
+// MAIN COMPONENT
+// ======================================================
 
 const EmployeeStatus = ({
   username = "username",
   onLogout,
   onBack,
 }) => {
-  const [search, setSearch] = useState("");
-  const [searchApplied, setSearchApplied] = useState("");
-  const [pageSize, setPageSize] = useState(10);
-  const [validationError, setValidationError] = useState("");
-  const [isSearchValid, setIsSearchValid] = useState(true);
-  const [isSearchTouched, setIsSearchTouched] = useState(false);
 
-  // Employee data
-  // setEmployees is not required because the employee list
-  // is not modified anywhere in this component.
-  const [employees] = useState([
+  // ====================================================
+  // SEARCH
+  // ====================================================
+
+  const [search, setSearch] = useState("");
+
+  const [searchApplied, setSearchApplied] =
+    useState("");
+
+
+  // ====================================================
+  // PAGINATION
+  // ====================================================
+
+  const [pageSize, setPageSize] = useState(10);
+
+
+  // ====================================================
+  // VALIDATION
+  // ====================================================
+
+  const [validationError, setValidationError] =
+    useState("");
+
+  const [isSearchValid, setIsSearchValid] =
+    useState(true);
+
+  const [isSearchTouched, setIsSearchTouched] =
+    useState(false);
+
+
+  // ====================================================
+  // EMPLOYEE DATA
+  // ====================================================
+
+  const [employees, setEmployees] = useState([
     {
-      id: "EMP001",
+      id: "250808001",
       name: "Employee 1",
+      department: "IT",
+      status: "On Leave",
+    },
+
+    {
+      id: "260808001",
+      name: "Employee 2",
+      department: "HR",
+      status: "Active",
+    },
+
+    {
+      id: "260812001",
+      name: "Employee 3",
       department: "IT",
       status: "Active",
     },
+
     {
-      id: "EMP002",
-      name: "Employee 2",
+      id: "260813002",
+      name: "Employee 4",
       department: "HR",
       status: "On Leave",
     },
+
     {
-      id: "EMP003",
-      name: "Employee 3",
+      id: "260814003",
+      name: "Employee 5",
       department: "Finance",
       status: "Inactive",
     },
+
     {
-      id: "EMP004",
-      name: "Employee 4",
+      id: "260815004",
+      name: "Employee 6",
       department: "Marketing",
       status: "Active",
     },
+
     {
-      id: "EMP005",
-      name: "Employee 5",
+      id: "260816005",
+      name: "Employee 7",
       department: "IT",
       status: "On Leave",
     },
+
     {
-      id: "EMP006",
-      name: "Employee 6",
+      id: "260817006",
+      name: "Employee 8",
       department: "Sales",
       status: "Inactive",
     },
+
     {
-      id: "EMP007",
-      name: "Employee 7",
+      id: "260818007",
+      name: "Employee 9",
       department: "Operations",
       status: "Active",
     },
+
     {
-      id: "EMP008",
-      name: "Employee 8",
+      id: "260819008",
+      name: "Employee 10",
       department: "Finance",
       status: "On Leave",
     },
+
+    {
+      id: "260820009",
+      name: "Employee 11",
+      department: "IT",
+      status: "Active",
+    },
+
+    {
+      id: "260821010",
+      name: "Employee 12",
+      department: "HR",
+      status: "Active",
+    },
   ]);
 
-  // Handle search input change with validation
+
+  // ====================================================
+  // SEARCH INPUT CHANGE
+  // ====================================================
+
   const handleSearchChange = (e) => {
+
     const value = e.target.value;
 
-    setSearch(value);
+    // Employee ID
+    if (/^\d/.test(value)) {
+
+      const numericValue =
+        value
+          .replace(/\D/g, "")
+          .slice(0, 9);
+
+      setSearch(numericValue);
+
+    } else {
+
+      // Name search
+      setSearch(value);
+    }
+
     setIsSearchTouched(false);
 
-    if (value.trim() === "") {
-      setIsSearchValid(true);
-      setValidationError("");
-    } else {
-      // Only validate if it looks like an Employee ID
-      if (isEmployeeIdFormat(value)) {
-        const result = validateEmployeeId(value);
+    setValidationError("");
 
-        setIsSearchValid(result.isValid);
-        setValidationError(result.message);
-      } else {
-        // It is a name search, no validation needed
-        setIsSearchValid(true);
-        setValidationError("");
-      }
-    }
+    setIsSearchValid(true);
+
+    setSearchApplied("");
   };
 
-  // Handle search with validation
+
+  // ====================================================
+  // SEARCH
+  // ====================================================
+
   const handleSearch = () => {
+
     setIsSearchTouched(true);
 
     const rawValue = search;
 
-    // Empty search
-    if (rawValue.trim() === "") {
+    // EMPTY
+    if (rawValue === "") {
+
       setValidationError(
-        "Please enter an Employee ID or Employee Name to search"
+        "Please enter an Employee ID or Employee Name."
       );
 
       setIsSearchValid(false);
-      setSearchApplied("");
+
+      setSearchApplied(null);
 
       return;
     }
 
-    const stripped = rawValue
-      .replace(/\s/g, "")
-      .toUpperCase();
 
-    const looksLikeEmpId =
-      stripped.startsWith("EMP") &&
-      stripped.length <= 7;
+    // ==================================================
+    // EMPLOYEE ID SEARCH
+    // ==================================================
 
-    // Employee ID search
-    if (looksLikeEmpId) {
-      const result = validateEmployeeId(rawValue);
+    if (looksLikeEmployeeId(rawValue)) {
 
-      if (result.isValid) {
-        setSearchApplied(rawValue);
-        setValidationError("");
-        setIsSearchValid(true);
-      } else {
-        setValidationError(result.message);
+      const result =
+        validateEmployeeId(rawValue);
+
+      // INVALID ID
+      if (!result.isValid) {
+
+        setValidationError(
+          result.message
+        );
+
         setIsSearchValid(false);
+
         setSearchApplied(null);
+
+        return;
       }
 
+      // VALID ID
+      const employeeId = rawValue;
+
+      let foundEmployee =
+        employees.find(
+          (emp) =>
+            emp.id === employeeId
+        );
+
+
+      // ==================================================
+      // CREATE EMPLOYEE IF VALID ID DOES NOT EXIST
+      // ==================================================
+
+      if (!foundEmployee) {
+
+        const newEmployee =
+          createEmployeeFromId(
+            employeeId
+          );
+
+        setEmployees((prev) => [
+          ...prev,
+          newEmployee,
+        ]);
+
+        foundEmployee = newEmployee;
+      }
+
+
+      // SUCCESS
+      setSearchApplied(employeeId);
+
+      setValidationError("");
+
+      setIsSearchValid(true);
+
       return;
     }
 
-    // Employee name search
-    const searchValue = rawValue.trim();
 
-    if (searchValue.length >= 2) {
-      setSearchApplied(searchValue);
-      setValidationError("");
-      setIsSearchValid(true);
-    } else {
+    // ==================================================
+    // NAME SEARCH
+    // ==================================================
+
+    const nameValue =
+      rawValue.trim();
+
+
+    // SPACES BEFORE / AFTER
+    if (rawValue !== nameValue) {
+
       setValidationError(
-        "Please enter at least 2 characters for name search"
+        "Search should not have spaces before or after the name."
       );
 
       setIsSearchValid(false);
+
       setSearchApplied(null);
+
+      return;
     }
+
+
+    // MULTIPLE SPACES
+    if (/\s{2,}/.test(nameValue)) {
+
+      setValidationError(
+        "Name search should not contain multiple spaces."
+      );
+
+      setIsSearchValid(false);
+
+      setSearchApplied(null);
+
+      return;
+    }
+
+
+    // MINIMUM 2 CHARACTERS
+    if (nameValue.length < 2) {
+
+      setValidationError(
+        "Please enter at least 2 characters."
+      );
+
+      setIsSearchValid(false);
+
+      setSearchApplied(null);
+
+      return;
+    }
+
+
+    // ONLY LETTERS
+    if (
+      !/^[A-Za-z]+(?: [A-Za-z]+)*$/.test(
+        nameValue
+      )
+    ) {
+
+      setValidationError(
+        "Name should contain only letters and single spaces."
+      );
+
+      setIsSearchValid(false);
+
+      setSearchApplied(null);
+
+      return;
+    }
+
+
+    // NAME SEARCH SUCCESS
+    setSearchApplied(nameValue);
+
+    setValidationError("");
+
+    setIsSearchValid(true);
   };
 
-  // Handle Enter key press
+
+  // ====================================================
+  // ENTER KEY
+  // ====================================================
+
   const handleKeyDown = (e) => {
+
     if (e.key === "Enter") {
+
       e.preventDefault();
+
       handleSearch();
     }
   };
 
-  // Filter employees based on search
+
+  // ====================================================
+  // FILTER EMPLOYEES
+  // ====================================================
+
   const filteredEmployees =
     searchApplied === null
       ? []
+      : searchApplied === ""
+      ? employees
+      : looksLikeEmployeeId(searchApplied)
+      ? employees.filter(
+          (emp) =>
+            emp.id === searchApplied
+        )
       : employees.filter(
           (emp) =>
-            emp.id
-              .toLowerCase()
-              .includes(searchApplied.toLowerCase()) ||
             emp.name
               .toLowerCase()
-              .includes(searchApplied.toLowerCase())
+              .includes(
+                searchApplied.toLowerCase()
+              )
         );
 
-  // Employees visible on current page
+
+  // ====================================================
+  // PAGE SIZE
+  // ====================================================
+
   const visibleEmployees =
     pageSize === "All"
       ? filteredEmployees
-      : filteredEmployees.slice(0, Number(pageSize));
+      : filteredEmployees.slice(
+          0,
+          Number(pageSize)
+        );
 
-  // Get status badge class
+
+  // ====================================================
+  // STATUS CLASS
+  // ====================================================
+
   const getStatusClass = (status) => {
+
     return `es-status-${status
       .toLowerCase()
-      .replace(" ", "-")}`;
+      .replace(/\s+/g, "-")}`;
   };
+
+
+  // ====================================================
+  // UI
+  // ====================================================
 
   return (
     <div className="es-page">
 
-      {/* Navbar */}
+      {/* ============================================== */}
+      {/* NAVBAR */}
+      {/* ============================================== */}
+
       <nav className="es-nav">
+
         <div className="es-nav-logo">
+
           <span className="es-nav-title">
             ITAMS
           </span>
@@ -268,9 +604,12 @@ const EmployeeStatus = ({
           <span className="es-nav-sub">
             IT Asset Management System
           </span>
+
         </div>
 
+
         <div className="es-nav-right">
+
           <span className="es-nav-user">
             {username}
           </span>
@@ -285,10 +624,16 @@ const EmployeeStatus = ({
           >
             Logout
           </button>
+
         </div>
+
       </nav>
 
-      {/* Body */}
+
+      {/* ============================================== */}
+      {/* BODY */}
+      {/* ============================================== */}
+
       <div className="es-body">
 
         <h1 className="es-page-title">
@@ -296,15 +641,20 @@ const EmployeeStatus = ({
         </h1>
 
         <p className="es-page-sub">
-          View employee status information.
+          View employee status.
         </p>
 
-        {/* Search Card with Validation */}
+
+        {/* ========================================== */}
+        {/* SEARCH CARD */}
+        {/* ========================================== */}
+
         <div className="es-card">
 
           <h2 className="es-card-title">
             Search Employee
           </h2>
+
 
           <div className="es-search-group">
 
@@ -312,18 +662,28 @@ const EmployeeStatus = ({
 
               <input
                 className={`es-input ${
-                  !isSearchValid && isSearchTouched
+                  !isSearchValid &&
+                  isSearchTouched
                     ? "es-input-error"
                     : ""
                 }`}
                 type="text"
+                inputMode="numeric"
+                maxLength={9}
                 placeholder="Enter Employee ID or Employee Name"
                 value={search}
-                onChange={handleSearchChange}
-                onKeyDown={handleKeyDown}
-                aria-invalid={!isSearchValid}
+                onChange={
+                  handleSearchChange
+                }
+                onKeyDown={
+                  handleKeyDown
+                }
+                aria-invalid={
+                  !isSearchValid
+                }
                 aria-describedby="validation-error"
               />
+
 
               <button
                 className="es-btn-primary"
@@ -334,81 +694,147 @@ const EmployeeStatus = ({
 
             </div>
 
-            {validationError && isSearchTouched && (
-              <div
-                className="es-validation-error"
-                id="validation-error"
-                role="alert"
-              >
-                ⚠️ {validationError}
-              </div>
-            )}
+
+            {/* ====================================== */}
+            {/* VALIDATION MESSAGE */}
+            {/* ====================================== */}
+
+            {validationError &&
+              isSearchTouched && (
+
+                <div
+                  className="es-validation-error"
+                  id="validation-error"
+                  role="alert"
+                >
+                  ⚠️ {validationError}
+                </div>
+              )}
+
+
+            {/* ====================================== */}
+            {/* FORMAT HINT */}
+            {/* ====================================== */}
 
             <div className="es-validation-hint">
+
               <small>
-                Format: EMP + 3 alphanumeric characters
-                (e.g., EMP001, EMPA12, EMP1AB)
+                Employee ID format: YYDDMMXXX — exactly
+                9 digits. Past and today's dates are
+                allowed. Future dates are not allowed.
+                Last 3 digits: 001–999.
               </small>
+
             </div>
 
           </div>
+
         </div>
 
-        {/* Table */}
+
+        {/* ========================================== */}
+        {/* EMPLOYEE TABLE */}
+        {/* ========================================== */}
+
         <div className="es-table-wrapper">
 
           <table className="es-table">
 
             <thead>
+
               <tr>
-                <th>Employee ID</th>
-                <th>Employee Name</th>
-                <th>Department</th>
-                <th>Status</th>
+
+                <th>
+                  Employee ID
+                </th>
+
+                <th>
+                  Employee Name
+                </th>
+
+                <th>
+                  Department
+                </th>
+
+                <th>
+                  Status
+                </th>
+
               </tr>
+
             </thead>
+
 
             <tbody>
 
               {visibleEmployees.length > 0 ? (
-                visibleEmployees.map((emp) => (
-                  <tr key={emp.id}>
 
-                    <td>
-                      <span className="es-employee-id">
-                        {emp.id}
-                      </span>
-                    </td>
+                visibleEmployees.map(
+                  (emp) => {
 
-                    <td>
-                      {emp.name}
-                    </td>
+                    return (
 
-                    <td>
-                      {emp.department}
-                    </td>
-
-                    <td>
-                      <span
-                        className={`es-status-badge ${getStatusClass(
-                          emp.status
-                        )}`}
+                      <tr
+                        key={emp.id}
                       >
-                        {emp.status}
-                      </span>
-                    </td>
 
-                  </tr>
-                ))
+                        {/* EMPLOYEE ID */}
+
+                        <td>
+
+                          <span className="es-employee-id">
+                            {emp.id}
+                          </span>
+
+                        </td>
+
+
+                        {/* EMPLOYEE NAME */}
+
+                        <td>
+                          {emp.name}
+                        </td>
+
+
+                        {/* DEPARTMENT */}
+
+                        <td>
+                          {emp.department}
+                        </td>
+
+
+                        {/* STATUS */}
+
+                        <td>
+
+                          <span
+                            className={`es-status-badge ${getStatusClass(
+                              emp.status
+                            )}`}
+                          >
+                            {emp.status}
+                          </span>
+
+                        </td>
+
+                      </tr>
+                    );
+                  }
+                )
+
               ) : (
+
                 <tr>
+
                   <td
                     colSpan="4"
                     className="es-no-data"
                   >
                     No employees found.
                   </td>
+
                 </tr>
+
               )}
 
             </tbody>
@@ -417,42 +843,63 @@ const EmployeeStatus = ({
 
         </div>
 
-        {/* Pagination */}
+
+        {/* ========================================== */}
+        {/* PAGINATION */}
+        {/* ========================================== */}
+
         <div className="es-pagination-row">
 
           <span className="es-pagination-info">
-            Showing {visibleEmployees.length} of{" "}
-            {filteredEmployees.length} employees
+
+            Showing{" "}
+            {visibleEmployees.length}{" "}
+            of{" "}
+            {filteredEmployees.length}{" "}
+            employees
+
           </span>
+
 
           <select
             className="es-page-size"
             value={pageSize}
             onChange={(e) => {
-              const v = e.target.value;
+
+              const value =
+                e.target.value;
 
               setPageSize(
-                v === "All"
+                value === "All"
                   ? "All"
-                  : Number(v)
+                  : Number(value)
               );
+
             }}
           >
 
-            {PAGE_SIZE_OPTIONS.map((o) => (
-              <option
-                key={o}
-                value={o}
-              >
-                {o}
-              </option>
-            ))}
+            {PAGE_SIZE_OPTIONS.map(
+              (option) => (
+
+                <option
+                  key={option}
+                  value={option}
+                >
+                  {option}
+                </option>
+
+              )
+            )}
 
           </select>
 
         </div>
 
-        {/* Back */}
+
+        {/* ========================================== */}
+        {/* BACK */}
+        {/* ========================================== */}
+
         <button
           className="es-back-btn"
           onClick={onBack}
@@ -461,6 +908,7 @@ const EmployeeStatus = ({
         </button>
 
       </div>
+
     </div>
   );
 };
