@@ -4,7 +4,7 @@ const { getInventory } = require("../controllers/inventoryController");
 
 const router = express.Router();
 
-router.use(authenticate, authorize("AssetManager", "Admin"));
+router.use(authenticate, authorize("AssetManager", "AssetInventory", "InventoryManager", "Admin"));
 router.get("/", getInventory);
 
 module.exports = router;

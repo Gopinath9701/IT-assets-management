@@ -1,5 +1,6 @@
 const { pool } = require("../config/db");
 const { generateAssignmentId } = require("../utils/idGenerator");
+const { validateAssignmentPayload } = require("../utils/validators");
 
 // GET /api/asset-assignments/pending  — approved requests not yet assigned
 async function getPending(req, res, next) {
@@ -69,9 +70,11 @@ async function getAvailableAssets(req, res, next) {
 async function assignAsset(req, res, next) {
   const client = await pool.connect();
   try {
-    const { requestId, assetId } = req.body;
-    if (!requestId || !assetId) {
-      return res.status(400).json({ success: false, message: "requestId and assetId are required" });
+    const { requestId, assetId, employeeId } = req.body;
+
+    const validationError = validateAssignmentPayload({ requestId, assetId, employeeId });
+    if (validationError) {
+      return res.status(400).json({ success: false, message: validationError });
     }
 
     const reqRows = await client.query(
@@ -94,18 +97,18 @@ async function assignAsset(req, res, next) {
       return res.status(400).json({ success: false, message: "Asset not found or not available for assignment" });
     }
 
-    const employeeId = reqRows.rows[0].employee_id;
+    const assignedEmployeeId = reqRows.rows[0].employee_id;
     const assignmentId = await generateAssignmentId();
 
     await client.query("BEGIN");
     await client.query(
       `INSERT INTO asset_assignments (assignment_id, request_id, employee_id, asset_id, assigned_date)
        VALUES ($1, $2, $3, $4, CURRENT_DATE)`,
-      [assignmentId, requestId, employeeId, assetId]
+      [assignmentId, requestId, assignedEmployeeId, assetId]
     );
     await client.query(
       "UPDATE assets SET status = 'In Use', assigned_to = $1 WHERE asset_id = $2",
-      [employeeId, assetId]
+      [assignedEmployeeId, assetId]
     );
     await client.query("COMMIT");
 

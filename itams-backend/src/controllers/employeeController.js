@@ -14,7 +14,7 @@ async function getEmployees(req, res, next) {
     );
     res.json({ success: true, employees: rows });
   } catch (err) {
-    next(err);
+    next(err); 
   }
 }
 
@@ -154,17 +154,6 @@ async function updateEmployeeStatus(req, res, next) {
 }
 
 // DELETE /api/employees/:employeeId
-
-
-// GET /api/employees/:employeeId/dashboard  (Employee dashboard support)
-async function getEmployeeDashboard(req, res, next) {
-  try {
-    const { employeeId } = req.params;
-    const { rows: employeeRows } = await pool.query("SELECT * FROM employees WHERE employee_id = $1", [employeeId]);
-
-    if (employeeRows.length === 0) {
-      return res.status(404).json({ success: false, message: "Employee not found" });
-    }
 async function deleteEmployee(req, res, next) {
   const client = await pool.connect();
   try {
@@ -189,6 +178,17 @@ async function deleteEmployee(req, res, next) {
     client.release();
   }
 }
+
+// GET /api/employees/:employeeId/dashboard  (Employee dashboard support)
+async function getEmployeeDashboard(req, res, next) {
+  try {
+    const { employeeId } = req.params;
+    const { rows: employeeRows } = await pool.query("SELECT * FROM employees WHERE employee_id = $1", [employeeId]);
+
+    if (employeeRows.length === 0) {
+      return res.status(404).json({ success: false, message: "Employee not found" });
+    }
+
     const { rows: assignedAssets } = await pool.query(
       `SELECT a.asset_id, a.asset_name, a.asset_type, aa.assigned_date
        FROM asset_assignments aa
