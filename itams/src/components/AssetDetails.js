@@ -7,19 +7,13 @@ const ROWS_OPTIONS = [10, 30, 50, "All"];
 // STATUS BADGE CLASSES
 // ==========================================
 const STATUS_CLASS = {
-  Active: "ad-badge--active",
-  Inactive: "ad-badge--inactive",
-  onLeave: "ad-badge--onleave",
-  "On Leave": "ad-badge--onleave",
-
-  // Keep these if your backend still has old values
+  Available: "ad-badge--active",
   "In Use": "ad-badge--inuse",
-  "Under Maintenance": "ad-badge--maintenance",
-  "Not In Use": "ad-badge--notinuse",
+  Maintenance: "ad-badge--maintenance",
 };
 
 // ==========================================
-// FIXED ASSET TYPE OPTIONS
+// ASSET TYPE OPTIONS
 // ==========================================
 const ASSET_TYPE_OPTIONS = [
   "All Asset Types",
@@ -33,13 +27,13 @@ const ASSET_TYPE_OPTIONS = [
 ];
 
 // ==========================================
-// FIXED STATUS OPTIONS
+// STATUS OPTIONS
 // ==========================================
 const STATUS_OPTIONS = [
   "All Status",
-  "Active",
-  "Inactive",
-  "onLeave",
+  "Available",
+  "In Use",
+  "Maintenance",
 ];
 
 // ==========================================
@@ -49,14 +43,7 @@ const AssetDetails = ({
   username = "username",
   onLogout,
   onBack,
-  onSidebarNavigate,
 }) => {
-  // ==========================================
-  // SIDEBAR
-  // ==========================================
-  const [activeSidebar, setActiveSidebar] =
-    useState("asset-management");
-
   // ==========================================
   // ASSETS FROM DATABASE
   // ==========================================
@@ -68,62 +55,61 @@ const AssetDetails = ({
   // SEARCH / FILTER
   // ==========================================
   const [searchText, setSearchText] = useState("");
+  const [filterCat, setFilterCat] = useState("All Asset Types");
+  const [filterStat, setFilterStat] = useState("All Status");
 
-  const [filterCat, setFilterCat] =
-    useState("All Asset Types");
-
-  const [filterStat, setFilterStat] =
-    useState("All Status");
-
-  const [searchError, setSearchError] =
-    useState("");
-
-  const [showFieldError, setShowFieldError] =
-    useState(false);
+  const [searchError, setSearchError] = useState("");
+  const [showFieldError, setShowFieldError] = useState(false);
 
   // ==========================================
   // TABLE
   // ==========================================
-  const [rowsPerPage, setRowsPerPage] =
-    useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   // ==========================================
   // VIEW ASSET
   // ==========================================
-  const [selectedAsset, setSelectedAsset] =
-    useState(null);
-
-  // ==========================================
-  // SIDEBAR ITEMS
-  // ==========================================
-  const sidebarItems = [
-    {
-      id: "dashboard",
-      label: "Dashboard",
-    },
-    {
-      id: "asset-management",
-      label: "Asset Management",
-    },
-    {
-      id: "asset-assignment",
-      label: "Asset Assignment",
-    },
-    {
-      id: "request-approval",
-      label: "Request Approval",
-    },
-    {
-      id: "maintenance",
-      label: "Maintenance",
-    },
-  ];
+  const [selectedAsset, setSelectedAsset] = useState(null);
 
   // ==========================================
   // FIXED FILTER OPTIONS
   // ==========================================
   const categories = ASSET_TYPE_OPTIONS;
   const statuses = STATUS_OPTIONS;
+
+  // ==========================================
+  // NORMALIZE STATUS
+  // ==========================================
+  const normalizeStatus = (status) => {
+    if (!status) {
+      return "";
+    }
+
+    const value = String(status).trim().toLowerCase();
+
+    if (
+      value === "available" ||
+      value === "active" ||
+      value === "not in use"
+    ) {
+      return "Available";
+    }
+
+    if (
+      value === "in use"
+    ) {
+      return "In Use";
+    }
+
+    if (
+      value === "maintenance" ||
+      value === "under maintenance"
+    ) {
+      return "Maintenance";
+    }
+
+    return status;
+  };
 
   // ==========================================
   // FETCH ASSETS FROM BACKEND
@@ -133,8 +119,7 @@ const AssetDetails = ({
       setLoading(true);
       setFetchError("");
 
-      const token =
-        localStorage.getItem("token");
+      const token = localStorage.getItem("token");
 
       if (!token) {
         throw new Error(
@@ -146,13 +131,9 @@ const AssetDetails = ({
         "http://localhost:5000/api/assets",
         {
           method: "GET",
-
           headers: {
-            "Content-Type":
-              "application/json",
-
-            Authorization:
-              `Bearer ${token}`,
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -161,17 +142,13 @@ const AssetDetails = ({
 
       if (!response.ok) {
         throw new Error(
-          data.message ||
-            "Failed to fetch assets"
+          data.message || "Failed to fetch assets"
         );
       }
 
       setAssets(data.assets || []);
     } catch (error) {
-      console.error(
-        "Fetch Assets Error:",
-        error
-      );
+      console.error("Fetch Assets Error:", error);
 
       setFetchError(
         error.message ||
@@ -188,26 +165,64 @@ const AssetDetails = ({
   useEffect(() => {
     fetchAssets();
 
-    // Prevent exhaustive-deps warning
-    // because fetchAssets is intentionally
-    // called only when the page loads.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ==========================================
-  // SIDEBAR CLICK
+  // SEARCH VALIDATION
   // ==========================================
-  const handleSidebarClick = (item) => {
-    console.log(
-      "AssetDetails sidebar clicked:",
-      item.id
-    );
+  const validateSearchText = () => {
+    const value = searchText;
 
-    setActiveSidebar(item.id);
-
-    if (onSidebarNavigate) {
-      onSidebarNavigate(item.id);
+    // Empty search
+    if (value.length === 0) {
+      return "Please enter an Asset ID or Asset Type";
     }
+
+    // Space before value
+    if (value !== value.trimStart()) {
+      return "Search should not have spaces before the value";
+    }
+
+    // Space after value
+    if (value !== value.trimEnd()) {
+      return "Search should not have spaces after the value";
+    }
+
+    // Any space inside the value
+    if (/\s/.test(value)) {
+      return "Search should not contain spaces";
+    }
+
+    // Special characters
+    if (!/^[A-Za-z0-9]+$/.test(value)) {
+      return "Search should not contain special characters";
+    }
+
+    // Minimum length
+    if (value.length < 2) {
+      return "Search must contain at least 2 characters";
+    }
+
+    return "";
+  };
+
+  // ==========================================
+  // STATUS VALIDATION
+  // ==========================================
+  const validateStatus = () => {
+    const validStatuses = [
+      "All Status",
+      "Available",
+      "In Use",
+      "Maintenance",
+    ];
+
+    if (!validStatuses.includes(filterStat)) {
+      return "Please select a valid asset status";
+    }
+
+    return "";
   };
 
   // ==========================================
@@ -217,21 +232,41 @@ const AssetDetails = ({
     setSearchError("");
     setShowFieldError(false);
 
-    const hasSearch =
-      searchText.trim() !== "";
+    // Validate status
+    const statusError = validateStatus();
+
+    if (statusError) {
+      setSearchError(statusError);
+      setShowFieldError(true);
+      return false;
+    }
+
+    const hasSearch = searchText.length > 0;
 
     const hasFilter =
       filterCat !== "All Asset Types" ||
       filterStat !== "All Status";
 
+    // Nothing entered or selected
     if (!hasSearch && !hasFilter) {
       setSearchError(
-        "Please enter a search term or select at least one filter."
+        "Please enter an Asset ID or Asset Type, or select a filter."
       );
 
       setShowFieldError(true);
-
       return false;
+    }
+
+    // Validate search if entered
+    if (hasSearch) {
+      const searchValidationError =
+        validateSearchText();
+
+      if (searchValidationError) {
+        setSearchError(searchValidationError);
+        setShowFieldError(true);
+        return false;
+      }
     }
 
     return true;
@@ -248,8 +283,9 @@ const AssetDetails = ({
   // SEARCH INPUT
   // ==========================================
   const handleSearchChange = (e) => {
-    setSearchText(e.target.value);
+    const value = e.target.value;
 
+    setSearchText(value);
     setSearchError("");
     setShowFieldError(false);
   };
@@ -257,13 +293,14 @@ const AssetDetails = ({
   // ==========================================
   // FILTER CHANGE
   // ==========================================
-  const handleFilterChange =
-    (setter) => (e) => {
-      setter(e.target.value);
+  const handleFilterChange = (setter) => (e) => {
+    const value = e.target.value;
 
-      setSearchError("");
-      setShowFieldError(false);
-    };
+    setter(value);
+
+    setSearchError("");
+    setShowFieldError(false);
+  };
 
   // ==========================================
   // ENTER KEY
@@ -271,7 +308,6 @@ const AssetDetails = ({
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
-
       applyFilters();
     }
   };
@@ -281,15 +317,8 @@ const AssetDetails = ({
   // ==========================================
   const handleReset = () => {
     setSearchText("");
-
-    setFilterCat(
-      "All Asset Types"
-    );
-
-    setFilterStat(
-      "All Status"
-    );
-
+    setFilterCat("All Asset Types");
+    setFilterStat("All Status");
     setSearchError("");
     setShowFieldError(false);
   };
@@ -297,66 +326,45 @@ const AssetDetails = ({
   // ==========================================
   // FILTER DATABASE DATA
   // ==========================================
-  const filtered = assets.filter(
-    (asset) => {
-      const search =
-        searchText
-          .toLowerCase()
-          .trim();
+  const filtered = assets.filter((asset) => {
+    const search = searchText.toLowerCase();
 
-      // ========================================
-      // SEARCH MATCH
-      // ========================================
-      const matchSearch =
-        search === "" ||
-        (asset.asset_name || "")
-          .toLowerCase()
-          .includes(search) ||
-        (asset.asset_id || "")
-          .toLowerCase()
-          .includes(search);
+    // ========================================
+    // SEARCH MATCH
+    // ========================================
+    const matchSearch =
+      search === "" ||
+      (asset.asset_name || "")
+        .toLowerCase()
+        .includes(search) ||
+      (asset.asset_id || "")
+        .toLowerCase()
+        .includes(search);
 
-      // ========================================
-      // ASSET TYPE MATCH
-      // ========================================
-      const matchCategory =
-        filterCat ===
-          "All Asset Types" ||
-        asset.asset_type ===
-          filterCat;
+    // ========================================
+    // ASSET TYPE MATCH
+    // ========================================
+    const matchCategory =
+      filterCat === "All Asset Types" ||
+      (asset.asset_type || "").toLowerCase() ===
+        filterCat.toLowerCase();
 
-      // ========================================
-      // STATUS MATCH
-      // ========================================
-      let matchStatus = true;
+    // ========================================
+    // STATUS MATCH
+    // ========================================
+    const normalizedAssetStatus =
+      normalizeStatus(asset.status);
 
-      if (
-        filterStat !== "All Status"
-      ) {
-        if (
-          filterStat === "onLeave"
-        ) {
-          // Accept both possible
-          // backend values
-          matchStatus =
-            asset.status ===
-              "onLeave" ||
-            asset.status ===
-              "On Leave";
-        } else {
-          matchStatus =
-            asset.status ===
-            filterStat;
-        }
-      }
+    const matchStatus =
+      filterStat === "All Status" ||
+      normalizedAssetStatus === filterStat;
 
-      return (
-        matchSearch &&
-        matchCategory &&
-        matchStatus
-      );
-    }
-  );
+    return (
+      matchSearch &&
+      matchCategory &&
+      matchStatus
+    );
+  });
 
   // ==========================================
   // DISPLAYED ROWS
@@ -364,36 +372,30 @@ const AssetDetails = ({
   const displayed =
     rowsPerPage === "All"
       ? filtered
-      : filtered.slice(
-          0,
-          rowsPerPage
-        );
+      : filtered.slice(0, rowsPerPage);
 
   // ==========================================
   // STATISTICS
   // ==========================================
-  const totalAssets =
-    assets.length;
+  const totalAssets = assets.length;
+
+  const available = assets.filter(
+    (asset) =>
+      normalizeStatus(asset.status) ===
+      "Available"
+  ).length;
 
   const inUse = assets.filter(
     (asset) =>
-      asset.status ===
+      normalizeStatus(asset.status) ===
       "In Use"
   ).length;
 
-  const underMaintenance =
-    assets.filter(
-      (asset) =>
-        asset.status ===
-        "Under Maintenance"
-    ).length;
-
-  const notInUse =
-    assets.filter(
-      (asset) =>
-        asset.status ===
-        "Not In Use"
-    ).length;
+  const maintenance = assets.filter(
+    (asset) =>
+      normalizeStatus(asset.status) ===
+      "Maintenance"
+  ).length;
 
   // ==========================================
   // DATE FORMAT
@@ -404,9 +406,7 @@ const AssetDetails = ({
     }
 
     try {
-      return new Date(
-        date
-      ).toLocaleDateString(
+      return new Date(date).toLocaleDateString(
         "en-GB"
       );
     } catch {
@@ -420,9 +420,7 @@ const AssetDetails = ({
   return (
     <div className="ad-page-wrapper">
 
-      {/* ======================================
-          TOP NAVBAR
-      ====================================== */}
+      {/* TOP NAVBAR */}
       <nav className="ad-top-nav">
 
         <div className="ad-nav-logo">
@@ -456,47 +454,10 @@ const AssetDetails = ({
 
       </nav>
 
-      {/* ======================================
-          BODY
-      ====================================== */}
+      {/* BODY */}
       <div className="ad-body-wrapper">
 
-        {/* ====================================
-            SIDEBAR
-        ==================================== */}
-        <aside className="ad-sidebar">
-
-          {sidebarItems.map(
-            (item) => (
-
-              <div
-                key={item.id}
-                className={
-                  "ad-sidebar-item" +
-                  (
-                    activeSidebar ===
-                    item.id
-                      ? " ad-sidebar-item--active"
-                      : ""
-                  )
-                }
-                onClick={() =>
-                  handleSidebarClick(
-                    item
-                  )
-                }
-              >
-                {item.label}
-              </div>
-
-            )
-          )}
-
-        </aside>
-
-        {/* ====================================
-            MAIN CONTENT
-        ==================================== */}
+        {/* MAIN CONTENT */}
         <main className="ad-main-content">
 
           {/* PAGE TITLE */}
@@ -520,9 +481,7 @@ const AssetDetails = ({
 
           </div>
 
-          {/* ==================================
-              STAT CARDS
-          ================================== */}
+          {/* STAT CARDS */}
           <div className="ad-stats-row">
 
             <div className="ad-stat-card">
@@ -533,6 +492,18 @@ const AssetDetails = ({
 
               <span className="ad-stat-value">
                 {totalAssets}
+              </span>
+
+            </div>
+
+            <div className="ad-stat-card">
+
+              <span className="ad-stat-label">
+                Available
+              </span>
+
+              <span className="ad-stat-value">
+                {available}
               </span>
 
             </div>
@@ -552,43 +523,27 @@ const AssetDetails = ({
             <div className="ad-stat-card">
 
               <span className="ad-stat-label">
-                Under Maintenance
+                Maintenance
               </span>
 
               <span className="ad-stat-value">
-                {underMaintenance}
-              </span>
-
-            </div>
-
-            <div className="ad-stat-card">
-
-              <span className="ad-stat-label">
-                Not In Use
-              </span>
-
-              <span className="ad-stat-value">
-                {notInUse}
+                {maintenance}
               </span>
 
             </div>
 
           </div>
 
-          {/* ==================================
-              SEARCH / FILTER
-          ================================== */}
+          {/* SEARCH / FILTER */}
           <div className="ad-filters-row">
 
             {/* SEARCH */}
             <div
-              className={
-                `ad-search-wrapper ${
-                  showFieldError
-                    ? "ad-search-wrapper--error"
-                    : ""
-                }`
-              }
+              className={`ad-search-wrapper ${
+                showFieldError
+                  ? "ad-search-wrapper--error"
+                  : ""
+              }`}
             >
 
               <svg
@@ -615,100 +570,72 @@ const AssetDetails = ({
               </svg>
 
               <input
-                className={
-                  `ad-search-input ${
-                    showFieldError
-                      ? "ad-input--error"
-                      : ""
-                  }`
-                }
+                className={`ad-search-input ${
+                  showFieldError
+                    ? "ad-input--error"
+                    : ""
+                }`}
                 type="text"
                 placeholder="Search assets..."
                 value={searchText}
-                onChange={
-                  handleSearchChange
-                }
-                onKeyDown={
-                  handleKeyDown
-                }
+                onChange={handleSearchChange}
+                onKeyDown={handleKeyDown}
               />
 
             </div>
 
-            {/* =================================
-                ASSET TYPE DROPDOWN
-            ================================= */}
+            {/* ASSET TYPE DROPDOWN */}
             <select
-              className={
-                `ad-filter-select ${
-                  showFieldError
-                    ? "ad-input--error"
-                    : ""
-                }`
-              }
+              className={`ad-filter-select ${
+                showFieldError
+                  ? "ad-input--error"
+                  : ""
+              }`}
               value={filterCat}
-              onChange={
-                handleFilterChange(
-                  setFilterCat
-                )
-              }
+              onChange={handleFilterChange(
+                setFilterCat
+              )}
             >
 
-              {categories.map(
-                (category) => (
-
-                  <option
-                    key={category}
-                    value={category}
-                  >
-                    {category}
-                  </option>
-
-                )
-              )}
+              {categories.map((category) => (
+                <option
+                  key={category}
+                  value={category}
+                >
+                  {category}
+                </option>
+              ))}
 
             </select>
 
-            {/* =================================
-                STATUS DROPDOWN
-            ================================= */}
+            {/* STATUS DROPDOWN */}
             <select
-              className={
-                `ad-filter-select ${
-                  showFieldError
-                    ? "ad-input--error"
-                    : ""
-                }`
-              }
+              className={`ad-filter-select ${
+                showFieldError
+                  ? "ad-input--error"
+                  : ""
+              }`}
               value={filterStat}
-              onChange={
-                handleFilterChange(
-                  setFilterStat
-                )
-              }
+              onChange={handleFilterChange(
+                setFilterStat
+              )}
             >
 
-              {statuses.map(
-                (status) => (
-
-                  <option
-                    key={status}
-                    value={status}
-                  >
-                    {status}
-                  </option>
-
-                )
-              )}
+              {statuses.map((status) => (
+                <option
+                  key={status}
+                  value={status}
+                >
+                  {status}
+                </option>
+              ))}
 
             </select>
 
             {/* SEARCH BUTTON */}
             <button
               className="ad-search-btn"
-              onClick={
-                applyFilters
-              }
+              onClick={applyFilters}
             >
               Search
             </button>
@@ -716,20 +643,15 @@ const AssetDetails = ({
             {/* RESET BUTTON */}
             <button
               className="ad-reset-btn"
-              onClick={
-                handleReset
-              }
+              onClick={handleReset}
             >
               Reset
             </button>
 
           </div>
 
-          {/* ==================================
-              SEARCH ERROR
-          ================================== */}
+          {/* SEARCH ERROR */}
           {searchError && (
-
             <div className="ad-error-container">
 
               <span className="ad-error-text">
@@ -737,14 +659,10 @@ const AssetDetails = ({
               </span>
 
             </div>
-
           )}
 
-          {/* ==================================
-              FETCH ERROR
-          ================================== */}
+          {/* FETCH ERROR */}
           {fetchError && (
-
             <div className="ad-error-container">
 
               <span className="ad-error-text">
@@ -752,12 +670,9 @@ const AssetDetails = ({
               </span>
 
             </div>
-
           )}
 
-          {/* ==================================
-              BACK BUTTON
-          ================================== */}
+          {/* BACK BUTTON */}
           <div className="ad-back-row">
 
             <button
@@ -769,9 +684,7 @@ const AssetDetails = ({
 
           </div>
 
-          {/* ==================================
-              LOADING / TABLE
-          ================================== */}
+          {/* LOADING / TABLE */}
           {loading ? (
 
             <div className="ad-error-container">
@@ -833,83 +746,73 @@ const AssetDetails = ({
 
                   ) : (
 
-                    displayed.map(
-                      (asset) => (
+                    displayed.map((asset) => (
 
-                        <tr
-                          key={
-                            asset.asset_id
-                          }
-                        >
+                      <tr
+                        key={asset.asset_id}
+                      >
 
-                          {/* ASSET ID */}
-                          <td>
+                        {/* ASSET ID */}
+                        <td>
 
-                            <span className="ad-asset-id">
-                              {
-                                asset.asset_id
-                              }
-                            </span>
+                          <span className="ad-asset-id">
+                            {asset.asset_id}
+                          </span>
 
-                          </td>
+                        </td>
 
-                          {/* ASSET TYPE */}
-                          <td>
-                            {
-                              asset.asset_type ||
-                              "-"
-                            }
-                          </td>
+                        {/* ASSET TYPE */}
+                        <td>
+                          {asset.asset_type || "-"}
+                        </td>
 
-                          {/* STATUS */}
-                          <td>
+                        {/* STATUS */}
+                        <td>
 
-                            <span
-                              className={
-                                `ad-badge ${
-                                  STATUS_CLASS[
-                                    asset.status
-                                  ] || ""
-                                }`
-                              }
-                            >
-                              {
-                                asset.status ||
-                                "-"
-                              }
-                            </span>
-
-                          </td>
-
-                          {/* PURCHASE DATE */}
-                          <td>
-
-                            {formatDate(
-                              asset.purchase_date
-                            )}
-
-                          </td>
-
-                          {/* ACTION */}
-                          <td>
-
-                            <button
-                              className="ad-view-btn"
-                              onClick={() =>
-                                setSelectedAsset(
-                                  asset
+                          <span
+                            className={`ad-badge ${
+                              STATUS_CLASS[
+                                normalizeStatus(
+                                  asset.status
                                 )
-                              }
-                            >
-                              View
-                            </button>
+                              ] || ""
+                            }`}
+                          >
+                            {normalizeStatus(
+                              asset.status
+                            ) || "-"}
+                          </span>
 
-                          </td>
+                        </td>
 
-                        </tr>
+                        {/* PURCHASE DATE */}
+                        <td>
 
-                      )
-                    )
+                          {formatDate(
+                            asset.purchase_date
+                          )}
+
+                        </td>
+
+                        {/* ACTION */}
+                        <td>
+
+                          <button
+                            className="ad-view-btn"
+                            onClick={() =>
+                              setSelectedAsset(
+                                asset
+                              )
+                            }
+                          >
+                            View
+                          </button>
+
+                        </td>
+
+                      </tr>
+
+                    ))
 
                   )}
 
@@ -921,9 +824,7 @@ const AssetDetails = ({
 
           )}
 
-          {/* ==================================
-              TABLE FOOTER
-          ================================== */}
+          {/* TABLE FOOTER */}
           <div className="ad-table-footer">
 
             <span className="ad-pagination-info">
@@ -953,18 +854,16 @@ const AssetDetails = ({
               }}
             >
 
-              {ROWS_OPTIONS.map(
-                (option) => (
+              {ROWS_OPTIONS.map((option) => (
 
-                  <option
-                    key={option}
-                    value={option}
-                  >
-                    {option}
-                  </option>
+                <option
+                  key={option}
+                  value={option}
+                >
+                  {option}
+                </option>
 
-                )
-              )}
+              ))}
 
             </select>
 
@@ -974,9 +873,7 @@ const AssetDetails = ({
 
       </div>
 
-      {/* ======================================
-          ASSET DETAIL MODAL
-      ====================================== */}
+      {/* ASSET DETAIL MODAL */}
       {selectedAsset && (
 
         <div
@@ -1038,7 +935,9 @@ const AssetDetails = ({
 
                 [
                   "Status",
-                  selectedAsset.status,
+                  normalizeStatus(
+                    selectedAsset.status
+                  ),
                 ],
 
                 [
@@ -1059,26 +958,25 @@ const AssetDetails = ({
                   "Description",
                   selectedAsset.description,
                 ],
-              ].map(
-                ([label, value]) => (
 
-                  <div
-                    className="ad-detail-row"
-                    key={label}
-                  >
+              ].map(([label, value]) => (
 
-                    <span className="ad-detail-label">
-                      {label}
-                    </span>
+                <div
+                  className="ad-detail-row"
+                  key={label}
+                >
 
-                    <span className="ad-detail-value">
-                      {value || "-"}
-                    </span>
+                  <span className="ad-detail-label">
+                    {label}
+                  </span>
 
-                  </div>
+                  <span className="ad-detail-value">
+                    {value || "-"}
+                  </span>
 
-                )
-              )}
+                </div>
+
+              ))}
 
             </div>
 
