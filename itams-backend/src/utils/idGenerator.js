@@ -67,3 +67,15 @@ async function generateAssignmentId() {
 }
 
 module.exports = { generateEmployeeId, generateAssetId, generateRequestId, generateAssignmentId, ASSET_TYPE_PREFIXES };
+// Sequential, e.g. DEP001, DEP002... generated server-side, never trusted from
+// the client (same reasoning as employee/asset IDs).
+async function generateDepartmentId() {
+  const { rows } = await pool.query(
+    `SELECT MAX(CAST(SUBSTRING(department_id FROM 4) AS INT)) AS max_seq
+     FROM departments WHERE department_id LIKE 'DEP%'`
+  );
+  const nextSeq = (Number(rows[0].max_seq) || 0) + 1;
+  return `DEP${String(nextSeq).padStart(3, "0")}`;
+}
+
+module.exports = { generateEmployeeId, generateAssetId, generateRequestId, generateAssignmentId, generateDepartmentId, ASSET_TYPE_PREFIXES };

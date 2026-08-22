@@ -1,3 +1,4 @@
+const { generateDepartmentId } = require("../utils/idGenerator");
 const { pool } = require("../config/db");
 const { DEPARTMENT_NAME_REGEX } = require("../utils/validators");
 
@@ -12,13 +13,12 @@ async function getDepartments(req, res, next) {
   } catch (err) {
     next(err);
   }
-}
-
+}   
 async function addDepartment(req, res, next) {
   try {
-    const { departmentId, departmentName, departmentHead, employeeCount } = req.body;
+    const { departmentName, departmentHead, employeeCount } = req.body;
 
-    if (!departmentId || !departmentName || !departmentHead || employeeCount === undefined) {
+    if (!departmentName || !departmentHead || employeeCount === undefined) {
       return res.status(400).json({ success: false, message: "Please fill all fields." });
     }
     if (!DEPARTMENT_NAME_REGEX.test(departmentName)) {
@@ -28,15 +28,17 @@ async function addDepartment(req, res, next) {
       return res.status(400).json({ success: false, message: "Department Head must contain letters only." });
     }
 
+    const departmentId = await generateDepartmentId();
+
     await pool.query(
       "INSERT INTO departments (department_id, name, head, employee_count) VALUES ($1, $2, $3, $4)",
       [departmentId, departmentName, departmentHead, employeeCount]
     );
 
-    res.status(201).json({ success: true, message: "Department added" });
+    res.status(201).json({ success: true, message: "Department added", departmentId });
   } catch (err) {
     if (err.code === "23505") {
-      return res.status(409).json({ success: false, message: "Department ID already exists" });
+      return res.status(409).json({ success: false, message: "Department already exists" });
     }
     next(err);
   }
