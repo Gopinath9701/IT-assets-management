@@ -206,9 +206,10 @@ const getPasswordRequirements = (password) => {
     uppercase: /[A-Z]/.test(password),
     lowercase: /[a-z]/.test(password),
     number: /[0-9]/.test(password),
-    special: /[!@#$%^&*(),.?":{}|<>_\-+=;'/`~[\]\\]/.test(
-      password
-    ),
+    special:
+      /[!@#$%^&*(),.?":{}|<>_\-+=;'/`~[\]\\]/.test(
+        password
+      ),
     noSpaces: !/\s/.test(password),
   };
 };
@@ -371,10 +372,13 @@ export default function ForgotPassword({
 
   // =====================================================
   // OTP CHANGE
+  // ONLY 6 DIGITS - NUMBERS ONLY
   // =====================================================
 
   const handleOTPChange = (e) => {
-    const value = e.target.value;
+    const value = e.target.value
+      .replace(/[^0-9]/g, "")
+      .slice(0, 6);
 
     setOtp(value);
 
@@ -383,9 +387,11 @@ export default function ForgotPassword({
       return;
     }
 
-    const error = validateOTP(value);
-
-    setOtpError(error);
+    if (value.length < 6) {
+      setOtpError("OTP must be exactly 6 digits.");
+    } else {
+      setOtpError("");
+    }
   };
 
   // =====================================================
