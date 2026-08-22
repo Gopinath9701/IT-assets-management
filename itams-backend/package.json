@@ -1,7 +1,7 @@
 {
   "name": "itams-backend",
   "version": "1.0.0",
-  "description": "IT Asset Management System - Backend API (Node.js + Express + MySQL)",
+  "description": "IT Asset Management System - Backend API (Node.js + Express + PostgreSQL/Neon)",
   "main": "server.js",
   "type": "commonjs",
   "scripts": {

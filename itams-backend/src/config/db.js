@@ -1,11 +1,9 @@
 const { Pool } = require("pg");
 require("dotenv").config();
 
-// Neon gives you one connection string (Dashboard -> Connection Details), e.g.:
-// postgresql://user:password@ep-xxxx.region.aws.neon.tech/dbname?sslmode=require
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }, // Neon requires TLS
+  ssl: { rejectUnauthorized: false },
 });
 
 async function testConnection() {

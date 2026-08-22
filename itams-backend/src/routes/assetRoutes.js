@@ -4,7 +4,7 @@ const { getAssets, getAssetById, addAsset, updateAsset, deleteAsset } = require(
 
 const router = express.Router();
 
-router.use(authenticate, authorize("AssetManager", "Admin"));
+router.use(authenticate, authorize("AssetManager"));
 
 router.get("/", getAssets);
 router.get("/:assetId", getAssetById);

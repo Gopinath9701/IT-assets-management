@@ -3,8 +3,8 @@ const jwt = require("jsonwebtoken");
 const { pool } = require("../config/db");
 const { sendOtpEmail } = require("../utils/email");
 const { generateOtp, otpExpiryDate } = require("../utils/otp");
+const { validatePassword } = require("../utils/validators");
 
-// Finds a user by their login ID (e.g. HR001) OR email address
 async function findUserByIdentifier(identifier) {
   const { rows } = await pool.query(
     "SELECT * FROM users WHERE login_id = $1 OR email = $1 LIMIT 1",
@@ -13,14 +13,7 @@ async function findUserByIdentifier(identifier) {
   return rows[0] || null;
 }
 
-// ---------------- LOGIN ----------------
-// POST /api/login  { employeeIdOrEmail, password }  <- field name matches Login.js exactly
-function normalizeRole(role) {
-  if (role === "AssetInventory") return "InventoryManager";
-  if (role === "InventoryManager") return "InventoryManager";
-  return role;
-}
-
+// POST /api/login  { employeeIdOrEmail, password }
 async function login(req, res, next) {
   try {
     const { employeeIdOrEmail: identifier, password } = req.body;
@@ -39,10 +32,8 @@ async function login(req, res, next) {
       return res.status(401).json({ success: false, message: "Invalid credentials" });
     }
 
-    const role = normalizeRole(user.role);
-
     const token = jwt.sign(
-      { id: user.id, loginId: user.login_id, role, name: user.name, email: user.email },
+      { id: user.id, loginId: user.login_id, role: user.role, name: user.name, email: user.email },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || "8h" }
     );
@@ -55,7 +46,7 @@ async function login(req, res, next) {
         loginId: user.login_id,
         name: user.name,
         email: user.email,
-        role, // 'HR', 'AssetManager', or 'InventoryManager' -> frontend routes to the right dashboard
+        role: user.role,
         department: user.department,
       },
     });
@@ -64,8 +55,7 @@ async function login(req, res, next) {
   }
 }
 
-// ---------------- FORGOT PASSWORD: SEND OTP ----------------
-// POST /api/forgot-password/send-otp  { emailOrId }  <- field name matches ForgotPassword.js exactly
+// POST /api/forgot-password/send-otp  { emailOrId }
 async function sendOtp(req, res, next) {
   try {
     const { emailOrId: identifier } = req.body;
@@ -74,7 +64,6 @@ async function sendOtp(req, res, next) {
     }
 
     const user = await findUserByIdentifier(identifier);
-    // Don't reveal whether the account exists — respond the same way either way
     if (!user) {
       return res.json({
         success: true,
@@ -98,7 +87,6 @@ async function sendOtp(req, res, next) {
   }
 }
 
-// ---------------- FORGOT PASSWORD: VERIFY OTP ----------------
 // POST /api/forgot-password/verify-otp  { emailOrId, otp }
 async function verifyOtp(req, res, next) {
   try {
@@ -131,16 +119,17 @@ async function verifyOtp(req, res, next) {
   }
 }
 
-// ---------------- FORGOT PASSWORD: RESET ----------------
-// POST /api/forgot-password/reset  { emailOrId, otp, newPassword }  <- matches ForgotPassword.js exactly
+// POST /api/forgot-password/reset  { emailOrId, otp, newPassword }
 async function resetPassword(req, res, next) {
   try {
     const { emailOrId: identifier, otp, newPassword } = req.body;
     if (!identifier || !otp || !newPassword) {
       return res.status(400).json({ success: false, message: "Identifier, OTP and new password are required" });
     }
-    if (newPassword.length < 6) {
-      return res.status(400).json({ success: false, message: "Password must be at least 6 characters" });
+
+    const passwordError = validatePassword(newPassword);
+    if (passwordError) {
+      return res.status(400).json({ success: false, message: passwordError });
     }
 
     const user = await findUserByIdentifier(identifier);
@@ -148,7 +137,6 @@ async function resetPassword(req, res, next) {
       return res.status(400).json({ success: false, message: "Account not found" });
     }
 
-    // Require the exact OTP that was already verified, within the last 15 minutes
     const { rows } = await pool.query(
       `SELECT * FROM password_resets
        WHERE user_id = $1 AND otp_code = $2 AND verified = TRUE AND created_at > (NOW() - INTERVAL '15 minutes')
@@ -162,8 +150,6 @@ async function resetPassword(req, res, next) {
 
     const hash = await bcrypt.hash(newPassword, 10);
     await pool.query("UPDATE users SET password_hash = $1 WHERE id = $2", [hash, user.id]);
-
-    // invalidate used OTPs for this user
     await pool.query("DELETE FROM password_resets WHERE user_id = $1", [user.id]);
 
     res.json({ success: true, message: "Password reset successful" });

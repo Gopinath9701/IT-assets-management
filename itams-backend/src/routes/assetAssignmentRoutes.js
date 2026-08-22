@@ -10,7 +10,7 @@ const {
 
 const router = express.Router();
 
-router.use(authenticate, authorize("AssetManager", "Admin"));
+router.use(authenticate, authorize("AssetManager"));
 
 router.get("/pending", getPending);
 router.get("/history", getHistory);
