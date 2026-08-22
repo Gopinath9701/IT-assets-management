@@ -7,14 +7,14 @@ import "../App.css";
 // =====================================================
 //
 // Format:
-// YYDDMM + 3-digit employee number
+// YYMMDD + 3-digit employee number
 //
 // Example:
 // 260821001
 //
 // YY = 26
-// DD = 08
-// MM = 21
+// MM = 08
+// DD = 21
 // Employee number = 001
 //
 // IMPORTANT:
@@ -26,48 +26,38 @@ import "../App.css";
 // =====================================================
 
 const validateEmployeeId = (value) => {
-  // Empty
   if (value.length === 0) {
     return "Please enter Employee ID.";
   }
 
-  // Spaces
   if (/\s/.test(value)) {
     return "Spaces are not allowed.";
   }
 
-  // Numbers only
   if (!/^[0-9]+$/.test(value)) {
     return "Employee ID must contain numbers only.";
   }
 
-  // Exactly 9 digits
   if (!/^[0-9]{9}$/.test(value)) {
     return "Employee ID must be exactly 9 digits.";
   }
 
-  // ----------------------------------------
-  // YYDDMM
-  // ----------------------------------------
-
+  // YYMMDD
   const year = Number(value.substring(0, 2));
-  const day = Number(value.substring(2, 4));
-  const month = Number(value.substring(4, 6));
+  const month = Number(value.substring(2, 4));
+  const day = Number(value.substring(4, 6));
 
   // Month validation
   if (month < 1 || month > 12) {
     return "Invalid month in Employee ID.";
   }
 
-  // Day basic validation
+  // Day validation
   if (day < 1 || day > 31) {
     return "Invalid day in Employee ID.";
   }
 
-  // ----------------------------------------
   // Validate actual calendar date
-  // ----------------------------------------
-
   const fullYear = 2000 + year;
 
   const employeeDate = new Date(
@@ -84,10 +74,7 @@ const validateEmployeeId = (value) => {
     return "Invalid date in Employee ID.";
   }
 
-  // ----------------------------------------
   // Future date validation
-  // ----------------------------------------
-
   const today = new Date();
 
   today.setHours(0, 0, 0, 0);
@@ -97,10 +84,7 @@ const validateEmployeeId = (value) => {
     return "Future date Employee IDs are not allowed.";
   }
 
-  // ----------------------------------------
   // Employee number
-  // ----------------------------------------
-
   const employeeNumber = value.substring(6);
 
   if (!/^[0-9]{3}$/.test(employeeNumber)) {
@@ -117,6 +101,14 @@ const validateEmployeeId = (value) => {
 // =====================================================
 // VALIDATE EMPLOYEE ID OR EMAIL
 // =====================================================
+//
+// Employee ID:
+// 260821001
+//
+// Email:
+// 260821001a@gmail.com
+//
+// =====================================================
 
 const validateEmployeeIdOrEmail = (value) => {
   if (value.length === 0) {
@@ -127,28 +119,21 @@ const validateEmployeeIdOrEmail = (value) => {
     return "Spaces are not allowed.";
   }
 
-  // ----------------------------------------
   // Employee ID
-  // ----------------------------------------
-
   if (/^[0-9]+$/.test(value)) {
     return validateEmployeeId(value);
   }
 
-  // ----------------------------------------
   // Email
-  // Format:
-  // 260821001@gmail.com
-  // ----------------------------------------
-
   if (value.includes("@")) {
-    const emailPattern = /^[0-9]{9}@gmail\.com$/;
+    const emailPattern =
+      /^[0-9]{9}a@gmail\.com$/;
 
     if (!emailPattern.test(value)) {
-      return "Email must be in this format: 260821001@gmail.com";
+      return "Email must be in this format: 260821001a@gmail.com";
     }
 
-    // Validate the employee ID part also
+    // Validate Employee ID part
     const employeeIdPart = value.substring(0, 9);
 
     const employeeIdError =
@@ -174,7 +159,9 @@ const getPasswordRequirements = (password) => {
     uppercase: /[A-Z]/.test(password),
     lowercase: /[a-z]/.test(password),
     number: /[0-9]/.test(password),
-    special: /[!@#$%^&*(),.?":{}|<>_\-\\[\]/`~+=;']/.test(password),
+    special: /[!@#$%^&*(),.?":{}|<>_\-[\]/`~+=;']/.test(
+      password
+    ),
     noSpaces: !/\s/.test(password),
   };
 };
@@ -299,10 +286,7 @@ export default function Login({
       [name]: value,
     }));
 
-    // ----------------------------------------
     // Employee ID / Email
-    // ----------------------------------------
-
     if (name === "employeeIdOrEmail") {
       setIdentifierTouched(true);
 
@@ -316,10 +300,7 @@ export default function Login({
       }
     }
 
-    // ----------------------------------------
     // Password
-    // ----------------------------------------
-
     if (name === "password") {
       setPasswordTouched(true);
 
@@ -347,27 +328,19 @@ export default function Login({
     const password =
       formData.password;
 
-    // ================================================
-    // EMPLOYEE ID / EMAIL VALIDATION
-    // ================================================
-
+    // Employee ID / Email validation
     const identifierValidation =
       validateEmployeeIdOrEmail(identifier);
 
     setIdentifierTouched(true);
 
     if (identifierValidation) {
-      setIdentifierError(
-        identifierValidation
-      );
+      setIdentifierError(identifierValidation);
     } else {
       setIdentifierError("");
     }
 
-    // ================================================
-    // PASSWORD VALIDATION
-    // ================================================
-
+    // Password validation
     const passwordValidation =
       validatePassword(password);
 
@@ -379,10 +352,7 @@ export default function Login({
       setPasswordError("");
     }
 
-    // ================================================
-    // STOP IF INVALID
-    // ================================================
-
+    // Stop if invalid
     if (
       identifierValidation ||
       passwordValidation
@@ -390,10 +360,7 @@ export default function Login({
       return;
     }
 
-    // ================================================
-    // LOGIN REQUEST
-    // ================================================
-
+    // Login request
     try {
       setLoading(true);
 
@@ -420,10 +387,7 @@ export default function Login({
         data
       );
 
-      // ================================================
-      // LOGIN SUCCESS
-      // ================================================
-
+      // Login success
       if (response.ok && data.success) {
         localStorage.setItem(
           "token",
@@ -447,10 +411,7 @@ export default function Login({
         }
       }
 
-      // ================================================
-      // LOGIN FAILED
-      // ================================================
-
+      // Login failed
       else {
         alert(
           data.message ||
@@ -491,9 +452,7 @@ export default function Login({
 
       <form onSubmit={handleSubmit}>
 
-        {/* ==========================================
-            EMPLOYEE ID OR EMAIL
-        ========================================== */}
+        {/* EMPLOYEE ID OR EMAIL */}
 
         <label>
           Employee ID or Email
@@ -515,8 +474,6 @@ export default function Login({
           }
         />
 
-        {/* Validation message */}
-
         {identifierError &&
           identifierTouched && (
             <div
@@ -530,12 +487,9 @@ export default function Login({
             </div>
           )}
 
-        {/* Hint */}
-
         {!identifierError &&
           identifierTouched &&
-          formData.employeeIdOrEmail &&
-          (
+          formData.employeeIdOrEmail && (
             <div
               style={{
                 color: "#188038",
@@ -547,9 +501,7 @@ export default function Login({
             </div>
           )}
 
-        {/* ==========================================
-            PASSWORD
-        ========================================== */}
+        {/* PASSWORD */}
 
         <label>
           Password
@@ -599,9 +551,7 @@ export default function Login({
 
         </div>
 
-        {/* ==========================================
-            PASSWORD REQUIREMENTS
-        ========================================== */}
+        {/* PASSWORD REQUIREMENTS */}
 
         {formData.password.length > 0 && (
           <div
@@ -662,7 +612,7 @@ export default function Login({
           </div>
         )}
 
-        {/* Password error */}
+        {/* PASSWORD ERROR */}
 
         {passwordError &&
           passwordTouched &&
@@ -678,9 +628,7 @@ export default function Login({
             </div>
           )}
 
-        {/* ==========================================
-            FORGOT PASSWORD
-        ========================================== */}
+        {/* FORGOT PASSWORD */}
 
         <a
           href="/forgot-password"
@@ -696,9 +644,7 @@ export default function Login({
           Forgot Password?
         </a>
 
-        {/* ==========================================
-            LOGIN BUTTON
-        ========================================== */}
+        {/* LOGIN BUTTON */}
 
         <button
           type="submit"
