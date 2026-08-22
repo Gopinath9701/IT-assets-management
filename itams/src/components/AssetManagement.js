@@ -14,6 +14,12 @@ const AssetManagement = ({
   username = "username",
   onLogout,
   onBack,
+
+  // ==============================
+  // DASHBOARD NAVIGATION
+  // ==============================
+  onNavigateToDashboard,
+
   onNavigateToAddAsset,
   onNavigateToManageAsset,
   onNavigateToAssetDetails,
@@ -104,7 +110,33 @@ const AssetManagement = ({
 
 
   // ==========================================
-  // GO TO MAIN
+  // GO TO DASHBOARD
+  // ==========================================
+
+  const goToDashboard = () => {
+
+    console.log("Opening Dashboard");
+
+    // IMPORTANT:
+    // App.js controls the actual Dashboard page.
+    // This callback changes App.js view to "dashboard".
+
+    if (onNavigateToDashboard) {
+
+      onNavigateToDashboard();
+
+    } else {
+
+      // Fallback if callback is not provided
+      setCurrentPage("main");
+      setActiveSidebar("dashboard");
+
+    }
+  };
+
+
+  // ==========================================
+  // GO TO MAIN ASSET MANAGEMENT
   // ==========================================
 
   const goToMain = () => {
@@ -248,7 +280,7 @@ const AssetManagement = ({
 
 
   // ==========================================
-  // NEW: GO TO MAINTENANCE
+  // GO TO MAINTENANCE
   // ==========================================
 
   const goToMaintenance = () => {
@@ -278,50 +310,71 @@ const AssetManagement = ({
       item.id
     );
 
+
+    // ========================================
+    // DASHBOARD
+    // ========================================
+
     if (
-      item.id ===
-      "asset-management"
+      item.id === "dashboard"
+    ) {
+
+      goToDashboard();
+
+    }
+
+
+    // ========================================
+    // ASSET MANAGEMENT
+    // ========================================
+
+    else if (
+      item.id === "asset-management"
     ) {
 
       goToMain();
 
     }
 
+
+    // ========================================
+    // ASSET ASSIGNMENT
+    // ========================================
+
     else if (
-      item.id ===
-      "asset-assignment"
+      item.id === "asset-assignment"
     ) {
 
       goToAssignment();
 
     }
 
+
+    // ========================================
+    // REQUEST APPROVAL
+    // ========================================
+
     else if (
-      item.id ===
-      "request-approval"
+      item.id === "request-approval"
     ) {
 
       goToApproval();
 
     }
 
+
+    // ========================================
+    // MAINTENANCE
+    // ========================================
+
     else if (
-      item.id ===
-      "maintenance"
+      item.id === "maintenance"
     ) {
 
       goToMaintenance();
 
     }
 
-    else if (
-      item.id ===
-      "dashboard"
-    ) {
-
-      goToMain();
-
-    }
   };
 
 
@@ -336,50 +389,71 @@ const AssetManagement = ({
       id
     );
 
+
+    // ========================================
+    // DASHBOARD
+    // ========================================
+
     if (
-      id ===
-      "asset-management"
+      id === "dashboard"
+    ) {
+
+      goToDashboard();
+
+    }
+
+
+    // ========================================
+    // ASSET MANAGEMENT
+    // ========================================
+
+    else if (
+      id === "asset-management"
     ) {
 
       goToMain();
 
     }
 
+
+    // ========================================
+    // ASSET ASSIGNMENT
+    // ========================================
+
     else if (
-      id ===
-      "asset-assignment"
+      id === "asset-assignment"
     ) {
 
       goToAssignment();
 
     }
 
+
+    // ========================================
+    // REQUEST APPROVAL
+    // ========================================
+
     else if (
-      id ===
-      "request-approval"
+      id === "request-approval"
     ) {
 
       goToApproval();
 
     }
 
+
+    // ========================================
+    // MAINTENANCE
+    // ========================================
+
     else if (
-      id ===
-      "maintenance"
+      id === "maintenance"
     ) {
 
       goToMaintenance();
 
     }
 
-    else if (
-      id ===
-      "dashboard"
-    ) {
-
-      goToMain();
-
-    }
   };
 
 
@@ -388,8 +462,7 @@ const AssetManagement = ({
   // ==========================================
 
   if (
-    currentPage ===
-    "add-asset"
+    currentPage === "add-asset"
   ) {
 
     return (
@@ -399,6 +472,7 @@ const AssetManagement = ({
         onBack={goToMain}
       />
     );
+
   }
 
 
@@ -407,8 +481,7 @@ const AssetManagement = ({
   // ==========================================
 
   if (
-    currentPage ===
-    "manage-assets"
+    currentPage === "manage-assets"
   ) {
 
     return (
@@ -421,6 +494,7 @@ const AssetManagement = ({
         }
       />
     );
+
   }
 
 
@@ -429,8 +503,7 @@ const AssetManagement = ({
   // ==========================================
 
   if (
-    currentPage ===
-    "asset-details"
+    currentPage === "asset-details"
   ) {
 
     return (
@@ -443,6 +516,7 @@ const AssetManagement = ({
         }
       />
     );
+
   }
 
 
@@ -451,8 +525,7 @@ const AssetManagement = ({
   // ==========================================
 
   if (
-    currentPage ===
-    "employee-status"
+    currentPage === "employee-status"
   ) {
 
     return (
@@ -462,6 +535,7 @@ const AssetManagement = ({
         onBack={goToMain}
       />
     );
+
   }
 
 
@@ -470,8 +544,7 @@ const AssetManagement = ({
   // ==========================================
 
   if (
-    currentPage ===
-    "asset-return"
+    currentPage === "asset-return"
   ) {
 
     return (
@@ -481,6 +554,7 @@ const AssetManagement = ({
         onBack={goToMain}
       />
     );
+
   }
 
 
@@ -489,8 +563,7 @@ const AssetManagement = ({
   // ==========================================
 
   if (
-    currentPage ===
-    "maintenance"
+    currentPage === "maintenance"
   ) {
 
     return (
@@ -503,6 +576,7 @@ const AssetManagement = ({
         }
       />
     );
+
   }
 
 
@@ -511,8 +585,7 @@ const AssetManagement = ({
   // ==========================================
 
   if (
-    currentPage ===
-    "approval"
+    currentPage === "approval"
   ) {
 
     return (
@@ -525,6 +598,7 @@ const AssetManagement = ({
         }
       />
     );
+
   }
 
 
@@ -533,8 +607,7 @@ const AssetManagement = ({
   // ==========================================
 
   if (
-    currentPage ===
-    "assignment"
+    currentPage === "assignment"
   ) {
 
     return (
@@ -547,6 +620,7 @@ const AssetManagement = ({
         }
       />
     );
+
   }
 
 
@@ -559,7 +633,9 @@ const AssetManagement = ({
     <div className="am-page-wrapper">
 
 
-      {/* TOP NAVIGATION */}
+      {/* ========================================
+          TOP NAVIGATION
+          ======================================== */}
 
       <nav className="am-top-nav">
 
@@ -596,12 +672,16 @@ const AssetManagement = ({
       </nav>
 
 
-      {/* BODY */}
+      {/* ========================================
+          BODY
+          ======================================== */}
 
       <div className="am-body-wrapper">
 
 
-        {/* SIDEBAR */}
+        {/* ======================================
+            LEFT SIDEBAR
+            ====================================== */}
 
         <aside className="am-sidebar">
 
@@ -624,6 +704,7 @@ const AssetManagement = ({
                 onClick={() =>
                   handleSidebarClick(item)
                 }
+
               >
 
                 {item.label}
@@ -636,7 +717,9 @@ const AssetManagement = ({
         </aside>
 
 
-        {/* MAIN CONTENT */}
+        {/* ======================================
+            MAIN CONTENT
+            ====================================== */}
 
         <main className="am-main-content">
 
@@ -721,6 +804,7 @@ const AssetManagement = ({
                       }
 
                     }}
+
                   >
 
                     {card.buttonLabel}
@@ -739,6 +823,7 @@ const AssetManagement = ({
       </div>
 
     </div>
+
   );
 };
 
