@@ -94,6 +94,36 @@ async function updateAsset(req, res, next) {
   }
 }
 
+// PATCH /api/assets/:assetId/retire
+// Only from 'Not In Use' — an asset currently assigned or under maintenance
+// must be returned/resolved first, so retiring it doesn't silently orphan
+// an active assignment or maintenance ticket.
+async function retireAsset(req, res, next) {
+  try {
+    const { assetId } = req.params;
+    const idError = validateAssetIdFormat(assetId);
+    if (idError) {
+      return res.status(400).json({ success: false, message: idError });
+    }
+
+    const result = await pool.query(
+      "UPDATE assets SET status = 'Retired' WHERE asset_id = $1 AND status = 'Not In Use'",
+      [assetId]
+    );
+    if (result.rowCount === 0) {
+      const { rows } = await pool.query("SELECT status FROM assets WHERE asset_id = $1", [assetId]);
+      if (rows.length === 0) {
+        return res.status(404).json({ success: false, message: "Asset not found" });
+      }
+      return res.status(400).json({ success: false, message: `Asset must be Not In Use to retire (currently ${rows[0].status})` });
+    }
+
+    res.json({ success: true, message: "Asset retired" });
+  } catch (err) {
+    next(err);
+  }
+}
+
 // DELETE /api/assets/:assetId
 async function deleteAsset(req, res, next) {
   try {
@@ -108,4 +138,4 @@ async function deleteAsset(req, res, next) {
   }
 }
 
-module.exports = { getAssets, getAssetById, addAsset, updateAsset, deleteAsset, ASSET_TYPE_PREFIXES };
+module.exports = { getAssets, getAssetById, addAsset, updateAsset, retireAsset, deleteAsset, ASSET_TYPE_PREFIXES };

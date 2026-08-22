@@ -5,7 +5,7 @@ require("dotenv").config();
 const bcrypt = require("bcryptjs");
 const { pool } = require("../src/config/db");
 const { generateEmployeeId } = require("../src/utils/idGenerator");
-const { validatePassword } = require("../src/utils/validators");
+const { validatePassword, buildEmployeeEmail } = require("../src/utils/validators");
 
 async function seed() {
   const plainPassword = process.env.DEFAULT_SEED_PASSWORD || "Itams@2026";
@@ -21,38 +21,28 @@ async function seed() {
   const today = new Date();
 
   const accounts = [
-    {
-      name: "HR Admin",
-      email: process.env.SEED_HR_EMAIL || "replace.with.real.hr@gmail.com",
-      department: "HR",
-      role: "HR",
-    },
-    {
-      name: "Asset Manager",
-      email: process.env.SEED_ASSET_MANAGER_EMAIL || "replace.with.real.assetmanager@gmail.com",
-      department: "Asset Management",
-      role: "AssetManager",
-    },
-    {
-      name: "Inventory Manager",
-      email: process.env.SEED_INVENTORY_MANAGER_EMAIL || "replace.with.real.inventorymanager@gmail.com",
-      department: "Inventory",
-      role: "InventoryManager",
-    },
+    { name: "HR Admin", department: "HR", role: "HR" },
+    { name: "Asset Manager", department: "Asset Management", role: "AssetManager" },
+    { name: "Inventory Manager", department: "Inventory", role: "InventoryManager" },
   ];
 
   for (const acc of accounts) {
-    // Skip regenerating an ID if this email is already seeded (keeps re-runs idempotent).
-    const { rows: existing } = await pool.query("SELECT login_id FROM users WHERE email = $1", [acc.email]);
+    // One seed account per role — reuse its existing login_id on re-runs
+    // instead of minting a new one each time.
+    const { rows: existing } = await pool.query("SELECT login_id FROM users WHERE role = $1 LIMIT 1", [acc.role]);
     const loginId = existing[0]?.login_id || (await generateEmployeeId(today));
+    // Per the frontend's login/forgot-password spec, email must be exactly
+    // {loginId}@gmail.com — not a real inbox until one is registered at that
+    // address, so OTP mail won't be deliverable yet.
+    const email = buildEmployeeEmail(loginId);
 
     await pool.query(
       `INSERT INTO users (login_id, name, email, department, password_hash, role)
        VALUES ($1, $2, $3, $4, $5, $6)
-       ON CONFLICT (login_id) DO UPDATE SET password_hash = EXCLUDED.password_hash, name = EXCLUDED.name`,
-      [loginId, acc.name, acc.email, acc.department, passwordHash, acc.role]
+       ON CONFLICT (login_id) DO UPDATE SET password_hash = EXCLUDED.password_hash, name = EXCLUDED.name, email = EXCLUDED.email`,
+      [loginId, acc.name, email, acc.department, passwordHash, acc.role]
     );
-    console.log(`✅ Seeded ${acc.role}: login ID ${loginId} | email ${acc.email} | password ${plainPassword}`);
+    console.log(`✅ Seeded ${acc.role}: login ID ${loginId} | email ${email} | password ${plainPassword}`);
   }
 
   const departments = [
