@@ -1,7 +1,15 @@
 import React from "react";
 import "./Dashboard.css";
 
-const Dashboard = () => {
+const Dashboard = ({
+  username,
+  onLogout,
+  onNavigateToDashboard,
+  onNavigateToAssetManagement,
+  onNavigateToAssetAssignment,
+  onNavigateToRequestApproval,
+  onNavigateToMaintenance,
+}) => {
   const assetOverview = [
     {
       id: "LAP001",
@@ -96,15 +104,23 @@ const Dashboard = () => {
         </div>
 
         <div className="dashboard-user">
-          <span>username</span>
+
+          <span>
+            {username || "username"}
+          </span>
 
           <span className="dashboard-divider">
             |
           </span>
 
-          <button className="dashboard-logout">
+          <button
+            type="button"
+            className="dashboard-logout"
+            onClick={onLogout}
+          >
             Logout
           </button>
+
         </div>
 
       </header>
@@ -118,23 +134,57 @@ const Dashboard = () => {
 
         <aside className="dashboard-sidebar">
 
-          <button className="sidebar-item active">
+          {/* DASHBOARD */}
+
+          <button
+            type="button"
+            className="sidebar-item active"
+            onClick={onNavigateToDashboard}
+          >
             Dashboard
           </button>
 
-          <button className="sidebar-item">
+
+          {/* ASSET MANAGEMENT */}
+
+          <button
+            type="button"
+            className="sidebar-item"
+            onClick={onNavigateToAssetManagement}
+          >
             Asset Management
           </button>
 
-          <button className="sidebar-item">
+
+          {/* ASSET ASSIGNMENT */}
+
+          <button
+            type="button"
+            className="sidebar-item"
+            onClick={onNavigateToAssetAssignment}
+          >
             Asset Assignment
           </button>
 
-          <button className="sidebar-item">
+
+          {/* REQUEST APPROVAL */}
+
+          <button
+            type="button"
+            className="sidebar-item"
+            onClick={onNavigateToRequestApproval}
+          >
             Request Approval
           </button>
 
-          <button className="sidebar-item">
+
+          {/* MAINTENANCE */}
+
+          <button
+            type="button"
+            className="sidebar-item"
+            onClick={onNavigateToMaintenance}
+          >
             Maintenance
           </button>
 
@@ -159,10 +209,7 @@ const Dashboard = () => {
           <div className="stats-grid">
 
             <div className="stat-card">
-
-              <h3>
-                Total Assets
-              </h3>
+              <h3>Total Assets</h3>
 
               <div className="stat-number blue">
                 120
@@ -173,15 +220,11 @@ const Dashboard = () => {
               <p>
                 All assets in system
               </p>
-
             </div>
 
 
             <div className="stat-card">
-
-              <h3>
-                Available Assets
-              </h3>
+              <h3>Available Assets</h3>
 
               <div className="stat-number green">
                 35
@@ -192,15 +235,11 @@ const Dashboard = () => {
               <p>
                 Ready to assign
               </p>
-
             </div>
 
 
             <div className="stat-card">
-
-              <h3>
-                Assigned Assets
-              </h3>
+              <h3>Assigned Assets</h3>
 
               <div className="stat-number purple">
                 75
@@ -211,15 +250,11 @@ const Dashboard = () => {
               <p>
                 Assigned to employees
               </p>
-
             </div>
 
 
             <div className="stat-card">
-
-              <h3>
-                Under Maintenance
-              </h3>
+              <h3>Under Maintenance</h3>
 
               <div className="stat-number orange">
                 10
@@ -230,15 +265,11 @@ const Dashboard = () => {
               <p>
                 Being repaired
               </p>
-
             </div>
 
 
             <div className="stat-card">
-
-              <h3>
-                Pending Requests
-              </h3>
+              <h3>Pending Requests</h3>
 
               <div className="stat-number red">
                 8
@@ -249,7 +280,6 @@ const Dashboard = () => {
               <p>
                 Waiting for approval
               </p>
-
             </div>
 
           </div>
@@ -259,8 +289,7 @@ const Dashboard = () => {
 
           <div className="dashboard-middle">
 
-
-            {/* ================= ASSET OVERVIEW ================= */}
+            {/* ASSET OVERVIEW */}
 
             <section className="dashboard-box asset-overview">
 
@@ -273,14 +302,12 @@ const Dashboard = () => {
                 <table>
 
                   <thead>
-
                     <tr>
                       <th>Asset ID</th>
                       <th>Asset Type</th>
                       <th>Status</th>
                       <th>Quantity</th>
                     </tr>
-
                   </thead>
 
                   <tbody>
@@ -336,7 +363,7 @@ const Dashboard = () => {
             </section>
 
 
-            {/* ================= ASSET TYPE SUMMARY ================= */}
+            {/* ASSET TYPE SUMMARY */}
 
             <section className="dashboard-box asset-summary">
 
@@ -349,11 +376,7 @@ const Dashboard = () => {
                 <div className="donut-chart">
 
                   <div className="donut-hole">
-
-                    <span>
-                      120
-                    </span>
-
+                    <span>120</span>
                   </div>
 
                 </div>
@@ -435,29 +458,12 @@ const Dashboard = () => {
 
                     <tr key={index}>
 
-                      <td>
-                        {item.date}
-                      </td>
-
-                      <td>
-                        {item.activity}
-                      </td>
-
-                      <td>
-                        {item.assetId}
-                      </td>
-
-                      <td>
-                        {item.assetType}
-                      </td>
-
-                      <td>
-                        {item.employeeId}
-                      </td>
-
-                      <td>
-                        {item.details}
-                      </td>
+                      <td>{item.date}</td>
+                      <td>{item.activity}</td>
+                      <td>{item.assetId}</td>
+                      <td>{item.assetType}</td>
+                      <td>{item.employeeId}</td>
+                      <td>{item.details}</td>
 
                     </tr>
 
