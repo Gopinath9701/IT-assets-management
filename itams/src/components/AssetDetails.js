@@ -95,9 +95,7 @@ const AssetDetails = ({
       return "Available";
     }
 
-    if (
-      value === "in use"
-    ) {
+    if (value === "in use") {
       return "In Use";
     }
 
@@ -176,32 +174,17 @@ const AssetDetails = ({
 
     // Empty search
     if (value.length === 0) {
-      return "Please enter an Asset ID or Asset Type";
+      return "Please enter an Asset ID";
     }
 
-    // Space before value
-    if (value !== value.trimStart()) {
-      return "Search should not have spaces before the value";
+    // Exactly 6 characters
+    if (value.length !== 6) {
+      return "Asset ID must contain exactly 6 characters";
     }
 
-    // Space after value
-    if (value !== value.trimEnd()) {
-      return "Search should not have spaces after the value";
-    }
-
-    // Any space inside the value
-    if (/\s/.test(value)) {
-      return "Search should not contain spaces";
-    }
-
-    // Special characters
-    if (!/^[A-Za-z0-9]+$/.test(value)) {
-      return "Search should not contain special characters";
-    }
-
-    // Minimum length
-    if (value.length < 2) {
-      return "Search must contain at least 2 characters";
+    // First 3 CAPITAL letters + last 3 numbers
+    if (!/^[A-Z]{3}[0-9]{3}$/.test(value)) {
+      return "Asset ID must be 3 capital letters followed by 3 numbers (Example: LAP001)";
     }
 
     return "";
@@ -250,14 +233,14 @@ const AssetDetails = ({
     // Nothing entered or selected
     if (!hasSearch && !hasFilter) {
       setSearchError(
-        "Please enter an Asset ID or Asset Type, or select a filter."
+        "Please enter an Asset ID or select a filter."
       );
 
       setShowFieldError(true);
       return false;
     }
 
-    // Validate search if entered
+    // Validate Asset ID if entered
     if (hasSearch) {
       const searchValidationError =
         validateSearchText();
@@ -281,9 +264,15 @@ const AssetDetails = ({
 
   // ==========================================
   // SEARCH INPUT
+  // ONLY:
+  // 3 CAPITAL LETTERS + 3 NUMBERS
+  // Example: LAP001
   // ==========================================
   const handleSearchChange = (e) => {
-    const value = e.target.value;
+    const value = e.target.value
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, "")
+      .slice(0, 6);
 
     setSearchText(value);
     setSearchError("");
@@ -325,21 +314,21 @@ const AssetDetails = ({
 
   // ==========================================
   // FILTER DATABASE DATA
+  // SEARCH ONLY BY ASSET ID
   // ==========================================
   const filtered = assets.filter((asset) => {
-    const search = searchText.toLowerCase();
+    const search = searchText.toUpperCase();
 
     // ========================================
-    // SEARCH MATCH
+    // ASSET ID MATCH ONLY
     // ========================================
+    const assetId = String(
+      asset.asset_id || ""
+    ).toUpperCase();
+
     const matchSearch =
       search === "" ||
-      (asset.asset_name || "")
-        .toLowerCase()
-        .includes(search) ||
-      (asset.asset_id || "")
-        .toLowerCase()
-        .includes(search);
+      assetId.includes(search);
 
     // ========================================
     // ASSET TYPE MATCH
@@ -537,7 +526,7 @@ const AssetDetails = ({
           {/* SEARCH / FILTER */}
           <div className="ad-filters-row">
 
-            {/* SEARCH */}
+            {/* SEARCH ASSET ID */}
             <div
               className={`ad-search-wrapper ${
                 showFieldError
@@ -576,10 +565,11 @@ const AssetDetails = ({
                     : ""
                 }`}
                 type="text"
-                placeholder="Search assets..."
+                placeholder="Search Asset ID"
                 value={searchText}
                 onChange={handleSearchChange}
                 onKeyDown={handleKeyDown}
+                maxLength={6}
               />
 
             </div>
