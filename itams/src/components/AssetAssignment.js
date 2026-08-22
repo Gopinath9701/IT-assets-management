@@ -5,7 +5,7 @@ const ROWS_OPTIONS = [10, 30, 50, "All"];
 
 // ==========================================
 // EMPLOYEE ID VALIDATION
-// Format: YYDDMM + 3 digits
+// Format: YYMMDD + 3 digits
 // Example: 260821001
 // ==========================================
 
@@ -50,12 +50,12 @@ const validateEmployeeId = (id) => {
   }
 
   // ==========================================
-  // YYDDMM + 3 DIGITS
+  // YYMMDD + 3 DIGITS
   // ==========================================
 
   const year = Number(id.substring(0, 2));
-  const day = Number(id.substring(2, 4));
-  const month = Number(id.substring(4, 6));
+  const month = Number(id.substring(2, 4));
+  const day = Number(id.substring(4, 6));
   const employeeNumber = id.substring(6, 9);
 
   // Month validation
@@ -139,14 +139,14 @@ const validateEmployeeId = (id) => {
 
 // ==========================================
 // INITIAL DATA
-// Employee ID format: YYDDMM + 3 digits
+// Employee ID format: YYMMDD + 3 digits
 // ==========================================
 
 const INITIAL_PENDING = [
   {
     requestId: "AR001",
     employeeId: "260808001",
-    employeeName: "Employee 1",
+    employeeName: "Rahul Sharma",
     department: "IT",
     assetType: "Laptop",
     purpose: "Development Work",
@@ -156,7 +156,7 @@ const INITIAL_PENDING = [
   {
     requestId: "AR004",
     employeeId: "260808004",
-    employeeName: "Employee 4",
+    employeeName: "Ananya Reddy",
     department: "HR",
     assetType: "Monitor",
     purpose: "New Employees",
@@ -166,7 +166,7 @@ const INITIAL_PENDING = [
   {
     requestId: "AR006",
     employeeId: "260808007",
-    employeeName: "Employee 7",
+    employeeName: "Arjun Rao",
     department: "Finance",
     assetType: "Printer",
     purpose: "Office Work",
@@ -184,7 +184,7 @@ const INITIAL_HISTORY = [
     assignmentId: "ASG001",
     requestId: "AR002",
     employeeId: "260808002",
-    employeeName: "Employee 2",
+    employeeName: "Sneha Patel",
     assetType: "Laptop",
     assetNameId: "Dell Latitude 5420 (AST1001)",
     assignedDate: "09-08-2026",
@@ -194,7 +194,7 @@ const INITIAL_HISTORY = [
     assignmentId: "ASG002",
     requestId: "AR003",
     employeeId: "260808003",
-    employeeName: "Employee 3",
+    employeeName: "Vikram Singh",
     assetType: "Keyboard",
     assetNameId: "Logitech K120 (AST2007)",
     assignedDate: "10-08-2026",
@@ -204,7 +204,7 @@ const INITIAL_HISTORY = [
     assignmentId: "ASG003",
     requestId: "AR005",
     employeeId: "260808005",
-    employeeName: "Employee 5",
+    employeeName: "Priya Nair",
     assetType: "Monitor",
     assetNameId: 'HP 24" Monitor (AST3004)',
     assignedDate: "11-08-2026",
@@ -528,7 +528,7 @@ const AssetAssignment = ({
 
             <div className="asa-validation-hint">
               <small>
-                Format: YYDDMM + 3 employee numbers
+                Format: YYMMDD + 3 employee numbers
                 (e.g., 260808001, 260808002, 260808003)
               </small>
             </div>
