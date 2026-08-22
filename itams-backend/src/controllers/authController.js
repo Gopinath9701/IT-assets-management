@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const { pool } = require("../config/db");
 const { sendOtpEmail } = require("../utils/email");
 const { generateOtp, otpExpiryDate } = require("../utils/otp");
-const { validatePassword } = require("../utils/validators");
+const { validatePassword, validateOtp } = require("../utils/validators");
 
 async function findUserByIdentifier(identifier) {
   const { rows } = await pool.query(
@@ -91,8 +91,12 @@ async function sendOtp(req, res, next) {
 async function verifyOtp(req, res, next) {
   try {
     const { emailOrId: identifier, otp } = req.body;
-    if (!identifier || !otp) {
-      return res.status(400).json({ success: false, message: "Identifier and OTP are required" });
+    if (!identifier) {
+      return res.status(400).json({ success: false, message: "Identifier is required" });
+    }
+    const otpError = validateOtp(otp);
+    if (otpError) {
+      return res.status(400).json({ success: false, message: otpError });
     }
 
     const user = await findUserByIdentifier(identifier);
@@ -123,8 +127,12 @@ async function verifyOtp(req, res, next) {
 async function resetPassword(req, res, next) {
   try {
     const { emailOrId: identifier, otp, newPassword } = req.body;
-    if (!identifier || !otp || !newPassword) {
-      return res.status(400).json({ success: false, message: "Identifier, OTP and new password are required" });
+    if (!identifier) {
+      return res.status(400).json({ success: false, message: "Identifier is required" });
+    }
+    const otpError = validateOtp(otp);
+    if (otpError) {
+      return res.status(400).json({ success: false, message: otpError });
     }
 
     const passwordError = validatePassword(newPassword);

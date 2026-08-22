@@ -30,6 +30,8 @@ async function generateEmployeeId(joiningDate) {
 // Format: [3-letter type prefix][3-digit sequence], e.g. MON001, KEY001.
 // Prefix map matches the frontend's own table exactly.
 const ASSET_TYPE_PREFIXES = {
+  Laptop: "LAP",
+  Desktop: "DSK",
   Monitor: "MON",
   Keyboard: "KEY",
   Webcam: "WEB",
@@ -37,6 +39,8 @@ const ASSET_TYPE_PREFIXES = {
   Mouse: "MOU",
   CPU: "CPU",
   Printer: "PRI",
+  Headset: "HEA",
+  Scanner: "SCN",
 };
 
 async function generateAssetId(assetType) {
@@ -66,7 +70,6 @@ async function generateAssignmentId() {
   return `ASG${String(count + 1).padStart(3, "0")}`;
 }
 
-module.exports = { generateEmployeeId, generateAssetId, generateRequestId, generateAssignmentId, ASSET_TYPE_PREFIXES };
 // Sequential, e.g. DEP001, DEP002... generated server-side, never trusted from
 // the client (same reasoning as employee/asset IDs).
 async function generateDepartmentId() {

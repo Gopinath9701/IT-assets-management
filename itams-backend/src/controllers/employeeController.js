@@ -1,5 +1,5 @@
 const { pool } = require("../config/db");
-const { validateEmployeePayload } = require("../utils/validators");
+const { validateEmployeePayload, validateEmployeeEmail, validateEmployeeIdFormat } = require("../utils/validators");
 const { generateEmployeeId } = require("../utils/idGenerator");
 
 // GET /api/employees?search=
@@ -22,6 +22,10 @@ async function getEmployees(req, res, next) {
 async function getEmployeeById(req, res, next) {
   try {
     const { employeeId } = req.params;
+    const idError = validateEmployeeIdFormat(employeeId);
+    if (idError) {
+      return res.status(400).json({ success: false, message: idError });
+    }
     const { rows } = await pool.query("SELECT * FROM employees WHERE employee_id = $1", [employeeId]);
     if (rows.length === 0) {
       return res.status(404).json({ success: false, message: "Employee not found" });
@@ -50,14 +54,19 @@ async function addEmployee(req, res, next) {
     const { employeeName, email, department, designation, phone, joiningDate } = req.body;
 
     const validationError = validateEmployeePayload(
-      { employeeName, email, department, designation, phone, joiningDate },
-      { requireEmail: true, requireJoiningDate: true }
+      { employeeName, department, designation, phone, joiningDate },
+      { requireJoiningDate: true }
     );
     if (validationError) {
       return res.status(400).json({ success: false, message: validationError });
     }
 
     const employeeId = await generateEmployeeId(joiningDate);
+
+    const emailError = validateEmployeeEmail(email, employeeId);
+    if (emailError) {
+      return res.status(400).json({ success: false, message: emailError });
+    }
 
     await pool.query(
       `INSERT INTO employees (employee_id, employee_name, email, department, designation, phone, joining_date)
@@ -81,11 +90,17 @@ async function updateEmployee(req, res, next) {
     const { employeeName, email, department, designation, phone, joiningDate } = req.body;
 
     const validationError = validateEmployeePayload(
-      { employeeName, email, department, designation, phone, joiningDate },
-      { requireEmail: false, requireJoiningDate: false }
+      { employeeName, department, designation, phone, joiningDate },
+      { requireJoiningDate: false }
     );
     if (validationError) {
       return res.status(400).json({ success: false, message: validationError });
+    }
+    if (email) {
+      const emailError = validateEmployeeEmail(email, employeeId);
+      if (emailError) {
+        return res.status(400).json({ success: false, message: emailError });
+      }
     }
 
     // COALESCE so any field the form doesn't send (e.g. email, per the current
