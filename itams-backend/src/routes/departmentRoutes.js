@@ -4,7 +4,7 @@ const { getDepartments, addDepartment, deleteDepartment } = require("../controll
 
 const router = express.Router();
 
-router.use(authenticate, authorize("HR", "Admin"));
+router.use(authenticate, authorize("HR"));
 
 router.get("/", getDepartments);
 router.post("/", addDepartment);

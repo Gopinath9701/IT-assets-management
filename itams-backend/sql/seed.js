@@ -1,72 +1,64 @@
 // Run with: npm run seed
-// Creates the initial HR and Asset Manager login accounts (and a couple of
-// sample departments) so you can log in immediately after setting up the DB.
+// Creates the three login accounts allowed by spec — HR, Asset Manager, and
+// Inventory Manager (employees do NOT get logins) — plus sample departments.
 require("dotenv").config();
 const bcrypt = require("bcryptjs");
 const { pool } = require("../src/config/db");
+const { generateEmployeeId } = require("../src/utils/idGenerator");
+const { validatePassword } = require("../src/utils/validators");
 
 async function seed() {
-  const plainPassword = String(process.env.DEFAULT_SEED_PASSWORD || "123$5678").trim();
+  const plainPassword = process.env.DEFAULT_SEED_PASSWORD || "Itams@2026";
 
-  await pool.query(
-    `DELETE FROM users
-     WHERE role IN ('HR', 'AssetManager', 'InventoryManager')
-        OR login_id IN ('250812001', '250812002', '250812003')`
-  );
+  const passwordError = validatePassword(plainPassword);
+  if (passwordError) {
+    console.error(`❌ DEFAULT_SEED_PASSWORD does not meet the password policy: ${passwordError}`);
+    console.error("   Fix DEFAULT_SEED_PASSWORD in .env (needs 8-20 chars, upper+lower+digit+special) and re-run.");
+    process.exit(1);
+  }
 
-  // IMPORTANT: The actual frontend validation accepts either:
-  // 1) a 9-digit employee ID, or
-  // 2) an email in the format 9-digitID@gmail.com
-  // So these seeded accounts must use valid employee IDs and matching Gmail
-  // addresses. The login_id is still stored in the DB, but the browser form
-  // will only accept the employee ID/email pattern above.
-  // The current validator interprets the first 2 digits as year, the next 2 as
-  // day, and the next 2 as month. To stay valid under the same rules, the
-  // seeded IDs must use a real date where month is 01-12 and not in the future.
-  const users = [
+  const passwordHash = await bcrypt.hash(plainPassword, 10);
+  const today = new Date();
+
+  const accounts = [
     {
-      login_id: "250812001",
       name: "HR Admin",
-      email: process.env.SEED_HR_EMAIL || "250812001@gmail.com",
+      email: process.env.SEED_HR_EMAIL || "replace.with.real.hr@gmail.com",
       department: "HR",
       role: "HR",
     },
     {
-      login_id: "250812002",
       name: "Asset Manager",
-      email: process.env.SEED_ASSET_MANAGER_EMAIL || "250812002@gmail.com",
+      email: process.env.SEED_ASSET_MANAGER_EMAIL || "replace.with.real.assetmanager@gmail.com",
       department: "Asset Management",
       role: "AssetManager",
     },
     {
-      login_id: "250812003",
       name: "Inventory Manager",
-      email: process.env.SEED_INVENTORY_MANAGER_EMAIL || "250812003@gmail.com",
-      department: "Inventory Management",
+      email: process.env.SEED_INVENTORY_MANAGER_EMAIL || "replace.with.real.inventorymanager@gmail.com",
+      department: "Inventory",
       role: "InventoryManager",
     },
   ];
 
-  for (const u of users) {
-    const passwordHash = await bcrypt.hash(plainPassword, 10);
+  for (const acc of accounts) {
+    // Skip regenerating an ID if this email is already seeded (keeps re-runs idempotent).
+    const { rows: existing } = await pool.query("SELECT login_id FROM users WHERE email = $1", [acc.email]);
+    const loginId = existing[0]?.login_id || (await generateEmployeeId(today));
+
     await pool.query(
       `INSERT INTO users (login_id, name, email, department, password_hash, role)
        VALUES ($1, $2, $3, $4, $5, $6)
-       ON CONFLICT (login_id) DO UPDATE SET
-         name = EXCLUDED.name,
-         email = EXCLUDED.email,
-         department = EXCLUDED.department,
-         password_hash = EXCLUDED.password_hash,
-         role = EXCLUDED.role`,
-      [u.login_id, u.name, u.email, u.department, passwordHash, u.role]
+       ON CONFLICT (login_id) DO UPDATE SET password_hash = EXCLUDED.password_hash, name = EXCLUDED.name`,
+      [loginId, acc.name, acc.email, acc.department, passwordHash, acc.role]
     );
-    console.log(`✅ Seeded user: ${u.login_id} (${u.role}) — password: ${plainPassword}`);
+    console.log(`✅ Seeded ${acc.role}: login ID ${loginId} | email ${acc.email} | password ${plainPassword}`);
   }
 
   const departments = [
-    ["DEP001", "Information Technology (IT)", "Head 1", 25],
-    ["DEP002", "Human Resources (HR)", "Head 2", 10],
-    ["DEP003", "Finance", "Head 3", 15],
+    ["DEP001", "Information Technology", "Head One", 25],
+    ["DEP002", "Human Resources", "Head Two", 10],
+    ["DEP003", "Finance", "Head Three", 15],
   ];
   for (const [id, name, head, count] of departments) {
     await pool.query(
@@ -77,13 +69,9 @@ async function seed() {
   }
   console.log("✅ Seeded sample departments");
 
-  console.log("\nLogin credentials (same password for all seeded users):");
-  console.log(`  HR:                log in with email = ${users[0].email} | password = ${plainPassword}`);
-  console.log(`  Asset Manager:     log in with email = ${users[1].email} | password = ${plainPassword}`);
-  console.log(`  Inventory Manager: log in with email = ${users[2].email} | password = ${plainPassword}`);
-  console.log("\n⚠️  The login form accepts a 9-digit Employee ID or a 9-digitID@gmail.com email.");
-  console.log("   Use the email shown above, or the login_id value, if the form is bypassed.");
-  console.log("   Change these passwords after first login in a real deployment.");
+  console.log("\n⚠️  Log in using the EMAIL shown above (Login.js's own validation");
+  console.log("   requires @gmail.com) — the 9-digit login ID also works if your");
+  console.log("   frontend's login form accepts numeric IDs directly.");
 
   process.exit(0);
 }

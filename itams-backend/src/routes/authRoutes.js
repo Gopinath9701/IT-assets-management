@@ -4,7 +4,6 @@ const { login, sendOtp, verifyOtp, resetPassword } = require("../controllers/aut
 
 const router = express.Router();
 
-// Prevent OTP spam / brute force: max 5 requests per 15 min per IP
 const otpLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 5,

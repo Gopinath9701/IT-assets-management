@@ -1,8 +1,6 @@
 -- ITAMS Database Schema (PostgreSQL / Neon)
 -- Run this once against your Neon database before running sql/seed.js
 
--- updated_at auto-refresh trigger (Postgres has no ON UPDATE CURRENT_TIMESTAMP
--- like MySQL — this function + a trigger per table replaces it)
 CREATE OR REPLACE FUNCTION set_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -11,9 +9,13 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- Login accounts. Per spec: ONLY HR, Asset Manager, and Inventory Manager get
+-- logins — regular employees are managed records only (see `employees` table),
+-- they do not log in. All three roles share the same 9-digit login_id format
+-- (YYMMDD + 3-digit serial, based on when that account was created).
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
-  login_id VARCHAR(20) NOT NULL UNIQUE,       -- e.g. HR001, AM001 (what's typed at Login page)
+  login_id VARCHAR(9) NOT NULL UNIQUE,        -- 9 digits: YYMMDD + serial
   name VARCHAR(150) NOT NULL,
   email VARCHAR(150) NOT NULL UNIQUE,
   department VARCHAR(100) DEFAULT NULL,
@@ -37,16 +39,19 @@ CREATE TABLE IF NOT EXISTS password_resets (
 
 CREATE TABLE IF NOT EXISTS departments (
   id SERIAL PRIMARY KEY,
-  department_id VARCHAR(20) NOT NULL UNIQUE,  -- e.g. DEP001
+  department_id VARCHAR(20) NOT NULL UNIQUE,
   name VARCHAR(150) NOT NULL,
   head VARCHAR(150) DEFAULT NULL,
   employee_count INT DEFAULT 0,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- HR-managed employee records. No login capability — see note on `users` above.
+-- employee_id: 9 digits, YYMMDD (joining date) + 3-digit serial, generated
+-- server-side (never trusted from the client).
 CREATE TABLE IF NOT EXISTS employees (
   id SERIAL PRIMARY KEY,
-  employee_id VARCHAR(20) NOT NULL UNIQUE,    -- e.g. EMP001
+  employee_id VARCHAR(9) NOT NULL UNIQUE,
   employee_name VARCHAR(150) NOT NULL,
   email VARCHAR(150) NOT NULL UNIQUE,
   department VARCHAR(100) NOT NULL,
@@ -60,10 +65,14 @@ CREATE TABLE IF NOT EXISTS employees (
 CREATE TRIGGER trg_employees_updated_at BEFORE UPDATE ON employees
   FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
+-- asset_id: [3-letter type prefix][3-digit sequence], e.g. MON001, KEY001.
+-- Generated server-side using the same prefix map as the frontend, but backed
+-- by a real database uniqueness check (the frontend's own localStorage-based
+-- counter can't guarantee uniqueness across devices/sessions).
 CREATE TABLE IF NOT EXISTS assets (
   id SERIAL PRIMARY KEY,
-  asset_id VARCHAR(10) NOT NULL UNIQUE,        -- 'AST' + 3 alphanumeric, e.g. AST7K2
-  asset_name VARCHAR(100) NOT NULL,
+  asset_id VARCHAR(10) NOT NULL UNIQUE,
+  asset_name VARCHAR(100) DEFAULT NULL,        -- no longer collected on Add/Edit forms
   asset_type VARCHAR(50) NOT NULL,
   brand VARCHAR(100) DEFAULT NULL,
   model VARCHAR(100) DEFAULT NULL,
@@ -71,7 +80,7 @@ CREATE TABLE IF NOT EXISTS assets (
   location VARCHAR(100) DEFAULT NULL,
   description TEXT DEFAULT NULL,
   status VARCHAR(20) NOT NULL DEFAULT 'Not In Use' CHECK (status IN ('In Use','Not In Use','Under Maintenance')),
-  assigned_to VARCHAR(20) DEFAULT NULL REFERENCES employees(employee_id) ON DELETE SET NULL,
+  assigned_to VARCHAR(9) DEFAULT NULL REFERENCES employees(employee_id) ON DELETE SET NULL,
   purchase_date DATE DEFAULT NULL,
   purchase_cost DECIMAL(10,2) DEFAULT NULL,
   warranty_expiry DATE DEFAULT NULL,
@@ -83,8 +92,8 @@ CREATE TRIGGER trg_assets_updated_at BEFORE UPDATE ON assets
 
 CREATE TABLE IF NOT EXISTS asset_requests (
   id SERIAL PRIMARY KEY,
-  request_id VARCHAR(20) NOT NULL UNIQUE,      -- e.g. AR001
-  employee_id VARCHAR(20) NOT NULL REFERENCES employees(employee_id) ON DELETE CASCADE,
+  request_id VARCHAR(20) NOT NULL UNIQUE,
+  employee_id VARCHAR(9) NOT NULL REFERENCES employees(employee_id) ON DELETE CASCADE,
   asset_type VARCHAR(50) NOT NULL,
   purpose VARCHAR(500) NOT NULL,
   required_date DATE NOT NULL,
@@ -97,9 +106,9 @@ CREATE TABLE IF NOT EXISTS asset_requests (
 
 CREATE TABLE IF NOT EXISTS asset_assignments (
   id SERIAL PRIMARY KEY,
-  assignment_id VARCHAR(20) NOT NULL UNIQUE,   -- e.g. ASG001
+  assignment_id VARCHAR(20) NOT NULL UNIQUE,
   request_id VARCHAR(20) NOT NULL REFERENCES asset_requests(request_id) ON DELETE CASCADE,
-  employee_id VARCHAR(20) NOT NULL REFERENCES employees(employee_id) ON DELETE CASCADE,
+  employee_id VARCHAR(9) NOT NULL REFERENCES employees(employee_id) ON DELETE CASCADE,
   asset_id VARCHAR(10) NOT NULL REFERENCES assets(asset_id) ON DELETE CASCADE,
   assigned_date DATE NOT NULL,
   returned_date DATE DEFAULT NULL,
@@ -109,8 +118,8 @@ CREATE TABLE IF NOT EXISTS asset_assignments (
 
 CREATE TABLE IF NOT EXISTS maintenance_requests (
   id SERIAL PRIMARY KEY,
-  request_id VARCHAR(20) NOT NULL UNIQUE,     -- e.g. MR001
-  employee_id VARCHAR(20) NOT NULL REFERENCES employees(employee_id) ON DELETE CASCADE,
+  request_id VARCHAR(20) NOT NULL UNIQUE,
+  employee_id VARCHAR(9) NOT NULL REFERENCES employees(employee_id) ON DELETE CASCADE,
   asset_id VARCHAR(20) DEFAULT NULL,
   issue_category VARCHAR(100) NOT NULL,
   description TEXT NOT NULL,
@@ -120,7 +129,6 @@ CREATE TABLE IF NOT EXISTS maintenance_requests (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Helpful indexes
 CREATE INDEX idx_employees_department ON employees(department);
 CREATE INDEX idx_employees_status ON employees(status);
 CREATE INDEX idx_maintenance_status ON maintenance_requests(status);

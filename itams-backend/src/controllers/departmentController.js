@@ -1,4 +1,5 @@
 const { pool } = require("../config/db");
+const { DEPARTMENT_NAME_REGEX } = require("../utils/validators");
 
 async function getDepartments(req, res, next) {
   try {
@@ -19,6 +20,12 @@ async function addDepartment(req, res, next) {
 
     if (!departmentId || !departmentName || !departmentHead || employeeCount === undefined) {
       return res.status(400).json({ success: false, message: "Please fill all fields." });
+    }
+    if (!DEPARTMENT_NAME_REGEX.test(departmentName)) {
+      return res.status(400).json({ success: false, message: "Department Name must contain letters only." });
+    }
+    if (!DEPARTMENT_NAME_REGEX.test(departmentHead)) {
+      return res.status(400).json({ success: false, message: "Department Head must contain letters only." });
     }
 
     await pool.query(

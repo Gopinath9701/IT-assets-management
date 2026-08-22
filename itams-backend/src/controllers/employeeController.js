@@ -1,6 +1,6 @@
-const bcrypt = require("bcryptjs");
 const { pool } = require("../config/db");
 const { validateEmployeePayload } = require("../utils/validators");
+const { generateEmployeeId } = require("../utils/idGenerator");
 
 // GET /api/employees?search=
 async function getEmployees(req, res, next) {
@@ -14,11 +14,11 @@ async function getEmployees(req, res, next) {
     );
     res.json({ success: true, employees: rows });
   } catch (err) {
-    next(err); 
+    next(err);
   }
 }
 
-// GET /api/employees/:employeeId  (also returns assigned assets, for ViewEmployeeList popup)
+// GET /api/employees/:employeeId
 async function getEmployeeById(req, res, next) {
   try {
     const { employeeId } = req.params;
@@ -42,96 +42,77 @@ async function getEmployeeById(req, res, next) {
 }
 
 // POST /api/employees  (AddEmployee.js form)
+// Employee ID is generated server-side from Date of Joining — never trusted
+// from the client. No login account is created — per spec, only HR/Asset
+// Manager/Inventory Manager accounts exist in `users`; employees don't log in.
 async function addEmployee(req, res, next) {
-  const client = await pool.connect();
   try {
-    const { employeeId, employeeName, email, department, designation, phone, joiningDate } = req.body;
+    const { employeeName, email, department, designation, phone, joiningDate } = req.body;
 
-    const validationError = validateEmployeePayload({
-      employeeId, employeeName, email, department, designation, phone, joiningDate,
-    });
+    const validationError = validateEmployeePayload(
+      { employeeName, email, department, designation, phone, joiningDate },
+      { requireEmail: true, requireJoiningDate: true }
+    );
     if (validationError) {
       return res.status(400).json({ success: false, message: validationError });
     }
 
-    const defaultPassword = process.env.DEFAULT_SEED_PASSWORD || "ITAMS@2026";
-    const passwordHash = await bcrypt.hash(defaultPassword, 10);
+    const employeeId = await generateEmployeeId(joiningDate);
 
-    await client.query("BEGIN");
-
-    await client.query(
+    await pool.query(
       `INSERT INTO employees (employee_id, employee_name, email, department, designation, phone, joining_date)
        VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [employeeId, employeeName, email, department, designation || null, phone || null, joiningDate || null]
+      [employeeId, employeeName, email, department, designation || null, phone || null, joiningDate]
     );
 
-    await client.query(
-      `INSERT INTO users (login_id, name, email, department, password_hash, role)
-       VALUES ($1, $2, $3, $4, $5, 'Employee')`,
-      [employeeId, employeeName, email, department, passwordHash]
-    );
-
-    await client.query("COMMIT");
-
-    res.status(201).json({
-      success: true,
-      message: "Employee Added Successfully!",
-      loginCreated: { loginId: employeeId, temporaryPassword: defaultPassword },
-    });
+    res.status(201).json({ success: true, message: "Employee Added Successfully!", employeeId });
   } catch (err) {
-    await client.query("ROLLBACK");
     if (err.code === "23505") {
       return res.status(409).json({ success: false, message: "Employee ID or email already exists" });
     }
     next(err);
-  } finally {
-    client.release();
   }
 }
 
-// PUT /api/employees/:employeeId  (UpdateEmployee.js form)
+// PUT /api/employees/:employeeId  (UpdateEmployee.js form — Employee ID is read-only)
 async function updateEmployee(req, res, next) {
-  const client = await pool.connect();
   try {
     const { employeeId } = req.params;
     const { employeeName, email, department, designation, phone, joiningDate } = req.body;
 
-    const validationError = validateEmployeePayload({
-      employeeId, employeeName, email, department, designation, phone, joiningDate,
-    });
+    const validationError = validateEmployeePayload(
+      { employeeName, email, department, designation, phone, joiningDate },
+      { requireEmail: false, requireJoiningDate: false }
+    );
     if (validationError) {
       return res.status(400).json({ success: false, message: validationError });
     }
 
-    await client.query("BEGIN");
-
-    const result = await client.query(
-      `UPDATE employees SET employee_name=$1, email=$2, department=$3, designation=$4, phone=$5, joining_date=$6
+    // COALESCE so any field the form doesn't send (e.g. email, per the current
+    // UpdateEmployee.js) leaves the existing value untouched instead of wiping it.
+    const result = await pool.query(
+      `UPDATE employees SET
+         employee_name = COALESCE($1, employee_name),
+         email = COALESCE($2, email),
+         department = COALESCE($3, department),
+         designation = COALESCE($4, designation),
+         phone = COALESCE($5, phone),
+         joining_date = COALESCE($6, joining_date)
        WHERE employee_id = $7`,
-      [employeeName, email, department, designation || null, phone || null, joiningDate || null, employeeId]
+      [employeeName || null, email || null, department || null, designation || null, phone || null, joiningDate || null, employeeId]
     );
 
     if (result.rowCount === 0) {
-      await client.query("ROLLBACK");
       return res.status(404).json({ success: false, message: "Employee not found" });
     }
 
-    await client.query(
-      `UPDATE users SET name = $1, email = $2, department = $3 WHERE login_id = $4`,
-      [employeeName, email, department, employeeId]
-    );
-
-    await client.query("COMMIT");
     res.json({ success: true, message: "Employee Updated Successfully!" });
   } catch (err) {
-    await client.query("ROLLBACK");
     next(err);
-  } finally {
-    client.release();
   }
 }
 
-// PATCH /api/employees/:employeeId/status  (EmployeeStatus.js dropdown)
+// PATCH /api/employees/:employeeId/status
 async function updateEmployeeStatus(req, res, next) {
   try {
     const { employeeId } = req.params;
@@ -155,82 +136,19 @@ async function updateEmployeeStatus(req, res, next) {
 
 // DELETE /api/employees/:employeeId
 async function deleteEmployee(req, res, next) {
-  const client = await pool.connect();
   try {
     const { employeeId } = req.params;
-
-    await client.query("BEGIN");
-
-    const result = await client.query("DELETE FROM employees WHERE employee_id = $1", [employeeId]);
+    const result = await pool.query("DELETE FROM employees WHERE employee_id = $1", [employeeId]);
     if (result.rowCount === 0) {
-      await client.query("ROLLBACK");
       return res.status(404).json({ success: false, message: "Employee not found" });
     }
-
-    await client.query("DELETE FROM users WHERE login_id = $1 AND role = 'Employee'", [employeeId]);
-
-    await client.query("COMMIT");
     res.json({ success: true, message: "Employee deleted" });
   } catch (err) {
-    await client.query("ROLLBACK");
-    next(err);
-  } finally {
-    client.release();
-  }
-}
-
-// GET /api/employees/:employeeId/dashboard  (Employee dashboard support)
-async function getEmployeeDashboard(req, res, next) {
-  try {
-    const { employeeId } = req.params;
-    const { rows: employeeRows } = await pool.query("SELECT * FROM employees WHERE employee_id = $1", [employeeId]);
-
-    if (employeeRows.length === 0) {
-      return res.status(404).json({ success: false, message: "Employee not found" });
-    }
-
-    const { rows: assignedAssets } = await pool.query(
-      `SELECT a.asset_id, a.asset_name, a.asset_type, aa.assigned_date
-       FROM asset_assignments aa
-       JOIN assets a ON a.asset_id = aa.asset_id
-       WHERE aa.employee_id = $1 AND aa.status = 'Assigned'
-       ORDER BY aa.assigned_date DESC`,
-      [employeeId]
-    );
-
-    const { rows: assetRequests } = await pool.query(
-      `SELECT request_id, asset_type, purpose, required_date, status
-       FROM asset_requests
-       WHERE employee_id = $1
-       ORDER BY id DESC
-       LIMIT 10`,
-      [employeeId]
-    );
-
-    const { rows: maintenanceRequests } = await pool.query(
-      `SELECT request_id, issue_category, description, priority, status, report_date
-       FROM maintenance_requests
-       WHERE employee_id = $1
-       ORDER BY id DESC
-       LIMIT 10`,
-      [employeeId]
-    );
-
-    res.json({
-      success: true,
-      dashboard: {
-        employee: employeeRows[0],
-        assignedAssets,
-        assetRequests,
-        maintenanceRequests,
-      },
-    });
-  } catch (err) {
     next(err);
   }
 }
 
-// GET /api/employees/stats/summary  (powers HRManagement.js "Employee Status Overview")
+// GET /api/employees/stats/summary
 async function getEmployeeStats(req, res, next) {
   try {
     const { rows } = await pool.query(
@@ -247,9 +165,6 @@ async function getEmployeeStats(req, res, next) {
       stats: {
         activeEmployees: Number(r.active) || 0,
         onLeave: Number(r.onLeave) || 0,
-        // "Resigned" isn't a status value in the current schema (only Active/On Leave/Inactive) —
-        // reported as 0 for now. Add a 'Resigned' status value if HR needs to distinguish it
-        // from 'Inactive' later.
         resigned: 0,
         inactive: Number(r.inactive) || 0,
         totalEmployees: Number(r.total) || 0,
@@ -267,6 +182,5 @@ module.exports = {
   updateEmployee,
   updateEmployeeStatus,
   deleteEmployee,
-  getEmployeeDashboard,
   getEmployeeStats,
 };

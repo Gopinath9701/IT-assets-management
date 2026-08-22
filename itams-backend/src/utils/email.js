@@ -5,9 +5,9 @@ const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
     user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_APP_PASSWORD, // 16-char App Password, not the Gmail login password
+    pass: process.env.GMAIL_APP_PASSWORD,
   },
-  connectionTimeout: 10000, // 10s — fail fast instead of hanging if Gmail is unreachable
+  connectionTimeout: 10000,
   greetingTimeout: 10000,
   socketTimeout: 10000,
 });
@@ -15,7 +15,7 @@ const transporter = nodemailer.createTransport({
 async function sendOtpEmail(toEmail, otp, name = "") {
   const fromName = process.env.EMAIL_FROM_NAME || "ITAMS Support";
 
-  const mailOptions = {
+  await transporter.sendMail({
     from: `"${fromName}" <${process.env.GMAIL_USER}>`,
     to: toEmail,
     subject: "Your ITAMS Password Reset OTP",
@@ -38,9 +38,7 @@ async function sendOtpEmail(toEmail, otp, name = "") {
         </div>
       </div>
     `,
-  };
-
-  await transporter.sendMail(mailOptions);
+  });
 }
 
 async function verifyEmailTransport() {
@@ -49,9 +47,6 @@ async function verifyEmailTransport() {
     console.log("✅ Gmail SMTP transporter ready");
   } catch (err) {
     console.error("⚠️  Gmail SMTP verification failed:", err.message);
-    console.error(
-      "   Check GMAIL_USER / GMAIL_APP_PASSWORD in .env — the app password must be a 16-char App Password, not your normal Gmail password."
-    );
   }
 }
 

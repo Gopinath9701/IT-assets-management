@@ -7,22 +7,23 @@ const {
   updateEmployee,
   updateEmployeeStatus,
   deleteEmployee,
-  getEmployeeDashboard,
   getEmployeeStats,
 } = require("../controllers/employeeController");
 
 const router = express.Router();
 
-router.get("/:employeeId/dashboard", authenticate, authorize("HR", "Admin", "Employee"), getEmployeeDashboard);
+router.use(authenticate);
 
-router.use(authenticate, authorize("HR", "Admin"));
+// Read: HR manages employees; AssetManager needs read-only visibility for the
+// Employee Status view under Asset Management (no update capability there).
+router.get("/", authorize("HR", "AssetManager"), getEmployees);
+router.get("/stats/summary", authorize("HR"), getEmployeeStats); // must come before /:employeeId
+router.get("/:employeeId", authorize("HR", "AssetManager"), getEmployeeById);
 
-router.get("/", getEmployees);
-router.get("/stats/summary", getEmployeeStats); // must come before /:employeeId
-router.get("/:employeeId", getEmployeeById);
-router.post("/", addEmployee);
-router.put("/:employeeId", updateEmployee);
-router.patch("/:employeeId/status", updateEmployeeStatus);
-router.delete("/:employeeId", deleteEmployee);
+// Write: HR only.
+router.post("/", authorize("HR"), addEmployee);
+router.put("/:employeeId", authorize("HR"), updateEmployee);
+router.patch("/:employeeId/status", authorize("HR"), updateEmployeeStatus);
+router.delete("/:employeeId", authorize("HR"), deleteEmployee);
 
 module.exports = router;

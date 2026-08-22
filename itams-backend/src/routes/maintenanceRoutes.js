@@ -8,11 +8,10 @@ const {
 
 const router = express.Router();
 
-router.use(authenticate);
+router.use(authenticate, authorize("HR", "AssetManager", "InventoryManager"));
 
-// HR/Admin/AssetManager can view all; anyone authenticated can file/view their own
 router.get("/", getMaintenanceRequests);
 router.post("/", createMaintenanceRequest);
-router.patch("/:requestId/status", authorize("AssetManager", "Admin", "Technician"), updateMaintenanceStatus);
+router.patch("/:requestId/status", authorize("AssetManager"), updateMaintenanceStatus);
 
 module.exports = router;

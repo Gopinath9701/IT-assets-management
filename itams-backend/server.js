@@ -23,7 +23,7 @@ app.use(express.json());
 
 app.get("/api/health", (req, res) => res.json({ success: true, message: "ITAMS API is running" }));
 
-app.use("/api", authRoutes); // matches the frontend's existing fetch() calls to /api/login, /api/forgot-password/*
+app.use("/api", authRoutes);
 app.use("/api/employees", employeeRoutes);
 app.use("/api/departments", departmentRoutes);
 app.use("/api/assets", assetRoutes);
@@ -40,8 +40,5 @@ const PORT = process.env.PORT || 5000;
 (async () => {
   await testConnection();
   app.listen(PORT, () => console.log(`🚀 ITAMS API listening on port ${PORT}`));
-  // Email verification runs in the background, not blocking startup — if Gmail
-  // is briefly slow/unreachable, the API should still come up. Login and most
-  // features don't depend on email; only forgot-password does.
   verifyEmailTransport();
 })();

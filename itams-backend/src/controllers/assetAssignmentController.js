@@ -1,8 +1,6 @@
 const { pool } = require("../config/db");
 const { generateAssignmentId } = require("../utils/idGenerator");
-const { validateAssignmentPayload } = require("../utils/validators");
 
-// GET /api/asset-assignments/pending  — approved requests not yet assigned
 async function getPending(req, res, next) {
   try {
     const { employeeId } = req.query;
@@ -28,12 +26,12 @@ async function getPending(req, res, next) {
   }
 }
 
-// GET /api/asset-assignments/history
 async function getHistory(req, res, next) {
   try {
     const { rows } = await pool.query(`
       SELECT a.assignment_id, a.request_id, a.employee_id, e.employee_name,
-             ast.asset_type, CONCAT(ast.asset_name, ' (', ast.asset_id, ')') AS asset_name_id,
+             ast.asset_type,
+             CONCAT(COALESCE(ast.model, ast.asset_type), ' (', ast.asset_id, ')') AS asset_name_id,
              a.assigned_date, a.status
       FROM asset_assignments a
       JOIN employees e ON e.employee_id = a.employee_id
@@ -46,19 +44,16 @@ async function getHistory(req, res, next) {
   }
 }
 
-// GET /api/asset-assignments/available-assets?type=Laptop
-// Real picker to replace the free-text field in AssetAssignment.js — lists
-// assets of the requested type that are currently unassigned.
 async function getAvailableAssets(req, res, next) {
   try {
     const { type } = req.query;
     const params = ["Not In Use"];
-    let query = "SELECT asset_id, asset_name, asset_type FROM assets WHERE status = $1";
+    let query = "SELECT asset_id, asset_type, model FROM assets WHERE status = $1";
     if (type) {
       params.push(type);
       query += ` AND asset_type = $${params.length}`;
     }
-    query += " ORDER BY asset_name ASC";
+    query += " ORDER BY asset_id ASC";
     const { rows } = await pool.query(query, params);
     res.json({ success: true, assets: rows });
   } catch (err) {
@@ -66,15 +61,12 @@ async function getAvailableAssets(req, res, next) {
   }
 }
 
-// POST /api/asset-assignments  { requestId, assetId }
 async function assignAsset(req, res, next) {
   const client = await pool.connect();
   try {
-    const { requestId, assetId, employeeId } = req.body;
-
-    const validationError = validateAssignmentPayload({ requestId, assetId, employeeId });
-    if (validationError) {
-      return res.status(400).json({ success: false, message: validationError });
+    const { requestId, assetId } = req.body;
+    if (!requestId || !assetId) {
+      return res.status(400).json({ success: false, message: "requestId and assetId are required" });
     }
 
     const reqRows = await client.query(
@@ -97,18 +89,18 @@ async function assignAsset(req, res, next) {
       return res.status(400).json({ success: false, message: "Asset not found or not available for assignment" });
     }
 
-    const assignedEmployeeId = reqRows.rows[0].employee_id;
+    const employeeId = reqRows.rows[0].employee_id;
     const assignmentId = await generateAssignmentId();
 
     await client.query("BEGIN");
     await client.query(
       `INSERT INTO asset_assignments (assignment_id, request_id, employee_id, asset_id, assigned_date)
        VALUES ($1, $2, $3, $4, CURRENT_DATE)`,
-      [assignmentId, requestId, assignedEmployeeId, assetId]
+      [assignmentId, requestId, employeeId, assetId]
     );
     await client.query(
       "UPDATE assets SET status = 'In Use', assigned_to = $1 WHERE asset_id = $2",
-      [assignedEmployeeId, assetId]
+      [employeeId, assetId]
     );
     await client.query("COMMIT");
 
@@ -135,7 +127,6 @@ async function reassignAsset(req, res, next) {
       "SELECT * FROM asset_assignments WHERE assignment_id = $1 AND status = 'Assigned'",
       [assignmentId]
     );
-
     if (assignmentResult.rows.length === 0) {
       return res.status(404).json({ success: false, message: "Active assignment not found" });
     }
@@ -152,6 +143,9 @@ async function reassignAsset(req, res, next) {
     if (assetResult.rows.length === 0) {
       return res.status(404).json({ success: false, message: "Asset not found" });
     }
+    // If reassigning to a DIFFERENT physical asset, that asset must actually be
+    // free right now — otherwise this would silently steal it from whoever
+    // currently holds it without closing out their assignment.
     if (targetAssetId !== currentAssignment.asset_id && assetResult.rows[0].status !== "Not In Use") {
       return res.status(400).json({ success: false, message: "Target asset is not available for assignment" });
     }
@@ -162,7 +156,6 @@ async function reassignAsset(req, res, next) {
       "UPDATE asset_assignments SET returned_date = CURRENT_DATE, status = 'Returned' WHERE assignment_id = $1",
       [assignmentId]
     );
-
     await client.query("UPDATE assets SET status = 'Not In Use', assigned_to = NULL WHERE asset_id = $1", [currentAssignment.asset_id]);
 
     const newAssignmentId = await generateAssignmentId();
@@ -171,14 +164,12 @@ async function reassignAsset(req, res, next) {
        VALUES ($1, $2, $3, $4, CURRENT_DATE, 'Assigned')`,
       [newAssignmentId, currentAssignment.request_id, employeeId, targetAssetId]
     );
-
     await client.query(
       "UPDATE assets SET status = 'In Use', assigned_to = $1 WHERE asset_id = $2",
       [employeeId, targetAssetId]
     );
 
     await client.query("COMMIT");
-
     res.status(201).json({ success: true, message: "Asset reassigned successfully", assignmentId: newAssignmentId });
   } catch (err) {
     await client.query("ROLLBACK");

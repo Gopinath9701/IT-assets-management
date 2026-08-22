@@ -1,9 +1,6 @@
 const { pool } = require("../config/db");
 const { generateRequestId } = require("../utils/idGenerator");
-const { validateAssetRequestPayload } = require("../utils/validators");
 
-// GET /api/asset-requests?status=&employeeId=&assetType=
-// Powers both AssetRequest.js (request history) and RequestApproval.js (pending queue)
 async function getRequests(req, res, next) {
   try {
     const { status, employeeId, assetType } = req.query;
@@ -40,19 +37,30 @@ async function getRequests(req, res, next) {
   }
 }
 
-// POST /api/asset-requests  (AssetRequest.js form: employeeId, assetType, purpose, requiredDate)
 async function createRequest(req, res, next) {
   try {
     const { employeeId, assetType, purpose, requiredDate } = req.body;
 
-    const validationError = validateAssetRequestPayload({ employeeId, assetType, purpose, requiredDate });
-    if (validationError) {
-      return res.status(400).json({ success: false, message: validationError });
+    if (!employeeId || !assetType || !purpose || !requiredDate) {
+      return res.status(400).json({ success: false, message: "All fields are required" });
+    }
+    if (purpose.trim().length < 10 || purpose.length > 500) {
+      return res.status(400).json({ success: false, message: "Purpose must be 10-500 characters" });
     }
 
     const { rows: empRows } = await pool.query("SELECT employee_id FROM employees WHERE employee_id = $1", [employeeId]);
     if (empRows.length === 0) {
       return res.status(400).json({ success: false, message: "Employee ID does not exist in the database" });
+    }
+
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const reqDate = new Date(requiredDate); reqDate.setHours(0, 0, 0, 0);
+    const maxDate = new Date(); maxDate.setFullYear(maxDate.getFullYear() + 1);
+    if (reqDate < today) {
+      return res.status(400).json({ success: false, message: "Required Date cannot be a past date" });
+    }
+    if (reqDate > maxDate) {
+      return res.status(400).json({ success: false, message: "Required Date cannot exceed one year from today" });
     }
 
     const requestId = await generateRequestId();
@@ -69,7 +77,6 @@ async function createRequest(req, res, next) {
   }
 }
 
-// PATCH /api/asset-requests/:requestId/approve
 async function approveRequest(req, res, next) {
   try {
     const { requestId } = req.params;
@@ -87,7 +94,6 @@ async function approveRequest(req, res, next) {
   }
 }
 
-// PATCH /api/asset-requests/:requestId/reject  { reason }
 async function rejectRequest(req, res, next) {
   try {
     const { requestId } = req.params;
