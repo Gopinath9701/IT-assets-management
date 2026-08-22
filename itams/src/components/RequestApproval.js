@@ -49,9 +49,10 @@ const validateEmployeeId = (id) => {
     };
   }
 
+  // YYMMDD
   const year = Number(id.substring(0, 2));
-  const day = Number(id.substring(2, 4));
-  const month = Number(id.substring(4, 6));
+  const month = Number(id.substring(2, 4));
+  const day = Number(id.substring(4, 6));
 
   if (month < 1 || month > 12) {
     return {
@@ -112,6 +113,7 @@ const validateEmployeeId = (id) => {
     message: "",
   };
 };
+
 // =====================================================
 // VALIDATION - SEARCH
 // =====================================================
@@ -255,7 +257,7 @@ const validateRequiredDate = (date) => {
 
 // =====================================================
 // INITIAL DATA
-// Employee IDs now use YYDDMM + 3 numbers
+// Employee IDs now use YYMMDD + 3 numbers
 // =====================================================
 
 const INITIAL_REQUESTS = [
@@ -824,7 +826,7 @@ const RequestApproval = ({
 
             <div className="ra-validation-hint">
               <small>
-                Format: YYDDMM + 3 employee numbers
+                Format: YYMMDD + 3 employee numbers
                 (e.g., 260808001, 260808002, 260808003)
               </small>
             </div>
