@@ -654,12 +654,12 @@ const AddAsset = ({
       )
     ) {
       newErrors.purchaseCost =
-        "Enter a valid amount. Example: 15000 or 15000.50.";
+        "Enter a valid amount. Example: 100 or 15000.50.";
     } else if (
-      Number(purchaseCost) <= 0
+      Number(purchaseCost) < 100
     ) {
       newErrors.purchaseCost =
-        "Purchase cost must be greater than 0.";
+        "Purchase cost must be at least ₹100.";
     } else if (
       Number(purchaseCost) >
       99999999
@@ -695,8 +695,7 @@ const AddAsset = ({
         new Date();
 
       sevenDaysAgo.setDate(
-        sevenDaysAgo.getDate() -
-          7
+        sevenDaysAgo.getDate() - 7
       );
 
       sevenDaysAgo.setHours(
@@ -768,7 +767,7 @@ const AddAsset = ({
 
     // ===================================================
     // DESCRIPTION
-    // ===================================================
+    // =====================================================
 
     const description =
       formData.description;
@@ -814,15 +813,12 @@ const AddAsset = ({
   // SUBMIT FORM
   // =====================================================
 
-  const handleSubmit = async (
-    e
-  ) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     setSuccessMessage("");
     setApiError("");
 
-    // Validate
     const isValid =
       validateForm();
 
@@ -902,7 +898,6 @@ const AddAsset = ({
 
       // =================================================
       // BACKEND REQUEST
-      // NO TOKEN
       // =================================================
 
       const response =
@@ -954,10 +949,6 @@ const AddAsset = ({
       // =================================================
       // SUCCESS
       // =================================================
-
-      setAssetId(
-        generatedAssetId
-      );
 
       setSuccessMessage(
         `Asset added successfully! Asset ID: ${generatedAssetId}`
