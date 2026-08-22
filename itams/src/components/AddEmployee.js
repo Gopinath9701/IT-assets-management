@@ -144,15 +144,15 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
       return "Enter Employee ID before entering Email.";
     }
 
-    // EXACTLY employeeID@gmail.com
-    const expectedEmail = `${id}@gmail.com`;
+    // EXACTLY employeeIDa@gmail.com
+    const expectedEmail = `${id}a@gmail.com`;
 
     if (value !== expectedEmail) {
       return `Email must be ${expectedEmail}.`;
     }
 
-    if (!/^\d{9}@gmail\.com$/.test(value)) {
-      return "Email must be in EmployeeID@gmail.com format.";
+    if (!/^\d{9}a@gmail\.com$/.test(value)) {
+      return "Email must be in EmployeeIDa@gmail.com format.";
     }
 
     return "";
@@ -215,7 +215,6 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
       return "Phone Number must contain exactly 10 digits.";
     }
 
-    // Indian mobile number should start with 6,7,8,9
     if (!/^[6-9]\d{9}$/.test(value)) {
       return "Enter a valid 10-digit Indian mobile number.";
     }
@@ -378,10 +377,8 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
   };
 
   const handlePhoneChange = (e) => {
-    // ONLY digits
     const value = e.target.value.replace(/\D/g, "");
 
-    // Maximum 10 digits
     const limitedValue = value.substring(0, 10);
 
     setPhone(limitedValue);
@@ -435,7 +432,6 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
 
     alert("✅ Employee saved successfully!");
 
-    // Reset form
     setEmployeeName("");
     setEmployeeId("");
     setEmail("");
@@ -582,7 +578,7 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
 
                 <input
                   type="email"
-                  placeholder="YYMMDD001@gmail.com"
+                  placeholder="YYMMDD001a@gmail.com"
                   value={email}
                   onChange={handleEmailChange}
                   className={
@@ -668,7 +664,6 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
                   Phone Number *
                 </label>
 
-                {/* ONLY PHONE UI CHANGED */}
                 <div
                   style={{
                     position: "relative",
