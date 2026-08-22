@@ -1,5 +1,6 @@
 const { pool } = require("../config/db");
 const { generateAssetId, ASSET_TYPE_PREFIXES } = require("../utils/idGenerator");
+const { validateNewAssetPayload, validateAssetUpdatePayload, validateAssetIdFormat } = require("../utils/validators");
 
 // GET /api/assets?search=&type=
 async function getAssets(req, res, next) {
@@ -23,6 +24,10 @@ async function getAssets(req, res, next) {
 async function getAssetById(req, res, next) {
   try {
     const { assetId } = req.params;
+    const idError = validateAssetIdFormat(assetId);
+    if (idError) {
+      return res.status(400).json({ success: false, message: idError });
+    }
     const { rows } = await pool.query("SELECT * FROM assets WHERE asset_id = $1", [assetId]);
     if (rows.length === 0) {
       return res.status(404).json({ success: false, message: "Asset not found" });
@@ -40,8 +45,9 @@ async function addAsset(req, res, next) {
   try {
     const { assetType, brand, model, purchaseDate, warrantyExpiry, purchaseCost, description } = req.body;
 
-    if (!assetType) {
-      return res.status(400).json({ success: false, message: "Asset Type is required" });
+    const validationError = validateNewAssetPayload({ assetType, brand, model, purchaseCost, purchaseDate, warrantyExpiry, description });
+    if (validationError) {
+      return res.status(400).json({ success: false, message: validationError });
     }
 
     const assetId = await generateAssetId(assetType);
@@ -63,6 +69,15 @@ async function updateAsset(req, res, next) {
   try {
     const { assetId } = req.params;
     const { model, description, purchaseDate, warrantyExpiry } = req.body;
+
+    const idError = validateAssetIdFormat(assetId);
+    if (idError) {
+      return res.status(400).json({ success: false, message: idError });
+    }
+    const validationError = validateAssetUpdatePayload({ model, description, purchaseDate, warrantyExpiry });
+    if (validationError) {
+      return res.status(400).json({ success: false, message: validationError });
+    }
 
     const result = await pool.query(
       `UPDATE assets SET model = $1, description = $2, purchase_date = $3, warranty_expiry = $4

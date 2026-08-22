@@ -1,5 +1,6 @@
 const { pool } = require("../config/db");
 const { generateRequestId } = require("../utils/idGenerator");
+const { validatePurpose, validateRequiredDate, validateRejectionReason, ASSET_TYPES } = require("../utils/validators");
 
 async function getRequests(req, res, next) {
   try {
@@ -41,11 +42,15 @@ async function createRequest(req, res, next) {
   try {
     const { employeeId, assetType, purpose, requiredDate } = req.body;
 
-    if (!employeeId || !assetType || !purpose || !requiredDate) {
-      return res.status(400).json({ success: false, message: "All fields are required" });
+    if (!employeeId) {
+      return res.status(400).json({ success: false, message: "Employee ID is required" });
     }
-    if (purpose.trim().length < 10 || purpose.length > 500) {
-      return res.status(400).json({ success: false, message: "Purpose must be 10-500 characters" });
+    if (!assetType || !ASSET_TYPES.includes(assetType)) {
+      return res.status(400).json({ success: false, message: "Please select a valid Asset Type" });
+    }
+    const purposeError = validatePurpose(purpose);
+    if (purposeError) {
+      return res.status(400).json({ success: false, message: purposeError });
     }
 
     const { rows: empRows } = await pool.query("SELECT employee_id FROM employees WHERE employee_id = $1", [employeeId]);
@@ -53,14 +58,9 @@ async function createRequest(req, res, next) {
       return res.status(400).json({ success: false, message: "Employee ID does not exist in the database" });
     }
 
-    const today = new Date(); today.setHours(0, 0, 0, 0);
-    const reqDate = new Date(requiredDate); reqDate.setHours(0, 0, 0, 0);
-    const maxDate = new Date(); maxDate.setFullYear(maxDate.getFullYear() + 1);
-    if (reqDate < today) {
-      return res.status(400).json({ success: false, message: "Required Date cannot be a past date" });
-    }
-    if (reqDate > maxDate) {
-      return res.status(400).json({ success: false, message: "Required Date cannot exceed one year from today" });
+    const requiredDateError = validateRequiredDate(requiredDate);
+    if (requiredDateError) {
+      return res.status(400).json({ success: false, message: requiredDateError });
     }
 
     const requestId = await generateRequestId();
@@ -98,8 +98,9 @@ async function rejectRequest(req, res, next) {
   try {
     const { requestId } = req.params;
     const { reason } = req.body;
-    if (!reason || !reason.trim()) {
-      return res.status(400).json({ success: false, message: "Reason for Rejection is required" });
+    const reasonError = validateRejectionReason(reason);
+    if (reasonError) {
+      return res.status(400).json({ success: false, message: reasonError });
     }
 
     const result = await pool.query(

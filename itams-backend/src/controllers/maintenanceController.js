@@ -1,4 +1,5 @@
 const { pool } = require("../config/db");
+const { validateMaintenancePayload } = require("../utils/validators");
 
 async function getMaintenanceRequests(req, res, next) {
   try {
@@ -18,8 +19,12 @@ async function createMaintenanceRequest(req, res, next) {
   try {
     const { employeeId, assetId, issueCategory, description, priority } = req.body;
 
-    if (!employeeId || !issueCategory || !description || !priority) {
-      return res.status(400).json({ success: false, message: "Please fill all fields." });
+    if (!employeeId) {
+      return res.status(400).json({ success: false, message: "Employee ID is required." });
+    }
+    const validationError = validateMaintenancePayload({ issueCategory, description, priority });
+    if (validationError) {
+      return res.status(400).json({ success: false, message: validationError });
     }
 
     const { rows } = await pool.query("SELECT COUNT(*) as count FROM maintenance_requests");
