@@ -26,7 +26,7 @@ const AssetReturn = () => {
   const [returnHistory, setReturnHistory] = useState([
     {
       assetId: "LAP001",
-      employeeId: "260808001",
+      employeeId: "260815001",
       assetType: "Laptop",
       returnDate: "18-08-2026",
       condition: "Good",
@@ -34,7 +34,7 @@ const AssetReturn = () => {
     },
     {
       assetId: "MON001",
-      employeeId: "260808002",
+      employeeId: "260815002",
       assetType: "Monitor",
       returnDate: "18-08-2026",
       condition: "Damaged",
@@ -67,14 +67,14 @@ const AssetReturn = () => {
   // EMPLOYEE ID VALIDATION
   //
   // FORMAT:
-  // YYDDMM + 3 DIGITS
+  // YYMMDD + 3 DIGITS
   //
   // Example:
-  // 260808001
+  // 260815001
   //
   // 26  = Year
-  // 08  = Day
   // 08  = Month
+  // 15  = Day
   // 001 = Employee Number
   //
   // RULES:
@@ -117,8 +117,8 @@ const AssetReturn = () => {
     // =====================================================
 
     const yy = id.substring(0, 2);
-    const dd = id.substring(2, 4);
-    const mm = id.substring(4, 6);
+    const mm = id.substring(2, 4);
+    const dd = id.substring(4, 6);
     const employeeNumber = id.substring(6, 9);
 
     // =====================================================
@@ -142,16 +142,6 @@ const AssetReturn = () => {
     }
 
     // =====================================================
-    // DAY
-    // =====================================================
-
-    const day = Number(dd);
-
-    if (!/^\d{2}$/.test(dd) || day < 1 || day > 31) {
-      return "DD must be between 01 and 31.";
-    }
-
-    // =====================================================
     // MONTH
     // =====================================================
 
@@ -159,6 +149,16 @@ const AssetReturn = () => {
 
     if (!/^\d{2}$/.test(mm) || month < 1 || month > 12) {
       return "MM must be between 01 and 12.";
+    }
+
+    // =====================================================
+    // DAY
+    // =====================================================
+
+    const day = Number(dd);
+
+    if (!/^\d{2}$/.test(dd) || day < 1 || day > 31) {
+      return "DD must be between 01 and 31.";
     }
 
     // =====================================================
@@ -177,9 +177,6 @@ const AssetReturn = () => {
 
     // =====================================================
     // CHECK REAL CALENDAR DATE
-    // Example:
-    // 260231001 -> invalid
-    // because February cannot have 31 days
     // =====================================================
 
     if (
@@ -620,7 +617,7 @@ const AssetReturn = () => {
                     handleSearch();
                   }
                 }}
-                placeholder="Enter Employee ID (e.g. 260808001)"
+                placeholder="Enter Employee ID (e.g. 260815001)"
                 maxLength={9}
               />
 
@@ -631,8 +628,8 @@ const AssetReturn = () => {
               )}
 
               <div className="validation-hint">
-                Format: YYDDMM + 3 employee digits
-                (e.g., 260808001)
+                Format: YYMMDD + 3 employee digits
+                (e.g., 260815001)
               </div>
 
             </div>
