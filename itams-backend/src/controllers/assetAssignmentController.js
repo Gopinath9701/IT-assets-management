@@ -1,5 +1,6 @@
 const { pool } = require("../config/db");
 const { generateAssignmentId } = require("../utils/idGenerator");
+const { validateAssetReturnPayload } = require("../utils/validators");
 
 async function getPending(req, res, next) {
   try {
@@ -179,4 +180,57 @@ async function reassignAsset(req, res, next) {
   }
 }
 
-module.exports = { getPending, getHistory, getAvailableAssets, assignAsset, reassignAsset };
+// POST /api/asset-assignments/:assignmentId/return  { returnDate, condition, remarks }
+// A Damaged/Faulty return goes to 'Under Maintenance' instead of straight
+// back to 'Not In Use' — it shouldn't look available for reassignment until
+// someone's actually looked at it.
+async function returnAsset(req, res, next) {
+  const client = await pool.connect();
+  try {
+    const { assignmentId } = req.params;
+    const { returnDate, condition, remarks } = req.body;
+
+    const validationError = validateAssetReturnPayload({ returnDate, condition, remarks });
+    if (validationError) {
+      return res.status(400).json({ success: false, message: validationError });
+    }
+
+    const assignmentResult = await client.query(
+      "SELECT * FROM asset_assignments WHERE assignment_id = $1 AND status = 'Assigned'",
+      [assignmentId]
+    );
+    if (assignmentResult.rows.length === 0) {
+      return res.status(404).json({ success: false, message: "Active assignment not found" });
+    }
+    const assignment = assignmentResult.rows[0];
+
+    const assignedDate = new Date(assignment.assigned_date); assignedDate.setHours(0, 0, 0, 0);
+    const rDate = new Date(returnDate); rDate.setHours(0, 0, 0, 0);
+    if (rDate < assignedDate) {
+      return res.status(400).json({ success: false, message: "Return Date cannot be before Assigned Date" });
+    }
+
+    const newAssetStatus = condition === "Good" ? "Not In Use" : "Under Maintenance";
+
+    await client.query("BEGIN");
+    await client.query(
+      `UPDATE asset_assignments SET status = 'Returned', returned_date = $1, condition = $2, remarks = $3
+       WHERE assignment_id = $4`,
+      [returnDate, condition, remarks ? remarks.trim() : null, assignmentId]
+    );
+    await client.query(
+      "UPDATE assets SET status = $1, assigned_to = NULL WHERE asset_id = $2",
+      [newAssetStatus, assignment.asset_id]
+    );
+    await client.query("COMMIT");
+
+    res.json({ success: true, message: "Asset returned successfully" });
+  } catch (err) {
+    await client.query("ROLLBACK");
+    next(err);
+  } finally {
+    client.release();
+  }
+}
+
+module.exports = { getPending, getHistory, getAvailableAssets, assignAsset, reassignAsset, returnAsset };

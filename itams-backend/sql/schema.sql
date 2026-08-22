@@ -72,14 +72,13 @@ CREATE TRIGGER trg_employees_updated_at BEFORE UPDATE ON employees
 CREATE TABLE IF NOT EXISTS assets (
   id SERIAL PRIMARY KEY,
   asset_id VARCHAR(10) NOT NULL UNIQUE,
-  asset_name VARCHAR(100) DEFAULT NULL,        -- no longer collected on Add/Edit forms
   asset_type VARCHAR(50) NOT NULL,
   brand VARCHAR(100) DEFAULT NULL,
   model VARCHAR(100) DEFAULT NULL,
   serial_number VARCHAR(100) DEFAULT NULL,
   location VARCHAR(100) DEFAULT NULL,
   description TEXT DEFAULT NULL,
-  status VARCHAR(20) NOT NULL DEFAULT 'Not In Use' CHECK (status IN ('In Use','Not In Use','Under Maintenance')),
+  status VARCHAR(20) NOT NULL DEFAULT 'Not In Use' CHECK (status IN ('In Use','Not In Use','Under Maintenance','Retired')),
   assigned_to VARCHAR(9) DEFAULT NULL REFERENCES employees(employee_id) ON DELETE SET NULL,
   purchase_date DATE DEFAULT NULL,
   purchase_cost DECIMAL(10,2) DEFAULT NULL,
@@ -113,6 +112,8 @@ CREATE TABLE IF NOT EXISTS asset_assignments (
   assigned_date DATE NOT NULL,
   returned_date DATE DEFAULT NULL,
   status VARCHAR(20) NOT NULL DEFAULT 'Assigned' CHECK (status IN ('Assigned','Returned')),
+  condition VARCHAR(20) DEFAULT NULL CHECK (condition IN ('Good','Damaged','Faulty')),
+  remarks VARCHAR(250) DEFAULT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

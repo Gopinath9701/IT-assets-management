@@ -290,6 +290,30 @@ function validateRequiredDate(requiredDate) {
   return null;
 }
 
+const RETURN_CONDITIONS = ["Good", "Damaged", "Faulty"];
+
+function validateAssetReturnPayload({ returnDate, condition, remarks }) {
+  if (!returnDate) return "Return Date is required.";
+  const rDate = new Date(returnDate); rDate.setHours(0, 0, 0, 0);
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  if (isNaN(rDate.getTime())) return "Return Date is not a valid date.";
+  if (rDate > today) return "Return Date cannot be a future date.";
+
+  if (!condition || !RETURN_CONDITIONS.includes(condition)) {
+    return "Please select a valid Return Condition.";
+  }
+
+  if (remarks) {
+    if (remarks !== remarks.trim()) return "Remarks should not have leading or trailing spaces.";
+    if (/\s{2,}/.test(remarks)) return "Remarks should not contain multiple consecutive spaces.";
+    if (remarks.trim().length < 2) return "Remarks must contain at least 2 characters.";
+    if (remarks.length > 250) return "Remarks cannot exceed 250 characters.";
+    if (!/^[A-Za-z0-9\s.,()&-]+$/.test(remarks)) return "Remarks contains invalid characters.";
+  }
+
+  return null;
+}
+
 function validateRejectionReason(reason) {
   if (!reason || !reason.trim()) return "Reason for rejection is required.";
   if (reason !== reason.trim()) return "Reason for rejection should not have leading or trailing spaces.";
@@ -315,6 +339,8 @@ module.exports = {
   validatePurpose,
   validateRequiredDate,
   validateRejectionReason,
+  validateAssetReturnPayload,
+  RETURN_CONDITIONS,
   EMP_ID_REGEX,
   PHONE_REGEX,
   DEPARTMENT_NAME_REGEX,

@@ -39,6 +39,33 @@ async function addDepartment(req, res, next) {
   }
 }
 
+async function updateDepartment(req, res, next) {
+  try {
+    const { departmentId } = req.params;
+    const { departmentName, departmentHead, employeeCount } = req.body;
+
+    const validationError = validateDepartmentPayload({ departmentName, departmentHead, employeeCount });
+    if (validationError) {
+      return res.status(400).json({ success: false, message: validationError });
+    }
+
+    const result = await pool.query(
+      "UPDATE departments SET name = $1, head = $2, employee_count = $3 WHERE department_id = $4",
+      [departmentName, departmentHead, employeeCount, departmentId]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ success: false, message: "Department not found" });
+    }
+    res.json({ success: true, message: "Department updated" });
+  } catch (err) {
+    if (err.code === "23505") {
+      return res.status(409).json({ success: false, message: "Department already exists" });
+    }
+    next(err);
+  }
+}
+
 async function deleteDepartment(req, res, next) {
   try {
     const { departmentId } = req.params;
@@ -52,4 +79,4 @@ async function deleteDepartment(req, res, next) {
   }
 }
 
-module.exports = { getDepartments, addDepartment, deleteDepartment };
+module.exports = { getDepartments, addDepartment, updateDepartment, deleteDepartment };
