@@ -19,6 +19,63 @@ const ROWS_PER_PAGE_OPTIONS = [10, 30, 50, "All"];
 const API_URL = "http://localhost:5000/api/assets";
 
 /* =========================================================
+   ASSET TYPE PREFIX
+========================================================= */
+
+const ASSET_PREFIXES = {
+  Monitor: "MON",
+  Keyboard: "KEY",
+  Laptop: "LAP",
+  Mouse: "MOU",
+  Printer: "PRI",
+  Desktop: "DES",
+  Webcam: "WEB",
+  Scanner: "SCA",
+  Projector: "PRO",
+};
+
+/* =========================================================
+   GENERATE ASSET ID
+========================================================= */
+
+const generateAssetId = (type, assets = [], currentId = null) => {
+  const prefix = ASSET_PREFIXES[type];
+
+  if (!prefix) {
+    return "";
+  }
+
+  const numbers = assets
+    .filter((asset) => {
+      if (!asset?.asset_id) {
+        return false;
+      }
+
+      if (currentId && asset.asset_id === currentId) {
+        return false;
+      }
+
+      return asset.asset_id.toUpperCase().startsWith(prefix);
+    })
+    .map((asset) => {
+      const match = String(asset.asset_id).match(
+        new RegExp(`^${prefix}(\\d{3})$`, "i")
+      );
+
+      return match ? Number(match[1]) : 0;
+    })
+    .filter((number) => number > 0);
+
+  let nextNumber = 1;
+
+  if (numbers.length > 0) {
+    nextNumber = Math.max(...numbers) + 1;
+  }
+
+  return `${prefix}${String(nextNumber).padStart(3, "0")}`;
+};
+
+/* =========================================================
    DEMO DATA
 ========================================================= */
 
@@ -112,11 +169,11 @@ const validateAssetId = (id) => {
     };
   }
 
-  if (!/^[A-Za-z]{3}[0-9]{3}$/.test(id)) {
+  if (!/^[A-Z]{3}[0-9]{3}$/.test(id)) {
     return {
       isValid: false,
       message:
-        "Asset ID must contain 3 letters followed by 3 numbers (e.g., LAP001)",
+        "Asset ID must contain 3 CAPITAL letters followed by 3 numbers (e.g., LAP001)",
     };
   }
 
@@ -179,8 +236,14 @@ const validateModel = (model) => {
     };
   }
 
-  // FIXED: removed unnecessary escape before _
-  if (!/^[A-Za-z0-9 .&()/\\_-]+$/.test(value)) {
+  /* Fixed ESLint warning:
+     Use RegExp constructor so "/" does not create
+     an unnecessary escape warning. */
+  const modelPattern = new RegExp(
+    "^[A-Za-z0-9 .&()/_\\\\-]+$"
+  );
+
+  if (!modelPattern.test(value)) {
     return {
       isValid: false,
       message:
@@ -225,16 +288,14 @@ const validateDescription = (description) => {
   if (description !== value) {
     return {
       isValid: false,
-      message:
-        "Description should not have leading or trailing spaces",
+      message: "Description should not have leading or trailing spaces",
     };
   }
 
   if (/\s{2,}/.test(value)) {
     return {
       isValid: false,
-      message:
-        "Description should not contain multiple consecutive spaces",
+      message: "Description should not contain multiple consecutive spaces",
     };
   }
 
@@ -314,8 +375,7 @@ const validateWarrantyExpiry = (date, purchaseDate) => {
   if (selectedDate > maxDate) {
     return {
       isValid: false,
-      message:
-        "Warranty expiry date cannot exceed 5 years from today",
+      message: "Warranty expiry date cannot exceed 5 years from today",
     };
   }
 
@@ -377,7 +437,9 @@ const ManageAsset = ({
   ===================================================== */
 
   const [editingAssetId, setEditingAssetId] = useState(null);
+  const [originalEditData, setOriginalEditData] = useState(null);
   const [isEditPage, setIsEditPage] = useState(false);
+
   const [editType, setEditType] = useState("");
   const [editPurchaseDate, setEditPurchaseDate] = useState("");
   const [editWarrantyExpiry, setEditWarrantyExpiry] =
@@ -416,7 +478,7 @@ const ManageAsset = ({
       const params = new URLSearchParams();
 
       if (search.trim()) {
-        params.append("search", search.trim());
+        params.append("search", search.trim().toUpperCase());
       }
 
       if (type && type !== "All Assets") {
@@ -444,7 +506,6 @@ const ManageAsset = ({
 
       const response = await fetch(url, {
         method: "GET",
-
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -504,7 +565,15 @@ const ManageAsset = ({
       ================================================= */
 
       if (data.assets && data.assets.length > 0) {
-        setAssets(data.assets);
+        setAssets(
+          data.assets.map((asset) => ({
+            ...asset,
+            asset_id: asset.asset_id
+              ? String(asset.asset_id).toUpperCase()
+              : asset.asset_id,
+          }))
+        );
+
         setIsDemoMode(false);
       } else {
         setAssets(DEMO_ASSETS);
@@ -538,7 +607,7 @@ const ManageAsset = ({
     setSearchError("");
     setShowFieldError(false);
 
-    const searchValue = searchName.trim();
+    const searchValue = searchName.trim().toUpperCase();
 
     /* BOTH EMPTY */
 
@@ -581,9 +650,7 @@ const ManageAsset = ({
 
       if (!result.isValid) {
         setSearchError(result.message);
-
         setShowFieldError(true);
-
         return;
       }
     }
@@ -605,7 +672,11 @@ const ManageAsset = ({
   ===================================================== */
 
   const handleSearchNameChange = (e) => {
-    setSearchName(e.target.value);
+    const value = e.target.value
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, "");
+
+    setSearchName(value);
 
     setSearchError("");
     setShowFieldError(false);
@@ -639,9 +710,9 @@ const ManageAsset = ({
 
   const filteredAssets = assets.filter((asset) => {
     const idMatch = appliedName
-      ? asset.asset_id
-          ?.toLowerCase()
-          .includes(appliedName.toLowerCase())
+      ? String(asset.asset_id || "")
+          .toUpperCase()
+          .includes(appliedName.toUpperCase())
       : true;
 
     const typeMatch =
@@ -666,27 +737,31 @@ const ManageAsset = ({
   ===================================================== */
 
   const openEditPage = (asset) => {
-    setEditingAssetId(asset.asset_id);
+    const assetId = String(asset.asset_id || "").toUpperCase();
+
+    const editData = {
+      assetId,
+      assetType: asset.asset_type || "",
+      model: asset.model || "",
+      purchaseDate: asset.purchase_date
+        ? String(asset.purchase_date).substring(0, 10)
+        : "",
+      warrantyExpiry: asset.warranty_expiry
+        ? String(asset.warranty_expiry).substring(0, 10)
+        : "",
+      description: asset.description || "",
+    };
+
+    setEditingAssetId(assetId);
+    setOriginalEditData(editData);
 
     setIsEditPage(true);
 
-    setEditType(asset.asset_type || "");
-
-    setEditModel(asset.model || "");
-
-    setEditDescription(asset.description || "");
-
-    setEditPurchaseDate(
-      asset.purchase_date
-        ? String(asset.purchase_date).substring(0, 10)
-        : ""
-    );
-
-    setEditWarrantyExpiry(
-      asset.warranty_expiry
-        ? String(asset.warranty_expiry).substring(0, 10)
-        : ""
-    );
+    setEditType(editData.assetType);
+    setEditModel(editData.model);
+    setEditDescription(editData.description);
+    setEditPurchaseDate(editData.purchaseDate);
+    setEditWarrantyExpiry(editData.warrantyExpiry);
 
     setEditErrors({});
   };
@@ -698,6 +773,7 @@ const ManageAsset = ({
   const closeEditPage = () => {
     setIsEditPage(false);
     setEditingAssetId(null);
+    setOriginalEditData(null);
 
     setEditType("");
     setEditModel("");
@@ -741,6 +817,63 @@ const ManageAsset = ({
       }));
     }
   };
+
+  /* =====================================================
+     EDIT TYPE CHANGE
+  ===================================================== */
+
+  const handleEditTypeChange = (e) => {
+    const newType = e.target.value;
+
+    setEditType(newType);
+
+    setEditErrors((prev) => ({
+      ...prev,
+      editType: "",
+    }));
+  };
+
+  /* =====================================================
+     GET CURRENT EDIT ASSET ID
+     
+     IMPORTANT:
+     If Asset Type is unchanged, keep the ORIGINAL ID.
+     Only generate a new ID when Asset Type changes.
+  ===================================================== */
+
+  const currentEditAssetId =
+    originalEditData &&
+    editType === originalEditData.assetType
+      ? editingAssetId
+      : generateAssetId(
+          editType,
+          assets,
+          editingAssetId
+        );
+
+  /* =====================================================
+     CHECK WHETHER EDIT ACTUALLY CHANGED
+     
+     IMPORTANT:
+     Update button is enabled ONLY when something changed.
+  ===================================================== */
+
+  const hasEditChanges = () => {
+    if (!originalEditData) {
+      return false;
+    }
+
+    return (
+      originalEditData.assetType !== editType ||
+      originalEditData.model !== editModel ||
+      originalEditData.purchaseDate !== editPurchaseDate ||
+      originalEditData.warrantyExpiry !==
+        editWarrantyExpiry ||
+      originalEditData.description !== editDescription
+    );
+  };
+
+  const editHasChanges = hasEditChanges();
 
   /* =====================================================
      VALIDATE EDIT FORM
@@ -798,6 +931,18 @@ const ManageAsset = ({
   ===================================================== */
 
   const saveEdit = async () => {
+    /* ===============================================
+       NO CHANGES
+    =============================================== */
+
+    if (!hasEditChanges()) {
+      return;
+    }
+
+    /* ===============================================
+       VALIDATE
+    =============================================== */
+
     if (!validateEditForm()) {
       setTimeout(() => {
         const firstError =
@@ -811,14 +956,25 @@ const ManageAsset = ({
       return;
     }
 
-    /* DEMO MODE */
+    /* ===============================================
+       GENERATE NEW ASSET ID
+    =============================================== */
+
+    const newAssetId =
+      currentEditAssetId || editingAssetId;
+
+    /* ===============================================
+       DEMO MODE
+    =============================================== */
 
     if (isDemoMode) {
       setAssets((prev) =>
         prev.map((asset) =>
-          asset.asset_id === editingAssetId
+          String(asset.asset_id).toUpperCase() ===
+          String(editingAssetId).toUpperCase()
             ? {
                 ...asset,
+                asset_id: newAssetId,
                 asset_type: editType,
                 model: editModel.trim(),
                 purchase_date: editPurchaseDate,
@@ -830,7 +986,7 @@ const ManageAsset = ({
       );
 
       alert(
-        `Asset ${editingAssetId} updated successfully!`
+        `Asset ${newAssetId} updated successfully!`
       );
 
       closeEditPage();
@@ -838,7 +994,9 @@ const ManageAsset = ({
       return;
     }
 
-    /* DATABASE UPDATE */
+    /* ===============================================
+       DATABASE UPDATE
+    =============================================== */
 
     try {
       const token = getToken();
@@ -862,6 +1020,7 @@ const ManageAsset = ({
           },
 
           body: JSON.stringify({
+            assetId: newAssetId,
             assetType: editType,
             model: editModel.trim(),
             purchaseDate: editPurchaseDate,
@@ -885,7 +1044,7 @@ const ManageAsset = ({
       }
 
       alert(
-        `Asset ${editingAssetId} updated successfully!`
+        `Asset ${newAssetId} updated successfully!`
       );
 
       closeEditPage();
@@ -915,14 +1074,17 @@ const ManageAsset = ({
       return;
     }
 
-    /* DEMO MODE DELETE */
+    /* ===============================================
+       DEMO MODE DELETE
+    =============================================== */
 
     if (isDemoMode) {
       const deletedId = deleteAsset.asset_id;
 
       setAssets((prev) =>
         prev.filter(
-          (asset) => asset.asset_id !== deletedId
+          (asset) =>
+            asset.asset_id !== deletedId
         )
       );
 
@@ -935,7 +1097,9 @@ const ManageAsset = ({
       return;
     }
 
-    /* DATABASE DELETE */
+    /* ===============================================
+       DATABASE DELETE
+    =============================================== */
 
     try {
       const token = getToken();
@@ -962,7 +1126,10 @@ const ManageAsset = ({
 
       const data = await response.json();
 
-      console.log("Delete Asset Response:", data);
+      console.log(
+        "Delete Asset Response:",
+        data
+      );
 
       if (!response.ok || !data.success) {
         alert(
@@ -981,7 +1148,10 @@ const ManageAsset = ({
 
       fetchAssets(appliedName, appliedType);
     } catch (error) {
-      console.error("Delete Asset Error:", error);
+      console.error(
+        "Delete Asset Error:",
+        error
+      );
 
       alert("Unable to connect to backend.");
     }
@@ -1019,9 +1189,20 @@ const ManageAsset = ({
               <input
                 className="ma-input ma-input--readonly"
                 type="text"
-                value={editingAssetId || ""}
+                value={
+                  currentEditAssetId ||
+                  editingAssetId ||
+                  ""
+                }
                 readOnly
               />
+
+              <div className="ma-validation-hint">
+                <small>
+                  Asset ID is automatically generated
+                  from Asset Type.
+                </small>
+              </div>
             </div>
 
             {/* ASSET TYPE */}
@@ -1038,14 +1219,7 @@ const ManageAsset = ({
                     : ""
                 }`}
                 value={editType}
-                onChange={(e) => {
-                  setEditType(e.target.value);
-
-                  setEditErrors((prev) => ({
-                    ...prev,
-                    editType: "",
-                  }));
-                }}
+                onChange={handleEditTypeChange}
               >
                 <option value="">
                   Select Asset Type
@@ -1224,10 +1398,18 @@ const ManageAsset = ({
                 type="button"
                 className="ma-edit-save-btn"
                 onClick={saveEdit}
+                disabled={!editHasChanges}
+                style={{
+                  opacity: editHasChanges ? 1 : 0.5,
+                  cursor: editHasChanges
+                    ? "pointer"
+                    : "not-allowed",
+                }}
               >
                 Update Asset
               </button>
             </div>
+
           </div>
 
           <button
@@ -1358,9 +1540,9 @@ const ManageAsset = ({
 
                 <div className="ma-validation-hint">
                   <small>
-                    Format: 3 letters + 3
-                    numbers (e.g., LAP001,
-                    PIT001, MON001)
+                    Format: 3 CAPITAL letters +
+                    3 numbers (e.g., LAP001,
+                    MON001)
                   </small>
                 </div>
               </div>
@@ -1402,6 +1584,7 @@ const ManageAsset = ({
               >
                 Search
               </button>
+
             </div>
 
             {searchError && (
@@ -1422,6 +1605,7 @@ const ManageAsset = ({
 
             <div className="ma-table-wrapper">
               <table className="ma-table">
+
                 <thead>
                   <tr>
                     <th>Asset ID</th>
@@ -1454,11 +1638,14 @@ const ManageAsset = ({
                       <tr
                         key={asset.asset_id}
                       >
+
                         {/* ASSET ID */}
 
                         <td>
                           <span className="ma-asset-id">
-                            {asset.asset_id}
+                            {String(
+                              asset.asset_id || ""
+                            ).toUpperCase()}
                           </span>
                         </td>
 
@@ -1473,6 +1660,7 @@ const ManageAsset = ({
                         {/* ACTIONS */}
 
                         <td className="ma-actions-cell">
+
                           <button
                             type="button"
                             className="ma-btn-edit"
@@ -1492,17 +1680,20 @@ const ManageAsset = ({
                           >
                             Delete
                           </button>
+
                         </td>
                       </tr>
                     ))
                   )}
                 </tbody>
+
               </table>
             </div>
 
             {/* FOOTER */}
 
             <div className="ma-table-footer">
+
               <button
                 className="ma-back-btn"
                 onClick={onBack}
@@ -1511,6 +1702,7 @@ const ManageAsset = ({
               </button>
 
               <div className="ma-rows-select-group">
+
                 <span className="ma-pagination-info">
                   Showing{" "}
                   {displayedAssets.length} of{" "}
@@ -1542,8 +1734,10 @@ const ManageAsset = ({
                     )
                   )}
                 </select>
+
               </div>
             </div>
+
           </div>
         </main>
       </div>
@@ -1563,6 +1757,7 @@ const ManageAsset = ({
               e.stopPropagation()
             }
           >
+
             <h2 className="ma-modal-title">
               Delete Asset
             </h2>
@@ -1572,16 +1767,19 @@ const ManageAsset = ({
               delete this asset?
             </p>
 
-            {/* ONLY ASSET ID + ASSET NAME */}
+            {/* ASSET DETAILS */}
 
             <div className="ma-delete-details">
+
               <div className="ma-delete-row">
                 <span className="ma-delete-label">
                   Asset ID:
                 </span>
 
                 <span className="ma-delete-value">
-                  {deleteAsset.asset_id}
+                  {String(
+                    deleteAsset.asset_id || ""
+                  ).toUpperCase()}
                 </span>
               </div>
 
@@ -1594,11 +1792,13 @@ const ManageAsset = ({
                   {deleteAsset.model}
                 </span>
               </div>
+
             </div>
 
             {/* BUTTONS */}
 
             <div className="ma-modal-actions">
+
               <button
                 type="button"
                 className="ma-modal-cancel"
@@ -1616,10 +1816,13 @@ const ManageAsset = ({
               >
                 Yes
               </button>
+
             </div>
+
           </div>
         </div>
       )}
+
     </div>
   );
 };
