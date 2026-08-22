@@ -35,13 +35,18 @@ function App() {
       try {
         return JSON.parse(savedUser);
       } catch (error) {
-        console.error("Unable to read saved user", error);
+        console.error(
+          "Unable to read saved user",
+          error
+        );
+
         return null;
       }
     }
 
     return null;
   });
+
 
   const username =
     user?.name ||
@@ -50,7 +55,9 @@ function App() {
     "username";
 
 
-  // ================= DASHBOARD =================
+  // =====================================================
+  // DASHBOARD
+  // =====================================================
 
   const handleDashboard = () => {
 
@@ -64,7 +71,73 @@ function App() {
   };
 
 
-  // ================= TEMPORARY LOGIN =================
+  // =====================================================
+  // ASSET MANAGEMENT
+  // =====================================================
+
+  const handleAssetManagement = () => {
+
+    setView("asset-management");
+    setActiveTab("asset-management");
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
+
+  // =====================================================
+  // ASSET ASSIGNMENT
+  // =====================================================
+
+  const handleAssetAssignment = () => {
+
+    setView("asset-management");
+    setActiveTab("asset-assignment");
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
+
+  // =====================================================
+  // REQUEST APPROVAL
+  // =====================================================
+
+  const handleRequestApproval = () => {
+
+    setView("asset-request");
+    setActiveTab("request-approval");
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
+
+  // =====================================================
+  // MAINTENANCE
+  // =====================================================
+
+  const handleMaintenance = () => {
+
+    setView("report-maintenance");
+    setActiveTab("maintenance");
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
+
+  // =====================================================
+  // TEMPORARY LOGIN
+  // =====================================================
 
   const handleTemporaryLogin = () => {
 
@@ -87,7 +160,9 @@ function App() {
   };
 
 
-  // ================= HOME SECTIONS =================
+  // =====================================================
+  // HOME SECTIONS
+  // =====================================================
 
   const scrollToSection = (id) => {
 
@@ -99,34 +174,46 @@ function App() {
 
       setTimeout(() => {
 
-        const section = document.getElementById(id);
+        const section =
+          document.getElementById(id);
 
         if (section) {
+
           section.scrollIntoView({
             behavior: "smooth",
           });
+
         }
 
       }, 100);
 
     } else {
 
-      const section = document.getElementById(id);
+      const section =
+        document.getElementById(id);
 
       if (section) {
+
         section.scrollIntoView({
           behavior: "smooth",
         });
+
       }
+
     }
   };
 
 
-  // ================= LOGIN SUCCESS =================
+  // =====================================================
+  // LOGIN SUCCESS
+  // =====================================================
 
   const handleLoginSuccess = (loggedInUser) => {
 
-    console.log("Logged-in user:", loggedInUser);
+    console.log(
+      "Logged-in user:",
+      loggedInUser
+    );
 
     setUser(loggedInUser);
 
@@ -135,24 +222,33 @@ function App() {
       JSON.stringify(loggedInUser)
     );
 
+
     if (loggedInUser.role === "HR") {
 
       setView("hr-management");
+      setActiveTab("hr-management");
 
-    } else if (
+    }
+
+    else if (
       loggedInUser.role === "AssetManager"
     ) {
 
       setView("dashboard");
       setActiveTab("dashboard");
 
-    } else if (
+    }
+
+    else if (
       loggedInUser.role === "AssetInventory"
     ) {
 
       setView("asset-inventory");
+      setActiveTab("asset-inventory");
 
-    } else {
+    }
+
+    else {
 
       console.error(
         "Unknown user role:",
@@ -165,11 +261,15 @@ function App() {
       );
 
       setView("home");
+      setActiveTab("home");
+
     }
   };
 
 
-  // ================= LOGOUT =================
+  // =====================================================
+  // LOGOUT
+  // =====================================================
 
   const handleLogout = () => {
 
@@ -182,7 +282,9 @@ function App() {
   };
 
 
-  // ================= HOME =================
+  // =====================================================
+  // HOME
+  // =====================================================
 
   const handleHome = () => {
 
@@ -196,21 +298,9 @@ function App() {
   };
 
 
-  // ================= ASSET MANAGEMENT =================
-
-  const handleAssetManagement = () => {
-
-    setView("asset-management");
-    setActiveTab("asset-management");
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  };
-
-
-  // ================= ASSET INVENTORY =================
+  // =====================================================
+  // ASSET INVENTORY
+  // =====================================================
 
   const handleAssetInventory = () => {
 
@@ -224,7 +314,9 @@ function App() {
   };
 
 
-  // ================= HR MANAGEMENT =================
+  // =====================================================
+  // HR MANAGEMENT
+  // =====================================================
 
   const handleHRManagement = () => {
 
@@ -241,14 +333,18 @@ function App() {
   return (
     <div>
 
-      {/* ================= NAVBAR ================= */}
+      {/* =================================================
+          NAVBAR
+      ================================================= */}
 
       <nav className="navbar">
 
         <div
           className="logo"
           style={{ cursor: "pointer" }}
-          onClick={() => scrollToSection("home")}
+          onClick={() =>
+            scrollToSection("home")
+          }
         >
 
           <h1>ITAMS</h1>
@@ -266,36 +362,55 @@ function App() {
 
           <li
             className={
-              activeTab === "home" ? "active" : ""
+              activeTab === "home"
+                ? "active"
+                : ""
             }
-            onClick={() => scrollToSection("home")}
+            onClick={() =>
+              scrollToSection("home")
+            }
           >
             Home
           </li>
 
+
           <li
             className={
-              activeTab === "features" ? "active" : ""
+              activeTab === "features"
+                ? "active"
+                : ""
             }
-            onClick={() => scrollToSection("features")}
+            onClick={() =>
+              scrollToSection("features")
+            }
           >
             Features
           </li>
 
+
           <li
             className={
-              activeTab === "about" ? "active" : ""
+              activeTab === "about"
+                ? "active"
+                : ""
             }
-            onClick={() => scrollToSection("about")}
+            onClick={() =>
+              scrollToSection("about")
+            }
           >
             About Us
           </li>
 
+
           <li
             className={
-              activeTab === "contact" ? "active" : ""
+              activeTab === "contact"
+                ? "active"
+                : ""
             }
-            onClick={() => scrollToSection("contact")}
+            onClick={() =>
+              scrollToSection("contact")
+            }
           >
             Contact
           </li>
@@ -303,7 +418,9 @@ function App() {
         </ul>
 
 
-        {/* ================= LOGIN BUTTON ================= */}
+        {/* =================================================
+            LOGIN BUTTON
+        ================================================= */}
 
         {!user && view === "home" && (
 
@@ -311,7 +428,9 @@ function App() {
 
             <button
               className="outline-btn"
-              onClick={() => setView("login")}
+              onClick={() =>
+                setView("login")
+              }
             >
               Login
             </button>
@@ -321,7 +440,9 @@ function App() {
         )}
 
 
-        {/* ================= LOGGED IN NAVIGATION ================= */}
+        {/* =================================================
+            LOGGED-IN NAVIGATION
+        ================================================= */}
 
         {user &&
           view !== "home" &&
@@ -333,10 +454,6 @@ function App() {
               <button
                 type="button"
                 className="outline-btn"
-                style={{
-                  fontSize: "12px",
-                  padding: "6px 14px",
-                }}
                 onClick={handleAssetInventory}
               >
                 Invtry
@@ -346,10 +463,6 @@ function App() {
               <button
                 type="button"
                 className="outline-btn"
-                style={{
-                  fontSize: "12px",
-                  padding: "6px 14px",
-                }}
                 onClick={handleAssetManagement}
               >
                 Asset Mgmt
@@ -359,10 +472,6 @@ function App() {
               <button
                 type="button"
                 className="outline-btn"
-                style={{
-                  fontSize: "12px",
-                  padding: "6px 14px",
-                }}
                 onClick={handleHRManagement}
               >
                 HR Mgmt
@@ -372,10 +481,6 @@ function App() {
               <button
                 type="button"
                 className="outline-btn"
-                style={{
-                  fontSize: "12px",
-                  padding: "6px 14px",
-                }}
                 onClick={handleHome}
               >
                 Home
@@ -385,10 +490,6 @@ function App() {
               <button
                 type="button"
                 className="outline-btn"
-                style={{
-                  fontSize: "12px",
-                  padding: "6px 14px",
-                }}
                 onClick={handleLogout}
               >
                 Logout
@@ -401,7 +502,9 @@ function App() {
       </nav>
 
 
-      {/* ================= LOGIN ================= */}
+      {/* =================================================
+          LOGIN
+      ================================================= */}
 
       {view === "login" && (
 
@@ -410,7 +513,9 @@ function App() {
             onForgotPasswordClick={() =>
               setView("forgot-password")
             }
-            onLoginSuccess={handleLoginSuccess}
+            onLoginSuccess={
+              handleLoginSuccess
+            }
           />
 
           <div
@@ -422,7 +527,9 @@ function App() {
 
             <button
               type="button"
-              onClick={handleTemporaryLogin}
+              onClick={
+                handleTemporaryLogin
+              }
               className="outline-btn"
             >
               Temporary Login
@@ -430,10 +537,13 @@ function App() {
 
           </div>
         </>
+
       )}
 
 
-      {/* ================= FORGOT PASSWORD ================= */}
+      {/* =================================================
+          FORGOT PASSWORD
+      ================================================= */}
 
       {view === "forgot-password" && (
 
@@ -446,7 +556,9 @@ function App() {
       )}
 
 
-      {/* ================= HOME ================= */}
+      {/* =================================================
+          HOME
+      ================================================= */}
 
       {view === "home" && (
 
@@ -459,52 +571,77 @@ function App() {
       )}
 
 
-      {/* ================= DASHBOARD ================= */}
+      {/* =================================================
+          DASHBOARD
+      ================================================= */}
 
       {view === "dashboard" && (
 
         <Dashboard
+
           username={username}
+
           onLogout={handleLogout}
-          onNavigateToDashboard={handleDashboard}
-          onNavigateToAssetManagement={handleAssetManagement}
-          onNavigateToAssetAssignment={() =>
-            setView("asset-management")
+
+          onNavigateToDashboard={
+            handleDashboard
           }
-          onNavigateToRequestApproval={() =>
-            setView("asset-request")
+
+          onNavigateToAssetManagement={
+            handleAssetManagement
           }
-          onNavigateToMaintenance={() =>
-            setView("report-maintenance")
+
+          onNavigateToAssetAssignment={
+            handleAssetAssignment
           }
+
+          onNavigateToRequestApproval={
+            handleRequestApproval
+          }
+
+          onNavigateToMaintenance={
+            handleMaintenance
+          }
+
         />
 
       )}
 
 
-      {/* ================= ASSET INVENTORY ================= */}
+      {/* =================================================
+          ASSET INVENTORY
+      ================================================= */}
 
       {view === "asset-inventory" && (
 
         <AssetInventory
+
           username={username}
+
           onLogout={handleLogout}
+
           onBack={handleHome}
+
         />
 
       )}
 
 
-      {/* ================= ASSET MANAGEMENT ================= */}
+      {/* =================================================
+          ASSET MANAGEMENT
+      ================================================= */}
 
       {view === "asset-management" && (
 
         <AssetManagement
+
           username={username}
+
           onLogout={handleLogout}
 
-          /* LEFT SIDEBAR DASHBOARD */
-          onNavigateToDashboard={handleDashboard}
+          onNavigateToDashboard={
+            handleDashboard
+          }
 
           onNavigateToAddAsset={() =>
             setView("add-asset")
@@ -519,169 +656,235 @@ function App() {
       )}
 
 
-      {/* ================= ADD ASSET ================= */}
+      {/* =================================================
+          ADD ASSET
+      ================================================= */}
 
       {view === "add-asset" && (
 
         <AddAsset
+
           username={username}
+
           onLogout={handleLogout}
+
           onBack={() =>
             setView("asset-management")
           }
+
         />
 
       )}
 
 
-      {/* ================= ASSET RETURN ================= */}
+      {/* =================================================
+          ASSET RETURN
+      ================================================= */}
 
       {view === "asset-return" && (
 
         <AssetReturn
+
           username={username}
+
           onLogout={handleLogout}
+
           onBack={() =>
             setView("asset-management")
           }
+
         />
 
       )}
 
 
-      {/* ================= HR MANAGEMENT ================= */}
+      {/* =================================================
+          HR MANAGEMENT
+      ================================================= */}
 
       {view === "hr-management" && (
 
         <HRManagement
+
           username={username}
+
           onLogout={handleLogout}
+
           onAddEmployee={() =>
             setView("add-employee")
           }
+
           onUpdateEmployee={() =>
             setView("update-employee")
           }
+
           onViewEmployeeList={() =>
             setView("view-employee-list")
           }
+
           onEmployeeStatus={() =>
             setView("employee-status")
           }
+
           onDepartmentManagement={() =>
             setView("department-management")
           }
+
           onReportMaintenance={() =>
             setView("report-maintenance")
           }
+
           onAssetRequest={() =>
             setView("asset-request")
           }
+
         />
 
       )}
 
 
-      {/* ================= ADD EMPLOYEE ================= */}
+      {/* =================================================
+          ADD EMPLOYEE
+      ================================================= */}
 
       {view === "add-employee" && (
 
         <AddEmployee
+
           username={username}
+
           onLogout={handleLogout}
+
           onBack={() =>
             setView("hr-management")
           }
+
         />
 
       )}
 
 
-      {/* ================= VIEW EMPLOYEE LIST ================= */}
+      {/* =================================================
+          VIEW EMPLOYEE LIST
+      ================================================= */}
 
       {view === "view-employee-list" && (
 
         <ViewEmployeeList
+
           username={username}
+
           onLogout={handleLogout}
+
           onBack={() =>
             setView("hr-management")
           }
+
         />
 
       )}
 
 
-      {/* ================= EMPLOYEE STATUS ================= */}
+      {/* =================================================
+          EMPLOYEE STATUS
+      ================================================= */}
 
       {view === "employee-status" && (
 
         <EmployeeStatus
+
           username={username}
+
           onLogout={handleLogout}
+
           onBack={() =>
             setView("hr-management")
           }
+
         />
 
       )}
 
 
-      {/* ================= DEPARTMENT MANAGEMENT ================= */}
+      {/* =================================================
+          DEPARTMENT MANAGEMENT
+      ================================================= */}
 
       {view === "department-management" && (
 
         <DepartmentManagement
+
           username={username}
+
           onLogout={handleLogout}
+
           onBack={() =>
             setView("hr-management")
           }
+
         />
 
       )}
 
 
-      {/* ================= UPDATE EMPLOYEE ================= */}
+      {/* =================================================
+          UPDATE EMPLOYEE
+      ================================================= */}
 
       {view === "update-employee" && (
 
         <UpdateEmployee
+
           username={username}
+
           onLogout={handleLogout}
+
           onBack={() =>
             setView("hr-management")
           }
+
         />
 
       )}
 
 
-      {/* ================= REPORT MAINTENANCE ================= */}
+      {/* =================================================
+          REPORT MAINTENANCE
+      ================================================= */}
 
       {view === "report-maintenance" && (
 
         <ReportMaintenance
+
           username={username}
+
           onLogout={handleLogout}
+
           onBack={() =>
             setView("hr-management")
           }
+
         />
 
       )}
 
 
-      {/* ================= ASSET REQUEST ================= */}
+      {/* =================================================
+          ASSET REQUEST
+      ================================================= */}
 
       {view === "asset-request" && (
 
         <AssetRequest
+
           username={username}
+
           onLogout={handleLogout}
+
           onBack={() =>
             setView("hr-management")
           }
+
         />
 
       )}
