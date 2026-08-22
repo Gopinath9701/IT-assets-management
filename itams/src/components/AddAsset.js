@@ -496,6 +496,17 @@ const AddAsset = ({
         return;
       }
 
+      // SAME NUMBER CANNOT REPEAT MORE THAN 4 TIMES
+      // 6666     = ALLOWED
+      // 66666    = NOT ALLOWED
+      // 7777     = ALLOWED
+      // 77777    = NOT ALLOWED
+      // 1234444  = ALLOWED
+      // 12344444 = NOT ALLOWED
+      if (/(\d)\1{4,}/.test(value)) {
+        return;
+      }
+
       setFormData((prev) => ({
         ...prev,
         description: value,
@@ -767,7 +778,7 @@ const AddAsset = ({
 
     // ===================================================
     // DESCRIPTION
-    // =====================================================
+    // ===================================================
 
     const description =
       formData.description;
@@ -798,6 +809,11 @@ const AddAsset = ({
     ) {
       newErrors.description =
         "Description can contain only letters, numbers, and spaces.";
+    } else if (
+      /(\d)\1{4,}/.test(description)
+    ) {
+      newErrors.description =
+        "The same number cannot be repeated more than 4 times continuously.";
     }
 
     setErrors(newErrors);
