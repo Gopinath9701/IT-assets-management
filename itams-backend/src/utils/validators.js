@@ -54,11 +54,15 @@ function validateEmployeeIdFormat(employeeId) {
   return null;
 }
 
+// The literal "a" before @gmail.com matches Login.js/AddEmployee.js/
+// ViewEmployeeList.js as of the frontend's latest commits — ForgotPassword.js
+// hasn't been updated to match yet and still expects no "a", which is a
+// frontend-side inconsistency to fix on that end, not here.
 function buildEmployeeEmail(employeeId) {
-  return `${employeeId}@gmail.com`;
+  return `${employeeId}a@gmail.com`;
 }
 
-// Per the frontend spec, an employee's email is always {employeeId}@gmail.com
+// Per the frontend spec, an employee's email is always {employeeId}a@gmail.com
 // — not a free-form address.
 function validateEmployeeEmail(email, employeeId) {
   const expected = buildEmployeeEmail(employeeId);
@@ -209,6 +213,7 @@ function validateNewAssetPayload({ assetType, brand, model, purchaseCost, purcha
   if (description.trim().length < 10) return "Description must contain at least 10 characters.";
   if (description.length > 500) return "Description cannot exceed 500 characters.";
   if (!/^[A-Za-z0-9 ]+$/.test(description)) return "Description can contain only letters, numbers, and spaces.";
+  if (/(\d)\1{4,}/.test(description)) return "The same number cannot be repeated more than 4 times continuously.";
 
   return null;
 }
