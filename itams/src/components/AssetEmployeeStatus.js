@@ -7,11 +7,11 @@ const PAGE_SIZE_OPTIONS = [10, 30, 50, "All"];
 // EMPLOYEE ID VALIDATION
 //
 // FORMAT:
-// YYDDMMXXX
+// YYMMDDXXX
 //
 // YY  = Actual year
-// DD  = Day
 // MM  = Month
+// DD  = Day
 // XXX = Employee number (001 - 999)
 //
 // RULES:
@@ -26,7 +26,6 @@ const PAGE_SIZE_OPTIONS = [10, 30, 50, "All"];
 // ======================================================
 
 const validateEmployeeId = (id) => {
-
   // EMPTY
   if (!id || id.length === 0) {
     return {
@@ -56,32 +55,32 @@ const validateEmployeeId = (id) => {
     return {
       isValid: false,
       message:
-        "Employee ID must be exactly 9 digits (YYDDMMXXX).",
+        "Employee ID must be exactly 9 digits (YYMMDDXXX).",
     };
   }
 
   // SPLIT ID
   const yearShort = Number(id.substring(0, 2));
-  const day = Number(id.substring(2, 4));
-  const month = Number(id.substring(4, 6));
+  const month = Number(id.substring(2, 4));
+  const day = Number(id.substring(4, 6));
   const employeeNumber = Number(id.substring(6, 9));
 
   // ACTUAL YEAR
   const fullYear = 2000 + yearShort;
-
-  // DAY
-  if (day < 1 || day > 31) {
-    return {
-      isValid: false,
-      message: "Employee ID contains an invalid day.",
-    };
-  }
 
   // MONTH
   if (month < 1 || month > 12) {
     return {
       isValid: false,
       message: "Employee ID contains an invalid month.",
+    };
+  }
+
+  // DAY
+  if (day < 1 || day > 31) {
+    return {
+      isValid: false,
+      message: "Employee ID contains an invalid day.",
     };
   }
 
@@ -138,13 +137,11 @@ const validateEmployeeId = (id) => {
   };
 };
 
-
 // ======================================================
 // CHECK WHETHER SEARCH IS AN EMPLOYEE ID
 // ======================================================
 
 const looksLikeEmployeeId = (value) => {
-
   if (!value) {
     return false;
   }
@@ -162,25 +159,43 @@ const looksLikeEmployeeId = (value) => {
   return false;
 };
 
-
 // ======================================================
 // CREATE EMPLOYEE FOR A VALID ID
 // ======================================================
 
 const createEmployeeFromId = (employeeId) => {
-
   const employeeNumber = Number(
     employeeId.substring(6, 9)
   );
 
+  const randomNames = [
+    "Rahul Sharma",
+    "Ananya Reddy",
+    "Arjun Kumar",
+    "Sneha Patel",
+    "Rohit Verma",
+    "Priya Singh",
+    "Karthik Rao",
+    "Neha Reddy",
+    "Vikram Mehta",
+    "Pooja Nair",
+    "Aditya Kapoor",
+    "Meera Joshi",
+  ];
+
+  const name =
+    randomNames[
+      (employeeNumber - 1) %
+        randomNames.length
+    ];
+
   return {
     id: employeeId,
-    name: `Employee ${employeeNumber}`,
+    name,
     department: "IT",
     status: "Active",
   };
 };
-
 
 // ======================================================
 // MAIN COMPONENT
@@ -191,7 +206,6 @@ const EmployeeStatus = ({
   onLogout,
   onBack,
 }) => {
-
   // ====================================================
   // SEARCH
   // ====================================================
@@ -201,13 +215,11 @@ const EmployeeStatus = ({
   const [searchApplied, setSearchApplied] =
     useState("");
 
-
   // ====================================================
   // PAGINATION
   // ====================================================
 
   const [pageSize, setPageSize] = useState(10);
-
 
   // ====================================================
   // VALIDATION
@@ -222,7 +234,6 @@ const EmployeeStatus = ({
   const [isSearchTouched, setIsSearchTouched] =
     useState(false);
 
-
   // ====================================================
   // EMPLOYEE DATA
   // ====================================================
@@ -230,110 +241,104 @@ const EmployeeStatus = ({
   const [employees, setEmployees] = useState([
     {
       id: "250808001",
-      name: "Employee 1",
+      name: "Rahul Sharma",
       department: "IT",
       status: "On Leave",
     },
 
     {
       id: "260808001",
-      name: "Employee 2",
+      name: "Ananya Reddy",
       department: "HR",
       status: "Active",
     },
 
     {
       id: "260812001",
-      name: "Employee 3",
+      name: "Arjun Kumar",
       department: "IT",
       status: "Active",
     },
 
     {
       id: "260813002",
-      name: "Employee 4",
+      name: "Sneha Patel",
       department: "HR",
       status: "On Leave",
     },
 
     {
       id: "260814003",
-      name: "Employee 5",
+      name: "Rohit Verma",
       department: "Finance",
       status: "Inactive",
     },
 
     {
       id: "260815004",
-      name: "Employee 6",
+      name: "Priya Singh",
       department: "Marketing",
       status: "Active",
     },
 
     {
       id: "260816005",
-      name: "Employee 7",
+      name: "Karthik Rao",
       department: "IT",
       status: "On Leave",
     },
 
     {
       id: "260817006",
-      name: "Employee 8",
+      name: "Neha Reddy",
       department: "Sales",
       status: "Inactive",
     },
 
     {
       id: "260818007",
-      name: "Employee 9",
+      name: "Vikram Mehta",
       department: "Operations",
       status: "Active",
     },
 
     {
       id: "260819008",
-      name: "Employee 10",
+      name: "Pooja Nair",
       department: "Finance",
       status: "On Leave",
     },
 
     {
       id: "260820009",
-      name: "Employee 11",
+      name: "Aditya Kapoor",
       department: "IT",
       status: "Active",
     },
 
     {
       id: "260821010",
-      name: "Employee 12",
+      name: "Meera Joshi",
       department: "HR",
       status: "Active",
     },
   ]);
-
 
   // ====================================================
   // SEARCH INPUT CHANGE
   // ====================================================
 
   const handleSearchChange = (e) => {
-
     const value = e.target.value;
 
     // Employee ID
     if (/^\d/.test(value)) {
-
-      const numericValue =
-        value
-          .replace(/\D/g, "")
-          .slice(0, 9);
+      const numericValue = value
+        .replace(/\D/g, "")
+        .slice(0, 9);
 
       setSearch(numericValue);
-
     } else {
-
       // Name search
       setSearch(value);
     }
@@ -347,20 +352,17 @@ const EmployeeStatus = ({
     setSearchApplied("");
   };
 
-
   // ====================================================
   // SEARCH
   // ====================================================
 
   const handleSearch = () => {
-
     setIsSearchTouched(true);
 
     const rawValue = search;
 
     // EMPTY
     if (rawValue === "") {
-
       setValidationError(
         "Please enter an Employee ID or Employee Name."
       );
@@ -372,19 +374,16 @@ const EmployeeStatus = ({
       return;
     }
 
-
     // ==================================================
     // EMPLOYEE ID SEARCH
     // ==================================================
 
     if (looksLikeEmployeeId(rawValue)) {
-
       const result =
         validateEmployeeId(rawValue);
 
       // INVALID ID
       if (!result.isValid) {
-
         setValidationError(
           result.message
         );
@@ -405,13 +404,11 @@ const EmployeeStatus = ({
             emp.id === employeeId
         );
 
-
       // ==================================================
       // CREATE EMPLOYEE IF VALID ID DOES NOT EXIST
       // ==================================================
 
       if (!foundEmployee) {
-
         const newEmployee =
           createEmployeeFromId(
             employeeId
@@ -425,7 +422,6 @@ const EmployeeStatus = ({
         foundEmployee = newEmployee;
       }
 
-
       // SUCCESS
       setSearchApplied(employeeId);
 
@@ -436,7 +432,6 @@ const EmployeeStatus = ({
       return;
     }
 
-
     // ==================================================
     // NAME SEARCH
     // ==================================================
@@ -444,10 +439,8 @@ const EmployeeStatus = ({
     const nameValue =
       rawValue.trim();
 
-
     // SPACES BEFORE / AFTER
     if (rawValue !== nameValue) {
-
       setValidationError(
         "Search should not have spaces before or after the name."
       );
@@ -459,10 +452,8 @@ const EmployeeStatus = ({
       return;
     }
 
-
     // MULTIPLE SPACES
     if (/\s{2,}/.test(nameValue)) {
-
       setValidationError(
         "Name search should not contain multiple spaces."
       );
@@ -474,10 +465,8 @@ const EmployeeStatus = ({
       return;
     }
 
-
     // MINIMUM 2 CHARACTERS
     if (nameValue.length < 2) {
-
       setValidationError(
         "Please enter at least 2 characters."
       );
@@ -489,14 +478,12 @@ const EmployeeStatus = ({
       return;
     }
 
-
     // ONLY LETTERS
     if (
       !/^[A-Za-z]+(?: [A-Za-z]+)*$/.test(
         nameValue
       )
     ) {
-
       setValidationError(
         "Name should contain only letters and single spaces."
       );
@@ -508,7 +495,6 @@ const EmployeeStatus = ({
       return;
     }
 
-
     // NAME SEARCH SUCCESS
     setSearchApplied(nameValue);
 
@@ -517,21 +503,17 @@ const EmployeeStatus = ({
     setIsSearchValid(true);
   };
 
-
   // ====================================================
   // ENTER KEY
   // ====================================================
 
   const handleKeyDown = (e) => {
-
     if (e.key === "Enter") {
-
       e.preventDefault();
 
       handleSearch();
     }
   };
-
 
   // ====================================================
   // FILTER EMPLOYEES
@@ -556,7 +538,6 @@ const EmployeeStatus = ({
               )
         );
 
-
   // ====================================================
   // PAGE SIZE
   // ====================================================
@@ -569,18 +550,15 @@ const EmployeeStatus = ({
           Number(pageSize)
         );
 
-
   // ====================================================
   // STATUS CLASS
   // ====================================================
 
   const getStatusClass = (status) => {
-
     return `es-status-${status
       .toLowerCase()
       .replace(/\s+/g, "-")}`;
   };
-
 
   // ====================================================
   // UI
@@ -607,7 +585,6 @@ const EmployeeStatus = ({
 
         </div>
 
-
         <div className="es-nav-right">
 
           <span className="es-nav-user">
@@ -629,7 +606,6 @@ const EmployeeStatus = ({
 
       </nav>
 
-
       {/* ============================================== */}
       {/* BODY */}
       {/* ============================================== */}
@@ -644,7 +620,6 @@ const EmployeeStatus = ({
           View employee status.
         </p>
 
-
         {/* ========================================== */}
         {/* SEARCH CARD */}
         {/* ========================================== */}
@@ -654,7 +629,6 @@ const EmployeeStatus = ({
           <h2 className="es-card-title">
             Search Employee
           </h2>
-
 
           <div className="es-search-group">
 
@@ -668,7 +642,7 @@ const EmployeeStatus = ({
                     : ""
                 }`}
                 type="text"
-                inputMode="numeric"
+                inputMode="text"
                 maxLength={9}
                 placeholder="Enter Employee ID or Employee Name"
                 value={search}
@@ -684,7 +658,6 @@ const EmployeeStatus = ({
                 aria-describedby="validation-error"
               />
 
-
               <button
                 className="es-btn-primary"
                 onClick={handleSearch}
@@ -693,7 +666,6 @@ const EmployeeStatus = ({
               </button>
 
             </div>
-
 
             {/* ====================================== */}
             {/* VALIDATION MESSAGE */}
@@ -711,7 +683,6 @@ const EmployeeStatus = ({
                 </div>
               )}
 
-
             {/* ====================================== */}
             {/* FORMAT HINT */}
             {/* ====================================== */}
@@ -719,7 +690,7 @@ const EmployeeStatus = ({
             <div className="es-validation-hint">
 
               <small>
-                Employee ID format: YYDDMMXXX — exactly
+                Employee ID format: YYMMDDXXX — exactly
                 9 digits. Past and today's dates are
                 allowed. Future dates are not allowed.
                 Last 3 digits: 001–999.
@@ -730,7 +701,6 @@ const EmployeeStatus = ({
           </div>
 
         </div>
-
 
         {/* ========================================== */}
         {/* EMPLOYEE TABLE */}
@@ -764,7 +734,6 @@ const EmployeeStatus = ({
 
             </thead>
 
-
             <tbody>
 
               {visibleEmployees.length > 0 ? (
@@ -788,20 +757,17 @@ const EmployeeStatus = ({
 
                         </td>
 
-
                         {/* EMPLOYEE NAME */}
 
                         <td>
                           {emp.name}
                         </td>
 
-
                         {/* DEPARTMENT */}
 
                         <td>
                           {emp.department}
                         </td>
-
 
                         {/* STATUS */}
 
@@ -843,7 +809,6 @@ const EmployeeStatus = ({
 
         </div>
 
-
         {/* ========================================== */}
         {/* PAGINATION */}
         {/* ========================================== */}
@@ -859,7 +824,6 @@ const EmployeeStatus = ({
             employees
 
           </span>
-
 
           <select
             className="es-page-size"
@@ -894,7 +858,6 @@ const EmployeeStatus = ({
           </select>
 
         </div>
-
 
         {/* ========================================== */}
         {/* BACK */}
