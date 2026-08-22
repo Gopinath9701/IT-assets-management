@@ -231,7 +231,7 @@ const createEmployeeFromId = (id) => {
     department: department,
     status: "Active",
     phone: "9876543210",
-    email: `${id}@gmail.com`,
+    email: `${id}a@gmail.com`,
     joiningDate: formatDate(employeeDate),
 
     assets: [],
@@ -249,7 +249,7 @@ const EMPLOYEES = [
     department: "IT",
     status: "Active",
     phone: "9876543210",
-    email: "260101001@gmail.com",
+    email: "260101001a@gmail.com",
     joiningDate: "01-01-2026",
 
     assets: [
@@ -277,7 +277,7 @@ const EMPLOYEES = [
     department: "HR",
     status: "Active",
     phone: "9876543211",
-    email: "260202002@gmail.com",
+    email: "260202002a@gmail.com",
     joiningDate: "02-02-2026",
 
     assets: [
@@ -295,7 +295,7 @@ const EMPLOYEES = [
     department: "Finance",
     status: "On Leave",
     phone: "9876543212",
-    email: "260503003@gmail.com",
+    email: "260503003a@gmail.com",
     joiningDate: "03-05-2026",
 
     assets: [
@@ -313,7 +313,7 @@ const EMPLOYEES = [
     department: "IT",
     status: "Inactive",
     phone: "9876543213",
-    email: "260704004@gmail.com",
+    email: "260704004a@gmail.com",
     joiningDate: "04-07-2026",
 
     assets: [],
@@ -325,7 +325,7 @@ const EMPLOYEES = [
     department: "HR",
     status: "Active",
     phone: "9876543214",
-    email: "260805005@gmail.com",
+    email: "260805005a@gmail.com",
     joiningDate: "05-08-2026",
 
     assets: [],
@@ -341,7 +341,7 @@ const EMPLOYEES = [
     department: "IT",
     status: "Active",
     phone: "9876543215",
-    email: "250808001@gmail.com",
+    email: "250808001a@gmail.com",
     joiningDate: "08-08-2025",
 
     assets: [
@@ -359,7 +359,7 @@ const EMPLOYEES = [
     department: "HR",
     status: "Active",
     phone: "9876543216",
-    email: "260808001@gmail.com",
+    email: "260808001a@gmail.com",
     joiningDate: "08-08-2026",
 
     assets: [
@@ -381,7 +381,7 @@ const EMPLOYEES = [
     department: "Finance",
     status: "Active",
     phone: "9876543217",
-    email: "260821001@gmail.com",
+    email: "260821001a@gmail.com",
     joiningDate: "21-08-2026",
 
     assets: [],
