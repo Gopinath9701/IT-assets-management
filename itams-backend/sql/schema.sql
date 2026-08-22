@@ -126,7 +126,7 @@ CREATE TABLE IF NOT EXISTS maintenance_requests (
   description TEXT NOT NULL,
   priority VARCHAR(20) NOT NULL DEFAULT 'Medium' CHECK (priority IN ('Low','Medium','High')),
   status VARCHAR(20) NOT NULL DEFAULT 'Pending' CHECK (status IN ('Pending','In Progress','Completed')),
-  report_date DATE NOT NULL,
+  report_date TIMESTAMP NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

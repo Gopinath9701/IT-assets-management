@@ -46,14 +46,15 @@ async function seed() {
   }
 
   const departments = [
-    ["DEP001", "Information Technology", "Head One", 25],
-    ["DEP002", "Human Resources", "Head Two", 10],
-    ["DEP003", "Finance", "Head Three", 15],
+    ["DEP001", "Information Technology", "Suresh Iyer", 25],
+    ["DEP002", "Human Resources", "Anita Menon", 10],
+    ["DEP003", "Finance", "Rakesh Verma", 15],
   ];
   for (const [id, name, head, count] of departments) {
     await pool.query(
       `INSERT INTO departments (department_id, name, head, employee_count)
-       VALUES ($1, $2, $3, $4) ON CONFLICT (department_id) DO UPDATE SET name = EXCLUDED.name`,
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT (department_id) DO UPDATE SET name = EXCLUDED.name, head = EXCLUDED.head, employee_count = EXCLUDED.employee_count`,
       [id, name, head, count]
     );
   }
