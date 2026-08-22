@@ -1,12 +1,18 @@
 const { pool } = require("../config/db");
 const { validateMaintenancePayload } = require("../utils/validators");
 
+// LEFT JOIN so a ticket with no linked asset (asset_id NULL) still comes
+// back — asset_type is just null for it instead of dropping the row.
 async function getMaintenanceRequests(req, res, next) {
   try {
     const { employeeId } = req.query;
     const query = employeeId
-      ? "SELECT * FROM maintenance_requests WHERE employee_id = $1 ORDER BY id DESC"
-      : "SELECT * FROM maintenance_requests ORDER BY id DESC";
+      ? `SELECT m.*, a.asset_type FROM maintenance_requests m
+         LEFT JOIN assets a ON a.asset_id = m.asset_id
+         WHERE m.employee_id = $1 ORDER BY m.id DESC`
+      : `SELECT m.*, a.asset_type FROM maintenance_requests m
+         LEFT JOIN assets a ON a.asset_id = m.asset_id
+         ORDER BY m.id DESC`;
     const params = employeeId ? [employeeId] : [];
     const { rows } = await pool.query(query, params);
     res.json({ success: true, reports: rows });
@@ -33,7 +39,7 @@ async function createMaintenanceRequest(req, res, next) {
 
     await pool.query(
       `INSERT INTO maintenance_requests (request_id, employee_id, asset_id, issue_category, description, priority, report_date)
-       VALUES ($1, $2, $3, $4, $5, $6, CURRENT_DATE)`,
+       VALUES ($1, $2, $3, $4, $5, $6, NOW())`,
       [requestId, employeeId, assetId || null, issueCategory, description, priority]
     );
 
