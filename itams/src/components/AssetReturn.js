@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "./AssetReturn.css";
 
-const AssetReturn = () => {
+const AssetReturn = ({ onBack }) => {
   const [employeeId, setEmployeeId] = useState("");
   const [employeeIdError, setEmployeeIdError] = useState("");
 
@@ -65,65 +65,33 @@ const AssetReturn = () => {
 
   // =====================================================
   // EMPLOYEE ID VALIDATION
-  //
-  // FORMAT:
-  // YYMMDD + 3 DIGITS
-  //
-  // Example:
-  // 260815001
-  //
-  // 26  = Year
-  // 08  = Month
-  // 15  = Day
-  // 001 = Employee Number
-  //
-  // RULES:
-  // - Exactly 9 digits
-  // - Numbers only
-  // - No spaces
-  // - Employee number cannot be 000
-  // - Valid calendar date
-  // - Date cannot be future
   // =====================================================
 
   const validateEmployeeId = (id) => {
-    // Empty
     if (!id || id.length === 0) {
       return "Employee ID is required.";
     }
 
-    // Leading / trailing spaces
     if (id.trim() !== id) {
       return "Employee ID should not have leading or trailing spaces.";
     }
 
-    // Any spaces
     if (/\s/.test(id)) {
       return "Employee ID should not contain spaces.";
     }
 
-    // Numbers only
     if (!/^\d+$/.test(id)) {
       return "Employee ID must contain numbers only.";
     }
 
-    // Exactly 9 digits
     if (id.length !== 9) {
       return "Employee ID must be exactly 9 digits.";
     }
-
-    // =====================================================
-    // SPLIT ID
-    // =====================================================
 
     const yy = id.substring(0, 2);
     const mm = id.substring(2, 4);
     const dd = id.substring(4, 6);
     const employeeNumber = id.substring(6, 9);
-
-    // =====================================================
-    // EMPLOYEE NUMBER
-    // =====================================================
 
     if (!/^\d{3}$/.test(employeeNumber)) {
       return "Last 3 digits must be the employee number.";
@@ -133,17 +101,9 @@ const AssetReturn = () => {
       return "Employee number cannot be 000.";
     }
 
-    // =====================================================
-    // YEAR
-    // =====================================================
-
     if (!/^\d{2}$/.test(yy)) {
       return "First 2 digits must represent YY.";
     }
-
-    // =====================================================
-    // MONTH
-    // =====================================================
 
     const month = Number(mm);
 
@@ -151,19 +111,11 @@ const AssetReturn = () => {
       return "MM must be between 01 and 12.";
     }
 
-    // =====================================================
-    // DAY
-    // =====================================================
-
     const day = Number(dd);
 
     if (!/^\d{2}$/.test(dd) || day < 1 || day > 31) {
       return "DD must be between 01 and 31.";
     }
-
-    // =====================================================
-    // CREATE ACTUAL DATE
-    // =====================================================
 
     const fullYear = 2000 + Number(yy);
 
@@ -175,10 +127,6 @@ const AssetReturn = () => {
 
     employeeDate.setHours(0, 0, 0, 0);
 
-    // =====================================================
-    // CHECK REAL CALENDAR DATE
-    // =====================================================
-
     if (
       employeeDate.getFullYear() !== fullYear ||
       employeeDate.getMonth() !== month - 1 ||
@@ -187,10 +135,6 @@ const AssetReturn = () => {
       return "Employee ID contains an invalid calendar date.";
     }
 
-    // =====================================================
-    // DATE CANNOT BE FUTURE
-    // =====================================================
-
     const today = new Date();
 
     today.setHours(0, 0, 0, 0);
@@ -198,10 +142,6 @@ const AssetReturn = () => {
     if (employeeDate > today) {
       return "Employee ID date cannot be in the future.";
     }
-
-    // =====================================================
-    // VALID
-    // =====================================================
 
     return "";
   };
@@ -280,7 +220,6 @@ const AssetReturn = () => {
 
   // =====================================================
   // DATE CONVERSION
-  // DD-MM-YYYY -> DATE
   // =====================================================
 
   const convertToDate = (dateString) => {
@@ -431,10 +370,6 @@ const AssetReturn = () => {
       return;
     }
 
-    // =====================================================
-    // EMPLOYEE ID
-    // =====================================================
-
     const employeeError =
       validateEmployeeId(employeeId);
 
@@ -444,10 +379,6 @@ const AssetReturn = () => {
     }
 
     setEmployeeIdError("");
-
-    // =====================================================
-    // RETURN DATE
-    // =====================================================
 
     const dateError =
       validateReturnDate(returnForm.returnDate);
@@ -459,10 +390,6 @@ const AssetReturn = () => {
 
     setReturnDateError("");
 
-    // =====================================================
-    // CONDITION
-    // =====================================================
-
     const conditionErrorMessage =
       validateCondition(returnForm.condition);
 
@@ -472,10 +399,6 @@ const AssetReturn = () => {
     }
 
     setConditionError("");
-
-    // =====================================================
-    // REMARKS
-    // =====================================================
 
     const remarksErrorMessage =
       validateRemarks(returnForm.remarks);
@@ -487,10 +410,6 @@ const AssetReturn = () => {
 
     setRemarksError("");
 
-    // =====================================================
-    // CREATE HISTORY
-    // =====================================================
-
     const newHistory = {
       assetId: selectedAsset.assetId,
       employeeId: employeeId,
@@ -501,13 +420,11 @@ const AssetReturn = () => {
         returnForm.remarks.trim() || "-",
     };
 
-    // Add history
     setReturnHistory((prev) => [
       newHistory,
       ...prev,
     ]);
 
-    // Remove returned asset
     setAssignedAssets((prev) =>
       prev.filter(
         (asset) =>
@@ -525,9 +442,7 @@ const AssetReturn = () => {
   return (
     <div className="asset-return-page">
 
-      {/* =====================================================
-          HEADER
-      ===================================================== */}
+      {/* HEADER */}
 
       <header className="asset-return-header">
 
@@ -557,9 +472,7 @@ const AssetReturn = () => {
 
       </header>
 
-      {/* =====================================================
-          MAIN CONTENT
-      ===================================================== */}
+      {/* MAIN CONTENT */}
 
       <main className="asset-return-content">
 
@@ -577,9 +490,7 @@ const AssetReturn = () => {
           </div>
         )}
 
-        {/* =====================================================
-            SEARCH EMPLOYEE
-        ===================================================== */}
+        {/* SEARCH EMPLOYEE */}
 
         <section className="return-section">
 
@@ -645,9 +556,7 @@ const AssetReturn = () => {
 
         </section>
 
-        {/* =====================================================
-            ASSIGNED ASSETS
-        ===================================================== */}
+        {/* ASSIGNED ASSETS */}
 
         <section className="return-section">
 
@@ -735,9 +644,7 @@ const AssetReturn = () => {
 
         </section>
 
-        {/* =====================================================
-            RETURN HISTORY
-        ===================================================== */}
+        {/* RETURN HISTORY */}
 
         <section className="return-section">
 
@@ -810,17 +717,13 @@ const AssetReturn = () => {
 
         </section>
 
-        {/* =====================================================
-            BOTTOM
-        ===================================================== */}
+        {/* BOTTOM */}
 
         <div className="bottom-row">
 
           <button
             className="back-button"
-            onClick={() =>
-              window.history.back()
-            }
+            onClick={onBack}
           >
             ← Back
           </button>
@@ -837,9 +740,7 @@ const AssetReturn = () => {
 
       </main>
 
-      {/* =====================================================
-          RETURN MODAL
-      ===================================================== */}
+      {/* RETURN MODAL */}
 
       {selectedAsset && (
 
@@ -1036,7 +937,7 @@ const AssetReturn = () => {
 
             </div>
 
-            {/* Modal Buttons */}
+            {/* MODAL BUTTONS */}
 
             <div className="modal-actions">
 
