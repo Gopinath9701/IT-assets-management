@@ -124,7 +124,7 @@ const validateEmployeeIdOrEmail = (value) => {
     return validateEmployeeId(value);
   }
 
-  // Email
+  // Email — requires 260821001a@gmail.com format
   if (value.includes("@")) {
     const emailPattern =
       /^[0-9]{9}a@gmail\.com$/;
