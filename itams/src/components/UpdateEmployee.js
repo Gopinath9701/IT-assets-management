@@ -391,7 +391,7 @@ const UpdateEmployee = ({
   // SEARCH EMPLOYEE
   // ====================================================
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     setIsSearchTouched(true);
     setSearchError("");
     setUpdateSuccess(false);
@@ -412,134 +412,68 @@ const UpdateEmployee = ({
       return;
     }
 
-    const employeeId = searchInput;
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `http://localhost:5000/api/employees/${searchInput}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-    // ==================================================
-    // FUTURE DATE CHECK
-    // ==================================================
+      const data = await response.json();
 
-    const year = Number(employeeId.substring(0, 2));
-    const month = Number(employeeId.substring(2, 4));
-    const day = Number(employeeId.substring(4, 6));
+      if (response.status === 404) {
+        setSearchError(
+          `Employee ID "${searchInput}" was not found in the system.`
+        );
+        setIsSearchValid(false);
+        setEmployee(null);
+        return;
+      }
 
-    const employeeDate = new Date(
-      2000 + year,
-      month - 1,
-      day
-    );
+      if (!response.ok) {
+        setSearchError(data.message || "Failed to fetch employee.");
+        setIsSearchValid(false);
+        setEmployee(null);
+        return;
+      }
 
-    employeeDate.setHours(0, 0, 0, 0);
+      const emp = data.employee;
+      const foundEmployee = {
+        id: emp.employee_id,
+        name: emp.employee_name,
+        email: emp.email,
+        department: emp.department,
+        designation: emp.designation || "",
+        phone: emp.phone ? emp.phone.replace(/^\+91/, "") : "",
+      };
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    if (employeeDate > today) {
+      setEmployee(foundEmployee);
+      setFormData({
+        id: foundEmployee.id,
+        name: foundEmployee.name,
+        email: foundEmployee.email,
+        department: foundEmployee.department,
+        designation: foundEmployee.designation,
+        phone: foundEmployee.phone,
+      });
+      setFormErrors({});
+      setUpdateSuccess(false);
+      setSearchError("");
+      setIsSearchValid(true);
+    } catch (error) {
+      console.error("Search Employee Error:", error);
       setSearchError(
-        `Employee ID "${employeeId}" was not found in the system.`
+        "Unable to connect to server. Please make sure the backend is running."
       );
       setIsSearchValid(false);
       setEmployee(null);
-      return;
     }
-
-    // ==================================================
-    // FIND EXISTING EMPLOYEE
-    // ==================================================
-
-    let foundEmployee = EMPLOYEE_DATA[employeeId];
-
-    // ==================================================
-    // PAST / CURRENT DATE EMPLOYEE
-    // ==================================================
-
-    if (!foundEmployee) {
-      const employeeNumber = Number(
-        employeeId.substring(6, 9)
-      );
-
-      const departments = [
-        "IT",
-        "HR",
-        "Finance",
-        "Marketing",
-        "Sales",
-        "Operations",
-        "Administration",
-      ];
-
-      const designations = [
-        "Developer",
-        "Manager",
-        "Accountant",
-        "Analyst",
-        "Executive",
-        "Assistant",
-        "Lead",
-        "Director",
-      ];
-
-      const department =
-        departments[
-          (employeeNumber - 1) % departments.length
-        ];
-
-      const designation =
-        designations[
-          (employeeNumber - 1) % designations.length
-        ];
-
-      const phoneNumber = String(
-        9000000000 + employeeNumber
-      );
-
-      const employeeNames = [
-        "Rahul Sharma",
-        "Priya Reddy",
-        "Arjun Kumar",
-        "Sneha Rao",
-        "Vikram Singh",
-        "Ananya Reddy",
-        "Kiran Kumar",
-        "Pooja Sharma",
-        "Rohit Verma",
-        "Neha Reddy",
-      ];
-
-      foundEmployee = {
-        id: employeeId,
-        name:
-          employeeNames[
-            (employeeNumber - 1) %
-              employeeNames.length
-          ],
-        email: `${employeeId}@gmail.com`,
-        department: department,
-        designation: designation,
-        phone: phoneNumber,
-      };
-
-      EMPLOYEE_DATA[employeeId] = foundEmployee;
-    }
-
-    // ==================================================
-    // SHOW EMPLOYEE
-    // ==================================================
-
-    setEmployee(foundEmployee);
-
-    setFormData({
-      id: foundEmployee.id,
-      name: foundEmployee.name,
-      email: foundEmployee.email,
-      department: foundEmployee.department,
-      designation: foundEmployee.designation,
-      phone: foundEmployee.phone,
-    });
-
-    setFormErrors({});
-    setUpdateSuccess(false);
-    setSearchError("");
-    setIsSearchValid(true);
   };
 
   // ====================================================
@@ -581,46 +515,26 @@ const UpdateEmployee = ({
     const errors = {};
 
     const idResult = validateEmployeeId(formData.id);
-
     if (!idResult.isValid) {
       errors.id = idResult.message;
     }
 
     const nameResult = validateEmployeeName(formData.name);
-
     if (!nameResult.isValid) {
       errors.name = nameResult.message;
     }
 
-    const emailResult = validateEmail(
-      formData.email,
-      formData.id
-    );
-
-    if (!emailResult.isValid) {
-      errors.email = emailResult.message;
-    }
-
-    const departmentResult = validateDepartment(
-      formData.department
-    );
-
+    const departmentResult = validateDepartment(formData.department);
     if (!departmentResult.isValid) {
       errors.department = departmentResult.message;
     }
 
-    const designationResult = validateDesignation(
-      formData.designation
-    );
-
+    const designationResult = validateDesignation(formData.designation);
     if (!designationResult.isValid) {
       errors.designation = designationResult.message;
     }
 
-    const phoneResult = validatePhoneNumber(
-      formData.phone
-    );
-
+    const phoneResult = validatePhoneNumber(formData.phone);
     if (!phoneResult.isValid) {
       errors.phone = phoneResult.message;
     }
@@ -634,7 +548,7 @@ const UpdateEmployee = ({
   // UPDATE EMPLOYEE
   // ====================================================
 
-  const handleUpdate = () => {
+  const handleUpdate = async () => {
     const isValid = validateForm();
 
     if (!isValid) {
@@ -642,19 +556,42 @@ const UpdateEmployee = ({
       return;
     }
 
-    EMPLOYEE_DATA[formData.id] = {
-      ...formData,
-    };
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `http://localhost:5000/api/employees/${formData.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            employeeName: formData.name,
+            email: formData.email,
+            department: formData.department,
+            designation: formData.designation,
+            phone: `+91${formData.phone}`,
+          }),
+        }
+      );
 
-    setEmployee({
-      ...formData,
-    });
+      const data = await response.json();
 
-    setUpdateSuccess(true);
+      if (!response.ok) {
+        alert(data.message || "Failed to update employee.");
+        return;
+      }
 
-    alert(
-      `✅ Employee ${formData.id} updated successfully!`
-    );
+      setEmployee({ ...formData });
+      setUpdateSuccess(true);
+      alert(`✅ Employee ${formData.id} updated successfully!`);
+    } catch (error) {
+      console.error("Update Employee Error:", error);
+      alert(
+        "Unable to connect to server. Please make sure the backend is running."
+      );
+    }
   };
 
   // ====================================================
@@ -857,34 +794,6 @@ const UpdateEmployee = ({
                   {formErrors.name && (
                     <span className="field-error">
                       {formErrors.name}
-                    </span>
-                  )}
-
-                </div>
-
-                {/* EMAIL */}
-                <div className="form-group">
-
-                  <label>
-                    Email *
-                  </label>
-
-                  <input
-                    className={
-                      formErrors.email
-                        ? "input-error"
-                        : ""
-                    }
-                    type="text"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleFormChange}
-                    placeholder="YYMMDD001@gmail.com"
-                  />
-
-                  {formErrors.email && (
-                    <span className="field-error">
-                      {formErrors.email}
                     </span>
                   )}
 
