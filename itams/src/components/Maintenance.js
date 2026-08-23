@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./Maintenance.css";
 
 const Maintenance = ({
@@ -9,90 +9,65 @@ const Maintenance = ({
 }) => {
   const [activeSidebar, setActiveSidebar] = useState("maintenance");
 
-  const [tickets, setTickets] = useState([
-    {
-      ticket: 1,
-      assetId: "LAP001",
-      employeeId: "250818001",
-      assetType: "Laptop",
-      issue: "Screen damaged",
-      priority: "High",
-      reported: "18-08-2026 09:00 AM",
-      status: "Pending",
-    },
-    {
-      ticket: 2,
-      assetId: "MON001",
-      employeeId: "250818002",
-      assetType: "Monitor",
-      issue: "Display issue",
-      priority: "Medium",
-      reported: "18-08-2026 09:10 AM",
-      status: "Pending",
-    },
-    {
-      ticket: 3,
-      assetId: "KEY001",
-      employeeId: "250818003",
-      assetType: "Keyboard",
-      issue: "Keys not working",
-      priority: "Low",
-      reported: "18-08-2026 09:25 AM",
-      status: "Pending",
-    },
-  ]);
+  const [tickets, setTickets] = useState([]);
+  const [inProgressTickets, setInProgressTickets] = useState([]);
+  const [history, setHistory] = useState([]);
 
-  const [inProgressTickets, setInProgressTickets] = useState([
-    {
-      ticket: 2,
-      assetId: "MON001",
-      employeeId: "250818002",
-      assetType: "Monitor",
-      issue: "Display issue",
-      priority: "Medium",
-      repairStarted: "18-08-2026 11:30 AM",
-      technician: "Technician 1",
-      status: "In Progress",
-    },
-    {
-      ticket: 4,
-      assetId: "PRN001",
-      employeeId: "250818004",
-      assetType: "Printer",
-      issue: "Paper jam",
-      priority: "High",
-      repairStarted: "18-08-2026 12:05 PM",
-      technician: "Technician 2",
-      status: "In Progress",
-    },
-  ]);
+  // Load maintenance requests from backend on mount
+  useEffect(() => {
+    loadMaintenanceData();
+  }, []);
 
-  const [history, setHistory] = useState([
-    {
-      ticket: 5,
-      assetId: "LAP002",
-      employeeId: "250817001",
-      assetType: "Laptop",
-      issue: "Battery not charging",
-      priority: "High",
-      reported: "17-08-2026 10:15 AM",
-      completed: "17-08-2026 04:20 PM",
-      technician: "Technician 1",
-      status: "Completed",
-    },
-    {
-      ticket: 6,
-      assetId: "MOU001",
-      employeeId: "250817002",
-      assetType: "Mouse",
-      issue: "Scroll not working",
-      priority: "Low",
-      reported: "17-08-2026 02:40 PM",
-      completed: "18-08-2026 10:00 AM",
-      technician: "Technician 3",
-      status: "Completed",
-    },
-  ]);
+  const loadMaintenanceData = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` };
+      const resp = await fetch("http://localhost:5000/api/maintenance", { headers });
+      const data = await resp.json();
+      if (!data.success) return;
+
+      const reports = data.reports || [];
+      const fmt = (r) => ({
+        ticket: r.id,
+        requestId: r.request_id,
+        assetId: r.asset_id || "-",
+        employeeId: r.employee_id,
+        assetType: r.asset_id ? r.asset_id.substring(0, 3) : "-",
+        issue: r.description,
+        priority: r.priority,
+        reported: r.report_date
+          ? new Date(r.report_date).toLocaleDateString("en-GB").replace(/\//g, "-")
+          : "-",
+        status: r.status,
+        repairStarted: "-",
+        technician: "-",
+        completed: "-",
+      });
+
+      setTickets(reports.filter((r) => r.status === "Pending").map(fmt));
+      setInProgressTickets(reports.filter((r) => r.status === "In Progress").map(fmt));
+      setHistory(reports.filter((r) => r.status === "Completed").map(fmt));
+    } catch (err) {
+      console.error("Load maintenance error:", err);
+    }
+  };
+
+  const updateStatus = async (requestId, newStatus) => {
+    try {
+      const token = localStorage.getItem("token");
+      const resp = await fetch(`http://localhost:5000/api/maintenance/${requestId}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      const data = await resp.json();
+      if (!resp.ok) { alert(data.message || "Failed to update status."); return false; }
+      return true;
+    } catch (err) {
+      alert("Unable to connect to server.");
+      return false;
+    }
+  };
 
   const handleSidebarClick = (id) => {
     setActiveSidebar(id);
@@ -110,56 +85,24 @@ const Maintenance = ({
     }
   };
 
-  const startRepair = (ticket) => {
-    const confirmed = window.confirm(
-      `Start repair for Ticket ${ticket.ticket}?`
-    );
-
+  const startRepair = async (ticket) => {
+    const confirmed = window.confirm(`Start repair for Ticket ${ticket.ticket}?`);
     if (!confirmed) return;
-
-    const newInProgress = {
-      ...ticket,
-      repairStarted: "18-08-2026 03:15 PM",
-      technician: "Technician 1",
-      status: "In Progress",
-    };
-
-    setTickets((prev) =>
-      prev.filter((item) => item.ticket !== ticket.ticket)
-    );
-
-    setInProgressTickets((prev) => [
-      ...prev,
-      newInProgress,
-    ]);
-
-    alert(`Repair started for Ticket ${ticket.ticket}`);
+    const ok = await updateStatus(ticket.requestId, "In Progress");
+    if (ok) {
+      alert(`Repair started for Ticket ${ticket.ticket}`);
+      loadMaintenanceData();
+    }
   };
 
-  const completeRepair = (ticket) => {
-    const confirmed = window.confirm(
-      `Mark Ticket ${ticket.ticket} as repaired?`
-    );
-
+  const completeRepair = async (ticket) => {
+    const confirmed = window.confirm(`Mark Ticket ${ticket.ticket} as repaired?`);
     if (!confirmed) return;
-
-    const completedTicket = {
-      ...ticket,
-      reported: "18-08-2026 09:10 AM",
-      completed: "18-08-2026 03:30 PM",
-      status: "Completed",
-    };
-
-    setInProgressTickets((prev) =>
-      prev.filter((item) => item.ticket !== ticket.ticket)
-    );
-
-    setHistory((prev) => [
-      completedTicket,
-      ...prev,
-    ]);
-
-    alert(`Ticket ${ticket.ticket} marked as repaired.`);
+    const ok = await updateStatus(ticket.requestId, "Completed");
+    if (ok) {
+      alert(`Ticket ${ticket.ticket} marked as repaired.`);
+      loadMaintenanceData();
+    }
   };
 
   return (
@@ -332,7 +275,7 @@ const Maintenance = ({
                     <th>Asset Type</th>
                     <th>Issue</th>
                     <th>Priority</th>
-                    <th>Reported Date & Time</th>
+                    <th>Reported Date</th>
                     <th>Status</th>
                     <th>Action</th>
                   </tr>
@@ -435,8 +378,6 @@ const Maintenance = ({
                     <th>Asset Type</th>
                     <th>Issue</th>
                     <th>Priority</th>
-                    <th>Repair Started</th>
-                    <th>Technician</th>
                     <th>Status</th>
                     <th>Action</th>
                   </tr>
@@ -451,26 +392,16 @@ const Maintenance = ({
                       <tr key={ticket.ticket}>
 
                         <td>{ticket.ticket}</td>
-
                         <td>{ticket.assetId}</td>
-
                         <td>{ticket.employeeId}</td>
-
                         <td>{ticket.assetType}</td>
-
                         <td>{ticket.issue}</td>
 
                         <td>
-                          <span
-                            className={`priority-badge priority-${ticket.priority.toLowerCase()}`}
-                          >
+                          <span className={`priority-badge priority-${ticket.priority.toLowerCase()}`}>
                             {ticket.priority}
                           </span>
                         </td>
-
-                        <td>{ticket.repairStarted}</td>
-
-                        <td>{ticket.technician}</td>
 
                         <td>
                           <span className="status-badge status-progress">
@@ -481,9 +412,7 @@ const Maintenance = ({
                         <td>
                           <button
                             className="maintenance-action-button"
-                            onClick={() =>
-                              completeRepair(ticket)
-                            }
+                            onClick={() => completeRepair(ticket)}
                           >
                             Repaired
                           </button>
@@ -496,10 +425,7 @@ const Maintenance = ({
                   ) : (
 
                     <tr>
-                      <td
-                        colSpan="10"
-                        className="maintenance-empty"
-                      >
+                      <td colSpan="8" className="maintenance-empty">
                         No tickets currently in progress.
                       </td>
                     </tr>
@@ -543,42 +469,30 @@ const Maintenance = ({
                     <th>Asset Type</th>
                     <th>Issue</th>
                     <th>Priority</th>
-                    <th>Reported Date & Time</th>
-                    <th>Completed Date & Time</th>
-                    <th>Technician</th>
+                    <th>Reported Date</th>
                     <th>Status</th>
                   </tr>
                 </thead>
 
                 <tbody>
 
-                  {history.map((ticket) => (
+                  {history.length > 0 ? history.map((ticket) => (
 
                     <tr key={ticket.ticket}>
 
                       <td>{ticket.ticket}</td>
-
                       <td>{ticket.assetId}</td>
-
                       <td>{ticket.employeeId}</td>
-
                       <td>{ticket.assetType}</td>
-
                       <td>{ticket.issue}</td>
 
                       <td>
-                        <span
-                          className={`priority-badge priority-${ticket.priority.toLowerCase()}`}
-                        >
+                        <span className={`priority-badge priority-${ticket.priority.toLowerCase()}`}>
                           {ticket.priority}
                         </span>
                       </td>
 
                       <td>{ticket.reported}</td>
-
-                      <td>{ticket.completed}</td>
-
-                      <td>{ticket.technician}</td>
 
                       <td>
                         <span className="status-badge status-completed">
@@ -588,7 +502,13 @@ const Maintenance = ({
 
                     </tr>
 
-                  ))}
+                  )) : (
+                    <tr>
+                      <td colSpan="8" className="maintenance-empty">
+                        No completed tickets.
+                      </td>
+                    </tr>
+                  )}
 
                 </tbody>
 
