@@ -1,54 +1,11 @@
 import React, { useState } from "react";
 import "./AssetReturn.css";
 
-const AssetReturn = ({ onBack }) => {
+const AssetReturn = ({ username = "username", onLogout, onBack }) => {
   const [employeeId, setEmployeeId] = useState("");
   const [employeeIdError, setEmployeeIdError] = useState("");
-
-  const [assignedAssets, setAssignedAssets] = useState([
-    {
-      assetId: "LAP001",
-      assetType: "Laptop",
-      assignedDate: "15-08-2026",
-    },
-    {
-      assetId: "MON001",
-      assetType: "Monitor",
-      assignedDate: "15-08-2026",
-    },
-    {
-      assetId: "KEY001",
-      assetType: "Keyboard",
-      assignedDate: "16-08-2026",
-    },
-  ]);
-
-  const [returnHistory, setReturnHistory] = useState([
-    {
-      assetId: "LAP001",
-      employeeId: "260815001",
-      assetType: "Laptop",
-      returnDate: "18-08-2026",
-      condition: "Good",
-      remarks: "-",
-    },
-    {
-      assetId: "MON001",
-      employeeId: "260815002",
-      assetType: "Monitor",
-      returnDate: "18-08-2026",
-      condition: "Damaged",
-      remarks: "Screen issue",
-    },
-    {
-      assetId: "KEY001",
-      employeeId: "260817001",
-      assetType: "Keyboard",
-      returnDate: "17-08-2026",
-      condition: "Good",
-      remarks: "-",
-    },
-  ]);
+  const [assignedAssets, setAssignedAssets] = useState([]);
+  const [returnHistory, setReturnHistory] = useState([]);
 
   const [selectedAsset, setSelectedAsset] = useState(null);
 
@@ -147,22 +104,78 @@ const AssetReturn = ({ onBack }) => {
   };
 
   // =====================================================
-  // SEARCH EMPLOYEE
+  // SEARCH EMPLOYEE — loads their current assignments
   // =====================================================
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     setSuccessMessage("");
-
     const error = validateEmployeeId(employeeId);
-
-    if (error) {
-      setEmployeeIdError(error);
-      return;
-    }
-
+    if (error) { setEmployeeIdError(error); return; }
     setEmployeeIdError("");
 
-    setSuccessMessage("Employee ID is valid.");
+    try {
+      const token = localStorage.getItem("token");
+      const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` };
+
+      const resp = await fetch(
+        "http://localhost:5000/api/asset-assignments/history",
+        { headers }
+      );
+      const data = await resp.json();
+      if (!data.success) { setSuccessMessage("Could not load assignments."); return; }
+
+      const allForEmployee = (data.history || []).filter(
+        (h) => h.employee_id === employeeId
+      );
+
+      // Active (not yet returned)
+      const active = allForEmployee.filter((h) => h.status === "Assigned");
+      setAssignedAssets(
+        active.map((h) => {
+          // asset_name_id format: "Model (ASSETID)" — extract ID from inside parens
+          const assetIdMatch = h.asset_name_id
+            ? h.asset_name_id.match(/\(([^)]+)\)$/)
+            : null;
+          const assetId = assetIdMatch ? assetIdMatch[1] : h.asset_name_id || "-";
+          return {
+            assignmentId: h.assignment_id,
+            assetId,
+            assetType: h.asset_type || "-",
+            assignedDate: h.assigned_date
+              ? new Date(h.assigned_date).toLocaleDateString("en-GB").replace(/\//g, "-")
+              : "-",
+          };
+        })
+      );
+
+      // Returned history
+      const returned = allForEmployee.filter((h) => h.status === "Returned");
+      setReturnHistory(
+        returned.map((h) => {
+          const assetIdMatch = h.asset_name_id
+            ? h.asset_name_id.match(/\(([^)]+)\)$/)
+            : null;
+          const assetId = assetIdMatch ? assetIdMatch[1] : h.asset_name_id || "-";
+          return {
+            assetId,
+            employeeId: h.employee_id,
+            assetType: h.asset_type || "-",
+            returnDate: "-",
+            condition: "-",
+            remarks: "-",
+          };
+        })
+      );
+
+      setSuccessMessage(
+        active.length > 0
+          ? `Found ${active.length} assigned asset(s) for this employee.`
+          : "No currently assigned assets found for this employee."
+      );
+    } catch (err) {
+      console.error("Search Error:", err);
+      alert("Unable to connect to server.");
+    }
   };
 
   // =====================================================
@@ -360,83 +373,58 @@ const AssetReturn = ({ onBack }) => {
   };
 
   // =====================================================
-  // RETURN ASSET
+  // RETURN ASSET — calls backend
   // =====================================================
 
-  const handleReturn = () => {
+  const handleReturn = async () => {
     setSuccessMessage("");
+    if (!selectedAsset) return;
 
-    if (!selectedAsset) {
-      return;
-    }
-
-    const employeeError =
-      validateEmployeeId(employeeId);
-
-    if (employeeError) {
-      setEmployeeIdError(employeeError);
-      return;
-    }
-
+    const employeeError = validateEmployeeId(employeeId);
+    if (employeeError) { setEmployeeIdError(employeeError); return; }
     setEmployeeIdError("");
 
-    const dateError =
-      validateReturnDate(returnForm.returnDate);
-
-    if (dateError) {
-      setReturnDateError(dateError);
-      return;
-    }
-
+    const dateError = validateReturnDate(returnForm.returnDate);
+    if (dateError) { setReturnDateError(dateError); return; }
     setReturnDateError("");
 
-    const conditionErrorMessage =
-      validateCondition(returnForm.condition);
-
-    if (conditionErrorMessage) {
-      setConditionError(conditionErrorMessage);
-      return;
-    }
-
+    const conditionErrorMessage = validateCondition(returnForm.condition);
+    if (conditionErrorMessage) { setConditionError(conditionErrorMessage); return; }
     setConditionError("");
 
-    const remarksErrorMessage =
-      validateRemarks(returnForm.remarks);
-
-    if (remarksErrorMessage) {
-      setRemarksError(remarksErrorMessage);
-      return;
-    }
-
+    const remarksErrorMessage = validateRemarks(returnForm.remarks);
+    if (remarksErrorMessage) { setRemarksError(remarksErrorMessage); return; }
     setRemarksError("");
 
-    const newHistory = {
-      assetId: selectedAsset.assetId,
-      employeeId: employeeId,
-      assetType: selectedAsset.assetType,
-      returnDate: returnForm.returnDate,
-      condition: returnForm.condition,
-      remarks:
-        returnForm.remarks.trim() || "-",
-    };
+    // Convert DD-MM-YYYY to YYYY-MM-DD for backend
+    const parts = returnForm.returnDate.split("-");
+    const isoDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
 
-    setReturnHistory((prev) => [
-      newHistory,
-      ...prev,
-    ]);
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `http://localhost:5000/api/asset-assignments/${selectedAsset.assignmentId}/return`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({
+            returnDate: isoDate,
+            condition: returnForm.condition,
+            remarks: returnForm.remarks.trim() || null,
+          }),
+        }
+      );
+      const data = await response.json();
+      if (!response.ok) { alert(data.message || "Failed to return asset."); return; }
 
-    setAssignedAssets((prev) =>
-      prev.filter(
-        (asset) =>
-          asset.assetId !== selectedAsset.assetId
-      )
-    );
-
-    closeModal();
-
-    setSuccessMessage(
-      "Asset returned successfully!"
-    );
+      closeModal();
+      setSuccessMessage("Asset returned successfully!");
+      // Refresh the list
+      handleSearch();
+    } catch (err) {
+      console.error("Return Error:", err);
+      alert("Unable to connect to server.");
+    }
   };
 
   return (
@@ -460,11 +448,11 @@ const AssetReturn = ({ onBack }) => {
 
         <div className="asset-return-user">
 
-          <span>username</span>
+          <span>{username}</span>
 
           <span className="header-divider"></span>
 
-          <button>
+          <button onClick={onLogout}>
             Logout
           </button>
 
