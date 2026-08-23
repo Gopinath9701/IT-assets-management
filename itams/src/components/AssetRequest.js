@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./AssetRequest.css";
 
 // =====================================================
@@ -459,11 +459,35 @@ const AssetRequest = ({
     useState("");
 
   // ===================================================
-  // REQUEST DATA
+  // REQUEST DATA — loaded from backend
   // ===================================================
 
-  const [requests, setRequests] =
-    useState(INITIAL_REQUESTS);
+  const [requests, setRequests] = useState([]);
+
+  // Load request history on mount
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    fetch("http://localhost:5000/api/asset-requests", {
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.success && data.requests) {
+          setRequests(
+            data.requests.map((r) => ({
+              id: r.request_id,
+              assetType: r.asset_type,
+              employeeId: r.employee_id,
+              status: r.status,
+              date: r.request_date
+                ? new Date(r.request_date).toLocaleDateString("en-GB").replace(/\//g, "-")
+                : "-",
+            }))
+          );
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // ===================================================
   // PAGINATION
@@ -607,52 +631,60 @@ const AssetRequest = ({
   };
 
   // ===================================================
-  // SUBMIT REQUEST
+  // SUBMIT REQUEST — calls backend
   // ===================================================
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const isValid =
-      validateForm();
+    const isValid = validateForm();
+    if (!isValid) return;
 
-    if (!isValid) {
-      return;
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:5000/api/asset-requests", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          employeeId,
+          assetType,
+          purpose,
+          requiredDate,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(data.message || "Failed to submit asset request.");
+        return;
+      }
+
+      alert("✅ Asset Request Submitted Successfully!");
+      handleCancel();
+
+      // Reload request history
+      const refreshResp = await fetch("http://localhost:5000/api/asset-requests", {
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      });
+      const refreshData = await refreshResp.json();
+      if (refreshData.success && refreshData.requests) {
+        setRequests(
+          refreshData.requests.map((r) => ({
+            id: r.request_id,
+            assetType: r.asset_type,
+            employeeId: r.employee_id,
+            status: r.status,
+            date: r.request_date
+              ? new Date(r.request_date).toLocaleDateString("en-GB").replace(/\//g, "-")
+              : "-",
+          }))
+        );
+      }
+    } catch (error) {
+      console.error("Submit Asset Request Error:", error);
+      alert("Unable to connect to server. Please make sure the backend is running.");
     }
-
-    // Generate request ID
-    const nextNumber =
-      requests.length + 1;
-
-    const requestNumber =
-      String(nextNumber).padStart(3, "0");
-
-    const newRequest = {
-      id: `AR${requestNumber} (Automatic Generated)`,
-
-      assetType: assetType,
-
-      employeeId: employeeId,
-
-      status: "Pending",
-
-      date: new Date()
-        .toLocaleDateString("en-GB")
-        .replace(/\//g, "-"),
-    };
-
-    // Add request
-    setRequests((previous) => [
-      newRequest,
-      ...previous,
-    ]);
-
-    alert(
-      "✅ Asset Request Submitted Successfully!"
-    );
-
-    // Clear form
-    handleCancel();
   };
 
   // ===================================================
