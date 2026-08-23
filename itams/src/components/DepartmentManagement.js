@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import "./DepartmentManagement.css";
+import React, { useState } from "react";import "./DepartmentManagement.css";
 
 // =====================================================
 // VALIDATION - DEPARTMENT NAME
@@ -284,44 +283,40 @@ const DepartmentManagement = ({
   // =====================================================
   // DEPARTMENT DATA
   // =====================================================
-  const [departments, setDepartments] = useState([
-    {
-      id: "DEP001",
-      name: "Information Technology (IT)",
-      head: "Rahul Sharma",
-      employees: 25,
-    },
-    {
-      id: "DEP002",
-      name: "Human Resources (HR)",
-      head: "Priya Reddy",
-      employees: 10,
-    },
-    {
-      id: "DEP003",
-      name: "Finance",
-      head: "Arjun Kumar",
-      employees: 15,
-    },
-    {
-      id: "DEP004",
-      name: "Marketing",
-      head: "Sneha Rao",
-      employees: 12,
-    },
-    {
-      id: "DEP005",
-      name: "Sales",
-      head: "Vikram Singh",
-      employees: 20,
-    },
-    {
-      id: "DEP006",
-      name: "Administration",
-      head: "Ananya Sharma",
-      employees: 18,
-    },
-  ]);
+  const [departments, setDepartments] = useState([]);
+
+  // =====================================================
+  // FETCH DEPARTMENTS FROM BACKEND
+  // =====================================================
+
+  React.useEffect(() => {
+    const fetchDepartments = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch("http://localhost:5000/api/departments", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = await response.json();
+        if (response.ok && data.departments) {
+          setDepartments(
+            data.departments.map((dept) => ({
+              id: dept.department_id,
+              name: dept.name,
+              head: dept.head || "",
+              employees: dept.employee_count || 0,
+            }))
+          );
+        }
+      } catch (err) {
+        console.error("Fetch Departments Error:", err);
+      }
+    };
+    fetchDepartments();
+  }, []);
 
   // =====================================================
   // GENERATE DEPARTMENT ID
@@ -369,7 +364,7 @@ const DepartmentManagement = ({
   // =====================================================
   // SEARCH
   // =====================================================
-  const handleSearch = () => {
+  const handleSearch = async () => {
     setSearchTouched(true);
 
     const result = validateSearch(search);
@@ -382,6 +377,33 @@ const DepartmentManagement = ({
 
     setSearchError("");
     setSearchApplied(search);
+
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `http://localhost:5000/api/departments?search=${encodeURIComponent(search)}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const data = await response.json();
+      if (response.ok && data.departments) {
+        setDepartments(
+          data.departments.map((dept) => ({
+            id: dept.department_id,
+            name: dept.name,
+            head: dept.head || "",
+            employees: dept.employee_count || 0,
+          }))
+        );
+      }
+    } catch (err) {
+      console.error("Search Departments Error:", err);
+    }
   };
 
   // =====================================================
@@ -474,13 +496,13 @@ const DepartmentManagement = ({
   // =====================================================
   // ADD DEPARTMENT
   // =====================================================
-  const addDepartment = () => {
+  const addDepartment = async () => {
     // Validate all fields
     if (!validateForm()) {
       return;
     }
 
-    // Check duplicate department
+    // Check duplicate locally
     const duplicate = departments.some(
       (dept) =>
         dept.name.toLowerCase() ===
@@ -497,30 +519,67 @@ const DepartmentManagement = ({
       return;
     }
 
-    // Generate ID
-    const newId = generateDepartmentId();
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:5000/api/departments", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          departmentName: departmentName.trim(),
+          departmentHead: departmentHead.trim(),
+          employeeCount: Number(employeeCount),
+        }),
+      });
 
-    // Create department
-    const newDepartment = {
-      id: newId,
-      name: departmentName.trim(),
-      head: departmentHead.trim(),
-      employees: Number(employeeCount),
-    };
+      const data = await response.json();
 
-    // Add department
-    setDepartments((prev) => [
-      ...prev,
-      newDepartment,
-    ]);
+      if (!response.ok) {
+        if (response.status === 409) {
+          setErrors((prev) => ({
+            ...prev,
+            departmentName: "This Department already exists",
+          }));
+          return;
+        }
+        alert(data.message || "Failed to add department.");
+        return;
+      }
 
-    // Clear form
-    setDepartmentName("");
-    setDepartmentHead("");
-    setEmployeeCount("");
-    setErrors({});
+      // Refresh departments list
+      const refreshResponse = await fetch("http://localhost:5000/api/departments", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const refreshData = await refreshResponse.json();
+      if (refreshResponse.ok && refreshData.departments) {
+        setDepartments(
+          refreshData.departments.map((dept) => ({
+            id: dept.department_id,
+            name: dept.name,
+            head: dept.head || "",
+            employees: dept.employee_count || 0,
+          }))
+        );
+      }
 
-    alert("✅ Department added successfully!");
+      // Clear form
+      setDepartmentName("");
+      setDepartmentHead("");
+      setEmployeeCount("");
+      setErrors({});
+      setSearchApplied("");
+
+      alert("✅ Department added successfully!");
+    } catch (error) {
+      console.error("Add Department Error:", error);
+      alert("Unable to connect to server. Please make sure the backend is running.");
+    }
   };
 
   // =====================================================
