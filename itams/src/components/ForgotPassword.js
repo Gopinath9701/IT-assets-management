@@ -7,14 +7,14 @@ import "../App.css";
 // =====================================================
 //
 // Format:
-// YYDDMM + 3-digit employee number
+// YYMMDD + 3-digit employee number
 //
 // Example:
 // 260821001
 //
 // YY = 26
-// DD = 08
-// MM = 21
+// MM = 08
+// DD = 21
 // Employee number = 001
 //
 // Rules:
@@ -48,12 +48,12 @@ const validateEmployeeId = (value) => {
   }
 
   // ----------------------------------------
-  // YYDDMM
+  // YYMMDD + 3 digits
   // ----------------------------------------
 
-  const year = Number(value.substring(0, 2));
-  const day = Number(value.substring(2, 4));
-  const month = Number(value.substring(4, 6));
+  const year  = Number(value.substring(0, 2));
+  const month = Number(value.substring(2, 4));
+  const day   = Number(value.substring(4, 6));
 
   // Month validation
   if (month < 1 || month > 12) {
@@ -65,17 +65,10 @@ const validateEmployeeId = (value) => {
     return "Invalid day in Employee ID.";
   }
 
-  // ----------------------------------------
   // Validate actual calendar date
-  // ----------------------------------------
-
   const fullYear = 2000 + year;
 
-  const employeeDate = new Date(
-    fullYear,
-    month - 1,
-    day
-  );
+  const employeeDate = new Date(fullYear, month - 1, day);
 
   if (
     employeeDate.getFullYear() !== fullYear ||
@@ -85,12 +78,8 @@ const validateEmployeeId = (value) => {
     return "Invalid date in Employee ID.";
   }
 
-  // ----------------------------------------
   // Future date validation
-  // ----------------------------------------
-
   const today = new Date();
-
   today.setHours(0, 0, 0, 0);
   employeeDate.setHours(0, 0, 0, 0);
 
@@ -98,10 +87,7 @@ const validateEmployeeId = (value) => {
     return "Future date Employee IDs are not allowed.";
   }
 
-  // ----------------------------------------
-  // Employee number
-  // ----------------------------------------
-
+  // Employee number (last 3 digits)
   const employeeNumber = value.substring(6);
 
   if (!/^[0-9]{3}$/.test(employeeNumber)) {
@@ -119,7 +105,7 @@ const validateEmployeeId = (value) => {
 // VALIDATE EMAIL
 // =====================================================
 //
-// Email MUST match the Employee ID.
+// Email MUST match the Employee ID with 'a' suffix.
 //
 // Example:
 //
@@ -127,14 +113,14 @@ const validateEmployeeId = (value) => {
 // 260821001
 //
 // Email:
-// 260821001@gmail.com
+// 260821001a@gmail.com
 //
 // These are NOT allowed:
 //
-// 260821002@gmail.com
+// 260821001@gmail.com   (missing 'a')
 // shravan@gmail.com
-// abc260821001@gmail.com
-// 260821001@yahoo.com
+// abc260821001a@gmail.com
+// 260821001a@yahoo.com
 // =====================================================
 
 const validateEmail = (value) => {
@@ -153,13 +139,13 @@ const validateEmail = (value) => {
     return "Email is too long.";
   }
 
-  // Exactly 9 digits + @gmail.com
-  const emailPattern = /^([0-9]{9})@gmail\.com$/;
+  // Exactly 9 digits + a + @gmail.com
+  const emailPattern = /^([0-9]{9})a@gmail\.com$/;
 
   const match = value.match(emailPattern);
 
   if (!match) {
-    return "Email must be in this format: 260821001@gmail.com";
+    return "Email must be in this format: 260821001a@gmail.com";
   }
 
   // Get Employee ID from email
@@ -206,10 +192,9 @@ const getPasswordRequirements = (password) => {
     uppercase: /[A-Z]/.test(password),
     lowercase: /[a-z]/.test(password),
     number: /[0-9]/.test(password),
-    special:
-      /[!@#$%^&*(),.?":{}|<>_\-+=;'/`~[\]\\]/.test(
-        password
-      ),
+    special: /[!@#$%^&*(),.?":{}|<>_\-+=;'/`~[\]\\]/.test(
+      password
+    ),
     noSpaces: !/\s/.test(password),
   };
 };
@@ -372,13 +357,10 @@ export default function ForgotPassword({
 
   // =====================================================
   // OTP CHANGE
-  // ONLY 6 DIGITS - NUMBERS ONLY
   // =====================================================
 
   const handleOTPChange = (e) => {
-    const value = e.target.value
-      .replace(/[^0-9]/g, "")
-      .slice(0, 6);
+    const value = e.target.value;
 
     setOtp(value);
 
@@ -387,11 +369,9 @@ export default function ForgotPassword({
       return;
     }
 
-    if (value.length < 6) {
-      setOtpError("OTP must be exactly 6 digits.");
-    } else {
-      setOtpError("");
-    }
+    const error = validateOTP(value);
+
+    setOtpError(error);
   };
 
   // =====================================================
@@ -713,7 +693,7 @@ export default function ForgotPassword({
 
           <input
             type="text"
-            placeholder="Enter your Email"
+            placeholder="Enter your Email (e.g. 260821001a@gmail.com)"
             value={email}
             onChange={handleEmailChange}
             autoComplete="email"
