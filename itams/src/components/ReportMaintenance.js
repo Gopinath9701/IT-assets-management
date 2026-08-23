@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./ReportMaintenance.css";
 
 // =====================================================
@@ -180,11 +180,11 @@ const validateAssetId = (id) => {
     };
   }
 
-  if (!/^[A-Za-z0-9]+$/.test(id)) {
+  if (!/^[A-Z0-9]+$/.test(id.substring(0, 3)) || !/^[A-Za-z0-9]+$/.test(id)) {
     return {
       isValid: false,
       message:
-        "Asset ID should contain letters and numbers only",
+        "First 3 characters must be CAPITAL letters (e.g., LAP, MON)",
     };
   }
 
@@ -344,38 +344,38 @@ const ReportMaintenance = ({
   const [errors, setErrors] = useState({});
 
   // =====================================================
-  // SAMPLE REPORTS
+  // LOAD REPORTS FROM BACKEND
   // =====================================================
-  const [reports, setReports] = useState([
-    {
-      id: "MR001",
-      assetId: "LAP001",
-      category: "Hardware Issue",
-      description: "Laptop screen is not responding.",
-      priority: "High",
-      status: "Pending",
-      date: "30-06-2026",
-    },
-    {
-      id: "MR002",
-      assetId: "PRI001",
-      category: "Software Issue",
-      description: "Printer is not printing documents.",
-      priority: "Medium",
-      status: "In Progress",
-      date: "29-06-2026",
-    },
-    {
-      id: "MR003",
-      assetId: "MON001",
-      category: "Performance Issue",
-      description:
-        "Monitor display is getting disconnected frequently.",
-      priority: "Low",
-      status: "Completed",
-      date: "27-06-2026",
-    },
-  ]);
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    fetch("http://localhost:5000/api/maintenance", {
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.success && data.reports) {
+          setReports(
+            data.reports.map((r) => ({
+              id: r.request_id,
+              assetId: r.asset_id || "-",
+              category: r.issue_category,
+              description: r.description,
+              priority: r.priority,
+              status: r.status,
+              date: r.report_date
+                ? new Date(r.report_date).toLocaleDateString("en-GB").replace(/\//g, "-")
+                : "-",
+            }))
+          );
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  // =====================================================
+  // SAMPLE REPORTS (fallback — cleared once API loads)
+  // =====================================================
+  const [reports, setReports] = useState([]);
 
   // =====================================================
   // FORM VALIDATION
@@ -423,46 +423,67 @@ const ReportMaintenance = ({
   };
 
   // =====================================================
-  // SUBMIT
+  // SUBMIT — calls backend
   // =====================================================
-  const submitRequest = () => {
+  const submitRequest = async () => {
     if (!validateForm()) {
       return;
     }
 
-    const nextNumber =
-      reports.length + 1;
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:5000/api/maintenance", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          employeeId,
+          assetId: assetId.toUpperCase(),
+          issueCategory,
+          description: description.trim(),
+          priority,
+        }),
+      });
 
-    const newReport = {
-      id: `MR${String(nextNumber).padStart(
-        3,
-        "0"
-      )}`,
-      assetId: assetId.toUpperCase(),
-      category: issueCategory,
-      description: description.trim(),
-      priority,
-      status: "Pending",
-      date: new Date()
-        .toLocaleDateString("en-GB")
-        .replace(/\//g, "-"),
-    };
+      const data = await response.json();
 
-    setReports((previous) => [
-      newReport,
-      ...previous,
-    ]);
+      if (!response.ok) {
+        alert(data.message || "Failed to submit maintenance request.");
+        return;
+      }
 
-    alert(
-      "✅ Maintenance request submitted successfully!"
-    );
+      alert("✅ Maintenance request submitted successfully!");
 
-    setEmployeeId("");
-    setAssetId("");
-    setIssueCategory("");
-    setDescription("");
-    setPriority("");
-    setErrors({});
+      // Reload reports list
+      const refreshResp = await fetch("http://localhost:5000/api/maintenance", {
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      });
+      const refreshData = await refreshResp.json();
+      if (refreshData.success && refreshData.reports) {
+        setReports(
+          refreshData.reports.map((r) => ({
+            id: r.request_id,
+            assetId: r.asset_id || "-",
+            category: r.issue_category,
+            description: r.description,
+            priority: r.priority,
+            status: r.status,
+            date: r.report_date
+              ? new Date(r.report_date).toLocaleDateString("en-GB").replace(/\//g, "-")
+              : "-",
+          }))
+        );
+      }
+
+      setEmployeeId("");
+      setAssetId("");
+      setIssueCategory("");
+      setDescription("");
+      setPriority("");
+      setErrors({});
+    } catch (error) {
+      console.error("Submit Maintenance Error:", error);
+      alert("Unable to connect to server. Please make sure the backend is running.");
+    }
   };
 
   // =====================================================
