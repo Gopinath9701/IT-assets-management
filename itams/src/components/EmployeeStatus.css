@@ -1,614 +1,884 @@
-/* ============================================================
-   EmployeeStatus.css — Complete CSS
-   ============================================================ */
+import React, { useState } from "react";import "./DepartmentManagement.css";
 
-.es-page *,
-.es-page *::before,
-.es-page *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-.es-page {
-  min-height: 100vh;
-  background: #f9fafb;
-  font-family: "Inter", Arial, sans-serif;
-  display: flex;
-  flex-direction: column;
-}
-
-/* ============================
-   NAVBAR
-   ============================ */
-.es-nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 36px;
-  height: 68px;
-  background: #ffffff;
-  border-bottom: 1px solid #e5e7eb;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
-.es-nav-logo {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.25;
-}
-
-.es-nav-title {
-  font-size: 22px;
-  font-weight: 800;
-  color: #1d4ed8;
-}
-
-.es-nav-sub {
-  font-size: 11px;
-  color: #6b7280;
-  font-weight: 500;
-}
-
-.es-nav-right {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.es-nav-user {
-  font-size: 14px;
-  font-weight: 500;
-  color: #111827;
-}
-
-.es-nav-divider {
-  color: #d1d5db;
-  font-size: 16px;
-}
-
-.es-logout-btn {
-  background: none;
-  border: none;
-  font-size: 14px;
-  font-weight: 500;
-  color: #111827;
-  cursor: pointer;
-  padding: 0;
-  transition: color 0.2s ease;
-}
-
-.es-logout-btn:hover {
-  color: #1d4ed8;
-}
-
-/* ============================
-   BODY
-   ============================ */
-.es-body {
-  flex: 1;
-  max-width: 1100px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 40px 28px 56px;
-}
-
-.es-page-title {
-  font-size: 26px;
-  font-weight: 700;
-  color: #111827;
-  margin-bottom: 6px;
-}
-
-.es-page-sub {
-  font-size: 14px;
-  color: #6b7280;
-  margin-bottom: 28px;
-}
-
-/* ============================
-   SEARCH CARD
-   ============================ */
-.es-card {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 24px 28px;
-  margin-bottom: 24px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
-
-.es-card-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: #111827;
-  margin-bottom: 16px;
-}
-
-/* ============================
-   SEARCH GROUP
-   ============================ */
-.es-search-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: 100%;
-}
-
-.es-search-row {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.es-input {
-  flex: 1;
-  min-width: 200px;
-  padding: 10px 14px;
-  border: 2px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 14px;
-  color: #111827;
-  background: #ffffff;
-  outline: none;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  font-family: inherit;
-}
-
-.es-input:focus {
-  border-color: #1d4ed8;
-  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.1);
-}
-
-.es-input::placeholder {
-  color: #9ca3af;
-}
-
-/* ============================
-   BUTTONS
-   ============================ */
-.es-btn-primary {
-  padding: 10px 28px;
-  background: #1d4ed8;
-  color: #ffffff;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-family: inherit;
-  white-space: nowrap;
-}
-
-.es-btn-primary:hover:not(:disabled) {
-  background: #1e40af;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3);
-}
-
-.es-btn-primary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-}
-
-/* ============================
-   VALIDATION STYLES
-   ============================ */
-.es-input-error {
-  border-color: #dc3545 !important;
-  background-color: #fff8f8;
-}
-
-.es-input-error:focus {
-  border-color: #dc3545 !important;
-  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25) !important;
-}
-
-.es-validation-error {
-  color: #dc3545;
-  font-size: 0.875rem;
-  padding: 8px 12px;
-  background-color: #f8d7da;
-  border-radius: 6px;
-  border: 1px solid #f5c6cb;
-  width: 100%;
-  animation: esShake 0.3s ease-in-out;
-}
-
-@keyframes esShake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-6px); }
-  75% { transform: translateX(6px); }
-}
-
-.es-validation-hint {
-  margin-top: 4px;
-  color: #6c757d;
-  font-size: 0.8rem;
-}
-
-.es-validation-hint small {
-  display: block;
-  padding: 6px 12px;
-  background-color: #f8f9fa;
-  border-radius: 6px;
-  border-left: 3px solid #1d4ed8;
-  color: #495057;
-}
-
-/* ============================
-   TABLE
-   ============================ */
-.es-table-wrapper {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  overflow-x: auto;
-  margin-bottom: 16px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
-
-.es-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-}
-
-.es-table thead tr {
-  background: #f3f4f6;
-}
-
-.es-table th {
-  text-align: left;
-  padding: 13px 18px;
-  font-size: 13px;
-  font-weight: 700;
-  color: #374151;
-  border-bottom: 2px solid #e5e7eb;
-  white-space: nowrap;
-}
-
-.es-table td {
-  padding: 14px 18px;
-  color: #374151;
-  border-bottom: 1px solid #f3f4f6;
-  font-size: 14px;
-  vertical-align: middle;
-}
-
-.es-table tbody tr:last-child td {
-  border-bottom: none;
-}
-
-.es-table tbody tr:hover {
-  background: #f9fafb;
-  transition: background 0.15s ease;
-}
-
-.es-no-data {
-  text-align: center;
-  color: #9ca3af;
-  padding: 28px !important;
-  font-style: italic;
-}
-
-/* ============================
-   EMPLOYEE ID
-   ============================ */
-.es-employee-id {
-  font-family: "Courier New", monospace;
-  font-weight: 700;
-  color: #1d4ed8;
-  background: #eff6ff;
-  padding: 2px 10px;
-  border-radius: 4px;
-  font-size: 13px;
-  letter-spacing: 0.5px;
-  display: inline-block;
-}
-
-/* ============================
-   STATUS BADGES
-   ============================ */
-.es-status-badge {
-  display: inline-block;
-  padding: 4px 14px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: capitalize;
-  letter-spacing: 0.3px;
-}
-
-.es-status-active {
-  background-color: #d4edda;
-  color: #155724;
-  border: 1px solid #c3e6cb;
-}
-
-.es-status-on-leave {
-  background-color: #fff3cd;
-  color: #856404;
-  border: 1px solid #ffe8a1;
-}
-
-.es-status-inactive {
-  background-color: #f8d7da;
-  color: #721c24;
-  border: 1px solid #f5c6cb;
-}
-
-/* ============================
-   UPDATE CELL
-   ============================ */
-.es-update-cell {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.es-select {
-  padding: 8px 32px 8px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 13px;
-  font-family: inherit;
-  color: #374151;
-  background: #ffffff;
-  cursor: pointer;
-  appearance: none;
-  -webkit-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  min-width: 120px;
-  outline: none;
-  transition: border-color 0.2s ease;
-}
-
-.es-select:focus {
-  border-color: #1d4ed8;
-  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.1);
-}
-
-.es-update-btn {
-  padding: 8px 22px;
-  background: #1d4ed8;
-  color: #ffffff;
-  border: none;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.2s ease;
-  font-family: inherit;
-}
-
-.es-update-btn:hover {
-  background: #1e40af;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3);
-}
-
-/* ============================
-   PAGINATION
-   ============================ */
-.es-pagination-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 28px;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.es-pagination-info {
-  color: #6b7280;
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.es-page-size {
-  padding: 8px 32px 8px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 13px;
-  font-family: inherit;
-  color: #374151;
-  background: #ffffff;
-  cursor: pointer;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  transition: border-color 0.2s ease;
-}
-
-.es-page-size:hover {
-  border-color: #1d4ed8;
-}
-
-.es-page-size:focus {
-  outline: none;
-  border-color: #1d4ed8;
-  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.1);
-}
-
-/* ============================
-   BACK BUTTON
-   ============================ */
-.es-back-btn {
-  display: inline-block;
-  padding: 10px 28px;
-  background: #ffffff;
-  color: #374151;
-  border: 1.5px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-family: inherit;
-  margin-top: 4px;
-}
-
-.es-back-btn:hover {
-  background: #f3f4f6;
-  border-color: #9ca3af;
-  transform: translateX(-2px);
-}
-
-/* ============================
-   SCROLLBAR STYLING
-   ============================ */
-.es-table-wrapper::-webkit-scrollbar {
-  height: 6px;
-}
-
-.es-table-wrapper::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 3px;
-}
-
-.es-table-wrapper::-webkit-scrollbar-thumb {
-  background: #d1d5db;
-  border-radius: 3px;
-}
-
-.es-table-wrapper::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
-}
-
-/* ============================
-   ANIMATIONS
-   ============================ */
-@keyframes esFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-5px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.es-validation-error {
-  animation: esFadeIn 0.2s ease-out;
-}
-
-/* ============================
-   RESPONSIVE
-   ============================ */
-@media (max-width: 700px) {
-  .es-body {
-    padding: 20px 14px 36px;
+// =====================================================
+// VALIDATION - DEPARTMENT NAME
+// =====================================================
+const validateDepartmentName = (name) => {
+  if (name.length === 0) {
+    return {
+      isValid: false,
+      message: "Department Name is required",
+    };
   }
 
-  .es-card {
-    padding: 20px 16px;
+  if (name.trim() === "") {
+    return {
+      isValid: false,
+      message: "Department Name cannot contain only spaces",
+    };
   }
 
-  .es-search-row {
-    flex-direction: column;
-    align-items: stretch;
+  if (name !== name.trim()) {
+    return {
+      isValid: false,
+      message:
+        "Department Name should not have leading or trailing spaces",
+    };
   }
 
-  .es-input {
-    min-width: unset;
+  // No multiple consecutive spaces
+  if (/\s{2,}/.test(name)) {
+    return {
+      isValid: false,
+      message:
+        "Department Name should not contain multiple consecutive spaces",
+    };
   }
 
-  .es-btn-primary {
-    width: 100%;
-    justify-content: center;
+  if (name.length < 2) {
+    return {
+      isValid: false,
+      message:
+        "Department Name must be at least 2 characters",
+    };
   }
 
-  .es-pagination-row {
-    flex-direction: column;
-    align-items: stretch;
+  if (name.length > 100) {
+    return {
+      isValid: false,
+      message:
+        "Department Name cannot exceed 100 characters",
+    };
   }
 
-  .es-page-size {
-    width: 100%;
+  // ONLY LETTERS AND SPACES
+  if (!/^[A-Za-z\s]+$/.test(name)) {
+    return {
+      isValid: false,
+      message:
+        "Department Name should contain only letters and spaces",
+    };
   }
 
-  .es-update-cell {
-    flex-direction: column;
-    align-items: stretch;
+  return {
+    isValid: true,
+    message: "",
+  };
+};
+
+// =====================================================
+// VALIDATION - DEPARTMENT HEAD
+// =====================================================
+const validateDepartmentHead = (head) => {
+  if (head.length === 0) {
+    return {
+      isValid: false,
+      message: "Department Head is required",
+    };
   }
 
-  .es-update-btn {
-    width: 100%;
+  if (head.trim() === "") {
+    return {
+      isValid: false,
+      message: "Department Head cannot contain only spaces",
+    };
   }
 
-  .es-select {
-    width: 100%;
+  if (head !== head.trim()) {
+    return {
+      isValid: false,
+      message:
+        "Department Head should not have leading or trailing spaces",
+    };
   }
 
-  .es-table th,
-  .es-table td {
-    padding: 10px 12px;
-    font-size: 12px;
+  // No multiple consecutive spaces
+  if (/\s{2,}/.test(head)) {
+    return {
+      isValid: false,
+      message:
+        "Department Head should not contain multiple consecutive spaces",
+    };
   }
 
-  .es-employee-id {
-    font-size: 11px;
-    padding: 2px 6px;
+  if (head.length < 2) {
+    return {
+      isValid: false,
+      message:
+        "Department Head must be at least 2 characters",
+    };
   }
 
-  .es-status-badge {
-    font-size: 10px;
-    padding: 3px 8px;
+  if (head.length > 100) {
+    return {
+      isValid: false,
+      message:
+        "Department Head cannot exceed 100 characters",
+    };
   }
 
-  .es-update-btn {
-    font-size: 12px;
-    padding: 7px 16px;
+  // ONLY LETTERS AND SPACES
+  if (!/^[A-Za-z\s]+$/.test(head)) {
+    return {
+      isValid: false,
+      message:
+        "Department Head should contain only letters and spaces",
+    };
   }
 
-  .es-select {
-    font-size: 12px;
-    padding: 7px 28px 7px 10px;
-    min-width: unset;
+  return {
+    isValid: true,
+    message: "",
+  };
+};
+
+// =====================================================
+// VALIDATION - EMPLOYEE COUNT
+// =====================================================
+const validateEmployeeCount = (count) => {
+  if (count.length === 0) {
+    return {
+      isValid: false,
+      message: "Number of Employees is required",
+    };
   }
 
-  .es-back-btn {
-    width: 100%;
-    text-align: center;
-  }
-}
-
-@media (max-width: 480px) {
-  .es-nav {
-    padding: 0 16px;
-    height: 60px;
+  if (count.trim() === "") {
+    return {
+      isValid: false,
+      message:
+        "Number of Employees cannot contain only spaces",
+    };
   }
 
-  .es-nav-title {
-    font-size: 18px;
+  if (count !== count.trim()) {
+    return {
+      isValid: false,
+      message:
+        "Number of Employees should not have leading or trailing spaces",
+    };
   }
 
-  .es-nav-sub {
-    font-size: 10px;
+  // Numbers only
+  if (!/^[0-9]+$/.test(count)) {
+    return {
+      isValid: false,
+      message:
+        "Number of Employees must contain numbers only",
+    };
   }
 
-  .es-page-title {
-    font-size: 22px;
+  const number = Number(count);
+
+  if (number > 1000) {
+    return {
+      isValid: false,
+      message:
+        "Number of Employees cannot exceed 1000",
+    };
   }
 
-  .es-card-title {
-    font-size: 14px;
+  return {
+    isValid: true,
+    message: "",
+  };
+};
+
+// =====================================================
+// VALIDATION - SEARCH
+// =====================================================
+const validateSearch = (search) => {
+  if (search.length === 0) {
+    return {
+      isValid: false,
+      message:
+        "Department Name is required for search",
+    };
   }
 
-  .es-validation-error {
-    font-size: 12px;
-    padding: 6px 10px;
+  if (search.trim() === "") {
+    return {
+      isValid: false,
+      message:
+        "Search cannot contain only spaces",
+    };
   }
-}
+
+  if (search !== search.trim()) {
+    return {
+      isValid: false,
+      message:
+        "Search should not have leading or trailing spaces",
+    };
+  }
+
+  // ===================================================
+  // MULTIPLE SPACES ARE ALLOWED
+  // ===================================================
+
+  // NO multiple-space validation here.
+  // Example:
+  // Information Technology       Department
+  // is allowed.
+
+  if (search.length < 2) {
+    return {
+      isValid: false,
+      message:
+        "Search must contain at least 2 characters",
+    };
+  }
+
+  if (search.length > 100) {
+    return {
+      isValid: false,
+      message:
+        "Search cannot exceed 100 characters",
+    };
+  }
+
+  // ===================================================
+  // ONLY LETTERS AND SPACES
+  // ===================================================
+
+  if (!/^[A-Za-z ]+$/.test(search)) {
+    return {
+      isValid: false,
+      message:
+        "Search should contain only letters and spaces",
+    };
+  }
+
+  return {
+    isValid: true,
+    message: "",
+  };
+};
+
+// =====================================================
+// MAIN COMPONENT
+// =====================================================
+const DepartmentManagement = ({
+  username = "username",
+  onLogout,
+  onBack,
+}) => {
+  // =====================================================
+  // SEARCH STATES
+  // =====================================================
+  const [search, setSearch] = useState("");
+  const [searchApplied, setSearchApplied] = useState("");
+  const [searchError, setSearchError] = useState("");
+  const [searchTouched, setSearchTouched] = useState(false);
+
+  // =====================================================
+  // FORM STATES
+  // =====================================================
+  const [departmentName, setDepartmentName] = useState("");
+  const [departmentHead, setDepartmentHead] = useState("");
+  const [employeeCount, setEmployeeCount] = useState("");
+
+  const [errors, setErrors] = useState({});
+
+  // =====================================================
+  // DEPARTMENT DATA
+  // =====================================================
+  const [departments, setDepartments] = useState([]);
+
+  // =====================================================
+  // FETCH DEPARTMENTS FROM BACKEND
+  // =====================================================
+
+  React.useEffect(() => {
+    const fetchDepartments = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch("http://localhost:5000/api/departments", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = await response.json();
+        if (response.ok && data.departments) {
+          setDepartments(
+            data.departments.map((dept) => ({
+              id: dept.department_id,
+              name: dept.name,
+              head: dept.head || "",
+              employees: dept.employee_count || 0,
+            }))
+          );
+        }
+      } catch (err) {
+        console.error("Fetch Departments Error:", err);
+      }
+    };
+    fetchDepartments();
+  }, []);
+
+  // =====================================================
+  // GENERATE DEPARTMENT ID
+  // =====================================================
+  const generateDepartmentId = () => {
+    const nextNumber = departments.length + 1;
+
+    return `DEP${String(nextNumber).padStart(3, "0")}`;
+  };
+
+  // =====================================================
+  // SEARCH INPUT CHANGE
+  // =====================================================
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+
+    // ===================================================
+    // ONLY LETTERS AND SPACES ARE ALLOWED WHILE TYPING
+    // Numbers and special characters are automatically
+    // rejected.
+    // ===================================================
+
+    if (!/^[A-Za-z ]*$/.test(value)) {
+      return;
+    }
+
+    setSearch(value);
+    setSearchTouched(false);
+
+    if (value === "") {
+      setSearchError("");
+      setSearchApplied("");
+      return;
+    }
+
+    const result = validateSearch(value);
+
+    if (!result.isValid) {
+      setSearchError(result.message);
+    } else {
+      setSearchError("");
+    }
+  };
+
+  // =====================================================
+  // SEARCH
+  // =====================================================
+  const handleSearch = async () => {
+    setSearchTouched(true);
+
+    const result = validateSearch(search);
+
+    if (!result.isValid) {
+      setSearchError(result.message);
+      setSearchApplied(null);
+      return;
+    }
+
+    setSearchError("");
+    setSearchApplied(search);
+
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `http://localhost:5000/api/departments?search=${encodeURIComponent(search)}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const data = await response.json();
+      if (response.ok && data.departments) {
+        setDepartments(
+          data.departments.map((dept) => ({
+            id: dept.department_id,
+            name: dept.name,
+            head: dept.head || "",
+            employees: dept.employee_count || 0,
+          }))
+        );
+      }
+    } catch (err) {
+      console.error("Search Departments Error:", err);
+    }
+  };
+
+  // =====================================================
+  // SEARCH ENTER KEY
+  // =====================================================
+  const handleSearchKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleSearch();
+    }
+  };
+
+  // =====================================================
+  // FILTER DEPARTMENTS
+  // =====================================================
+  const filteredDepartments =
+    searchApplied === null
+      ? []
+      : departments.filter((dept) =>
+          dept.name
+            .toLowerCase()
+            .includes(
+              (searchApplied || "").toLowerCase()
+            )
+        );
+
+  // =====================================================
+  // FORM VALIDATION
+  // =====================================================
+  const validateForm = () => {
+    const newErrors = {};
+
+    const nameResult =
+      validateDepartmentName(departmentName);
+
+    if (!nameResult.isValid) {
+      newErrors.departmentName =
+        nameResult.message;
+    }
+
+    const headResult =
+      validateDepartmentHead(departmentHead);
+
+    if (!headResult.isValid) {
+      newErrors.departmentHead =
+        headResult.message;
+    }
+
+    const countResult =
+      validateEmployeeCount(employeeCount);
+
+    if (!countResult.isValid) {
+      newErrors.employeeCount =
+        countResult.message;
+    }
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // =====================================================
+  // FIELD CHANGE HANDLER
+  // =====================================================
+  const handleFieldChange =
+    (setter, field, validator) => (e) => {
+      const value = e.target.value;
+
+      setter(value);
+
+      // Empty field - don't show error until Add
+      if (value === "") {
+        setErrors((prev) => ({
+          ...prev,
+          [field]: "",
+        }));
+        return;
+      }
+
+      const result = validator(value);
+
+      setErrors((prev) => ({
+        ...prev,
+        [field]: result.isValid
+          ? ""
+          : result.message,
+      }));
+    };
+
+  // =====================================================
+  // ADD DEPARTMENT
+  // =====================================================
+  const addDepartment = async () => {
+    // Validate all fields
+    if (!validateForm()) {
+      return;
+    }
+
+    // Check duplicate locally
+    const duplicate = departments.some(
+      (dept) =>
+        dept.name.toLowerCase() ===
+        departmentName.trim().toLowerCase()
+    );
+
+    if (duplicate) {
+      setErrors((prev) => ({
+        ...prev,
+        departmentName:
+          "This Department already exists",
+      }));
+
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:5000/api/departments", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          departmentName: departmentName.trim(),
+          departmentHead: departmentHead.trim(),
+          employeeCount: Number(employeeCount),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 409) {
+          setErrors((prev) => ({
+            ...prev,
+            departmentName: "This Department already exists",
+          }));
+          return;
+        }
+        alert(data.message || "Failed to add department.");
+        return;
+      }
+
+      // Refresh departments list
+      const refreshResponse = await fetch("http://localhost:5000/api/departments", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const refreshData = await refreshResponse.json();
+      if (refreshResponse.ok && refreshData.departments) {
+        setDepartments(
+          refreshData.departments.map((dept) => ({
+            id: dept.department_id,
+            name: dept.name,
+            head: dept.head || "",
+            employees: dept.employee_count || 0,
+          }))
+        );
+      }
+
+      // Clear form
+      setDepartmentName("");
+      setDepartmentHead("");
+      setEmployeeCount("");
+      setErrors({});
+      setSearchApplied("");
+
+      alert("✅ Department added successfully!");
+    } catch (error) {
+      console.error("Add Department Error:", error);
+      alert("Unable to connect to server. Please make sure the backend is running.");
+    }
+  };
+
+  // =====================================================
+  // CANCEL
+  // =====================================================
+  const handleCancel = () => {
+    setDepartmentName("");
+    setDepartmentHead("");
+    setEmployeeCount("");
+    setErrors({});
+  };
+
+  // =====================================================
+  // UI
+  // =====================================================
+  return (
+    <div className="dm-page">
+
+      {/* NAVBAR */}
+      <nav className="dm-nav">
+
+        <div className="dm-nav-logo">
+          <span className="dm-nav-title">
+            ITAMS
+          </span>
+
+          <span className="dm-nav-sub">
+            IT Asset Management System
+          </span>
+        </div>
+
+        <div className="dm-nav-right">
+
+          <span className="dm-nav-user">
+            {username}
+          </span>
+
+          <span className="dm-nav-divider">
+            |
+          </span>
+
+          <button
+            className="dm-logout-btn"
+            onClick={onLogout}
+          >
+            Logout
+          </button>
+
+        </div>
+
+      </nav>
+
+      {/* BODY */}
+      <div className="dm-body">
+
+        <h1 className="dm-page-title">
+          Department Management
+        </h1>
+
+        <p className="dm-page-sub">
+          Manage organization departments.
+        </p>
+
+        {/* SEARCH CARD */}
+        <div className="dm-card">
+
+          <h2 className="dm-card-title">
+            Search Department
+          </h2>
+
+          <div className="dm-search-row">
+
+            <div className="dm-search-input-wrapper">
+
+              <input
+                className={`dm-input ${
+                  searchError && searchTouched
+                    ? "dm-input-error"
+                    : ""
+                }`}
+                type="text"
+                placeholder="Enter Department Name"
+                value={search}
+                onChange={handleSearchChange}
+                onKeyDown={handleSearchKeyDown}
+              />
+
+              {searchError &&
+                searchTouched && (
+                  <span className="dm-error-text">
+                    ⚠️ {searchError}
+                  </span>
+                )}
+
+            </div>
+
+            <button
+              className="dm-btn-primary"
+              onClick={handleSearch}
+            >
+              Search
+            </button>
+
+          </div>
+
+        </div>
+
+        {/* ADD NEW DEPARTMENT */}
+        <div className="dm-card">
+
+          <h2 className="dm-card-title">
+            Add New Department
+          </h2>
+
+          <div className="dm-add-form">
+
+            {/* DEPARTMENT NAME */}
+            <div className="dm-form-group">
+
+              <input
+                className={`dm-input ${
+                  errors.departmentName
+                    ? "dm-input-error"
+                    : ""
+                }`}
+                type="text"
+                placeholder="Department Name"
+                value={departmentName}
+                onChange={handleFieldChange(
+                  setDepartmentName,
+                  "departmentName",
+                  validateDepartmentName
+                )}
+              />
+
+              {errors.departmentName && (
+                <span className="dm-error-text">
+                  ⚠️ {errors.departmentName}
+                </span>
+              )}
+
+            </div>
+
+            {/* DEPARTMENT HEAD */}
+            <div className="dm-form-group">
+
+              <input
+                className={`dm-input ${
+                  errors.departmentHead
+                    ? "dm-input-error"
+                    : ""
+                }`}
+                type="text"
+                placeholder="Department Head"
+                value={departmentHead}
+                onChange={handleFieldChange(
+                  setDepartmentHead,
+                  "departmentHead",
+                  validateDepartmentHead
+                )}
+              />
+
+              {errors.departmentHead && (
+                <span className="dm-error-text">
+                  ⚠️ {errors.departmentHead}
+                </span>
+              )}
+
+            </div>
+
+            {/* NUMBER OF EMPLOYEES */}
+            <div className="dm-form-group">
+
+              <input
+                className={`dm-input ${
+                  errors.employeeCount
+                    ? "dm-input-error"
+                    : ""
+                }`}
+                type="text"
+                inputMode="numeric"
+                placeholder="Number of Employees"
+                value={employeeCount}
+                onChange={handleFieldChange(
+                  setEmployeeCount,
+                  "employeeCount",
+                  validateEmployeeCount
+                )}
+              />
+
+              {errors.employeeCount && (
+                <span className="dm-error-text">
+                  ⚠️ {errors.employeeCount}
+                </span>
+              )}
+
+            </div>
+
+            {/* BUTTONS */}
+            <div className="dm-btn-row">
+
+              <button
+                className="dm-btn-add"
+                onClick={addDepartment}
+              >
+                Add
+              </button>
+
+              <button
+                className="dm-btn-cancel"
+                onClick={handleCancel}
+              >
+                Cancel
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        {/* DEPARTMENT LIST */}
+        <div className="dm-card">
+
+          <h2 className="dm-card-title">
+            Department List
+          </h2>
+
+          <div className="dm-table-wrapper">
+
+            <table className="dm-table">
+
+              <thead>
+                <tr>
+                  <th>Department Name</th>
+                  <th>Department Head</th>
+                  <th>Number of Employees</th>
+                </tr>
+              </thead>
+
+              <tbody>
+
+                {filteredDepartments.length > 0 ? (
+
+                  filteredDepartments.map(
+                    (dept) => (
+                      <tr key={dept.id}>
+
+                        <td>
+                          {dept.name}
+                        </td>
+
+                        <td>
+                          {dept.head}
+                        </td>
+
+                        <td>
+                          {dept.employees}
+                        </td>
+
+                      </tr>
+                    )
+                  )
+
+                ) : (
+
+                  <tr>
+
+                    <td
+                      colSpan="3"
+                      className="dm-no-data"
+                    >
+                      No Department Found
+                    </td>
+
+                  </tr>
+
+                )}
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        </div>
+
+        {/* BACK BUTTON */}
+        <button
+          className="dm-back-btn"
+          onClick={onBack}
+        >
+          ← Back
+        </button>
+
+      </div>
+
+    </div>
+  );
+};
+
+export default DepartmentManagement;
