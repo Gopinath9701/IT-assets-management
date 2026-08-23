@@ -96,7 +96,7 @@ async function assignAsset(req, res, next) {
     await client.query("BEGIN");
     await client.query(
       `INSERT INTO asset_assignments (assignment_id, request_id, employee_id, asset_id, assigned_date)
-       VALUES ($1, $2, $3, $4, CURRENT_DATE)`,
+       VALUES ($1, $2, $3, $4, NOW())`,
       [assignmentId, requestId, employeeId, assetId]
     );
     await client.query(
@@ -154,7 +154,7 @@ async function reassignAsset(req, res, next) {
     await client.query("BEGIN");
 
     await client.query(
-      "UPDATE asset_assignments SET returned_date = CURRENT_DATE, status = 'Returned' WHERE assignment_id = $1",
+      "UPDATE asset_assignments SET returned_date = NOW(), status = 'Returned' WHERE assignment_id = $1",
       [assignmentId]
     );
     await client.query("UPDATE assets SET status = 'Not In Use', assigned_to = NULL WHERE asset_id = $1", [currentAssignment.asset_id]);
@@ -162,7 +162,7 @@ async function reassignAsset(req, res, next) {
     const newAssignmentId = await generateAssignmentId();
     await client.query(
       `INSERT INTO asset_assignments (assignment_id, request_id, employee_id, asset_id, assigned_date, status)
-       VALUES ($1, $2, $3, $4, CURRENT_DATE, 'Assigned')`,
+       VALUES ($1, $2, $3, $4, NOW(), 'Assigned')`,
       [newAssignmentId, currentAssignment.request_id, employeeId, targetAssetId]
     );
     await client.query(
@@ -212,11 +212,16 @@ async function returnAsset(req, res, next) {
 
     const newAssetStatus = condition === "Good" ? "Not In Use" : "Under Maintenance";
 
+    // returnDate is validated above as a sanity check on what the caller
+    // claims, but the stored returned_date is NOW() — the actual moment this
+    // was recorded — same reasoning as report_date on maintenance requests:
+    // a client-supplied date has no time component, so trusting it verbatim
+    // would leave returned_date permanently stuck at midnight.
     await client.query("BEGIN");
     await client.query(
-      `UPDATE asset_assignments SET status = 'Returned', returned_date = $1, condition = $2, remarks = $3
-       WHERE assignment_id = $4`,
-      [returnDate, condition, remarks ? remarks.trim() : null, assignmentId]
+      `UPDATE asset_assignments SET status = 'Returned', returned_date = NOW(), condition = $1, remarks = $2
+       WHERE assignment_id = $3`,
+      [condition, remarks ? remarks.trim() : null, assignmentId]
     );
     await client.query(
       "UPDATE assets SET status = $1, assigned_to = NULL WHERE asset_id = $2",
