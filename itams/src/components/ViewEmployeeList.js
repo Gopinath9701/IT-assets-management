@@ -397,26 +397,90 @@ const ViewEmployeeList = ({
   onLogout,
   onBack,
 }) => {
-  const [searchInput, setSearchInput] =
-    useState("");
+  const [searchInput, setSearchInput] = useState("");
+  const [searchId, setSearchId] = useState("");
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [pageSize, setPageSize] = useState(10);
+  const [validationError, setValidationError] = useState("");
+  const [isSearchValid, setIsSearchValid] = useState(true);
+  const [searchTouched, setSearchTouched] = useState(false);
+  const [employees, setEmployees] = React.useState([]);
+  const [loading, setLoading] = React.useState(false);
 
-  const [searchId, setSearchId] =
-    useState("");
+  // =====================================================
+  // FETCH ALL EMPLOYEES FROM BACKEND
+  // =====================================================
 
-  const [selectedEmployee, setSelectedEmployee] =
-    useState(null);
+  React.useEffect(() => {
+    const fetchEmployees = async () => {
+      setLoading(true);
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch("http://localhost:5000/api/employees", {
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        });
+        const data = await response.json();
+        if (response.ok && data.employees) {
+          setEmployees(
+            data.employees.map((emp) => ({
+              id: emp.employee_id,
+              name: emp.employee_name,
+              department: emp.department,
+              status: emp.status,
+              phone: emp.phone || "",
+              email: emp.email || "",
+              joiningDate: emp.joining_date
+                ? new Date(emp.joining_date).toLocaleDateString("en-GB").replace(/\//g, "-")
+                : "",
+              assets: [],
+            }))
+          );
+        }
+      } catch (err) {
+        console.error("Fetch Employees Error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchEmployees();
+  }, []);
 
-  const [pageSize, setPageSize] =
-    useState(10);
+  // =====================================================
+  // FETCH SINGLE EMPLOYEE WITH ASSETS
+  // =====================================================
 
-  const [validationError, setValidationError] =
-    useState("");
-
-  const [isSearchValid, setIsSearchValid] =
-    useState(true);
-
-  const [searchTouched, setSearchTouched] =
-    useState(false);
+  const fetchEmployeeById = async (id) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`http://localhost:5000/api/employees/${id}`, {
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      });
+      const data = await response.json();
+      if (!response.ok) return null;
+      const emp = data.employee;
+      return {
+        id: emp.employee_id,
+        name: emp.employee_name,
+        department: emp.department,
+        status: emp.status,
+        phone: emp.phone || "",
+        email: emp.email || "",
+        joiningDate: emp.joining_date
+          ? new Date(emp.joining_date).toLocaleDateString("en-GB").replace(/\//g, "-")
+          : "",
+        assets: (data.assets || []).map((a) => ({
+          assetId: a.asset_id,
+          assetType: a.asset_type,
+          assignedDate: a.assigned_date
+            ? new Date(a.assigned_date).toLocaleDateString("en-GB").replace(/\//g, "-")
+            : "",
+        })),
+      };
+    } catch (err) {
+      console.error("Fetch Employee By ID Error:", err);
+      return null;
+    }
+  };
 
   // =====================================================
   // SEARCH INPUT CHANGE
@@ -471,73 +535,42 @@ const ViewEmployeeList = ({
   };
 
   // =====================================================
-  // SEARCH EMPLOYEE
+  // SEARCH EMPLOYEE — fetches from backend
   // =====================================================
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     setSearchTouched(true);
 
-    // Empty
     if (searchInput === "") {
-      setValidationError(
-        "Please enter an Employee ID."
-      );
-
+      setValidationError("Please enter an Employee ID.");
       setIsSearchValid(false);
       setSearchId("");
       setSelectedEmployee(null);
-
       return;
     }
 
-    // Validate
-    const result =
-      validateEmployeeId(searchInput);
-
+    const result = validateEmployeeId(searchInput);
     if (!result.isValid) {
-      setValidationError(
-        result.message
-      );
-
+      setValidationError(result.message);
       setIsSearchValid(false);
       setSearchId("");
       setSelectedEmployee(null);
-
       return;
     }
 
-    // ===================================================
-    // FIND EMPLOYEE
-    // ===================================================
-
-    let foundEmployee =
-      EMPLOYEES.find(
-        (employee) =>
-          employee.id === searchInput
-      );
-
-    // ===================================================
-    // CREATE EMPLOYEE IF NOT STORED
-    // ===================================================
-
-    if (!foundEmployee) {
-      foundEmployee =
-        createEmployeeFromId(
-          searchInput
-        );
+    const found = await fetchEmployeeById(searchInput);
+    if (!found) {
+      setValidationError(`Employee ID "${searchInput}" was not found in the system.`);
+      setIsSearchValid(false);
+      setSearchId("");
+      setSelectedEmployee(null);
+      return;
     }
 
-    // ===================================================
-    // SUCCESS
-    // ===================================================
-
-    setSearchId(foundEmployee.id);
-
+    setSearchId(found.id);
     setValidationError("");
-
     setIsSearchValid(true);
-
-    setSelectedEmployee(foundEmployee);
+    setSelectedEmployee(found);
   };
 
   // =====================================================
@@ -557,11 +590,8 @@ const ViewEmployeeList = ({
 
   const filteredEmployees =
     searchId === ""
-      ? EMPLOYEES
-      : EMPLOYEES.filter(
-          (employee) =>
-            employee.id === searchId
-        );
+      ? employees
+      : employees.filter((employee) => employee.id === searchId);
 
   // =====================================================
   // PAGE SIZE
@@ -576,59 +606,28 @@ const ViewEmployeeList = ({
         );
 
   // =====================================================
-  // VIEW EMPLOYEE
+  // VIEW EMPLOYEE — fetches full record with assets
   // =====================================================
 
-  const handleViewEmployee = (
-    employee
-  ) => {
-    // Validate ID first
-    const validation =
-      validateEmployeeId(
-        employee.id
-      );
-
-    // Future/invalid employee cannot open
+  const handleViewEmployee = async (employee) => {
+    const validation = validateEmployeeId(employee.id);
     if (!validation.isValid) {
-      setValidationError(
-        validation.message
-      );
-
+      setValidationError(validation.message);
       setSearchTouched(true);
-
       return;
     }
 
-    // Find exact employee
-    let exactEmployee =
-      EMPLOYEES.find(
-        (emp) =>
-          emp.id === employee.id
-      );
-
-    // If not stored, create it
-    if (!exactEmployee) {
-      exactEmployee =
-        createEmployeeFromId(
-          employee.id
-        );
+    const fullEmployee = await fetchEmployeeById(employee.id);
+    if (!fullEmployee) {
+      setValidationError(`Could not load employee "${employee.id}".`);
+      setSearchTouched(true);
+      return;
     }
 
-    // Open exact employee
-    setSelectedEmployee(
-      exactEmployee
-    );
-
-    setSearchInput(
-      exactEmployee.id
-    );
-
-    setSearchId(
-      exactEmployee.id
-    );
-
+    setSelectedEmployee(fullEmployee);
+    setSearchInput(fullEmployee.id);
+    setSearchId(fullEmployee.id);
     setValidationError("");
-
     setIsSearchValid(true);
   };
 
