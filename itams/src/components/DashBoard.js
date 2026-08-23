@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "./Dashboard.css";
 
 const Dashboard = ({
@@ -10,81 +10,73 @@ const Dashboard = ({
   onNavigateToRequestApproval,
   onNavigateToMaintenance,
 }) => {
-  const assetOverview = [
-    {
-      id: "LAP001",
-      type: "Laptop",
-      status: "Available",
-      quantity: 25,
-    },
-    {
-      id: "MON001",
-      type: "Monitor",
-      status: "Assigned",
-      quantity: 30,
-    },
-    {
-      id: "KEY001",
-      type: "Keyboard",
-      status: "Available",
-      quantity: 20,
-    },
-    {
-      id: "MOU001",
-      type: "Mouse",
-      status: "Assigned",
-      quantity: 25,
-    },
-    {
-      id: "PRI001",
-      type: "Printer",
-      status: "Under Maintenance",
-      quantity: 10,
-    },
-  ];
+  // ── Live stats ──────────────────────────────────────
+  const [stats, setStats] = useState({
+    total: 0, available: 0, assigned: 0, maintenance: 0, pending: 0,
+  });
+  const [assetOverview, setAssetOverview] = useState([]);
+  const [recentActivity, setRecentActivity] = useState([]);
 
-  const recentActivity = [
-    {
-      date: "18-08-2026 10:30 AM",
-      activity: "Asset Assigned",
-      assetId: "LAP001",
-      assetType: "Laptop",
-      employeeId: "260818001",
-      details: "Asset assigned to employee",
-    },
-    {
-      date: "18-08-2026 09:45 AM",
-      activity: "Asset Returned",
-      assetId: "MON001",
-      assetType: "Monitor",
-      employeeId: "260817002",
-      details: "Asset returned by employee",
-    },
-    {
-      date: "18-08-2026 09:20 AM",
-      activity: "Maintenance Issue Reported",
-      assetId: "PRI001",
-      assetType: "Printer",
-      employeeId: "260818003",
-      details: "Paper jam issue reported",
-    },
-    {
-      date: "17-08-2026 04:15 PM",
-      activity: "Maintenance Completed",
-      assetId: "KEY001",
-      assetType: "Keyboard",
-      employeeId: "260816001",
-      details: "Keys not working issue resolved",
-    },
-    {
-      date: "17-08-2026 11:00 AM",
-      activity: "New Asset Added",
-      assetId: "LAP002",
-      assetType: "Laptop",
-      employeeId: "260817004",
-      details: "New laptop added to inventory",
-    },
-  ];
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` };
+
+    // Inventory for stat cards + overview table
+    fetch("http://localhost:5000/api/inventory", { headers })
+      .then((r) => r.json())
+      .then((data) => {
+        if (!data.success) return;
+        const inv = data.inventory || [];
+        let total = 0, available = 0, assigned = 0, maintenance = 0;
+        inv.forEach((row) => {
+          total      += Number(row.total)       || 0;
+          available  += Number(row.available)   || 0;
+          assigned   += Number(row.assigned)    || 0;
+          maintenance+= Number(row.maintenance) || 0;
+        });
+        setStats((prev) => ({ ...prev, total, available, assigned, maintenance }));
+        // Build overview rows — one per asset type
+        setAssetOverview(
+          inv.map((row) => ({
+            id: row.name,
+            type: row.name,
+            available: Number(row.available) || 0,
+            status: Number(row.available) > 0 ? "Available" : "Not In Use",
+            quantity: Number(row.total) || 0,
+          }))
+        );
+      })
+      .catch(() => {});
+
+    // Pending requests count
+    fetch("http://localhost:5000/api/asset-requests?status=Pending", { headers })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.success) setStats((prev) => ({ ...prev, pending: (data.requests || []).length }));
+      })
+      .catch(() => {});
+
+    // Recent activity from assignment history
+    fetch("http://localhost:5000/api/asset-assignments/history", { headers })
+      .then((r) => r.json())
+      .then((data) => {
+        if (!data.success) return;
+        const rows = (data.history || []).slice(0, 10).map((h) => ({
+          date: h.assigned_date
+            ? new Date(h.assigned_date).toLocaleDateString("en-GB").replace(/\//g, "-")
+            : "-",
+          activity: h.status === "Returned" ? "Asset Returned" : "Asset Assigned",
+          assetId: h.asset_id || "-",
+          assetType: h.asset_type || "-",
+          employeeId: h.employee_id || "-",
+          details: h.status === "Returned"
+            ? "Asset returned by employee"
+            : "Asset assigned to employee",
+        }));
+        setRecentActivity(rows);
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <div className="dashboard-page">
@@ -210,76 +202,37 @@ const Dashboard = ({
 
             <div className="stat-card">
               <h3>Total Assets</h3>
-
-              <div className="stat-number blue">
-                120
-              </div>
-
+              <div className="stat-number blue">{stats.total}</div>
               <div className="stat-line"></div>
-
-              <p>
-                All assets in system
-              </p>
+              <p>All assets in system</p>
             </div>
-
 
             <div className="stat-card">
               <h3>Available Assets</h3>
-
-              <div className="stat-number green">
-                35
-              </div>
-
+              <div className="stat-number green">{stats.available}</div>
               <div className="stat-line"></div>
-
-              <p>
-                Ready to assign
-              </p>
+              <p>Ready to assign</p>
             </div>
-
 
             <div className="stat-card">
               <h3>Assigned Assets</h3>
-
-              <div className="stat-number purple">
-                75
-              </div>
-
+              <div className="stat-number purple">{stats.assigned}</div>
               <div className="stat-line"></div>
-
-              <p>
-                Assigned to employees
-              </p>
+              <p>Assigned to employees</p>
             </div>
-
 
             <div className="stat-card">
               <h3>Under Maintenance</h3>
-
-              <div className="stat-number orange">
-                10
-              </div>
-
+              <div className="stat-number orange">{stats.maintenance}</div>
               <div className="stat-line"></div>
-
-              <p>
-                Being repaired
-              </p>
+              <p>Being repaired</p>
             </div>
-
 
             <div className="stat-card">
               <h3>Pending Requests</h3>
-
-              <div className="stat-number red">
-                8
-              </div>
-
+              <div className="stat-number red">{stats.pending}</div>
               <div className="stat-line"></div>
-
-              <p>
-                Waiting for approval
-              </p>
+              <p>Waiting for approval</p>
             </div>
 
           </div>
@@ -303,10 +256,9 @@ const Dashboard = ({
 
                   <thead>
                     <tr>
-                      <th>Asset ID</th>
                       <th>Asset Type</th>
                       <th>Status</th>
-                      <th>Quantity</th>
+                      <th>Total</th>
                     </tr>
                   </thead>
 
@@ -315,10 +267,6 @@ const Dashboard = ({
                     {assetOverview.map((asset) => (
 
                       <tr key={asset.id}>
-
-                        <td>
-                          {asset.id}
-                        </td>
 
                         <td>
                           {asset.type}
@@ -367,59 +315,96 @@ const Dashboard = ({
 
             <section className="dashboard-box asset-summary">
 
-              <h2>
-                Asset Type Summary
-              </h2>
+              <h2>Asset Type Summary</h2>
 
-              <div className="summary-content">
+              {(() => {
+                const COLORS = [
+                  "#2563eb", "#22c55e", "#f97316", "#9333ea",
+                  "#ef4444", "#f59e0b", "#06b6d4", "#ec4899",
+                  "#14b8a6", "#8b5cf6",
+                ];
 
-                <div className="donut-chart">
+                const total = assetOverview.reduce((s, a) => s + a.quantity, 0);
 
-                  <div className="donut-hole">
-                    <span>120</span>
+                // Build SVG donut segments
+                const SIZE = 180;
+                const OUTER = 80;
+                const INNER = 48;
+                const cx = SIZE / 2;
+                const cy = SIZE / 2;
+
+                let cumulative = 0;
+                const segments = assetOverview
+                  .filter((a) => a.quantity > 0)
+                  .map((asset, i) => {
+                    const fraction = asset.quantity / (total || 1);
+                    const startAngle = cumulative * 2 * Math.PI - Math.PI / 2;
+                    cumulative += fraction;
+                    const endAngle = cumulative * 2 * Math.PI - Math.PI / 2;
+                    const largeArc = fraction > 0.5 ? 1 : 0;
+
+                    const x1 = cx + OUTER * Math.cos(startAngle);
+                    const y1 = cy + OUTER * Math.sin(startAngle);
+                    const x2 = cx + OUTER * Math.cos(endAngle);
+                    const y2 = cy + OUTER * Math.sin(endAngle);
+                    const x3 = cx + INNER * Math.cos(endAngle);
+                    const y3 = cy + INNER * Math.sin(endAngle);
+                    const x4 = cx + INNER * Math.cos(startAngle);
+                    const y4 = cy + INNER * Math.sin(startAngle);
+
+                    const d = `M ${x1} ${y1} A ${OUTER} ${OUTER} 0 ${largeArc} 1 ${x2} ${y2} L ${x3} ${y3} A ${INNER} ${INNER} 0 ${largeArc} 0 ${x4} ${y4} Z`;
+
+                    return { d, color: COLORS[i % COLORS.length], asset };
+                  });
+
+                return (
+                  <div className="summary-content">
+
+                    <div style={{ position: "relative", width: SIZE, height: SIZE, flexShrink: 0 }}>
+                      <svg width={SIZE} height={SIZE}>
+                        {segments.map((seg, i) => (
+                          <path key={i} d={seg.d} fill={seg.color} stroke="#fff" strokeWidth="2" />
+                        ))}
+                        {/* Centre hole label */}
+                        <text
+                          x={cx} y={cy - 6}
+                          textAnchor="middle"
+                          fontSize="18"
+                          fontWeight="700"
+                          fill="#091e42"
+                        >
+                          {total}
+                        </text>
+                        <text
+                          x={cx} y={cy + 12}
+                          textAnchor="middle"
+                          fontSize="10"
+                          fill="#5e6c84"
+                        >
+                          Total
+                        </text>
+                      </svg>
+                    </div>
+
+                    <div className="chart-legend">
+                      {assetOverview.map((asset, index) => (
+                        <div className="legend-item" key={asset.type}>
+                          <span
+                            className="legend-dot"
+                            style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                          ></span>
+                          <span>{asset.type}</span>
+                          <strong>{asset.quantity}</strong>
+                        </div>
+                      ))}
+                    </div>
+
                   </div>
-
-                </div>
-
-
-                <div className="chart-legend">
-
-                  <div className="legend-item">
-                    <span className="legend-dot laptop"></span>
-                    <span>Laptop</span>
-                    <strong>25</strong>
-                  </div>
-
-                  <div className="legend-item">
-                    <span className="legend-dot monitor"></span>
-                    <span>Monitor</span>
-                    <strong>30</strong>
-                  </div>
-
-                  <div className="legend-item">
-                    <span className="legend-dot keyboard"></span>
-                    <span>Keyboard</span>
-                    <strong>20</strong>
-                  </div>
-
-                  <div className="legend-item">
-                    <span className="legend-dot mouse"></span>
-                    <span>Mouse</span>
-                    <strong>25</strong>
-                  </div>
-
-                  <div className="legend-item">
-                    <span className="legend-dot printer"></span>
-                    <span>Printer</span>
-                    <strong>10</strong>
-                  </div>
-
-                </div>
-
-              </div>
+                );
+              })()}
 
               <div className="total-assets">
-                Total Assets: 120
+                Total Assets: {stats.total}
               </div>
 
             </section>
@@ -442,7 +427,7 @@ const Dashboard = ({
                 <thead>
 
                   <tr>
-                    <th>Date & Time</th>
+                    <th>Date</th>
                     <th>Activity</th>
                     <th>Asset ID</th>
                     <th>Asset Type</th>
