@@ -11,6 +11,8 @@ import AssetRequest from "./components/AssetRequest";
 import AssetManagement from "./components/AssetManagement";
 import AssetInventory from "./components/AssetInventory";
 import AssetReturn from "./components/AssetReturn";
+import RequestApproval from "./components/RequestApproval";
+import Maintenance from "./components/Maintenance";
 
 import HRManagement from "./components/HRManagement";
 import AddEmployee from "./components/AddEmployee";
@@ -108,30 +110,15 @@ function App() {
   // =====================================================
 
   const handleRequestApproval = () => {
-
-    setView("asset-request");
+    setView("request-approval");
     setActiveTab("request-approval");
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-
-  // =====================================================
-  // MAINTENANCE
-  // =====================================================
-
   const handleMaintenance = () => {
-
-    setView("report-maintenance");
+    setView("maintenance");
     setActiveTab("maintenance");
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
 
@@ -240,7 +227,8 @@ function App() {
     }
 
     else if (
-      loggedInUser.role === "AssetInventory"
+      loggedInUser.role === "AssetInventory" ||
+      loggedInUser.role === "InventoryManager"
     ) {
 
       setView("asset-inventory");
@@ -454,42 +442,6 @@ function App() {
               <button
                 type="button"
                 className="outline-btn"
-                onClick={handleAssetInventory}
-              >
-                Invtry
-              </button>
-
-
-              <button
-                type="button"
-                className="outline-btn"
-                onClick={handleAssetManagement}
-              >
-                Asset Mgmt
-              </button>
-
-
-              <button
-                type="button"
-                className="outline-btn"
-                onClick={handleHRManagement}
-              >
-                HR Mgmt
-              </button>
-
-
-              <button
-                type="button"
-                className="outline-btn"
-                onClick={handleHome}
-              >
-                Home
-              </button>
-
-
-              <button
-                type="button"
-                className="outline-btn"
                 onClick={handleLogout}
               >
                 Logout
@@ -508,35 +460,14 @@ function App() {
 
       {view === "login" && (
 
-        <>
-          <Login
-            onForgotPasswordClick={() =>
-              setView("forgot-password")
-            }
-            onLoginSuccess={
-              handleLoginSuccess
-            }
-          />
-
-          <div
-            style={{
-              textAlign: "center",
-              marginTop: "15px",
-            }}
-          >
-
-            <button
-              type="button"
-              onClick={
-                handleTemporaryLogin
-              }
-              className="outline-btn"
-            >
-              Temporary Login
-            </button>
-
-          </div>
-        </>
+        <Login
+          onForgotPasswordClick={() =>
+            setView("forgot-password")
+          }
+          onLoginSuccess={
+            handleLoginSuccess
+          }
+        />
 
       )}
 
@@ -884,6 +815,60 @@ function App() {
           onBack={() =>
             setView("hr-management")
           }
+
+        />
+
+      )}
+
+      {/* =================================================
+          REQUEST APPROVAL
+      ================================================= */}
+
+      {view === "request-approval" && (
+
+        <RequestApproval
+
+          username={username}
+
+          onLogout={handleLogout}
+
+          onBack={() =>
+            setView("dashboard")
+          }
+
+          onSidebarNavigate={(id) => {
+            if (id === "dashboard") handleDashboard();
+            else if (id === "asset-management") handleAssetManagement();
+            else if (id === "asset-assignment") handleAssetAssignment();
+            else if (id === "maintenance") handleMaintenance();
+          }}
+
+        />
+
+      )}
+
+      {/* =================================================
+          MAINTENANCE (Asset Manager view)
+      ================================================= */}
+
+      {view === "maintenance" && (
+
+        <Maintenance
+
+          username={username}
+
+          onLogout={handleLogout}
+
+          onBack={() =>
+            setView("dashboard")
+          }
+
+          onSidebarNavigate={(id) => {
+            if (id === "dashboard") handleDashboard();
+            else if (id === "asset-management") handleAssetManagement();
+            else if (id === "asset-assignment") handleAssetAssignment();
+            else if (id === "request-approval") handleRequestApproval();
+          }}
 
         />
 
