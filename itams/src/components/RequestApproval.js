@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./RequestApproval.css";
 
 const ASSET_TYPES = [
@@ -334,17 +334,47 @@ const RequestApproval = ({
     useState(false);
 
   // ===================================================
-  // TABLE STATE
+  // TABLE STATE — loaded from backend
   // ===================================================
 
-  const [requests, setRequests] =
-    useState(INITIAL_REQUESTS);
+  const [requests, setRequests] = useState([]);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [selectedReq, setSelectedReq] = useState(null);
 
-  const [rowsPerPage, setRowsPerPage] =
-    useState(10);
+  // Load all requests on mount
+  useEffect(() => {
+    loadRequests();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const [selectedReq, setSelectedReq] =
-    useState(null);
+  const loadRequests = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:5000/api/asset-requests", {
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      });
+      const data = await response.json();
+      if (data.success && data.requests) {
+        setRequests(
+          data.requests.map((r) => ({
+            id: r.request_id,
+            employeeId: r.employee_id,
+            employeeName: r.employee_name || "-",
+            department: r.department || "-",
+            assetType: r.asset_type,
+            purpose: r.purpose,
+            requiredDate: r.required_date
+              ? new Date(r.required_date).toLocaleDateString("en-GB").replace(/\//g, "-")
+              : "-",
+            status: r.status,
+            rejectionReason: r.rejection_reason || "",
+          }))
+        );
+      }
+    } catch (err) {
+      console.error("Load Requests Error:", err);
+    }
+  };
 
   // ===================================================
   // REJECTION STATE
@@ -509,127 +539,60 @@ const RequestApproval = ({
   };
 
   // ===================================================
-  // APPROVE
+  // APPROVE — calls backend
   // ===================================================
 
-  const handleApprove = () => {
-    if (!selectedReq) {
-      return;
-    }
+  const handleApprove = async () => {
+    if (!selectedReq || selectedReq.status === "Approved" || selectedReq.status === "Rejected") return;
 
-    if (
-      selectedReq.status === "Approved" ||
-      selectedReq.status === "Rejected"
-    ) {
-      return;
-    }
-
-    const dateValidation =
-      validateRequiredDate(
-        selectedReq.requiredDate
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `http://localhost:5000/api/asset-requests/${selectedReq.id}/approve`,
+        { method: "PATCH", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` } }
       );
-
-    if (!dateValidation.isValid) {
-      alert(
-        `⚠️ ${dateValidation.message}`
-      );
-
-      return;
+      const data = await response.json();
+      if (!response.ok) { alert(data.message || "Failed to approve."); return; }
+      alert(`✅ Request ${selectedReq.id} approved successfully!`);
+      setSelectedReq(null);
+      setRejectionReason("");
+      setRejectError("");
+      loadRequests();
+    } catch (err) {
+      alert("Unable to connect to server.");
     }
-
-    setRequests((prev) =>
-      prev.map((request) =>
-        request.id === selectedReq.id
-          ? {
-              ...request,
-              status: "Approved",
-            }
-          : request
-      )
-    );
-
-    setSelectedReq((prev) => ({
-      ...prev,
-      status: "Approved",
-    }));
-
-    setRejectionReason("");
-    setRejectError("");
-
-    alert(
-      `✅ Request ${selectedReq.id} approved successfully!`
-    );
   };
 
   // ===================================================
-  // REJECT
+  // REJECT — calls backend
   // ===================================================
 
-  const handleReject = () => {
-    if (!selectedReq) {
-      return;
-    }
+  const handleReject = async () => {
+    if (!selectedReq || selectedReq.status === "Approved" || selectedReq.status === "Rejected") return;
 
-    if (
-      selectedReq.status === "Approved" ||
-      selectedReq.status === "Rejected"
-    ) {
-      return;
-    }
+    const result = validateRejectionReason(rejectionReason);
+    if (!result.isValid) { setRejectError(result.message); return; }
 
-    // Validate rejection description
-    const result =
-      validateRejectionReason(
-        rejectionReason
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `http://localhost:5000/api/asset-requests/${selectedReq.id}/reject`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ reason: rejectionReason.trim() }),
+        }
       );
-
-    if (!result.isValid) {
-      setRejectError(result.message);
-      return;
+      const data = await response.json();
+      if (!response.ok) { alert(data.message || "Failed to reject."); return; }
+      alert(`❌ Request ${selectedReq.id} rejected.`);
+      setSelectedReq(null);
+      setRejectionReason("");
+      setRejectError("");
+      loadRequests();
+    } catch (err) {
+      alert("Unable to connect to server.");
     }
-
-    // Validate required date
-    const dateValidation =
-      validateRequiredDate(
-        selectedReq.requiredDate
-      );
-
-    if (!dateValidation.isValid) {
-      setRejectError(
-        dateValidation.message
-      );
-
-      return;
-    }
-
-    const cleanReason =
-      rejectionReason.trim();
-
-    setRequests((prev) =>
-      prev.map((request) =>
-        request.id === selectedReq.id
-          ? {
-              ...request,
-              status: "Rejected",
-              rejectionReason:
-                cleanReason,
-            }
-          : request
-      )
-    );
-
-    setSelectedReq((prev) => ({
-      ...prev,
-      status: "Rejected",
-      rejectionReason: cleanReason,
-    }));
-
-    setRejectionReason(cleanReason);
-    setRejectError("");
-
-    alert(
-      `❌ Request ${selectedReq.id} rejected.`
-    );
   };
 
   // ===================================================
