@@ -62,15 +62,6 @@ function buildEmployeeEmail(employeeId) {
   return `${employeeId}a@gmail.com`;
 }
 
-// Per the frontend spec, an employee's email is always {employeeId}a@gmail.com
-// — not a free-form address.
-function validateEmployeeEmail(email, employeeId) {
-  const expected = buildEmployeeEmail(employeeId);
-  if (!email) return "Email is required.";
-  if (email !== expected) return `Email must be ${expected}.`;
-  return null;
-}
-
 // Password policy per spec: 8-20 chars, no spaces, at least one uppercase,
 // one lowercase, one digit, one special character.
 function validatePassword(password) {
@@ -107,19 +98,26 @@ function validateJoiningDateWindow(joiningDate) {
   return null;
 }
 
-// Returns an error message string, or null if valid. Does not check email —
-// callers validate email separately via validateEmployeeEmail once the
-// employee's ID is known (generated server-side on create, taken from the
-// URL param on update).
+// Returns an error message string, or null if valid. Doesn't cover email —
+// that's never client input at all (see buildEmployeeEmail): it's always
+// derived server-side from employeeId, which itself doesn't exist until
+// after generation on create, and never changes on update.
 function validateEmployeePayload(
   { employeeName, department, designation, phone, joiningDate },
-  { requireJoiningDate = true } = {}
+  { requireJoiningDate = true, requireEmployeeName = true, requireDepartment = true } = {}
 ) {
-  if (!employeeName || employeeName.trim().length < 4 || employeeName.length > 20 || !NAME_REGEX.test(employeeName)) {
-    return "Employee Name must be 4-20 characters, letters and spaces only.";
+  // On update, a field left out of the request is meant to stay unchanged
+  // (see the COALESCE in employeeController's updateEmployee) — so it's only
+  // validated here if the caller actually sent something for it.
+  if (requireEmployeeName || employeeName !== undefined) {
+    if (!employeeName || employeeName.trim().length < 4 || employeeName.length > 20 || !NAME_REGEX.test(employeeName)) {
+      return "Employee Name must be 4-20 characters, letters and spaces only.";
+    }
   }
-  if (!department) {
-    return "Please select a Department.";
+  if (requireDepartment || department !== undefined) {
+    if (!department) {
+      return "Please select a Department.";
+    }
   }
   if (designation) {
     if (designation.trim().length < 4 || designation.length > 20 || !DESIGNATION_REGEX.test(designation)) {
@@ -331,7 +329,6 @@ function validateRejectionReason(reason) {
 module.exports = {
   validateEmployeePayload,
   validateEmployeeIdFormat,
-  validateEmployeeEmail,
   buildEmployeeEmail,
   validatePassword,
   validateOtp,

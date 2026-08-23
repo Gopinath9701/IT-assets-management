@@ -1,5 +1,5 @@
 const { pool } = require("../config/db");
-const { validateEmployeePayload, validateEmployeeEmail, validateEmployeeIdFormat } = require("../utils/validators");
+const { validateEmployeePayload, validateEmployeeIdFormat, buildEmployeeEmail } = require("../utils/validators");
 const { generateEmployeeId } = require("../utils/idGenerator");
 
 // GET /api/employees?search=
@@ -47,11 +47,15 @@ async function getEmployeeById(req, res, next) {
 
 // POST /api/employees  (AddEmployee.js form)
 // Employee ID is generated server-side from Date of Joining — never trusted
-// from the client. No login account is created — per spec, only HR/Asset
-// Manager/Inventory Manager accounts exist in `users`; employees don't log in.
+// from the client. Email is likewise never accepted from the client: it's a
+// deterministic function of the ID ({employeeId}a@gmail.com per spec), and
+// the ID itself doesn't exist until after generation, so a client could never
+// have known the required email in advance to send it. No login account is
+// created — per spec, only HR/Asset Manager/Inventory Manager accounts exist
+// in `users`; employees don't log in.
 async function addEmployee(req, res, next) {
   try {
-    const { employeeName, email, department, designation, phone, joiningDate } = req.body;
+    const { employeeName, department, designation, phone, joiningDate } = req.body;
 
     const validationError = validateEmployeePayload(
       { employeeName, department, designation, phone, joiningDate },
@@ -62,11 +66,7 @@ async function addEmployee(req, res, next) {
     }
 
     const employeeId = await generateEmployeeId(joiningDate);
-
-    const emailError = validateEmployeeEmail(email, employeeId);
-    if (emailError) {
-      return res.status(400).json({ success: false, message: emailError });
-    }
+    const email = buildEmployeeEmail(employeeId);
 
     await pool.query(
       `INSERT INTO employees (employee_id, employee_name, email, department, designation, phone, joining_date)
@@ -74,7 +74,7 @@ async function addEmployee(req, res, next) {
       [employeeId, employeeName, email, department, designation || null, phone || null, joiningDate]
     );
 
-    res.status(201).json({ success: true, message: "Employee Added Successfully!", employeeId });
+    res.status(201).json({ success: true, message: "Employee Added Successfully!", employeeId, email });
   } catch (err) {
     if (err.code === "23505") {
       return res.status(409).json({ success: false, message: "Employee ID or email already exists" });
@@ -84,37 +84,32 @@ async function addEmployee(req, res, next) {
 }
 
 // PUT /api/employees/:employeeId  (UpdateEmployee.js form — Employee ID is read-only)
+// Email isn't an accepted field here either — it's derived from employeeId,
+// which never changes after creation, so email never legitimately does either.
 async function updateEmployee(req, res, next) {
   try {
     const { employeeId } = req.params;
-    const { employeeName, email, department, designation, phone, joiningDate } = req.body;
+    const { employeeName, department, designation, phone, joiningDate } = req.body;
 
     const validationError = validateEmployeePayload(
       { employeeName, department, designation, phone, joiningDate },
-      { requireJoiningDate: false }
+      { requireJoiningDate: false, requireEmployeeName: false, requireDepartment: false }
     );
     if (validationError) {
       return res.status(400).json({ success: false, message: validationError });
     }
-    if (email) {
-      const emailError = validateEmployeeEmail(email, employeeId);
-      if (emailError) {
-        return res.status(400).json({ success: false, message: emailError });
-      }
-    }
 
-    // COALESCE so any field the form doesn't send (e.g. email, per the current
-    // UpdateEmployee.js) leaves the existing value untouched instead of wiping it.
+    // COALESCE so any field the form doesn't send leaves the existing value
+    // untouched instead of wiping it.
     const result = await pool.query(
       `UPDATE employees SET
          employee_name = COALESCE($1, employee_name),
-         email = COALESCE($2, email),
-         department = COALESCE($3, department),
-         designation = COALESCE($4, designation),
-         phone = COALESCE($5, phone),
-         joining_date = COALESCE($6, joining_date)
-       WHERE employee_id = $7`,
-      [employeeName || null, email || null, department || null, designation || null, phone || null, joiningDate || null, employeeId]
+         department = COALESCE($2, department),
+         designation = COALESCE($3, designation),
+         phone = COALESCE($4, phone),
+         joining_date = COALESCE($5, joining_date)
+       WHERE employee_id = $6`,
+      [employeeName || null, department || null, designation || null, phone || null, joiningDate || null, employeeId]
     );
 
     if (result.rowCount === 0) {
