@@ -1,4 +1,14 @@
 const { pool } = require("../config/db");
+const { ASSET_TYPE_PREFIXES } = require("../utils/idGenerator");
+
+// Each row here represents a whole asset TYPE (grouped with COUNT(*)), not
+// one physical asset, so there's no real per-row "asset ID" — reusing the
+// same 3-letter prefix real individual asset IDs are built from (LAP, MON,
+// KEY, ...) gives the frontend something distinct from `name` to show in an
+// "ID"-labeled column instead of duplicating the type name into it.
+function typeCode(assetType) {
+  return ASSET_TYPE_PREFIXES[assetType] || assetType.slice(0, 3).toUpperCase();
+}
 
 async function getInventory(req, res, next) {
   try {
@@ -28,10 +38,12 @@ async function getInventory(req, res, next) {
       ORDER BY asset_type ASC, model ASC
     `);
 
-    const toRow = (r) => {
+    const toRow = (r, assetType) => {
       const available = Number(r.available) || 0;
       return {
+        id: typeCode(assetType),
         name: r.name,
+        assetType,
         total: Number(r.total),
         available,
         assigned: Number(r.assigned) || 0,
@@ -43,11 +55,11 @@ async function getInventory(req, res, next) {
     const detailsByType = {};
     for (const r of modelRows) {
       if (!detailsByType[r.asset_type]) detailsByType[r.asset_type] = [];
-      detailsByType[r.asset_type].push(toRow(r));
+      detailsByType[r.asset_type].push(toRow(r, r.asset_type));
     }
 
     const inventory = typeRows.map((r) => {
-      const row = toRow(r);
+      const row = toRow(r, r.name);
       const details = detailsByType[row.name];
       if (details && details.length > 0) row.details = details;
       return row;
