@@ -144,15 +144,11 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
       return "Enter Employee ID before entering Email.";
     }
 
-    // EXACTLY employeeIDa@gmail.com
+    // Must be exactly: employeeIDa@gmail.com
     const expectedEmail = `${id}a@gmail.com`;
 
     if (value !== expectedEmail) {
       return `Email must be ${expectedEmail}.`;
-    }
-
-    if (!/^\d{9}a@gmail\.com$/.test(value)) {
-      return "Email must be in EmployeeIDa@gmail.com format.";
     }
 
     return "";
@@ -411,35 +407,52 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
   // SUBMIT
   // =========================================================
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!validateForm()) {
       return;
     }
 
-    const employeeData = {
-      employeeName: employeeName,
-      employeeId: employeeId,
-      email: email,
-      department: department,
-      designation: designation,
-      phone: `+91${phone}`,
-      dateOfJoining: dateOfJoining,
-    };
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:5000/api/employees", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          employeeName,
+          email,
+          department,
+          designation,
+          phone: `+91${phone}`,
+          joiningDate: dateOfJoining,
+        }),
+      });
 
-    console.log("Employee saved:", employeeData);
+      const data = await response.json();
 
-    alert("✅ Employee saved successfully!");
+      if (!response.ok) {
+        alert(data.message || "Failed to add employee.");
+        return;
+      }
 
-    setEmployeeName("");
-    setEmployeeId("");
-    setEmail("");
-    setDepartment("");
-    setDesignation("");
-    setPhone("");
-    setDateOfJoining("");
-    setErrors({});
+      alert(`✅ Employee added successfully! Employee ID: ${data.employeeId}`);
+
+      setEmployeeName("");
+      setEmployeeId("");
+      setEmail("");
+      setDepartment("");
+      setDesignation("");
+      setPhone("");
+      setDateOfJoining("");
+      setErrors({});
+    } catch (error) {
+      console.error("Add Employee Error:", error);
+      alert("Unable to connect to server. Please make sure the backend is running.");
+    }
   };
 
   // =========================================================
