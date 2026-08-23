@@ -301,91 +301,40 @@ const EmployeeStatus = ({
   // YYMMDDXXX
   // ====================================================
 
-  const [employees, setEmployees] = useState([
-    {
-      id: "250808001",
-      name: "Arjun Reddy",
-      department: "IT",
-      status: "On Leave",
-    },
+  const [employees, setEmployees] = useState([]);
 
-    {
-      id: "260808001",
-      name: "Sneha Sharma",
-      department: "HR",
-      status: "Active",
-    },
+  // ====================================================
+  // FETCH EMPLOYEES FROM BACKEND
+  // ====================================================
 
-    {
-      id: "260812001",
-      name: "Rahul Kumar",
-      department: "IT",
-      status: "Active",
-    },
-
-    {
-      id: "260813002",
-      name: "Priya Reddy",
-      department: "HR",
-      status: "On Leave",
-    },
-
-    {
-      id: "260814003",
-      name: "Vikram Singh",
-      department: "Finance",
-      status: "Inactive",
-    },
-
-    {
-      id: "260815004",
-      name: "Ananya Rao",
-      department: "Marketing",
-      status: "Active",
-    },
-
-    {
-      id: "260816005",
-      name: "Kiran Kumar",
-      department: "IT",
-      status: "On Leave",
-    },
-
-    {
-      id: "260817006",
-      name: "Neha Patel",
-      department: "Sales",
-      status: "Inactive",
-    },
-
-    {
-      id: "260818007",
-      name: "Rohit Sharma",
-      department: "Operations",
-      status: "Active",
-    },
-
-    {
-      id: "260819008",
-      name: "Pooja Reddy",
-      department: "Finance",
-      status: "On Leave",
-    },
-
-    {
-      id: "260820009",
-      name: "Sandeep Kumar",
-      department: "IT",
-      status: "Active",
-    },
-
-    {
-      id: "260821010",
-      name: "Divya Rao",
-      department: "HR",
-      status: "Active",
-    },
-  ]);
+  React.useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch("http://localhost:5000/api/employees", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = await response.json();
+        if (response.ok && data.employees) {
+          setEmployees(
+            data.employees.map((emp) => ({
+              id: emp.employee_id,
+              name: emp.employee_name,
+              department: emp.department,
+              status: emp.status,
+            }))
+          );
+        }
+      } catch (err) {
+        console.error("Fetch Employees Error:", err);
+      }
+    };
+    fetchEmployees();
+  }, []);
 
   // ====================================================
   // PENDING STATUS CHANGES
@@ -708,7 +657,7 @@ const EmployeeStatus = ({
   // UPDATE BUTTON
   // ====================================================
 
-  const handleUpdateStatus = (
+  const handleUpdateStatus = async (
     empId
   ) => {
 
@@ -728,46 +677,58 @@ const EmployeeStatus = ({
       return;
     }
 
-
     // ==================================================
-    // UPDATE EMPLOYEE
-    // ==================================================
-
-    setEmployees((prev) =>
-      prev.map((employee) =>
-        employee.id === empId
-          ? {
-              ...employee,
-              status: newStatus,
-            }
-          : employee
-      )
-    );
-
-
-    // ==================================================
-    // REMOVE TEMPORARY STATUS
+    // CALL API
     // ==================================================
 
-    setPendingStatuses((prev) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `http://localhost:5000/api/employees/${empId}/status`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ status: newStatus }),
+        }
+      );
 
-      const updated = {
-        ...prev,
-      };
+      const data = await response.json();
 
-      delete updated[empId];
+      if (!response.ok) {
+        alert(data.message || "Failed to update status.");
+        return;
+      }
 
-      return updated;
-    });
+      // ==================================================
+      // UPDATE LOCAL STATE
+      // ==================================================
 
+      setEmployees((prev) =>
+        prev.map((employee) =>
+          employee.id === empId
+            ? { ...employee, status: newStatus }
+            : employee
+        )
+      );
 
-    // ==================================================
-    // SUCCESS MESSAGE
-    // ==================================================
+      // ==================================================
+      // REMOVE TEMPORARY STATUS
+      // ==================================================
 
-    alert(
-      `✅ Status updated to "${newStatus}" successfully!`
-    );
+      setPendingStatuses((prev) => {
+        const updated = { ...prev };
+        delete updated[empId];
+        return updated;
+      });
+
+      alert(`✅ Status updated to "${newStatus}" successfully!`);
+    } catch (error) {
+      console.error("Update Status Error:", error);
+      alert("Unable to connect to server. Please make sure the backend is running.");
+    }
   };
 
 
