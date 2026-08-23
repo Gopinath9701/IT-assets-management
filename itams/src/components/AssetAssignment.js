@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./AssetAssignment.css";
 
 const ROWS_OPTIONS = [10, 30, 50, "All"];
@@ -233,9 +233,56 @@ const AssetAssignment = ({
   const [searchError, setSearchError] = useState("");
   const [isSearchTouched, setIsSearchTouched] = useState(false);
 
-  // Table data
-  const [pending, setPending] = useState(INITIAL_PENDING);
-  const [history, setHistory] = useState(INITIAL_HISTORY);
+  // Table data — loaded from backend
+  const [pending, setPending] = useState([]);
+  const [history, setHistory] = useState([]);
+
+  // Load on mount
+  useEffect(() => { loadData(); }, []); // eslint-disable-line
+
+  const loadData = async () => {
+    const token = localStorage.getItem("token");
+    const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` };
+    try {
+      const [pendResp, histResp] = await Promise.all([
+        fetch("http://localhost:5000/api/asset-assignments/pending", { headers }),
+        fetch("http://localhost:5000/api/asset-assignments/history", { headers }),
+      ]);
+      const pendData = await pendResp.json();
+      const histData = await histResp.json();
+      if (pendData.success) {
+        setPending(
+          (pendData.pending || []).map((r) => ({
+            requestId: r.request_id,
+            employeeId: r.employee_id,
+            employeeName: r.employee_name || "-",
+            department: r.department || "-",
+            assetType: r.asset_type,
+            purpose: r.purpose,
+            requiredDate: r.required_date
+              ? new Date(r.required_date).toLocaleDateString("en-GB").replace(/\//g, "-") : "-",
+            approvalDate: r.approval_date
+              ? new Date(r.approval_date).toLocaleDateString("en-GB").replace(/\//g, "-") : "-",
+          }))
+        );
+      }
+      if (histData.success) {
+        setHistory(
+          (histData.history || []).map((h) => ({
+            assignmentId: h.assignment_id,
+            requestId: h.request_id,
+            employeeId: h.employee_id,
+            employeeName: h.employee_name || "-",
+            assetType: h.asset_type || "-",
+            assetNameId: h.asset_name_id || "-",
+            assignedDate: h.assigned_date
+              ? new Date(h.assigned_date).toLocaleDateString("en-GB").replace(/\//g, "-") : "-",
+            status: h.status,
+          }))
+        );
+      }
+    } catch (err) { console.error("Load assignment data error:", err); }
+  };
 
   // Rows
   const [pendingRows, setPendingRows] = useState(10);
@@ -354,52 +401,47 @@ const AssetAssignment = ({
   };
 
   // ==========================================
-  // CONFIRM ASSIGNMENT
+  // CONFIRM ASSIGNMENT — calls backend
   // ==========================================
 
-  const confirmAssign = () => {
-    if (!selectedRequest) {
-      return;
+  const confirmAssign = async () => {
+    if (!selectedRequest) return;
+
+    try {
+      const token = localStorage.getItem("token");
+      const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` };
+
+      // Fetch first available asset of the required type
+      const availResp = await fetch(
+        `http://localhost:5000/api/asset-assignments/available-assets?type=${encodeURIComponent(selectedRequest.assetType)}`,
+        { headers }
+      );
+      const availData = await availResp.json();
+      const available = availData.assets || [];
+
+      if (available.length === 0) {
+        alert(`No available ${selectedRequest.assetType} assets to assign. Please add stock first.`);
+        return;
+      }
+
+      const assetId = available[0].asset_id;
+
+      const response = await fetch("http://localhost:5000/api/asset-assignments", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ requestId: selectedRequest.requestId, assetId }),
+      });
+      const data = await response.json();
+
+      if (!response.ok) { alert(data.message || "Failed to assign asset."); return; }
+
+      alert(`Asset assigned successfully!\nAssignment ID: ${data.assignmentId}\nAsset: ${assetId}`);
+      closeAssignModal();
+      loadData();
+    } catch (err) {
+      console.error("Confirm Assign Error:", err);
+      alert("Unable to connect to server.");
     }
-
-    const padded = String(assignCounter).padStart(3, "0");
-
-    const today = new Date();
-
-    const assignedDate =
-      `${String(today.getDate()).padStart(2, "0")}-` +
-      `${String(today.getMonth() + 1).padStart(2, "0")}-` +
-      `${today.getFullYear()}`;
-
-    const newEntry = {
-      assignmentId: `ASG${padded}`,
-      requestId: selectedRequest.requestId,
-      employeeId: selectedRequest.employeeId,
-      employeeName: selectedRequest.employeeName,
-      assetType: selectedRequest.assetType,
-
-      // No asset input in modal now
-      assetNameId: selectedRequest.assetType,
-
-      assignedDate,
-      status: "Assigned",
-    };
-
-    assignCounter += 1;
-
-    setPending((prev) =>
-      prev.filter(
-        (r) => r.requestId !== selectedRequest.requestId
-      )
-    );
-
-    setHistory((prev) => [newEntry, ...prev]);
-
-    alert(
-      `Asset assigned successfully!\nAssignment ID: ${newEntry.assignmentId}`
-    );
-
-    closeAssignModal();
   };
 
   // ==========================================
