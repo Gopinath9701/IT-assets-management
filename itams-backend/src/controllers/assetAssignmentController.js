@@ -31,9 +31,9 @@ async function getHistory(req, res, next) {
   try {
     const { rows } = await pool.query(`
       SELECT a.assignment_id, a.request_id, a.employee_id, e.employee_name,
-             ast.asset_type,
+             ast.asset_id, ast.asset_type,
              CONCAT(COALESCE(ast.model, ast.asset_type), ' (', ast.asset_id, ')') AS asset_name_id,
-             a.assigned_date, a.status
+             a.assigned_date, a.returned_date, a.condition, a.remarks, a.status
       FROM asset_assignments a
       JOIN employees e ON e.employee_id = a.employee_id
       JOIN assets ast ON ast.asset_id = a.asset_id
