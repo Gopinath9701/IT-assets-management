@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./EmployeeStatus.css";
 
 const PAGE_SIZE_OPTIONS = [10, 30, 50, "All"];
@@ -235,94 +235,38 @@ const EmployeeStatus = ({
     useState(false);
 
   // ====================================================
-  // EMPLOYEE DATA
+  // EMPLOYEE DATA — loaded from backend
   // ====================================================
 
-  const [employees, setEmployees] = useState([
-    {
-      id: "250808001",
-      name: "Rahul Sharma",
-      department: "IT",
-      status: "On Leave",
-    },
+  const [employees, setEmployees] = useState([]);
 
-    {
-      id: "260808001",
-      name: "Ananya Reddy",
-      department: "HR",
-      status: "Active",
-    },
-
-    {
-      id: "260812001",
-      name: "Arjun Kumar",
-      department: "IT",
-      status: "Active",
-    },
-
-    {
-      id: "260813002",
-      name: "Sneha Patel",
-      department: "HR",
-      status: "On Leave",
-    },
-
-    {
-      id: "260814003",
-      name: "Rohit Verma",
-      department: "Finance",
-      status: "Inactive",
-    },
-
-    {
-      id: "260815004",
-      name: "Priya Singh",
-      department: "Marketing",
-      status: "Active",
-    },
-
-    {
-      id: "260816005",
-      name: "Karthik Rao",
-      department: "IT",
-      status: "On Leave",
-    },
-
-    {
-      id: "260817006",
-      name: "Neha Reddy",
-      department: "Sales",
-      status: "Inactive",
-    },
-
-    {
-      id: "260818007",
-      name: "Vikram Mehta",
-      department: "Operations",
-      status: "Active",
-    },
-
-    {
-      id: "260819008",
-      name: "Pooja Nair",
-      department: "Finance",
-      status: "On Leave",
-    },
-
-    {
-      id: "260820009",
-      name: "Aditya Kapoor",
-      department: "IT",
-      status: "Active",
-    },
-
-    {
-      id: "260821010",
-      name: "Meera Joshi",
-      department: "HR",
-      status: "Active",
-    },
-  ]);
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch("http://localhost:5000/api/employees", {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = await response.json();
+        if (response.ok && data.employees) {
+          setEmployees(
+            data.employees.map((emp) => ({
+              id: emp.employee_id,
+              name: emp.employee_name,
+              department: emp.department,
+              status: emp.status,
+            }))
+          );
+        }
+      } catch (err) {
+        console.error("Fetch Employees Error:", err);
+      }
+    };
+    fetchEmployees();
+  }, []);
 
   // ====================================================
   // SEARCH INPUT CHANGE
@@ -395,40 +339,10 @@ const EmployeeStatus = ({
         return;
       }
 
-      // VALID ID
-      const employeeId = rawValue;
-
-      let foundEmployee =
-        employees.find(
-          (emp) =>
-            emp.id === employeeId
-        );
-
-      // ==================================================
-      // CREATE EMPLOYEE IF VALID ID DOES NOT EXIST
-      // ==================================================
-
-      if (!foundEmployee) {
-        const newEmployee =
-          createEmployeeFromId(
-            employeeId
-          );
-
-        setEmployees((prev) => [
-          ...prev,
-          newEmployee,
-        ]);
-
-        foundEmployee = newEmployee;
-      }
-
-      // SUCCESS
-      setSearchApplied(employeeId);
-
+      // VALID ID — filter from real data
+      setSearchApplied(rawValue);
       setValidationError("");
-
       setIsSearchValid(true);
-
       return;
     }
 
