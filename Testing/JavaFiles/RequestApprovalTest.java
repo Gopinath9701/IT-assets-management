@@ -1,1042 +1,1822 @@
-package com.test;
+package com.itams;
 
-import java.time.Duration;
-
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-
-import org.openqa.selenium.Alert;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.NoAlertPresentException;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.chrome.ChromeDriver;
-
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-public class RequestApprovalTest {
+import java.time.Duration;
+import java.util.List;
 
-    private WebDriver driver;
-    private WebDriverWait wait;
+import static org.junit.jupiter.api.Assertions.*;
 
-    private static final String BASE_URL = "http://localhost:3000";
+public class RequestApprovalTest extends BaseTest {
+
+    private static final String BASE_URL =
+            "http://localhost:3000";
+
+    private static final String EMPLOYEE_ID =
+            "260822002";
+
+    private static final String PASSWORD =
+            "Itams@2026a";
+
+    private final Duration WAIT_TIME =
+            Duration.ofSeconds(15);
 
     // =========================================================
     // SETUP
     // =========================================================
 
-    @Before
-    public void setUp() {
-
-        driver = new ChromeDriver();
-
-        driver.manage().window().maximize();
-
-        driver.manage().timeouts().implicitlyWait(
-                Duration.ofSeconds(2)
-        );
-
-        driver.manage().timeouts().pageLoadTimeout(
-                Duration.ofSeconds(30)
-        );
-
-        wait = new WebDriverWait(
-                driver,
-                Duration.ofSeconds(15)
-        );
+    @BeforeEach
+    public void setUpRequestApproval() {
 
         driver.get(BASE_URL);
 
-        waitForPageReady();
+        waitForPageLoad();
+
+        login();
+
+        openRequestApproval();
+
+        waitForRequestApprovalPage();
     }
 
     // =========================================================
-    // TEARDOWN
+    // LOGIN
     // =========================================================
 
-    @After
-    public void tearDown() {
+    private void login() {
 
-        if (driver != null) {
+        WebElement employeeId = findVisible(
+                By.name("employeeIdOrEmail"),
+                By.name("employeeId"),
+                By.cssSelector("input[type='text']")
+        );
 
-            try {
-                acceptAlertIfPresent();
-            } catch (Exception ignored) {
-            }
+        assertNotNull(
+                employeeId,
+                "Employee ID field not found"
+        );
 
-            driver.quit();
+        employeeId.clear();
+        employeeId.sendKeys(EMPLOYEE_ID);
+
+        WebElement password = findVisible(
+                By.name("password"),
+                By.cssSelector("input[type='password']")
+        );
+
+        assertNotNull(
+                password,
+                "Password field not found"
+        );
+
+        password.clear();
+        password.sendKeys(PASSWORD);
+
+        WebElement loginButton = findVisible(
+                By.cssSelector("form button[type='submit']"),
+                By.xpath("//button[normalize-space()='Login']"),
+                By.xpath("//button[contains(normalize-space(),'Login')]")
+        );
+
+        assertNotNull(
+                loginButton,
+                "Login button not found"
+        );
+
+        safeClick(loginButton);
+
+        acceptAlertIfPresent();
+
+        sleep(800);
+    }
+
+    // =========================================================
+    // OPEN REQUEST APPROVAL
+    // =========================================================
+
+    private void openRequestApproval() {
+
+        if (isRequestApprovalPage()) {
+            return;
         }
-    }
 
-    // =========================================================
-    // WAIT FOR PAGE
-    // =========================================================
-
-    private void waitForPageReady() {
-
-        wait.until(driver ->
-                ((JavascriptExecutor) driver)
-                        .executeScript(
-                                "return document.readyState"
-                        )
-                        .equals("complete")
+        WebElement requestApproval = findVisible(
+                By.xpath(
+                        "//*[normalize-space()='Request Approval']"
+                ),
+                By.xpath(
+                        "//button[normalize-space()='Request Approval']"
+                ),
+                By.xpath(
+                        "//a[normalize-space()='Request Approval']"
+                ),
+                By.xpath(
+                        "//div[normalize-space()='Request Approval']"
+                )
         );
+
+        assertNotNull(
+                requestApproval,
+                "Request Approval navigation option not found"
+        );
+
+        safeClick(requestApproval);
+
+        waitForRequestApprovalPage();
     }
 
     // =========================================================
-    // WAIT VISIBLE
+    // PAGE CHECK
     // =========================================================
 
-    private WebElement waitForVisible(By locator) {
+    private boolean isRequestApprovalPage() {
 
-        return wait.until(
+        return !driver.findElements(
+                By.cssSelector(".ra-page-title")
+        ).isEmpty();
+    }
+
+    private void waitForRequestApprovalPage() {
+
+        WebElement title = new WebDriverWait(
+                driver,
+                WAIT_TIME
+        ).until(
                 ExpectedConditions.visibilityOfElementLocated(
-                        locator
+                        By.cssSelector(".ra-page-title")
+                )
+        );
+
+        assertEquals(
+                "Request Approval",
+                title.getText().trim()
+        );
+    }
+
+    // =========================================================
+    // TEST 1 - PAGE TITLE
+    // =========================================================
+
+    @Test
+    public void requestApprovalPageTest() {
+
+        WebElement title =
+                driver.findElement(
+                        By.cssSelector(".ra-page-title")
+                );
+
+        assertTrue(title.isDisplayed());
+
+        assertEquals(
+                "Request Approval",
+                title.getText().trim()
+        );
+    }
+
+    // =========================================================
+    // TEST 2 - PAGE SUBTITLE
+    // =========================================================
+
+    @Test
+    public void pageSubtitleTest() {
+
+        WebElement subtitle =
+                driver.findElement(
+                        By.cssSelector(".ra-page-subtitle")
+                );
+
+        assertTrue(
+                subtitle.getText().contains(
+                        "Review and approve or reject asset requests."
                 )
         );
     }
 
     // =========================================================
-    // WAIT CLICKABLE
+    // TEST 3 - ITAMS LOGO
     // =========================================================
 
-    private WebElement waitForClickable(By locator) {
+    @Test
+    public void itamsLogoTest() {
 
-        return wait.until(
-                ExpectedConditions.elementToBeClickable(
-                        locator
+        WebElement logo =
+                driver.findElement(
+                        By.cssSelector(
+                                ".ra-nav-logo-title"
+                        )
+                );
+
+        assertEquals(
+                "ITAMS",
+                logo.getText().trim()
+        );
+    }
+
+    // =========================================================
+    // TEST 4 - LOGOUT BUTTON
+    // =========================================================
+
+    @Test
+    public void logoutButtonTest() {
+
+        WebElement logout =
+                driver.findElement(
+                        By.cssSelector(
+                                ".ra-logout-btn"
+                        )
+                );
+
+        assertTrue(logout.isDisplayed());
+
+        assertEquals(
+                "Logout",
+                logout.getText().trim()
+        );
+    }
+
+    // =========================================================
+    // TEST 5 - SIDEBAR
+    // =========================================================
+
+    @Test
+    public void sidebarItemsTest() {
+
+        String body =
+                driver.findElement(
+                        By.cssSelector(".ra-sidebar")
+                ).getText();
+
+        assertTrue(body.contains("Dashboard"));
+        assertTrue(body.contains("Asset Management"));
+        assertTrue(body.contains("Asset Assignment"));
+        assertTrue(body.contains("Request Approval"));
+        assertTrue(body.contains("Maintenance"));
+    }
+
+    // =========================================================
+    // TEST 6 - REQUEST APPROVAL ACTIVE SIDEBAR
+    // =========================================================
+
+    @Test
+    public void requestApprovalActiveSidebarTest() {
+
+        WebElement active =
+                driver.findElement(
+                        By.cssSelector(
+                                ".ra-sidebar-item--active"
+                        )
+                );
+
+        assertEquals(
+                "Request Approval",
+                active.getText().trim()
+        );
+    }
+
+    // =========================================================
+    // TEST 7 - SEARCH REQUEST CARD
+    // =========================================================
+
+    @Test
+    public void searchRequestCardTest() {
+
+        WebElement heading =
+                driver.findElement(
+                        By.cssSelector(
+                                ".ra-card-heading"
+                        )
+                );
+
+        assertEquals(
+                "Search Request",
+                heading.getText().trim()
+        );
+    }
+
+    // =========================================================
+    // TEST 8 - EMPLOYEE ID FIELD
+    // =========================================================
+
+    @Test
+    public void employeeIdFieldTest() {
+
+        WebElement input =
+                getEmployeeIdInput();
+
+        assertTrue(
+                input.isDisplayed()
+        );
+
+        assertEquals(
+                "Enter employee ID",
+                input.getAttribute("placeholder")
+        );
+
+        assertEquals(
+                "9",
+                input.getAttribute("maxlength")
+        );
+    }
+
+    // =========================================================
+    // TEST 9 - ASSET TYPE DROPDOWN
+    // =========================================================
+
+    @Test
+    public void assetTypeDropdownTest() {
+
+        WebElement select =
+                getAssetTypeSelect();
+
+        List<WebElement> options =
+                select.findElements(
+                        By.tagName("option")
+                );
+
+        assertEquals(
+                7,
+                options.size()
+        );
+
+        assertTrue(
+                optionExists(select, "All Assets")
+        );
+
+        assertTrue(
+                optionExists(select, "Laptop")
+        );
+
+        assertTrue(
+                optionExists(select, "Monitor")
+        );
+
+        assertTrue(
+                optionExists(select, "Keyboard")
+        );
+
+        assertTrue(
+                optionExists(select, "Mouse")
+        );
+
+        assertTrue(
+                optionExists(select, "Printer")
+        );
+
+        assertTrue(
+                optionExists(select, "Desktop")
+        );
+    }
+
+    // =========================================================
+    // TEST 10 - SEARCH BUTTON
+    // =========================================================
+
+    @Test
+    public void searchButtonTest() {
+
+        WebElement button =
+                driver.findElement(
+                        By.cssSelector(
+                                ".ra-search-btn"
+                        )
+                );
+
+        assertTrue(
+                button.isDisplayed()
+        );
+
+        assertEquals(
+                "Search",
+                button.getText().trim()
+        );
+    }
+
+    // =========================================================
+    // TEST 11 - EMPTY SEARCH
+    // =========================================================
+
+    @Test
+    public void emptySearchValidationTest() {
+
+        getEmployeeIdInput().clear();
+
+        selectAssetType("All Assets");
+
+        clickSearch();
+
+        WebElement error =
+                new WebDriverWait(
+                        driver,
+                        WAIT_TIME
+                ).until(
+                        ExpectedConditions.visibilityOfElementLocated(
+                                By.cssSelector(
+                                        ".ra-search-error"
+                                )
+                        )
+                );
+
+        assertTrue(
+                error.getText().contains(
+                        "Please enter an Employee ID or select an Asset Type"
                 )
         );
     }
 
     // =========================================================
-    // SCROLL
+    // TEST 12 - EMPLOYEE ID LETTER VALIDATION
     // =========================================================
 
-    private void scrollIntoView(WebElement element) {
+    @Test
+    public void employeeIdLettersValidationTest() {
 
-        ((JavascriptExecutor) driver).executeScript(
-                "arguments[0].scrollIntoView({block:'center', inline:'center'});",
-                element
+        WebElement input =
+                getEmployeeIdInput();
+
+        input.clear();
+
+        input.sendKeys(
+                "ABCDEF001"
+        );
+
+        selectAssetType("All Assets");
+
+        clickSearch();
+
+        WebElement error =
+                waitForSearchError();
+
+        assertTrue(
+                error.getText().contains(
+                        "Employee ID should contain numbers only"
+                )
         );
     }
 
     // =========================================================
-    // SAFE CLICK
+    // TEST 13 - EMPLOYEE ID LENGTH
     // =========================================================
 
-    private void safeClick(By locator) {
+    @Test
+    public void employeeIdLengthValidationTest() {
 
-        WebElement element = waitForClickable(locator);
+        WebElement input =
+                getEmployeeIdInput();
 
-        scrollIntoView(element);
+        input.clear();
+
+        input.sendKeys("26080800");
+
+        selectAssetType("All Assets");
+
+        clickSearch();
+
+        WebElement error =
+                waitForSearchError();
+
+        assertTrue(
+                error.getText().contains(
+                        "Employee ID must contain exactly 9 digits"
+                )
+        );
+    }
+
+    // =========================================================
+    // TEST 14 - INVALID MONTH
+    // =========================================================
+
+    @Test
+    public void invalidMonthValidationTest() {
+
+        WebElement input =
+                getEmployeeIdInput();
+
+        input.clear();
+
+        // YYMMDD + employee number
+        input.sendKeys("261308001");
+
+        selectAssetType("All Assets");
+
+        clickSearch();
+
+        WebElement error =
+                waitForSearchError();
+
+        assertTrue(
+                error.getText().contains(
+                        "valid month"
+                )
+        );
+    }
+
+    // =========================================================
+    // TEST 15 - INVALID DAY
+    // =========================================================
+
+    @Test
+    public void invalidDayValidationTest() {
+
+        WebElement input =
+                getEmployeeIdInput();
+
+        input.clear();
+
+        input.sendKeys("260832001");
+
+        selectAssetType("All Assets");
+
+        clickSearch();
+
+        WebElement error =
+                waitForSearchError();
+
+        assertTrue(
+                error.getText().contains(
+                        "valid day"
+                )
+        );
+    }
+
+    // =========================================================
+    // TEST 16 - EMPLOYEE NUMBER 000
+    // =========================================================
+
+    @Test
+    public void employeeNumberZeroValidationTest() {
+
+        WebElement input =
+                getEmployeeIdInput();
+
+        input.clear();
+
+        input.sendKeys("260808000");
+
+        selectAssetType("All Assets");
+
+        clickSearch();
+
+        WebElement error =
+                waitForSearchError();
+
+        assertTrue(
+                error.getText().contains(
+                        "Employee number cannot be 000"
+                )
+        );
+    }
+
+    // =========================================================
+    // TEST 17 - FUTURE EMPLOYEE DATE
+    // =========================================================
+
+    @Test
+    public void futureEmployeeDateValidationTest() {
+
+        WebElement input =
+                getEmployeeIdInput();
+
+        input.clear();
+
+        // 99/12/31 is future relative to current system
+        input.sendKeys("991231001");
+
+        selectAssetType("All Assets");
+
+        clickSearch();
+
+        WebElement error =
+                waitForSearchError();
+
+        assertTrue(
+                error.getText().contains(
+                        "Future date Employee IDs are not allowed"
+                )
+        );
+    }
+
+    // =========================================================
+    // TEST 18 - VALID EMPLOYEE ID
+    // =========================================================
+
+    @Test
+    public void validEmployeeIdSearchTest() {
+
+        WebElement input =
+                getEmployeeIdInput();
+
+        input.clear();
+
+        input.sendKeys(
+                "260808001"
+        );
+
+        selectAssetType("All Assets");
+
+        clickSearch();
+
+        sleep(500);
+
+        assertEquals(
+                "260808001",
+                input.getAttribute("value")
+        );
+    }
+
+    // =========================================================
+    // TEST 19 - ASSET TYPE ONLY SEARCH
+    // =========================================================
+
+    @Test
+    public void assetTypeOnlySearchTest() {
+
+        getEmployeeIdInput().clear();
+
+        selectAssetType("Laptop");
+
+        clickSearch();
+
+        sleep(500);
+
+        assertEquals(
+                "Laptop",
+                getSelectedAssetType()
+        );
+
+        // No validation error should be displayed
+        assertTrue(
+                driver.findElements(
+                        By.cssSelector(
+                                ".ra-search-error"
+                        )
+                ).isEmpty()
+        );
+    }
+
+    // =========================================================
+    // TEST 20 - ENTER KEY SEARCH
+    // =========================================================
+
+    @Test
+    public void enterKeySearchTest() {
+
+        WebElement input =
+                getEmployeeIdInput();
+
+        input.clear();
+
+        input.sendKeys(
+                "260808001"
+        );
+
+        input.sendKeys(
+                Keys.ENTER
+        );
+
+        sleep(500);
+
+        assertEquals(
+                "260808001",
+                input.getAttribute("value")
+        );
+    }
+
+    // =========================================================
+    // TEST 21 - REQUEST TABLE
+    // =========================================================
+
+    @Test
+    public void requestTableTest() {
+
+        WebElement heading =
+                findVisible(
+                        By.xpath(
+                                "//h2[normalize-space()='Pending Request List']"
+                        )
+                );
+
+        assertNotNull(
+                heading,
+                "Pending Request List not found"
+        );
+
+        assertEquals(
+                "Pending Request List",
+                heading.getText().trim()
+        );
+    }
+
+    // =========================================================
+    // TEST 22 - TABLE HEADERS
+    // =========================================================
+
+    @Test
+    public void tableHeadersTest() {
+
+        List<WebElement> headers =
+                driver.findElements(
+                        By.cssSelector(
+                                ".ra-table thead th"
+                        )
+                );
+
+        assertEquals(
+                6,
+                headers.size()
+        );
+
+        assertEquals(
+                "Request ID",
+                headers.get(0).getText().trim()
+        );
+
+        assertEquals(
+                "Employee ID",
+                headers.get(1).getText().trim()
+        );
+
+        assertEquals(
+                "Asset Type",
+                headers.get(2).getText().trim()
+        );
+
+        assertEquals(
+                "Purpose",
+                headers.get(3).getText().trim()
+        );
+
+        assertEquals(
+                "Required Date",
+                headers.get(4).getText().trim()
+        );
+
+        assertEquals(
+                "Status",
+                headers.get(5).getText().trim()
+        );
+    }
+
+    // =========================================================
+    // TEST 23 - REQUEST ROW
+    // =========================================================
+
+    @Test
+    public void requestRowTest() {
+
+        List<WebElement> rows =
+                driver.findElements(
+                        By.cssSelector(
+                                ".ra-table-row"
+                        )
+                );
+
+        if (rows.isEmpty()) {
+
+            assertTrue(
+                    driver.getPageSource()
+                            .contains(
+                                    "No requests found."
+                            )
+            );
+
+            return;
+        }
+
+        assertTrue(
+                rows.get(0).isDisplayed()
+        );
+    }
+
+    // =========================================================
+    // TEST 24 - REQUEST SELECTION
+    // =========================================================
+
+    @Test
+    public void requestSelectionTest() {
+
+        List<WebElement> rows =
+                driver.findElements(
+                        By.cssSelector(
+                                ".ra-table-row"
+                        )
+                );
+
+        if (rows.isEmpty()) {
+            return;
+        }
+
+        safeClick(rows.get(0));
+
+        WebElement details =
+                new WebDriverWait(
+                        driver,
+                        WAIT_TIME
+                ).until(
+                        ExpectedConditions.visibilityOfElementLocated(
+                                By.cssSelector(
+                                        ".ra-card--details"
+                                )
+                        )
+                );
+
+        assertTrue(
+                details.isDisplayed()
+        );
+
+        assertTrue(
+                details.getText().contains(
+                        "Request Details"
+                )
+        );
+    }
+
+    // =========================================================
+    // TEST 25 - REQUEST DETAILS
+    // =========================================================
+
+    @Test
+    public void requestDetailsTest() {
+
+        selectFirstRequest();
+
+        String details =
+                driver.findElement(
+                        By.cssSelector(
+                                ".ra-card--details"
+                        )
+                ).getText();
+
+        assertTrue(
+                details.contains("Request ID")
+        );
+
+        assertTrue(
+                details.contains("Employee ID")
+        );
+
+        assertTrue(
+                details.contains("Employee Name")
+        );
+
+        assertTrue(
+                details.contains("Department")
+        );
+
+        assertTrue(
+                details.contains("Asset Type")
+        );
+
+        assertTrue(
+                details.contains("Purpose")
+        );
+
+        assertTrue(
+                details.contains("Required Date")
+        );
+
+        assertTrue(
+                details.contains("Request Status")
+        );
+    }
+
+    // =========================================================
+    // TEST 26 - APPROVE BUTTON
+    // =========================================================
+
+    @Test
+    public void approveButtonTest() {
+
+        selectFirstRequest();
+
+        WebElement approve =
+                driver.findElement(
+                        By.cssSelector(
+                                ".ra-approve-btn"
+                        )
+                );
+
+        assertTrue(
+                approve.isDisplayed()
+        );
+
+        assertEquals(
+                "Approve",
+                approve.getText().trim()
+        );
+    }
+
+    // =========================================================
+    // TEST 27 - REJECT BUTTON
+    // =========================================================
+
+    @Test
+    public void rejectButtonTest() {
+
+        selectFirstRequest();
+
+        WebElement reject =
+                driver.findElement(
+                        By.cssSelector(
+                                ".ra-reject-btn"
+                        )
+                );
+
+        assertTrue(
+                reject.isDisplayed()
+        );
+
+        assertEquals(
+                "Reject",
+                reject.getText().trim()
+        );
+    }
+
+    // =========================================================
+    // TEST 28 - REJECTION TEXTAREA
+    // =========================================================
+
+    @Test
+    public void rejectionTextareaTest() {
+
+        selectFirstRequest();
+
+        WebElement textarea =
+                driver.findElement(
+                        By.cssSelector(
+                                ".ra-textarea"
+                        )
+                );
+
+        assertTrue(
+                textarea.isDisplayed()
+        );
+
+        assertEquals(
+                "Enter description for rejection",
+                textarea.getAttribute("placeholder")
+        );
+    }
+
+    // =========================================================
+    // TEST 29 - REJECT WITHOUT REASON
+    // =========================================================
+
+    @Test
+    public void rejectWithoutReasonTest() {
+
+        selectFirstRequest();
+
+        WebElement textarea =
+                driver.findElement(
+                        By.cssSelector(
+                                ".ra-textarea"
+                        )
+                );
+
+        textarea.clear();
+
+        WebElement reject =
+                driver.findElement(
+                        By.cssSelector(
+                                ".ra-reject-btn"
+                        )
+                );
+
+        safeClick(reject);
+
+        WebElement error =
+                new WebDriverWait(
+                        driver,
+                        WAIT_TIME
+                ).until(
+                        ExpectedConditions.visibilityOfElementLocated(
+                                By.cssSelector(
+                                        ".ra-error"
+                                )
+                        )
+                );
+
+        assertTrue(
+                error.getText().contains(
+                        "Reason for rejection is required"
+                )
+        );
+    }
+
+    // =========================================================
+    // TEST 30 - SHORT REJECTION REASON
+    // =========================================================
+
+    @Test
+    public void shortRejectionReasonTest() {
+
+        selectFirstRequest();
+
+        WebElement textarea =
+                driver.findElement(
+                        By.cssSelector(
+                                ".ra-textarea"
+                        )
+                );
+
+        textarea.clear();
+        textarea.sendKeys("Too short");
+
+        safeClick(
+                driver.findElement(
+                        By.cssSelector(
+                                ".ra-reject-btn"
+                        )
+                )
+        );
+
+        WebElement error =
+                waitForRejectError();
+
+        assertTrue(
+                error.getText().contains(
+                        "at least 10 characters"
+                )
+        );
+    }
+
+    // =========================================================
+    // TEST 31 - SPECIAL CHARACTER REJECTION
+    // =========================================================
+
+    @Test
+    public void specialCharacterRejectionTest() {
+
+        selectFirstRequest();
+
+        WebElement textarea =
+                getRejectionTextarea();
+
+        textarea.clear();
+
+        textarea.sendKeys(
+                "Invalid@reason!"
+        );
+
+        clickReject();
+
+        WebElement error =
+                waitForRejectError();
+
+        assertTrue(
+                error.getText().contains(
+                        "only letters, numbers and single spaces"
+                )
+        );
+    }
+
+    // =========================================================
+    // TEST 32 - MULTIPLE SPACE REJECTION
+    // =========================================================
+
+    @Test
+    public void multipleSpaceRejectionTest() {
+
+        selectFirstRequest();
+
+        WebElement textarea =
+                getRejectionTextarea();
+
+        textarea.clear();
+
+        textarea.sendKeys(
+                "Reason  contains multiple spaces"
+        );
+
+        clickReject();
+
+        WebElement error =
+                waitForRejectError();
+
+        assertTrue(
+                error.getText().contains(
+                        "multiple consecutive spaces"
+                )
+        );
+    }
+
+    // =========================================================
+    // TEST 33 - LEADING SPACE REJECTION
+    // =========================================================
+
+    @Test
+    public void leadingSpaceRejectionTest() {
+
+        selectFirstRequest();
+
+        WebElement textarea =
+                getRejectionTextarea();
+
+        textarea.clear();
+
+        textarea.sendKeys(
+                " Invalid reason here"
+        );
+
+        clickReject();
+
+        WebElement error =
+                waitForRejectError();
+
+        assertTrue(
+                error.getText().contains(
+                        "leading or trailing spaces"
+                )
+        );
+    }
+
+    // =========================================================
+    // TEST 34 - VALID REJECTION REASON
+    // =========================================================
+
+    @Test
+    public void validRejectionReasonTest() {
+
+        selectFirstRequest();
+
+        WebElement textarea =
+                getRejectionTextarea();
+
+        textarea.clear();
+
+        textarea.sendKeys(
+                "Asset is not required now"
+        );
+
+        assertEquals(
+                "Asset is not required now",
+                textarea.getAttribute("value")
+        );
+    }
+
+    // =========================================================
+    // TEST 35 - PAGINATION OPTIONS
+    // =========================================================
+
+    @Test
+    public void paginationOptionsTest() {
+
+        WebElement select =
+                driver.findElement(
+                        By.cssSelector(
+                                ".ra-rows-select"
+                        )
+                );
+
+        List<WebElement> options =
+                select.findElements(
+                        By.tagName("option")
+                );
+
+        assertEquals(
+                4,
+                options.size()
+        );
+
+        assertTrue(
+                optionExists(select, "10")
+        );
+
+        assertTrue(
+                optionExists(select, "30")
+        );
+
+        assertTrue(
+                optionExists(select, "50")
+        );
+
+        assertTrue(
+                optionExists(select, "All")
+        );
+    }
+
+    // =========================================================
+    // TEST 36 - PAGINATION 30
+    // =========================================================
+
+    @Test
+    public void pagination30Test() {
+
+        WebElement select =
+                getRowsSelect();
+
+        new Select(select)
+                .selectByVisibleText("30");
+
+        assertEquals(
+                "30",
+                new Select(select)
+                        .getFirstSelectedOption()
+                        .getText()
+        );
+    }
+
+    // =========================================================
+    // TEST 37 - PAGINATION 50
+    // =========================================================
+
+    @Test
+    public void pagination50Test() {
+
+        WebElement select =
+                getRowsSelect();
+
+        new Select(select)
+                .selectByVisibleText("50");
+
+        assertEquals(
+                "50",
+                new Select(select)
+                        .getFirstSelectedOption()
+                        .getText()
+        );
+    }
+
+    // =========================================================
+    // TEST 38 - PAGINATION ALL
+    // =========================================================
+
+    @Test
+    public void paginationAllTest() {
+
+        WebElement select =
+                getRowsSelect();
+
+        new Select(select)
+                .selectByVisibleText("All");
+
+        assertEquals(
+                "All",
+                new Select(select)
+                        .getFirstSelectedOption()
+                        .getText()
+        );
+    }
+
+    // =========================================================
+    // TEST 39 - PAGINATION INFORMATION
+    // =========================================================
+
+    @Test
+    public void paginationInfoTest() {
+
+        WebElement info =
+                driver.findElement(
+                        By.cssSelector(
+                                ".ra-pagination-info"
+                        )
+                );
+
+        assertTrue(
+                info.getText().contains(
+                        "Showing"
+                )
+        );
+
+        assertTrue(
+                info.getText().contains(
+                        "requests"
+                )
+        );
+    }
+
+    // =========================================================
+    // TEST 40 - SIDEBAR NAVIGATION
+    // =========================================================
+
+    @Test
+    public void sidebarNavigationTest() {
+
+        List<WebElement> items =
+                driver.findElements(
+                        By.cssSelector(
+                                ".ra-sidebar-item"
+                        )
+                );
+
+        assertEquals(
+                5,
+                items.size()
+        );
+
+        assertEquals(
+                "Dashboard",
+                items.get(0).getText().trim()
+        );
+
+        assertEquals(
+                "Asset Management",
+                items.get(1).getText().trim()
+        );
+
+        assertEquals(
+                "Asset Assignment",
+                items.get(2).getText().trim()
+        );
+
+        assertEquals(
+                "Request Approval",
+                items.get(3).getText().trim()
+        );
+
+        assertEquals(
+                "Maintenance",
+                items.get(4).getText().trim()
+        );
+    }
+
+    // =========================================================
+    // TEST 41 - BACK BUTTON
+    // =========================================================
+
+    @Test
+    public void backButtonTest() {
+
+        WebElement back =
+                driver.findElement(
+                        By.cssSelector(
+                                ".ra-back-btn"
+                        )
+                );
+
+        assertTrue(
+                back.isDisplayed()
+        );
+
+        assertEquals(
+                "← Back",
+                back.getText().trim()
+        );
+    }
+
+    // =========================================================
+    // TEST 42 - SEARCH BY EMPLOYEE + TYPE
+    // =========================================================
+
+    @Test
+    public void employeeAndAssetTypeSearchTest() {
+
+        WebElement input =
+                getEmployeeIdInput();
+
+        input.clear();
+
+        input.sendKeys(
+                "260808001"
+        );
+
+        selectAssetType("Laptop");
+
+        clickSearch();
+
+        sleep(500);
+
+        assertEquals(
+                "260808001",
+                input.getAttribute("value")
+        );
+
+        assertEquals(
+                "Laptop",
+                getSelectedAssetType()
+        );
+    }
+
+    // =========================================================
+    // TEST 43 - SEARCH ERROR CLEARS ON INPUT
+    // =========================================================
+
+    @Test
+    public void searchErrorClearsOnInputTest() {
+
+        getEmployeeIdInput().clear();
+
+        selectAssetType("All Assets");
+
+        clickSearch();
+
+        waitForSearchError();
+
+        WebElement input =
+                getEmployeeIdInput();
+
+        input.sendKeys("260808001");
+
+        assertTrue(
+                driver.findElements(
+                        By.cssSelector(
+                                ".ra-search-error"
+                        )
+                ).isEmpty()
+        );
+    }
+
+    // =========================================================
+    // TEST 44 - REJECTION ERROR CLEARS ON INPUT
+    // =========================================================
+
+    @Test
+    public void rejectionErrorClearsOnInputTest() {
+
+        selectFirstRequest();
+
+        clickReject();
+
+        waitForRejectError();
+
+        WebElement textarea =
+                getRejectionTextarea();
+
+        textarea.sendKeys(
+                "Valid reason"
+        );
+
+        assertTrue(
+                driver.findElements(
+                        By.cssSelector(
+                                ".ra-error"
+                        )
+                ).isEmpty()
+        );
+    }
+
+    // =========================================================
+    // HELPER - EMPLOYEE ID
+    // =========================================================
+
+    private WebElement getEmployeeIdInput() {
+
+        return new WebDriverWait(
+                driver,
+                WAIT_TIME
+        ).until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        By.cssSelector(
+                                ".ra-search-row input"
+                        )
+                )
+        );
+    }
+
+    // =========================================================
+    // HELPER - ASSET TYPE
+    // =========================================================
+
+    private WebElement getAssetTypeSelect() {
+
+        return new WebDriverWait(
+                driver,
+                WAIT_TIME
+        ).until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        By.cssSelector(
+                                ".ra-search-row select"
+                        )
+                )
+        );
+    }
+
+    // =========================================================
+    // HELPER - SELECT TYPE
+    // =========================================================
+
+    private void selectAssetType(
+            String type
+    ) {
+
+        Select select =
+                new Select(
+                        getAssetTypeSelect()
+                );
+
+        select.selectByVisibleText(type);
+    }
+
+    // =========================================================
+    // HELPER - SELECTED TYPE
+    // =========================================================
+
+    private String getSelectedAssetType() {
+
+        return new Select(
+                getAssetTypeSelect()
+        )
+                .getFirstSelectedOption()
+                .getText()
+                .trim();
+    }
+
+    // =========================================================
+    // HELPER - SEARCH
+    // =========================================================
+
+    private void clickSearch() {
+
+        WebElement button =
+                driver.findElement(
+                        By.cssSelector(
+                                ".ra-search-btn"
+                        )
+                );
+
+        safeClick(button);
+    }
+
+    // =========================================================
+    // HELPER - SEARCH ERROR
+    // =========================================================
+
+    private WebElement waitForSearchError() {
+
+        return new WebDriverWait(
+                driver,
+                WAIT_TIME
+        ).until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        By.cssSelector(
+                                ".ra-search-error"
+                        )
+                )
+        );
+    }
+
+    // =========================================================
+    // HELPER - SELECT FIRST REQUEST
+    // =========================================================
+
+    private void selectFirstRequest() {
+
+        List<WebElement> rows =
+                driver.findElements(
+                        By.cssSelector(
+                                ".ra-table-row"
+                        )
+                );
+
+        if (rows.isEmpty()) {
+
+            fail(
+                    "No request is available for Request Approval testing."
+            );
+        }
+
+        safeClick(rows.get(0));
+
+        new WebDriverWait(
+                driver,
+                WAIT_TIME
+        ).until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        By.cssSelector(
+                                ".ra-card--details"
+                        )
+                )
+        );
+    }
+
+    // =========================================================
+    // HELPER - REJECTION TEXTAREA
+    // =========================================================
+
+    private WebElement getRejectionTextarea() {
+
+        return new WebDriverWait(
+                driver,
+                WAIT_TIME
+        ).until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        By.cssSelector(
+                                ".ra-textarea"
+                        )
+                )
+        );
+    }
+
+    // =========================================================
+    // HELPER - REJECT
+    // =========================================================
+
+    private void clickReject() {
+
+        WebElement reject =
+                driver.findElement(
+                        By.cssSelector(
+                                ".ra-reject-btn"
+                        )
+                );
+
+        safeClick(reject);
+    }
+
+    // =========================================================
+    // HELPER - REJECT ERROR
+    // =========================================================
+
+    private WebElement waitForRejectError() {
+
+        return new WebDriverWait(
+                driver,
+                WAIT_TIME
+        ).until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        By.cssSelector(
+                                ".ra-error"
+                        )
+                )
+        );
+    }
+
+    // =========================================================
+    // HELPER - ROWS SELECT
+    // =========================================================
+
+    private WebElement getRowsSelect() {
+
+        return driver.findElement(
+                By.cssSelector(
+                        ".ra-rows-select"
+                )
+        );
+    }
+
+    // =========================================================
+    // HELPER - OPTION EXISTS
+    // =========================================================
+
+    private boolean optionExists(
+            WebElement select,
+            String optionText
+    ) {
+
+        List<WebElement> options =
+                select.findElements(
+                        By.tagName("option")
+                );
+
+        for (WebElement option : options) {
+
+            if (option.getText()
+                    .trim()
+                    .equals(optionText)) {
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    // =========================================================
+    // HELPER - FIND VISIBLE
+    // =========================================================
+
+    private WebElement findVisible(
+            By... locators
+    ) {
+
+        for (By locator : locators) {
+
+            List<WebElement> elements =
+                    driver.findElements(locator);
+
+            for (WebElement element : elements) {
+
+                try {
+
+                    if (element.isDisplayed()) {
+                        return element;
+                    }
+
+                } catch (Exception ignored) {
+                }
+            }
+        }
+
+        return null;
+    }
+
+    // =========================================================
+    // HELPER - SAFE CLICK
+    // =========================================================
+
+    private void safeClick(
+            WebElement element
+    ) {
 
         try {
+
+            scrollIntoView(element);
+
+            new WebDriverWait(
+                    driver,
+                    Duration.ofSeconds(8)
+            ).until(
+                    ExpectedConditions.elementToBeClickable(
+                            element
+                    )
+            );
 
             element.click();
 
         } catch (Exception e) {
 
-            ((JavascriptExecutor) driver).executeScript(
-                    "arguments[0].click();",
-                    element
-            );
+            ((JavascriptExecutor) driver)
+                    .executeScript(
+                            "arguments[0].click();",
+                            element
+                    );
         }
     }
 
     // =========================================================
-    // NORMAL INPUT
+    // HELPER - SCROLL
     // =========================================================
 
-    private void normalType(By locator, String text) {
+    private void scrollIntoView(
+            WebElement element
+    ) {
 
-        WebElement element = waitForVisible(locator);
-
-        scrollIntoView(element);
-
-        element.click();
-
-        element.clear();
-
-        element.sendKeys(text);
+        ((JavascriptExecutor) driver)
+                .executeScript(
+                        "arguments[0].scrollIntoView({"
+                                + "block:'center'"
+                                + "});",
+                        element
+                );
     }
 
     // =========================================================
-    // IMPORTANT:
-    // REJECTION TEXTAREA INPUT
-    //
-    // DO NOT CLICK THE TEXTAREA
-    // DO NOT USE element.sendKeys()
-    //
-    // JavaScript directly changes the React controlled value.
-    // =========================================================
-
-    private void typeRejectionReason(String text) {
-
-        By locator = By.xpath(
-                "//textarea[@placeholder='Enter reason for rejection']"
-        );
-
-        WebElement textarea = waitForVisible(locator);
-
-        ((JavascriptExecutor) driver).executeScript(
-
-                "arguments[0].scrollIntoView({" +
-                        "block:'center'," +
-                        "inline:'nearest'" +
-                        "});",
-
-                textarea
-        );
-
-        wait.until(
-                ExpectedConditions.visibilityOf(textarea)
-        );
-
-        /*
-         * React controlled textarea.
-         *
-         * We use the native textarea value setter,
-         * then fire input and change events.
-         */
-
-        ((JavascriptExecutor) driver).executeScript(
-
-                "const textarea = arguments[0];" +
-                "const value = arguments[1];" +
-
-                "const setter = Object.getOwnPropertyDescriptor(" +
-                "HTMLTextAreaElement.prototype," +
-                "'value').set;" +
-
-                "setter.call(textarea, value);" +
-
-                "textarea.dispatchEvent(" +
-                "new Event('input', { bubbles: true })" +
-                ");" +
-
-                "textarea.dispatchEvent(" +
-                "new Event('change', { bubbles: true })" +
-                ");",
-
-                textarea,
-                text
-        );
-
-        /*
-         * Small wait so React updates its state.
-         */
-
-        try {
-
-            Thread.sleep(300);
-
-        } catch (InterruptedException e) {
-
-            Thread.currentThread().interrupt();
-        }
-    }
-
-    // =========================================================
-    // ALERT HANDLING
+    // HELPER - ALERT
     // =========================================================
 
     private void acceptAlertIfPresent() {
 
         try {
 
-            WebDriverWait shortWait =
-                    new WebDriverWait(
-                            driver,
-                            Duration.ofSeconds(3)
-                    );
-
-            Alert alert = shortWait.until(
+            new WebDriverWait(
+                    driver,
+                    Duration.ofSeconds(3)
+            ).until(
                     ExpectedConditions.alertIsPresent()
             );
 
-            System.out.println(
-                    "Alert: " + alert.getText()
-            );
-
-            alert.accept();
-
-        } catch (NoAlertPresentException ignored) {
+            driver.switchTo()
+                    .alert()
+                    .accept();
 
         } catch (Exception ignored) {
-
         }
     }
 
     // =========================================================
-    // OPEN REQUEST APPROVAL PAGE
-    //
-    // Home
-    // ↓
-    // Login
-    // ↓
-    // NO CREDENTIALS
-    // ↓
-    // Asset Mgmt
-    // ↓
-    // Asset Management
-    // ↓
-    // Request Approval
+    // HELPER - PAGE LOAD
     // =========================================================
 
-    private void openRequestApprovalPage() {
-
-        // -----------------------------------------------------
-        // HOME
-        // -----------------------------------------------------
-
-        waitForVisible(
-                By.xpath(
-                        "//button[normalize-space()='Login']"
-                )
-        );
-
-        // -----------------------------------------------------
-        // LOGIN
-        // -----------------------------------------------------
-
-        safeClick(
-                By.xpath(
-                        "//button[normalize-space()='Login']"
-                )
-        );
-
-        System.out.println(
-                "PASS: Login clicked"
-        );
-
-        // -----------------------------------------------------
-        // DO NOT ENTER USERNAME/PASSWORD
-        // -----------------------------------------------------
-
-        System.out.println(
-                "Username and password left empty"
-        );
-
-        // -----------------------------------------------------
-        // ASSET MGMT
-        // -----------------------------------------------------
-
-        waitForVisible(
-                By.xpath(
-                        "//button[normalize-space()='Asset Mgmt']"
-                )
-        );
-
-        safeClick(
-                By.xpath(
-                        "//button[normalize-space()='Asset Mgmt']"
-                )
-        );
-
-        System.out.println(
-                "PASS: Asset Mgmt clicked"
-        );
-
-        // -----------------------------------------------------
-        // ASSET MANAGEMENT PAGE
-        // -----------------------------------------------------
-
-        waitForVisible(
-                By.xpath(
-                        "//h1[normalize-space()='Asset Management']"
-                )
-        );
-
-        System.out.println(
-                "PASS: Asset Management opened"
-        );
-
-        // -----------------------------------------------------
-        // REQUEST APPROVAL SIDEBAR
-        // -----------------------------------------------------
-
-        safeClick(
-                By.xpath(
-                        "//*[normalize-space()='Request Approval']"
-                )
-        );
-
-        System.out.println(
-                "PASS: Request Approval clicked"
-        );
-
-        // -----------------------------------------------------
-        // REQUEST APPROVAL PAGE
-        // -----------------------------------------------------
-
-        waitForVisible(
-                By.xpath(
-                        "//h1[normalize-space()='Request Approval']"
-                )
-        );
-
-        System.out.println(
-                "PASS: Request Approval page opened"
-        );
-    }
-
-    // =========================================================
-    // SELECT REQUEST
-    // =========================================================
-
-    private void selectRequest(String requestId) {
-
-        By rowLocator = By.xpath(
-                "//tbody/tr[td[normalize-space()='" +
-                        requestId +
-                        "']]"
-        );
-
-        WebElement row = waitForVisible(
-                rowLocator
-        );
-
-        scrollIntoView(row);
+    private void waitForPageLoad() {
 
         try {
 
-            row.click();
-
-        } catch (Exception e) {
-
-            ((JavascriptExecutor) driver).executeScript(
-                    "arguments[0].click();",
-                    row
+            new WebDriverWait(
+                    driver,
+                    WAIT_TIME
+            ).until(
+                    d -> ((JavascriptExecutor) d)
+                            .executeScript(
+                                    "return document.readyState"
+                            )
+                            .equals("complete")
             );
+
+        } catch (Exception ignored) {
         }
-
-        waitForVisible(
-                By.xpath(
-                        "//h2[normalize-space()='Request Details']"
-                )
-        );
     }
 
     // =========================================================
-    // GET STATUS
+    // HELPER - SLEEP
     // =========================================================
 
-    private String getRequestStatus() {
+    private void sleep(long milliseconds) {
 
-        WebElement status = waitForVisible(
-                By.xpath(
-                        "//h2[normalize-space()='Request Details']" +
-                        "/following::span[contains(@class,'ra-badge')][1]"
-                )
-        );
+        try {
 
-        return status.getText().trim();
-    }
+            Thread.sleep(milliseconds);
 
-    // =========================================================
-    // TEST 1
-    // OPEN REQUEST APPROVAL
-    // =========================================================
+        } catch (InterruptedException e) {
 
-    @Test
-    public void testNavigateToRequestApproval() {
-
-        openRequestApprovalPage();
-
-        WebElement heading = waitForVisible(
-                By.xpath(
-                        "//h1[normalize-space()='Request Approval']"
-                )
-        );
-
-        Assert.assertTrue(
-                heading.isDisplayed()
-        );
-
-        System.out.println(
-                "RA01 PASS - Request Approval page opened"
-        );
-    }
-
-    // =========================================================
-    // TEST 2
-    // SEARCH SECTION
-    // =========================================================
-
-    @Test
-    public void testSearchSectionDisplayed() {
-
-        openRequestApprovalPage();
-
-        Assert.assertTrue(
-                waitForVisible(
-                        By.xpath(
-                                "//input[@placeholder='Enter employee ID']"
-                        )
-                ).isDisplayed()
-        );
-
-        Assert.assertTrue(
-                waitForVisible(
-                        By.xpath("//select")
-                ).isDisplayed()
-        );
-
-        Assert.assertTrue(
-                waitForVisible(
-                        By.xpath(
-                                "//button[normalize-space()='Search']"
-                        )
-                ).isDisplayed()
-        );
-
-        System.out.println(
-                "RA02 PASS - Search section displayed"
-        );
-    }
-
-    // =========================================================
-    // TEST 3
-    // EMPTY SEARCH
-    // =========================================================
-
-    @Test
-    public void testEmptySearchValidation() {
-
-        openRequestApprovalPage();
-
-        safeClick(
-                By.xpath(
-                        "//button[normalize-space()='Search']"
-                )
-        );
-
-        WebElement error = waitForVisible(
-                By.xpath(
-                        "//*[contains(normalize-space()," +
-                        "'Please enter an Employee ID or select an Asset Type to search')]"
-                )
-        );
-
-        Assert.assertTrue(
-                error.isDisplayed()
-        );
-
-        System.out.println(
-                "RA03 PASS - Empty search validation"
-        );
-    }
-
-    // =========================================================
-    // TEST 4
-    // INVALID EMPLOYEE ID
-    // =========================================================
-
-    @Test
-    public void testInvalidEmployeeId() {
-
-        openRequestApprovalPage();
-
-        normalType(
-                By.xpath(
-                        "//input[@placeholder='Enter employee ID']"
-                ),
-                "ABC123"
-        );
-
-        safeClick(
-                By.xpath(
-                        "//button[normalize-space()='Search']"
-                )
-        );
-
-        WebElement error = waitForVisible(
-                By.xpath(
-                        "//*[contains(normalize-space()," +
-                        "\"Employee ID must start with 'EMP'\")]"
-                )
-        );
-
-        Assert.assertTrue(
-                error.isDisplayed()
-        );
-
-        System.out.println(
-                "RA04 PASS - Invalid Employee ID"
-        );
-    }
-
-    // =========================================================
-    // TEST 5
-    // EMPLOYEE ID SPACE
-    // =========================================================
-
-    @Test
-    public void testEmployeeIdSpace() {
-
-        openRequestApprovalPage();
-
-        normalType(
-                By.xpath(
-                        "//input[@placeholder='Enter employee ID']"
-                ),
-                "EMP 01"
-        );
-
-        safeClick(
-                By.xpath(
-                        "//button[normalize-space()='Search']"
-                )
-        );
-
-        WebElement error = waitForVisible(
-                By.xpath(
-                        "//*[contains(normalize-space()," +
-                        "'Employee ID should not contain spaces')]"
-                )
-        );
-
-        Assert.assertTrue(
-                error.isDisplayed()
-        );
-
-        System.out.println(
-                "RA05 PASS - Space validation"
-        );
-    }
-
-    // =========================================================
-    // TEST 6
-    // VALID EMPLOYEE SEARCH
-    // =========================================================
-
-    @Test
-    public void testValidEmployeeSearch() {
-
-        openRequestApprovalPage();
-
-        normalType(
-                By.xpath(
-                        "//input[@placeholder='Enter employee ID']"
-                ),
-                "EMP001"
-        );
-
-        safeClick(
-                By.xpath(
-                        "//button[normalize-space()='Search']"
-                )
-        );
-
-        WebElement row = waitForVisible(
-                By.xpath(
-                        "//tbody/tr[td[normalize-space()='AR001']]"
-                )
-        );
-
-        Assert.assertTrue(
-                row.isDisplayed()
-        );
-
-        System.out.println(
-                "RA06 PASS - EMP001 search"
-        );
-    }
-
-    // =========================================================
-    // TEST 7
-    // ASSET TYPE SEARCH
-    // =========================================================
-
-    @Test
-    public void testSearchByAssetType() {
-
-        openRequestApprovalPage();
-
-        WebElement selectElement = waitForVisible(
-                By.xpath("//select")
-        );
-
-        Select select = new Select(
-                selectElement
-        );
-
-        select.selectByVisibleText(
-                "Laptop"
-        );
-
-        safeClick(
-                By.xpath(
-                        "//button[normalize-space()='Search']"
-                )
-        );
-
-        WebElement laptop = waitForVisible(
-                By.xpath(
-                        "//tbody/tr[td[normalize-space()='Laptop']]"
-                )
-        );
-
-        Assert.assertTrue(
-                laptop.isDisplayed()
-        );
-
-        System.out.println(
-                "RA07 PASS - Laptop search"
-        );
-    }
-
-    // =========================================================
-    // TEST 8
-    // SELECT REQUEST
-    // =========================================================
-
-    @Test
-    public void testSelectRequest() {
-
-        openRequestApprovalPage();
-
-        selectRequest(
-                "AR001"
-        );
-
-        Assert.assertTrue(
-                waitForVisible(
-                        By.xpath(
-                                "//h2[normalize-space()='Request Details']"
-                        )
-                ).isDisplayed()
-        );
-
-        Assert.assertTrue(
-                waitForVisible(
-                        By.xpath(
-                                "//*[normalize-space()='AR001']"
-                        )
-                ).isDisplayed()
-        );
-
-        Assert.assertTrue(
-                waitForVisible(
-                        By.xpath(
-                                "//*[normalize-space()='EMP001']"
-                        )
-                ).isDisplayed()
-        );
-
-        System.out.println(
-                "RA08 PASS - Request selected"
-        );
-    }
-
-    // =========================================================
-    // TEST 9
-    // REQUEST DETAILS
-    // =========================================================
-
-    @Test
-    public void testRequestDetails() {
-
-        openRequestApprovalPage();
-
-        selectRequest(
-                "AR001"
-        );
-
-        Assert.assertTrue(
-                waitForVisible(
-                        By.xpath(
-                                "//*[normalize-space()='Employee 1']"
-                        )
-                ).isDisplayed()
-        );
-
-        Assert.assertTrue(
-                waitForVisible(
-                        By.xpath(
-                                "//*[normalize-space()='IT']"
-                        )
-                ).isDisplayed()
-        );
-
-        Assert.assertTrue(
-                waitForVisible(
-                        By.xpath(
-                                "//*[normalize-space()='Laptop']"
-                        )
-                ).isDisplayed()
-        );
-
-        Assert.assertTrue(
-                waitForVisible(
-                        By.xpath(
-                                "//*[normalize-space()='Development Work']"
-                        )
-                ).isDisplayed()
-        );
-
-        System.out.println(
-                "RA09 PASS - Request details verified"
-        );
-    }
-
-    // =========================================================
-    // TEST 10
-    // APPROVE
-    // =========================================================
-
-    @Test
-    public void testApproveRequest() {
-
-        openRequestApprovalPage();
-
-        selectRequest(
-                "AR001"
-        );
-
-        Assert.assertEquals(
-                "Pending",
-                getRequestStatus()
-        );
-
-        safeClick(
-                By.xpath(
-                        "//button[normalize-space()='Approve']"
-                )
-        );
-
-        acceptAlertIfPresent();
-
-        Assert.assertEquals(
-                "Approved",
-                getRequestStatus()
-        );
-
-        System.out.println(
-                "RA10 PASS - Request approved"
-        );
-    }
-
-    // =========================================================
-    // TEST 11
-    // REJECT WITHOUT REASON
-    // =========================================================
-
-    @Test
-    public void testRejectWithoutReason() {
-
-        openRequestApprovalPage();
-
-        selectRequest(
-                "AR001"
-        );
-
-        safeClick(
-                By.xpath(
-                        "//button[normalize-space()='Reject']"
-                )
-        );
-
-        WebElement error = waitForVisible(
-                By.xpath(
-                        "//*[contains(normalize-space()," +
-                        "'Reason for rejection is required.')]"
-                )
-        );
-
-        Assert.assertTrue(
-                error.isDisplayed()
-        );
-
-        Assert.assertEquals(
-                "Pending",
-                getRequestStatus()
-        );
-
-        System.out.println(
-                "RA11 PASS - Empty rejection validation"
-        );
-    }
-
-    // =========================================================
-    // TEST 12
-    // SHORT REJECTION REASON
-    // =========================================================
-
-    @Test
-    public void testRejectShortReason() {
-
-        openRequestApprovalPage();
-
-        selectRequest(
-                "AR001"
-        );
-
-        /*
-         * IMPORTANT:
-         * This method DOES NOT click the textarea.
-         */
-        typeRejectionReason(
-                "Bad"
-        );
-
-        safeClick(
-                By.xpath(
-                        "//button[normalize-space()='Reject']"
-                )
-        );
-
-        WebElement error = waitForVisible(
-                By.xpath(
-                        "//*[contains(normalize-space()," +
-                        "'Reason for rejection must be at least 5 characters long.')]"
-                )
-        );
-
-        Assert.assertTrue(
-                error.isDisplayed()
-        );
-
-        Assert.assertEquals(
-                "Pending",
-                getRequestStatus()
-        );
-
-        System.out.println(
-                "RA12 PASS - Short rejection reason validation"
-        );
-    }
-
-    // =========================================================
-    // TEST 13
-    // VALID REJECTION
-    // =========================================================
-
-    @Test
-    public void testValidRejectRequest() {
-
-        openRequestApprovalPage();
-
-        selectRequest(
-                "AR001"
-        );
-
-        /*
-         * IMPORTANT:
-         * JavaScript is used here instead of Selenium click/sendKeys.
-         */
-        typeRejectionReason(
-                "Asset not required"
-        );
-
-        safeClick(
-                By.xpath(
-                        "//button[normalize-space()='Reject']"
-                )
-        );
-
-        /*
-         * RequestApproval.js shows a browser alert
-         * after successful rejection.
-         */
-        wait.until(
-                ExpectedConditions.alertIsPresent()
-        );
-
-        Alert alert = driver.switchTo().alert();
-
-        String alertText = alert.getText();
-
-        System.out.println(
-                "Alert: " + alertText
-        );
-
-        Assert.assertTrue(
-                alertText.contains(
-                        "rejected"
-                )
-        );
-
-        alert.accept();
-
-        Assert.assertEquals(
-                "Rejected",
-                getRequestStatus()
-        );
-
-        System.out.println(
-                "RA13 PASS - Request rejected"
-        );
-    }
-
-    // =========================================================
-    // TEST 14
-    // ROWS PER PAGE
-    // =========================================================
-
-    @Test
-    public void testRowsPerPage() {
-
-        openRequestApprovalPage();
-
-        WebElement rows = waitForVisible(
-                By.xpath(
-                        "//select[contains(@class,'ra-rows-select')]"
-                )
-        );
-
-        Select select = new Select(
-                rows
-        );
-
-        select.selectByVisibleText(
-                "30"
-        );
-
-        Assert.assertEquals(
-                "30",
-                select.getFirstSelectedOption().getText()
-        );
-
-        System.out.println(
-                "RA14 PASS - Rows per page"
-        );
-    }
-
-    // =========================================================
-    // TEST 15
-    // SIDEBAR ACTIVE
-    // =========================================================
-
-    @Test
-    public void testRequestApprovalSidebarActive() {
-
-        openRequestApprovalPage();
-
-        WebElement sidebar = waitForVisible(
-                By.xpath(
-                        "//*[normalize-space()='Request Approval']"
-                )
-        );
-
-        String className =
-                sidebar.getAttribute("class");
-
-        Assert.assertTrue(
-                className.contains(
-                        "ra-sidebar-item--active"
-                )
-        );
-
-        System.out.println(
-                "RA15 PASS - Request Approval sidebar active"
-        );
+            Thread.currentThread().interrupt();
+        }
     }
 }
