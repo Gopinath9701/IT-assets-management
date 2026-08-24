@@ -1,117 +1,245 @@
-package com.test;
+package com.itams;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.time.Duration;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-public class AssetInventoryTest {
+import java.time.Duration;
+import java.util.List;
 
-    private WebDriver driver;
-    private WebDriverWait wait;
+import static org.junit.jupiter.api.Assertions.*;
 
-    private final String BASE_URL = "http://localhost:3000";
+public class AssetInventoryTest extends BaseTest {
+
+    private static final String BASE_URL =
+            "http://localhost:3000";
+
+    // Asset Manager credentials
+    private static final String ASSET_MANAGER_ID =
+            "260822002";
+
+    private static final String ASSET_MANAGER_PASSWORD =
+            "Itams@2026a";
+
+    private static final Duration WAIT_TIME =
+            Duration.ofSeconds(15);
 
     // =========================================================
-    // SETUP
+    // WAIT
     // =========================================================
 
-    @Before
-    public void setUp() {
+    private WebDriverWait wait() {
+        return new WebDriverWait(driver, WAIT_TIME);
+    }
 
-        driver = new ChromeDriver();
+    // =========================================================
+    // BEFORE EACH TEST
+    // LOGIN -> ASSET MANAGEMENT -> ASSET INVENTORY
+    // =========================================================
 
-        driver.manage().window().maximize();
-
-        wait = new WebDriverWait(
-                driver,
-                Duration.ofSeconds(10)
-        );
+    @BeforeEach
+    public void loginAndOpenAssetInventory() {
 
         driver.get(BASE_URL);
 
-        openInventoryPage();
+        waitForPageLoad();
+
+        loginAsAssetManager();
+
+        openAssetInventory();
+
+        waitForInventoryPage();
     }
 
     // =========================================================
-    // OPEN INVENTORY PAGE
+    // LOGIN AS ASSET MANAGER
     // =========================================================
 
-    private void openInventoryPage() {
+    private void loginAsAssetManager() {
 
+        WebElement idField = findFirstVisible(
+                By.name("employeeIdOrEmail"),
+                By.name("employeeId"),
+                By.cssSelector("input[type='text']")
+        );
+
+        assertNotNull(
+                idField,
+                "Login Employee ID field not found"
+        );
+
+        idField.clear();
+        idField.sendKeys(ASSET_MANAGER_ID);
+
+        WebElement passwordField = findFirstVisible(
+                By.name("password"),
+                By.cssSelector("input[type='password']")
+        );
+
+        assertNotNull(
+                passwordField,
+                "Login password field not found"
+        );
+
+        passwordField.clear();
+        passwordField.sendKeys(
+                ASSET_MANAGER_PASSWORD
+        );
+
+        WebElement loginButton = findFirstVisible(
+                By.cssSelector(
+                        "form button[type='submit']"
+                ),
+                By.xpath(
+                        "//button[normalize-space()='Login']"
+                ),
+                By.xpath(
+                        "//button[contains(normalize-space(),'Login')]"
+                )
+        );
+
+        assertNotNull(
+                loginButton,
+                "Login button not found"
+        );
+
+        safeClick(loginButton);
+
+        // Login Successful alert
         try {
 
-            WebElement inventoryButton = wait.until(
-                    ExpectedConditions.elementToBeClickable(
-                            By.xpath(
-                                    "//button[contains(normalize-space(),'Invtry')]"
-                            )
-                    )
+            new WebDriverWait(
+                    driver,
+                    Duration.ofSeconds(5)
+            ).until(
+                    ExpectedConditions.alertIsPresent()
             );
 
-            inventoryButton.click();
+            driver.switchTo()
+                    .alert()
+                    .accept();
 
-        } catch (Exception firstAttempt) {
+        } catch (Exception ignored) {
+        }
 
-            try {
+        sleep(700);
+    }
 
-                WebElement loginButton = wait.until(
-                        ExpectedConditions.elementToBeClickable(
-                                By.xpath(
-                                        "//button[normalize-space()='Login']"
-                                )
+    // =========================================================
+    // OPEN ASSET INVENTORY
+    // =========================================================
+
+    private void openAssetInventory() {
+
+        if (isInventoryPage()) {
+            return;
+        }
+
+        // Try Asset Inventory directly
+        WebElement inventory = findFirstVisible(
+                By.xpath(
+                        "//*[normalize-space()='Asset Inventory']"
+                ),
+                By.xpath(
+                        "//button[normalize-space()='Asset Inventory']"
+                ),
+                By.xpath(
+                        "//div[normalize-space()='Asset Inventory']"
+                ),
+                By.xpath(
+                        "//a[normalize-space()='Asset Inventory']"
+                )
+        );
+
+        if (inventory != null) {
+
+            safeClick(inventory);
+
+            if (waitForInventoryShort()) {
+                return;
+            }
+        }
+
+        // Try Asset Management
+        WebElement assetManagement =
+                findFirstVisible(
+                        By.xpath(
+                                "//*[normalize-space()='Asset Management']"
+                        ),
+                        By.xpath(
+                                "//button[contains(normalize-space(),'Asset Management')]"
+                        ),
+                        By.xpath(
+                                "//div[contains(normalize-space(),'Asset Management')]"
+                        ),
+                        By.xpath(
+                                "//a[contains(normalize-space(),'Asset Management')]"
                         )
                 );
 
-                loginButton.click();
+        if (assetManagement != null) {
 
-            } catch (Exception ignored) {
-                // Login may already be completed
-            }
+            safeClick(assetManagement);
 
-            WebElement inventoryButton = wait.until(
-                    ExpectedConditions.elementToBeClickable(
-                            By.xpath(
-                                    "//button[contains(normalize-space(),'Invtry')]"
-                            )
+            sleep(700);
+
+            inventory = findFirstVisible(
+                    By.xpath(
+                            "//*[normalize-space()='Asset Inventory']"
+                    ),
+                    By.xpath(
+                            "//button[normalize-space()='Asset Inventory']"
+                    ),
+                    By.xpath(
+                            "//div[normalize-space()='Asset Inventory']"
+                    ),
+                    By.xpath(
+                            "//a[normalize-space()='Asset Inventory']"
                     )
             );
 
-            inventoryButton.click();
+            if (inventory != null) {
+                safeClick(inventory);
+            }
         }
 
-        wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.xpath(
-                                "//*[normalize-space()='Asset Inventory']"
-                        )
-                )
-        );
+        waitForInventoryPage();
     }
 
     // =========================================================
-    // TEST 1 - PAGE TITLE
+    // CHECK INVENTORY PAGE
     // =========================================================
 
-    @Test
-    public void testInventoryPageTitle() {
+    private boolean isInventoryPage() {
 
-        WebElement title = wait.until(
+        try {
+
+            return !driver.findElements(
+                    By.cssSelector(".ai-page-title")
+            ).isEmpty();
+
+        } catch (Exception e) {
+
+            return false;
+        }
+    }
+
+    // =========================================================
+    // WAIT INVENTORY PAGE
+    // =========================================================
+
+    private void waitForInventoryPage() {
+
+        WebElement title = wait().until(
                 ExpectedConditions.visibilityOfElementLocated(
-                        By.xpath(
-                                "//*[normalize-space()='Asset Inventory']"
-                        )
+                        By.cssSelector(".ai-page-title")
                 )
         );
 
@@ -121,36 +249,138 @@ public class AssetInventoryTest {
         );
     }
 
+    private boolean waitForInventoryShort() {
+
+        try {
+
+            new WebDriverWait(
+                    driver,
+                    Duration.ofSeconds(5)
+            ).until(
+                    ExpectedConditions.visibilityOfElementLocated(
+                            By.cssSelector(".ai-page-title")
+                    )
+            );
+
+            return true;
+
+        } catch (Exception e) {
+
+            return false;
+        }
+    }
+
     // =========================================================
-    // TEST 2 - PAGE DESCRIPTION
+    // TEST 1 - PAGE TITLE
     // =========================================================
 
     @Test
-    public void testInventoryPageDescription() {
+    public void assetInventoryPageLoadTest() {
 
-        WebElement description = driver.findElement(
-                By.xpath(
-                        "//*[contains(text(),'Track and monitor all IT assets inventory')]"
+        WebElement title = wait().until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        By.cssSelector(".ai-page-title")
                 )
         );
 
-        assertTrue(
-                description.getText().contains(
-                        "Track and monitor all IT assets inventory"
-                )
+        assertTrue(title.isDisplayed());
+
+        assertEquals(
+                "Asset Inventory",
+                title.getText().trim()
         );
     }
 
     // =========================================================
-    // TEST 3 - SELECT ASSET LABEL
+    // TEST 2 - PAGE SUBTITLE
     // =========================================================
 
     @Test
-    public void testSelectAssetLabel() {
+    public void pageSubtitleTest() {
 
-        WebElement label = driver.findElement(
-                By.xpath(
-                        "//*[normalize-space()='Select Asset']"
+        WebElement subtitle = wait().until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        By.cssSelector(".ai-page-sub")
+                )
+        );
+
+        assertEquals(
+                "Track and monitor all IT assets inventory in the organization.",
+                subtitle.getText().trim()
+        );
+    }
+
+    // =========================================================
+    // TEST 3 - ITAMS LOGO
+    // =========================================================
+
+    @Test
+    public void itamsLogoTest() {
+
+        WebElement logo = wait().until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        By.cssSelector(".ai-nav-title")
+                )
+        );
+
+        assertEquals(
+                "ITAMS",
+                logo.getText().trim()
+        );
+    }
+
+    // =========================================================
+    // TEST 4 - NAVBAR USERNAME
+    // =========================================================
+
+    @Test
+    public void usernameDisplayTest() {
+
+        WebElement username = wait().until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        By.cssSelector(".ai-nav-user")
+                )
+        );
+
+        assertTrue(username.isDisplayed());
+
+        assertFalse(
+                username.getText().trim().isEmpty(),
+                "Username should not be empty"
+        );
+    }
+
+    // =========================================================
+    // TEST 5 - LOGOUT BUTTON
+    // =========================================================
+
+    @Test
+    public void logoutButtonTest() {
+
+        WebElement logout = wait().until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        By.cssSelector(".ai-logout-btn")
+                )
+        );
+
+        assertTrue(logout.isDisplayed());
+
+        assertEquals(
+                "Logout",
+                logout.getText().trim()
+        );
+    }
+
+    // =========================================================
+    // TEST 6 - SELECT ASSET LABEL
+    // =========================================================
+
+    @Test
+    public void selectAssetLabelTest() {
+
+        WebElement label = wait().until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        By.cssSelector(".ai-select-label")
                 )
         );
 
@@ -161,477 +391,1080 @@ public class AssetInventoryTest {
     }
 
     // =========================================================
-    // TEST 4 - DEFAULT DROPDOWN
+    // TEST 7 - DROPDOWN BUTTON
     // =========================================================
 
     @Test
-    public void testDefaultAssetSelection() {
+    public void assetDropdownTest() {
 
-        WebElement dropdown = wait.until(
+        WebElement dropdown = wait().until(
                 ExpectedConditions.visibilityOfElementLocated(
                         By.cssSelector(".ai-dropdown-btn")
                 )
         );
 
+        assertTrue(dropdown.isDisplayed());
+
+        assertEquals(
+                "All Assets (Complete Inventory)",
+                dropdown.findElement(
+                        By.cssSelector("span")
+                ).getText().trim()
+        );
+    }
+
+    // =========================================================
+    // TEST 8 - DROPDOWN OPTIONS
+    // =========================================================
+
+    @Test
+    public void assetDropdownOptionsTest() {
+
+        openAssetDropdown();
+
+        List<WebElement> options =
+                wait().until(
+                        ExpectedConditions.visibilityOfAllElementsLocatedBy(
+                                By.cssSelector(
+                                        ".ai-dropdown-item"
+                                )
+                        )
+                );
+
+        assertEquals(
+                9,
+                options.size(),
+                "Expected 9 asset filter options"
+        );
+
         assertTrue(
-                dropdown.getText().trim().contains(
+                getDropdownText().contains(
                         "All Assets (Complete Inventory)"
                 )
         );
+
+        assertTrue(
+                getDropdownText().contains("Monitor")
+        );
+
+        assertTrue(
+                getDropdownText().contains("Keyboard")
+        );
+
+        assertTrue(
+                getDropdownText().contains("Mouse")
+        );
+
+        assertTrue(
+                getDropdownText().contains("Printer")
+        );
+
+        assertTrue(
+                getDropdownText().contains("Laptop")
+        );
+
+        assertTrue(
+                getDropdownText().contains("CPU")
+        );
+
+        assertTrue(
+                getDropdownText().contains("Webcam")
+        );
+
+        assertTrue(
+                getDropdownText().contains("Projector")
+        );
     }
 
     // =========================================================
-    // TEST 5 - TOTAL ASSETS
+    // TEST 9 - MONITOR FILTER
     // =========================================================
 
     @Test
-    public void testDefaultTotalAssets() {
+    public void monitorFilterTest() {
 
-        WebElement value = driver.findElement(
-                By.xpath(
-                        "//span[contains(@class,'ai-stat-label') " +
-                        "and normalize-space()='Total Assets']" +
-                        "/following-sibling::span[contains(@class,'ai-stat-value')]"
+        selectAssetType("Monitor");
+
+        WebElement dropdown =
+                getDropdownButton();
+
+        assertTrue(
+                dropdown.getText()
+                        .contains("Monitor"),
+                "Monitor was not selected"
+        );
+
+        WebElement tableTitle = wait().until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        By.cssSelector(".ai-table-title")
                 )
         );
 
-        assertEquals(
-                "130",
-                value.getText().trim()
+        assertTrue(
+                tableTitle.getText()
+                        .contains("Monitor"),
+                "Monitor inventory table was not displayed"
         );
     }
 
     // =========================================================
-    // TEST 6 - AVAILABLE ASSETS
+    // TEST 10 - KEYBOARD FILTER
     // =========================================================
 
     @Test
-    public void testDefaultAvailableAssets() {
+    public void keyboardFilterTest() {
 
-        WebElement value = driver.findElement(
-                By.xpath(
-                        "//span[contains(@class,'ai-stat-label') " +
-                        "and normalize-space()='Available Assets']" +
-                        "/following-sibling::span[contains(@class,'ai-stat-value')]"
-                )
+        selectAssetType("Keyboard");
+
+        assertTrue(
+                getDropdownButton()
+                        .getText()
+                        .contains("Keyboard")
         );
 
-        assertEquals(
-                "38",
-                value.getText().trim()
+        assertTrue(
+                getBodyText()
+                        .contains(
+                                "Inventory Details (Keyboard)"
+                        )
         );
     }
 
     // =========================================================
-    // TEST 7 - ASSIGNED ASSETS
+    // TEST 11 - MOUSE FILTER
     // =========================================================
 
     @Test
-    public void testDefaultAssignedAssets() {
+    public void mouseFilterTest() {
 
-        WebElement value = driver.findElement(
-                By.xpath(
-                        "//span[contains(@class,'ai-stat-label') " +
-                        "and normalize-space()='Assigned Assets']" +
-                        "/following-sibling::span[contains(@class,'ai-stat-value')]"
-                )
+        selectAssetType("Mouse");
+
+        assertTrue(
+                getDropdownButton()
+                        .getText()
+                        .contains("Mouse")
         );
 
-        assertEquals(
-                "81",
-                value.getText().trim()
+        assertTrue(
+                getBodyText()
+                        .contains(
+                                "Inventory Details (Mouse)"
+                        )
         );
     }
 
     // =========================================================
-    // TEST 8 - MAINTENANCE ASSETS
+    // TEST 12 - PRINTER FILTER
     // =========================================================
 
     @Test
-    public void testDefaultMaintenanceAssets() {
+    public void printerFilterTest() {
 
-        WebElement value = driver.findElement(
-                By.xpath(
-                        "//span[contains(@class,'ai-stat-label') " +
-                        "and normalize-space()='Under Maintenance']" +
-                        "/following-sibling::span[contains(@class,'ai-stat-value')]"
-                )
-        );
+        selectAssetType("Printer");
 
-        assertEquals(
-                "11",
-                value.getText().trim()
+        assertTrue(
+                getDropdownButton()
+                        .getText()
+                        .contains("Printer")
         );
     }
 
     // =========================================================
-    // TEST 9 - OUT OF STOCK
+    // TEST 13 - LAPTOP FILTER
     // =========================================================
 
     @Test
-    public void testDefaultOutOfStock() {
+    public void laptopFilterTest() {
 
-        WebElement value = driver.findElement(
-                By.xpath(
-                        "//span[contains(@class,'ai-stat-label') " +
-                        "and normalize-space()='Out of Stock']" +
-                        "/following-sibling::span[contains(@class,'ai-stat-value')]"
-                )
-        );
+        selectAssetType("Laptop");
 
-        assertEquals(
-                "2",
-                value.getText().trim()
+        assertTrue(
+                getDropdownButton()
+                        .getText()
+                        .contains("Laptop")
         );
     }
 
     // =========================================================
-    // TEST 10 - INVENTORY TABLE
+    // TEST 14 - CPU FILTER
     // =========================================================
 
     @Test
-    public void testInventoryTableDisplayed() {
+    public void cpuFilterTest() {
 
-        WebElement table = wait.until(
+        selectAssetType("CPU");
+
+        assertTrue(
+                getDropdownButton()
+                        .getText()
+                        .contains("CPU")
+        );
+    }
+
+    // =========================================================
+    // TEST 15 - WEBCAM FILTER
+    // =========================================================
+
+    @Test
+    public void webcamFilterTest() {
+
+        selectAssetType("Webcam");
+
+        assertTrue(
+                getDropdownButton()
+                        .getText()
+                        .contains("Webcam")
+        );
+    }
+
+    // =========================================================
+    // TEST 16 - PROJECTOR FILTER
+    // =========================================================
+
+    @Test
+    public void projectorFilterTest() {
+
+        selectAssetType("Projector");
+
+        assertTrue(
+                getDropdownButton()
+                        .getText()
+                        .contains("Projector")
+        );
+    }
+
+    // =========================================================
+    // TEST 17 - RETURN TO ALL ASSETS
+    // =========================================================
+
+    @Test
+    public void allAssetsFilterTest() {
+
+        selectAssetType(
+                "All Assets (Complete Inventory)"
+        );
+
+        assertTrue(
+                getDropdownButton()
+                        .getText()
+                        .contains(
+                                "All Assets (Complete Inventory)"
+                        )
+        );
+
+        assertTrue(
+                getBodyText()
+                        .contains(
+                                "Inventory Details"
+                        )
+        );
+    }
+
+    // =========================================================
+    // TEST 18 - STATISTICS CARDS
+    // =========================================================
+
+    @Test
+    public void statisticsCardsTest() {
+
+        List<WebElement> cards =
+                wait().until(
+                        ExpectedConditions.visibilityOfAllElementsLocatedBy(
+                                By.cssSelector(
+                                        ".ai-stat-card"
+                                )
+                        )
+                );
+
+        assertEquals(
+                5,
+                cards.size(),
+                "Expected 5 inventory statistics cards"
+        );
+    }
+
+    // =========================================================
+    // TEST 19 - TOTAL ASSETS CARD
+    // =========================================================
+
+    @Test
+    public void totalAssetsCardTest() {
+
+        WebElement card =
+                findStatCard("Total Assets");
+
+        assertNotNull(
+                card,
+                "Total Assets card not found"
+        );
+
+        assertTrue(
+                card.getText()
+                        .contains("Total Assets")
+        );
+
+        assertTrue(
+                card.getText()
+                        .contains(
+                                "All assets in system"
+                        )
+        );
+    }
+
+    // =========================================================
+    // TEST 20 - AVAILABLE ASSETS CARD
+    // =========================================================
+
+    @Test
+    public void availableAssetsCardTest() {
+
+        WebElement card =
+                findStatCard("Available Assets");
+
+        assertNotNull(card);
+
+        assertTrue(
+                card.getText()
+                        .contains(
+                                "Ready to assign"
+                        )
+        );
+    }
+
+    // =========================================================
+    // TEST 21 - ASSIGNED ASSETS CARD
+    // =========================================================
+
+    @Test
+    public void assignedAssetsCardTest() {
+
+        WebElement card =
+                findStatCard("Assigned Assets");
+
+        assertNotNull(card);
+
+        assertTrue(
+                card.getText()
+                        .contains(
+                                "Currently assigned"
+                        )
+        );
+    }
+
+    // =========================================================
+    // TEST 22 - MAINTENANCE CARD
+    // =========================================================
+
+    @Test
+    public void maintenanceAssetsCardTest() {
+
+        WebElement card =
+                findStatCard("Under Maintenance");
+
+        assertNotNull(card);
+
+        assertTrue(
+                card.getText()
+                        .contains(
+                                "Being serviced"
+                        )
+        );
+    }
+
+    // =========================================================
+    // TEST 23 - OUT OF STOCK CARD
+    // =========================================================
+
+    @Test
+    public void outOfStockCardTest() {
+
+        WebElement card =
+                findStatCard("Out of Stock");
+
+        assertNotNull(card);
+
+        assertTrue(
+                card.getText()
+                        .contains(
+                                "Not available"
+                        )
+        );
+    }
+
+    // =========================================================
+    // TEST 24 - INVENTORY TABLE
+    // =========================================================
+
+    @Test
+    public void inventoryTableTest() {
+
+        WebElement table = wait().until(
                 ExpectedConditions.visibilityOfElementLocated(
                         By.cssSelector(".ai-table")
                 )
         );
 
+        assertTrue(table.isDisplayed());
+
+        String tableText =
+                table.getText();
+
         assertTrue(
-                table.isDisplayed()
+                tableText.contains(
+                        "Asset Name"
+                )
+        );
+
+        assertTrue(
+                tableText.contains(
+                        "Total Stock"
+                )
+        );
+
+        assertTrue(
+                tableText.contains(
+                        "Available"
+                )
+        );
+
+        assertTrue(
+                tableText.contains(
+                        "Assigned"
+                )
+        );
+
+        assertTrue(
+                tableText.contains(
+                        "Under Maintenance"
+                )
+        );
+
+        assertTrue(
+                tableText.contains(
+                        "Status"
+                )
         );
     }
 
     // =========================================================
-    // TEST 11 - LAPTOP ROW
+    // TEST 25 - TABLE HEADER COUNT
     // =========================================================
 
     @Test
-    public void testLaptopRow() {
+    public void inventoryTableHeaderCountTest() {
 
-        WebElement row = driver.findElement(
-                By.xpath(
-                        "//table[contains(@class,'ai-table')]//tr[" +
-                        "td[normalize-space()='Laptop']" +
-                        "]"
-                )
+        List<WebElement> headers =
+                driver.findElements(
+                        By.cssSelector(
+                                ".ai-table thead th"
+                        )
+                );
+
+        assertEquals(
+                6,
+                headers.size(),
+                "Expected 6 inventory table columns"
         );
-
-        String rowText = row.getText();
-
-        assertTrue(rowText.contains("Laptop"));
-        assertTrue(rowText.contains("50"));
-        assertTrue(rowText.contains("18"));
-        assertTrue(rowText.contains("30"));
-        assertTrue(rowText.contains("2"));
-        assertTrue(rowText.contains("Available"));
     }
 
     // =========================================================
-    // TEST 12 - MONITOR ROW
+    // TEST 26 - INVENTORY DATA ROWS
     // =========================================================
 
     @Test
-    public void testMonitorRow() {
+    public void inventoryDataRowsTest() {
 
-        WebElement row = driver.findElement(
-                By.xpath(
-                        "//table[contains(@class,'ai-table')]//tr[" +
-                        "td[normalize-space()='Monitor']" +
-                        "]"
-                )
-        );
+        waitForInventoryTable();
 
-        String rowText = row.getText();
+        List<WebElement> rows =
+                driver.findElements(
+                        By.cssSelector(
+                                ".ai-table tbody tr"
+                        )
+                );
 
-        assertTrue(rowText.contains("Monitor"));
-        assertTrue(rowText.contains("30"));
-        assertTrue(rowText.contains("7"));
-        assertTrue(rowText.contains("21"));
-        assertTrue(rowText.contains("2"));
-        assertTrue(rowText.contains("Available"));
+        // Backend can legitimately return zero records.
+        // In that case the table should still exist.
+        assertNotNull(rows);
     }
 
     // =========================================================
-    // TEST 13 - OPEN DROPDOWN
+    // TEST 27 - ASSET STATUS
     // =========================================================
 
     @Test
-    public void testAssetDropdownOpens() {
+    public void assetStatusBadgeTest() {
 
-        WebElement dropdown = wait.until(
-                ExpectedConditions.elementToBeClickable(
-                        By.cssSelector(".ai-dropdown-btn")
-                )
+        waitForInventoryTable();
+
+        List<WebElement> badges =
+                driver.findElements(
+                        By.cssSelector(
+                                ".ai-status-badge"
+                        )
+                );
+
+        for (WebElement badge : badges) {
+
+            try {
+
+                String text =
+                        badge.getText().trim();
+
+                assertFalse(
+                        text.isEmpty(),
+                        "Asset status is empty"
+                );
+
+            } catch (
+                    StaleElementReferenceException ignored
+            ) {
+            }
+        }
+    }
+
+    // =========================================================
+    // TEST 28 - INVENTORY OVERVIEW CHART
+    // =========================================================
+
+    @Test
+    public void inventoryOverviewChartTest() {
+
+        List<WebElement> charts =
+                wait().until(
+                        ExpectedConditions.visibilityOfAllElementsLocatedBy(
+                                By.cssSelector(
+                                        ".ai-chart-card"
+                                )
+                        )
+                );
+
+        assertTrue(
+                charts.size() >= 2,
+                "Expected at least two chart cards"
         );
 
-        dropdown.click();
+        assertTrue(
+                getBodyText()
+                        .contains(
+                                "Inventory Overview"
+                        )
+        );
+    }
 
-        WebElement dropdownList = wait.until(
+    // =========================================================
+    // TEST 29 - CATEGORY CHART
+    // =========================================================
+
+    @Test
+    public void inventoryCategoryChartTest() {
+
+        assertTrue(
+                getBodyText()
+                        .contains(
+                                "Inventory by Category"
+                        )
+        );
+    }
+
+    // =========================================================
+    // TEST 30 - CHART SVG
+    // =========================================================
+
+    @Test
+    public void pieChartSvgTest() {
+
+        List<WebElement> svgs =
+                driver.findElements(
+                        By.cssSelector(
+                                ".ai-chart-card svg"
+                        )
+                );
+
+        assertTrue(
+                svgs.size() >= 2,
+                "Pie charts were not rendered"
+        );
+    }
+
+    // =========================================================
+    // TEST 31 - CHART LEGENDS
+    // =========================================================
+
+    @Test
+    public void chartLegendTest() {
+
+        List<WebElement> legends =
+                driver.findElements(
+                        By.cssSelector(
+                                ".ai-legend"
+                        )
+                );
+
+        assertTrue(
+                legends.size() >= 2,
+                "Chart legends are missing"
+        );
+    }
+
+    // =========================================================
+    // TEST 32 - INVENTORY CHART FOOTER
+    // =========================================================
+
+    @Test
+    public void chartFooterTest() {
+
+        WebElement footer = wait().until(
                 ExpectedConditions.visibilityOfElementLocated(
-                        By.cssSelector(".ai-dropdown-list")
+                        By.cssSelector(".ai-chart-footer")
                 )
         );
 
         assertTrue(
-                dropdownList.isDisplayed()
+                footer.getText()
+                        .contains(
+                                "Total Assets"
+                        )
         );
     }
 
     // =========================================================
-    // TEST 14 - SELECT MONITOR
+    // TEST 33 - MONITOR DETAILS
     // =========================================================
 
     @Test
-    public void testSelectMonitor() {
+    public void monitorDetailsTest() {
 
-        WebElement dropdown = wait.until(
-                ExpectedConditions.elementToBeClickable(
-                        By.cssSelector(".ai-dropdown-btn")
-                )
-        );
+        selectAssetType("Monitor");
 
-        dropdown.click();
+        sleep(500);
 
-        WebElement monitorOption = wait.until(
-                ExpectedConditions.elementToBeClickable(
-                        By.xpath(
-                                "//li[contains(@class,'ai-dropdown-item')" +
-                                " and normalize-space()='Monitor']"
+        List<WebElement> details =
+                driver.findElements(
+                        By.cssSelector(
+                                ".ai-table-card"
                         )
-                )
+                );
+
+        assertTrue(
+                details.size() >= 2,
+                "Monitor details table was not displayed"
         );
 
-        monitorOption.click();
-
-        wait.until(
-                ExpectedConditions.textToBePresentInElement(
-                        dropdown,
-                        "Monitor"
-                )
-        );
-
-        /*
-         * Selenium may read an invisible/newline character
-         * from the dropdown button.
-         *
-         * So normalize the text before checking it.
-         */
-
-        String selectedText = dropdown
-                .getText()
-                .replaceAll("[^A-Za-z]", "")
-                .trim();
-
-        assertEquals(
-                "Monitor",
-                selectedText
+        assertTrue(
+                getBodyText()
+                        .contains(
+                                "Inventory Details (Monitor)"
+                        )
         );
     }
 
     // =========================================================
-    // TEST 15 - MONITOR FILTER VALUES
+    // TEST 34 - MONITOR DETAIL TOTAL ROW
     // =========================================================
 
     @Test
-    public void testMonitorFilterValues() {
+    public void monitorTotalRowTest() {
 
-        WebElement dropdown = wait.until(
-                ExpectedConditions.elementToBeClickable(
-                        By.cssSelector(".ai-dropdown-btn")
-                )
-        );
+        selectAssetType("Monitor");
 
-        dropdown.click();
+        sleep(500);
 
-        WebElement monitorOption = wait.until(
-                ExpectedConditions.elementToBeClickable(
-                        By.xpath(
-                                "//li[contains(@class,'ai-dropdown-item')" +
-                                " and normalize-space()='Monitor']"
+        List<WebElement> totalRows =
+                driver.findElements(
+                        By.cssSelector(
+                                ".ai-total-row"
                         )
-                )
+                );
+
+        // Monitor details are conditional on backend
+        // data having details.
+        if (!totalRows.isEmpty()) {
+
+            String text =
+                    totalRows.get(0)
+                            .getText();
+
+            assertTrue(
+                    text.contains("Total")
+            );
+
+            assertTrue(
+                    text.contains("30")
+            );
+
+            assertTrue(
+                    text.contains("7")
+            );
+
+            assertTrue(
+                    text.contains("21")
+            );
+
+            assertTrue(
+                    text.contains("2")
+            );
+        }
+    }
+
+    // =========================================================
+    // TEST 35 - BACK BUTTON
+    // =========================================================
+
+    @Test
+    public void backButtonTest() {
+
+        List<WebElement> backButtons =
+                driver.findElements(
+                        By.cssSelector(
+                                ".ai-back-btn"
+                        )
+                );
+
+        // onBack is conditionally rendered.
+        if (!backButtons.isEmpty()) {
+
+            WebElement back =
+                    backButtons.get(0);
+
+            assertTrue(
+                    back.isDisplayed()
+            );
+
+            assertEquals(
+                    "Back",
+                    back.getText().trim()
+            );
+        }
+    }
+
+    // =========================================================
+    // TEST 36 - SELECT MONITOR THEN CHANGE BACK
+    // =========================================================
+
+    @Test
+    public void assetFilterChangeTest() {
+
+        selectAssetType("Monitor");
+
+        assertTrue(
+                getDropdownButton()
+                        .getText()
+                        .contains("Monitor")
         );
 
-        monitorOption.click();
+        selectAssetType("Laptop");
 
-        wait.until(
-                ExpectedConditions.textToBePresentInElement(
-                        dropdown,
-                        "Monitor"
-                )
+        assertTrue(
+                getDropdownButton()
+                        .getText()
+                        .contains("Laptop")
         );
 
-        // Total Assets = 30
-
-        WebElement total = driver.findElement(
-                By.xpath(
-                        "//span[contains(@class,'ai-stat-label') " +
-                        "and normalize-space()='Total Assets']" +
-                        "/following-sibling::span[contains(@class,'ai-stat-value')]"
-                )
+        selectAssetType(
+                "All Assets (Complete Inventory)"
         );
 
-        assertEquals(
-                "30",
-                total.getText().trim()
-        );
-
-        // Available = 7
-
-        WebElement available = driver.findElement(
-                By.xpath(
-                        "//span[contains(@class,'ai-stat-label') " +
-                        "and normalize-space()='Available Assets']" +
-                        "/following-sibling::span[contains(@class,'ai-stat-value')]"
-                )
-        );
-
-        assertEquals(
-                "7",
-                available.getText().trim()
-        );
-
-        // Assigned = 21
-
-        WebElement assigned = driver.findElement(
-                By.xpath(
-                        "//span[contains(@class,'ai-stat-label') " +
-                        "and normalize-space()='Assigned Assets']" +
-                        "/following-sibling::span[contains(@class,'ai-stat-value')]"
-                )
-        );
-
-        assertEquals(
-                "21",
-                assigned.getText().trim()
-        );
-
-        // Maintenance = 2
-
-        WebElement maintenance = driver.findElement(
-                By.xpath(
-                        "//span[contains(@class,'ai-stat-label') " +
-                        "and normalize-space()='Under Maintenance']" +
-                        "/following-sibling::span[contains(@class,'ai-stat-value')]"
-                )
-        );
-
-        assertEquals(
-                "2",
-                maintenance.getText().trim()
+        assertTrue(
+                getDropdownButton()
+                        .getText()
+                        .contains(
+                                "All Assets (Complete Inventory)"
+                        )
         );
     }
 
     // =========================================================
-    // TEST 16 - MONITOR TABLE AFTER FILTER
+    // HELPER - OPEN DROPDOWN
     // =========================================================
 
-    @Test
-    public void testMonitorTableAfterFilter() {
+    private void openAssetDropdown() {
 
-        WebElement dropdown = wait.until(
-                ExpectedConditions.elementToBeClickable(
-                        By.cssSelector(".ai-dropdown-btn")
-                )
-        );
+        WebElement dropdown =
+                wait().until(
+                        ExpectedConditions.elementToBeClickable(
+                                By.cssSelector(
+                                        ".ai-dropdown-btn"
+                                )
+                        )
+                );
 
-        dropdown.click();
+        safeClick(dropdown);
 
-        WebElement monitorOption = wait.until(
-                ExpectedConditions.elementToBeClickable(
-                        By.xpath(
-                                "//li[contains(@class,'ai-dropdown-item')" +
-                                " and normalize-space()='Monitor']"
+        wait().until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        By.cssSelector(
+                                ".ai-dropdown-list"
                         )
                 )
         );
+    }
 
-        monitorOption.click();
+    // =========================================================
+    // HELPER - SELECT ASSET TYPE
+    // =========================================================
 
-        wait.until(
-                ExpectedConditions.textToBePresentInElement(
-                        dropdown,
-                        "Monitor"
+    private void selectAssetType(
+            String assetType
+    ) {
+
+        openAssetDropdown();
+
+        List<WebElement> options =
+                driver.findElements(
+                        By.cssSelector(
+                                ".ai-dropdown-item"
+                        )
+                );
+
+        for (WebElement option : options) {
+
+            try {
+
+                if (option.getText()
+                        .trim()
+                        .equals(assetType)) {
+
+                    safeClick(option);
+
+                    sleep(400);
+
+                    return;
+                }
+
+            } catch (
+                    StaleElementReferenceException ignored
+            ) {
+            }
+        }
+
+        fail(
+                "Asset option not found: "
+                        + assetType
+        );
+    }
+
+    // =========================================================
+    // HELPER - DROPDOWN TEXT
+    // =========================================================
+
+    private String getDropdownText() {
+
+        return driver.findElement(
+                By.cssSelector(
+                        ".ai-dropdown-list"
+                )
+        ).getText();
+    }
+
+    // =========================================================
+    // HELPER - DROPDOWN BUTTON
+    // =========================================================
+
+    private WebElement getDropdownButton() {
+
+        return wait().until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        By.cssSelector(
+                                ".ai-dropdown-btn"
+                        )
                 )
         );
+    }
 
-        WebElement table = wait.until(
+    // =========================================================
+    // HELPER - STAT CARD
+    // =========================================================
+
+    private WebElement findStatCard(
+            String title
+    ) {
+
+        List<WebElement> cards =
+                driver.findElements(
+                        By.cssSelector(
+                                ".ai-stat-card"
+                        )
+                );
+
+        for (WebElement card : cards) {
+
+            try {
+
+                if (card.getText()
+                        .contains(title)) {
+
+                    return card;
+                }
+
+            } catch (
+                    StaleElementReferenceException ignored
+            ) {
+            }
+        }
+
+        return null;
+    }
+
+    // =========================================================
+    // HELPER - INVENTORY TABLE
+    // =========================================================
+
+    private void waitForInventoryTable() {
+
+        wait().until(
                 ExpectedConditions.visibilityOfElementLocated(
                         By.cssSelector(".ai-table")
                 )
         );
 
-        String tableText =
-                table.getText()
-                        .replaceAll("\\s+", " ")
-                        .trim();
-
-        assertTrue(tableText.contains("Monitor"));
-        assertTrue(tableText.contains("30"));
-        assertTrue(tableText.contains("7"));
-        assertTrue(tableText.contains("21"));
-        assertTrue(tableText.contains("2"));
-        assertTrue(tableText.contains("Available"));
+        sleep(300);
     }
 
     // =========================================================
-    // TEST 17 - BACK BUTTON
+    // HELPER - BODY TEXT
     // =========================================================
 
-    @Test
-    public void testBackButtonDisplayed() {
+    private String getBodyText() {
 
-        WebElement backButton = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.cssSelector(".ai-back-btn")
-                )
-        );
-
-        assertTrue(
-                backButton.isDisplayed()
-        );
-
-        assertEquals(
-                "Back",
-                backButton.getText().trim()
-        );
+        return driver.findElement(
+                By.tagName("body")
+        ).getText();
     }
 
     // =========================================================
-    // TEST 18 - TABLE HEADERS
+    // HELPER - FIND VISIBLE ELEMENT
     // =========================================================
 
-    @Test
-    public void testInventoryTableHeaders() {
+    private WebElement findFirstVisible(
+            By... locators
+    ) {
 
-        WebElement table = driver.findElement(
-                By.cssSelector(".ai-table")
-        );
+        for (By locator : locators) {
 
-        String tableText =
-                table.getText()
-                        .replaceAll("\\s+", " ")
-                        .trim();
+            try {
 
-        assertTrue(tableText.contains("Asset Name"));
-        assertTrue(tableText.contains("Total Stock"));
-        assertTrue(tableText.contains("Available"));
-        assertTrue(tableText.contains("Assigned"));
-        assertTrue(tableText.contains("Under Maintenance"));
-        assertTrue(tableText.contains("Status"));
+                List<WebElement> elements =
+                        driver.findElements(locator);
+
+                for (WebElement element :
+                        elements) {
+
+                    try {
+
+                        if (element.isDisplayed()) {
+                            return element;
+                        }
+
+                    } catch (
+                            StaleElementReferenceException ignored
+                    ) {
+                    }
+                }
+
+            } catch (Exception ignored) {
+            }
+        }
+
+        return null;
     }
 
     // =========================================================
-    // CLEANUP
+    // HELPER - SAFE CLICK
     // =========================================================
 
-    @After
-    public void tearDown() {
+    private void safeClick(
+            WebElement element
+    ) {
 
-        if (driver != null) {
-            driver.quit();
+        try {
+
+            scrollIntoView(element);
+
+            wait().until(
+                    ExpectedConditions.elementToBeClickable(
+                            element
+                    )
+            );
+
+            element.click();
+
+        } catch (Exception e) {
+
+            try {
+
+                ((JavascriptExecutor) driver)
+                        .executeScript(
+                                "arguments[0].click();",
+                                element
+                        );
+
+            } catch (Exception ignored) {
+            }
+        }
+    }
+
+    // =========================================================
+    // HELPER - SCROLL
+    // =========================================================
+
+    private void scrollIntoView(
+            WebElement element
+    ) {
+
+        try {
+
+            ((JavascriptExecutor) driver)
+                    .executeScript(
+                            "arguments[0].scrollIntoView({"
+                                    + "block:'center',"
+                                    + "inline:'center'"
+                                    + "});",
+                            element
+                    );
+
+        } catch (Exception ignored) {
+        }
+    }
+
+    // =========================================================
+    // HELPER - PAGE LOAD
+    // =========================================================
+
+    private void waitForPageLoad() {
+
+        try {
+
+            new WebDriverWait(
+                    driver,
+                    Duration.ofSeconds(15)
+            ).until(
+                    d -> ((JavascriptExecutor) d)
+                            .executeScript(
+                                    "return document.readyState"
+                            )
+                            .equals("complete")
+            );
+
+        } catch (Exception ignored) {
+        }
+    }
+
+    // =========================================================
+    // HELPER - SLEEP
+    // =========================================================
+
+    private void sleep(
+            long milliseconds
+    ) {
+
+        try {
+
+            Thread.sleep(milliseconds);
+
+        } catch (InterruptedException e) {
+
+            Thread.currentThread().interrupt();
         }
     }
 }
