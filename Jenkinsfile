@@ -1,5 +1,8 @@
 pipeline {
     agent any
+    tools {
+        maven 'Maven-3.9'
+    }
 
     environment {
         DEVOPS_EMAIL = "24211A6718@bvrit.ac.in"
