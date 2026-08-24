@@ -112,16 +112,16 @@ Login
 * HTML5
 * CSS3
 * JavaScript
-* React.js (Optional)
+* React.js 
 
 ### Backend
 
-* Spring Boot (Java)
+* Node.js
 * REST APIs
 
 ### Database
 
-* MySQL
+* PostgresSql (Neon.Tech)
 
 ### DevOps Tools
 
@@ -130,8 +130,6 @@ Login
 * Jenkins
 * Docker
 * Kubernetes
-* Prometheus
-* Grafana
 
 ---
 
@@ -145,8 +143,6 @@ Developer
 → Docker Hub
 → Kubernetes Deployment
 → Application Running
-→ Prometheus Monitoring
-→ Grafana Dashboard
 
 ---
 
@@ -207,8 +203,8 @@ cd IT-Asset-Management-System
 
 ```bash
 cd backend
-mvn clean install
-mvn spring-boot:run
+npm install
+nom run build
 ```
 
 ### Frontend Setup
@@ -240,7 +236,7 @@ docker build -t itams .
 Run Container:
 
 ```bash
-docker run -p 8080:8080 itams
+docker run -p 8080:80 itams
 ```
 
 ---
@@ -259,21 +255,6 @@ kubectl get services
 ```
 
 ---
-
-## Monitoring
-
-### Prometheus
-
-* Collect application metrics
-* Monitor resource utilization
-
-### Grafana
-
-* Visualize performance metrics
-* Create dashboards and alerts
-
----
-
 ## Reports Generated
 
 * Asset Inventory Report
