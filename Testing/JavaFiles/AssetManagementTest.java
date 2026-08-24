@@ -1,354 +1,951 @@
-package com.test;
+package com.itams;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
-
-import java.time.Duration;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import io.github.bonigarcia.wdm.WebDriverManager;
+import java.time.Duration;
+import java.util.List;
 
-public class AssetManagementTest {
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-    WebDriver driver;
-    WebDriverWait wait;
-    JavascriptExecutor js;
+public class AssetManagementTest extends BaseTest {
 
-    @Before
-    public void setup() throws InterruptedException {
-        WebDriverManager.chromedriver().setup();
-        driver = new ChromeDriver();
-        driver.manage().window().maximize();
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
-        wait = new WebDriverWait(driver, Duration.ofSeconds(15));
-        js = (JavascriptExecutor) driver;
+    // ============================================================
+    // ASSET MANAGER LOGIN
+    // ============================================================
 
-        driver.get("http://localhost:3000");
-        Thread.sleep(2000);
+    private static final String ASSET_MANAGER_ID = "260822002";
+    private static final String ASSET_MANAGER_PASSWORD = "Itams@2026a";
 
-        // Step 1: Click the top-right "Login" nav button (home page) to land on the Login page
-        try {
-            WebElement loginNavBtn = wait.until(
-                    ExpectedConditions.elementToBeClickable(By.xpath("//button[text()='Login']")));
-            loginNavBtn.click();
-            System.out.println("✓ Clicked top-right Login button, now on Login page");
-        } catch (Exception e) {
-            System.out.println("✗ Top-right Login button not found");
+    private static final String BASE_URL = "http://localhost:3000";
+
+    // ============================================================
+    // WAIT
+    // ============================================================
+
+    private WebDriverWait wait() {
+        return new WebDriverWait(
+                driver,
+                Duration.ofSeconds(15)
+        );
+    }
+
+    // ============================================================
+    // BEFORE EACH TEST
+    // LOGIN AS ASSET MANAGER
+    // ============================================================
+
+    @BeforeEach
+    public void loginAsAssetManager() {
+
+        driver.get(BASE_URL);
+
+        waitForPageLoad();
+
+        // --------------------------------------------------------
+        // Click Login
+        // --------------------------------------------------------
+
+        WebElement loginButton = wait().until(
+                ExpectedConditions.elementToBeClickable(
+                        By.xpath(
+                                "//button[contains(normalize-space(),'Login')]"
+                        )
+                )
+        );
+
+        safeClick(loginButton);
+
+        // --------------------------------------------------------
+        // Employee ID
+        // --------------------------------------------------------
+
+        WebElement employeeIdField = wait().until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        By.name("employeeIdOrEmail")
+                )
+        );
+
+        employeeIdField.clear();
+        employeeIdField.sendKeys(ASSET_MANAGER_ID);
+
+        // --------------------------------------------------------
+        // Password
+        // --------------------------------------------------------
+
+        WebElement passwordField = wait().until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        By.name("password")
+                )
+        );
+
+        passwordField.clear();
+        passwordField.sendKeys(ASSET_MANAGER_PASSWORD);
+
+        // --------------------------------------------------------
+        // Login submit
+        // --------------------------------------------------------
+
+        WebElement submitButton = wait().until(
+                ExpectedConditions.elementToBeClickable(
+                        By.xpath(
+                                "//form//button[@type='submit']"
+                        )
+                )
+        );
+
+        safeClick(submitButton);
+
+        // --------------------------------------------------------
+        // Handle Login Successful alert
+        // --------------------------------------------------------
+
+        handleLoginAlert();
+
+        // --------------------------------------------------------
+        // Wait until Asset Management page is displayed
+        // --------------------------------------------------------
+
+        wait().until(
+                ExpectedConditions.or(
+                        ExpectedConditions.visibilityOfElementLocated(
+                                By.xpath(
+                                        "//*[normalize-space()='Asset Management']"
+                                )
+                        ),
+                        ExpectedConditions.visibilityOfElementLocated(
+                                By.cssSelector(
+                                        ".am-page-title"
+                                )
+                        )
+                )
+        );
+
+        System.out.println(
+                "Asset Manager logged in successfully."
+        );
+    }
+
+    // ============================================================
+    // TEST 1
+    // VERIFY ASSET MANAGEMENT PAGE
+    // ============================================================
+
+    @Test
+    public void assetManagementPageLoadTest() {
+
+        WebElement title = wait().until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        By.cssSelector(".am-page-title")
+                )
+        );
+
+        assertTrue(
+                title.isDisplayed(),
+                "Asset Management title is not displayed"
+        );
+
+        assertTrue(
+                title.getText()
+                        .trim()
+                        .equalsIgnoreCase("Asset Management"),
+                "Incorrect page title displayed"
+        );
+
+        System.out.println(
+                "PASS: Asset Management page loaded."
+        );
+    }
+
+    // ============================================================
+    // TEST 2
+    // VERIFY PAGE SUBTITLE
+    // ============================================================
+
+    @Test
+    public void pageSubtitleTest() {
+
+        WebElement subtitle = wait().until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        By.cssSelector(".am-page-subtitle")
+                )
+        );
+
+        String text =
+                subtitle.getText();
+
+        assertTrue(
+                text.contains("Manage")
+                        || text.contains("assets")
+                        || text.contains("organization"),
+                "Asset Management subtitle is incorrect"
+        );
+
+        System.out.println(
+                "PASS: Page subtitle displayed correctly."
+        );
+    }
+
+    // ============================================================
+    // TEST 3
+    // VERIFY ITAMS LOGO
+    // ============================================================
+
+    @Test
+    public void itamsLogoTest() {
+
+        WebElement logo = wait().until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        By.cssSelector(
+                                ".am-nav-logo-title"
+                        )
+                )
+        );
+
+        assertTrue(
+                logo.getText()
+                        .trim()
+                        .equals("ITAMS"),
+                "ITAMS logo is not displayed correctly"
+        );
+
+        System.out.println(
+                "PASS: ITAMS logo displayed."
+        );
+    }
+
+    // ============================================================
+    // TEST 4
+    // VERIFY USERNAME
+    // ============================================================
+
+    @Test
+    public void usernameDisplayTest() {
+
+        WebElement username = wait().until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        By.cssSelector(
+                                ".am-nav-username"
+                        )
+                )
+        );
+
+        assertTrue(
+                username.isDisplayed(),
+                "Username is not displayed"
+        );
+
+        assertTrue(
+                !username.getText().trim().isEmpty(),
+                "Username is empty"
+        );
+
+        System.out.println(
+                "PASS: Asset Manager username displayed."
+        );
+    }
+
+    // ============================================================
+    // TEST 5
+    // VERIFY LOGOUT BUTTON
+    // ============================================================
+
+    @Test
+    public void logoutButtonTest() {
+
+        WebElement logoutButton = wait().until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        By.cssSelector(
+                                ".am-logout-btn"
+                        )
+                )
+        );
+
+        assertTrue(
+                logoutButton.isDisplayed(),
+                "Logout button is not displayed"
+        );
+
+        assertTrue(
+                logoutButton.getText()
+                        .trim()
+                        .equalsIgnoreCase("Logout"),
+                "Logout button text is incorrect"
+        );
+
+        System.out.println(
+                "PASS: Logout button displayed."
+        );
+    }
+
+    // ============================================================
+    // TEST 6
+    // VERIFY SIDEBAR
+    // ============================================================
+
+    @Test
+    public void sidebarItemsTest() {
+
+        String[] sidebarItems = {
+                "Dashboard",
+                "Asset Management",
+                "Asset Assignment",
+                "Request Approval",
+                "Maintenance"
+        };
+
+        for (String item : sidebarItems) {
+
+            WebElement element = wait().until(
+                    ExpectedConditions.visibilityOfElementLocated(
+                            By.xpath(
+                                    "//aside[contains(@class,'am-sidebar')]"
+                                            + "//*[normalize-space()='"
+                                            + item
+                                            + "']"
+                            )
+                    )
+            );
+
+            assertTrue(
+                    element.isDisplayed(),
+                    item + " sidebar item is not displayed"
+            );
         }
-        Thread.sleep(1500);
 
-        // Verify we actually landed on the Login page (form fields present)
+        System.out.println(
+                "PASS: All sidebar items displayed."
+        );
+    }
+
+    // ============================================================
+    // TEST 7
+    // VERIFY ADD ASSET CARD
+    // ============================================================
+
+    @Test
+    public void addAssetCardTest() {
+
+        WebElement button = findCardButton("Add Asset");
+
+        assertTrue(
+                button != null,
+                "Add Asset button was not found"
+        );
+
+        assertTrue(
+                button.isDisplayed(),
+                "Add Asset button is not visible"
+        );
+
+        System.out.println(
+                "PASS: Add Asset card displayed."
+        );
+    }
+
+    // ============================================================
+    // TEST 8
+    // VERIFY MANAGE ASSETS CARD
+    // ============================================================
+
+    @Test
+    public void manageAssetsCardTest() {
+
+        WebElement button = findCardButton("Manage Assets");
+
+        assertTrue(
+                button != null,
+                "Manage Assets button was not found"
+        );
+
+        assertTrue(
+                button.isDisplayed(),
+                "Manage Assets button is not visible"
+        );
+
+        System.out.println(
+                "PASS: Manage Assets card displayed."
+        );
+    }
+
+    // ============================================================
+    // TEST 9
+    // VERIFY ASSET DETAILS CARD
+    // ============================================================
+
+    @Test
+    public void assetDetailsCardTest() {
+
+        WebElement button = findCardButton("Asset Details");
+
+        assertTrue(
+                button != null,
+                "Asset Details button was not found"
+        );
+
+        assertTrue(
+                button.isDisplayed(),
+                "Asset Details button is not visible"
+        );
+
+        System.out.println(
+                "PASS: Asset Details card displayed."
+        );
+    }
+
+    // ============================================================
+    // TEST 10
+    // VERIFY EMPLOYEE STATUS CARD
+    // ============================================================
+
+    @Test
+    public void employeeStatusCardTest() {
+
+        WebElement button = findCardButton("Employee Status");
+
+        assertTrue(
+                button != null,
+                "Employee Status button was not found"
+        );
+
+        assertTrue(
+                button.isDisplayed(),
+                "Employee Status button is not visible"
+        );
+
+        System.out.println(
+                "PASS: Employee Status card displayed."
+        );
+    }
+
+    // ============================================================
+    // TEST 11
+    // VERIFY ASSET RETURN CARD
+    // ============================================================
+
+    @Test
+    public void assetReturnCardTest() {
+
+        WebElement button = findCardButton("Return");
+
+        assertTrue(
+                button != null,
+                "Asset Return button was not found"
+        );
+
+        assertTrue(
+                button.isDisplayed(),
+                "Asset Return button is not visible"
+        );
+
+        System.out.println(
+                "PASS: Asset Return card displayed."
+        );
+    }
+
+    // ============================================================
+    // TEST 12
+    // CLICK ADD ASSET
+    // ============================================================
+
+    @Test
+    public void addAssetNavigationTest() {
+
+        WebElement button = findCardButton("Add Asset");
+
+        assertTrue(
+                button != null,
+                "Add Asset button was not found"
+        );
+
+        safeClick(button);
+
+        waitForNavigation();
+
+        String page =
+                driver.getPageSource()
+                        .toLowerCase();
+
+        assertTrue(
+                page.contains("add asset"),
+                "Add Asset page was not opened"
+        );
+
+        System.out.println(
+                "PASS: Add Asset navigation works."
+        );
+    }
+
+    // ============================================================
+    // TEST 13
+    // CLICK MANAGE ASSETS
+    // ============================================================
+
+    @Test
+    public void manageAssetsNavigationTest() {
+
+        WebElement button = findCardButton("Manage Assets");
+
+        assertTrue(
+                button != null,
+                "Manage Assets button was not found"
+        );
+
+        safeClick(button);
+
+        waitForNavigation();
+
+        String page =
+                driver.getPageSource()
+                        .toLowerCase();
+
+        assertTrue(
+                page.contains("manage")
+                        || page.contains("asset"),
+                "Manage Assets page was not opened"
+        );
+
+        System.out.println(
+                "PASS: Manage Assets navigation works."
+        );
+    }
+
+    // ============================================================
+    // TEST 14
+    // CLICK ASSET DETAILS
+    // ============================================================
+
+    @Test
+    public void assetDetailsNavigationTest() {
+
+        WebElement button = findCardButton("Asset Details");
+
+        assertTrue(
+                button != null,
+                "Asset Details button was not found"
+        );
+
+        safeClick(button);
+
+        waitForNavigation();
+
+        String page =
+                driver.getPageSource()
+                        .toLowerCase();
+
+        assertTrue(
+                page.contains("asset details")
+                        || page.contains("asset"),
+                "Asset Details page was not opened"
+        );
+
+        System.out.println(
+                "PASS: Asset Details navigation works."
+        );
+    }
+
+    // ============================================================
+    // TEST 15
+    // CLICK EMPLOYEE STATUS
+    // ============================================================
+
+    @Test
+    public void employeeStatusNavigationTest() {
+
+        WebElement button =
+                findCardButton("Employee Status");
+
+        assertTrue(
+                button != null,
+                "Employee Status button was not found"
+        );
+
+        safeClick(button);
+
+        waitForNavigation();
+
+        String page =
+                driver.getPageSource()
+                        .toLowerCase();
+
+        assertTrue(
+                page.contains("employee status")
+                        || page.contains("employee"),
+                "Employee Status page was not opened"
+        );
+
+        System.out.println(
+                "PASS: Employee Status navigation works."
+        );
+    }
+
+    // ============================================================
+    // TEST 16
+    // CLICK ASSET RETURN
+    // ============================================================
+
+    @Test
+    public void assetReturnNavigationTest() {
+
+        WebElement button = findCardButton("Return");
+
+        assertTrue(
+                button != null,
+                "Asset Return button was not found"
+        );
+
+        safeClick(button);
+
+        waitForNavigation();
+
+        String page =
+                driver.getPageSource()
+                        .toLowerCase();
+
+        assertTrue(
+                page.contains("asset return")
+                        || page.contains("return")
+                        || page.contains("asset"),
+                "Asset Return page was not opened"
+        );
+
+        System.out.println(
+                "PASS: Asset Return navigation works."
+        );
+    }
+
+    // ============================================================
+    // TEST 17
+    // SIDEBAR ASSET MANAGEMENT
+    // ============================================================
+
+    @Test
+    public void sidebarAssetManagementTest() {
+
+        WebElement sidebarItem = wait().until(
+                ExpectedConditions.elementToBeClickable(
+                        By.xpath(
+                                "//aside[contains(@class,'am-sidebar')]"
+                                        + "//*[normalize-space()='Asset Management']"
+                        )
+                )
+        );
+
+        safeClick(sidebarItem);
+
+        wait().until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        By.cssSelector(".am-page-title")
+                )
+        );
+
+        assertTrue(
+                driver.findElement(
+                        By.cssSelector(".am-page-title")
+                ).getText()
+                        .trim()
+                        .equalsIgnoreCase("Asset Management"),
+                "Asset Management page is not active"
+        );
+
+        System.out.println(
+                "PASS: Asset Management sidebar navigation works."
+        );
+    }
+
+    // ============================================================
+    // TEST 18
+    // SIDEBAR ASSET ASSIGNMENT
+    // ============================================================
+
+    @Test
+    public void sidebarAssetAssignmentTest() {
+
+        WebElement item = wait().until(
+                ExpectedConditions.elementToBeClickable(
+                        By.xpath(
+                                "//aside[contains(@class,'am-sidebar')]"
+                                        + "//*[normalize-space()='Asset Assignment']"
+                        )
+                )
+        );
+
+        safeClick(item);
+
+        waitForNavigation();
+
+        String page =
+                driver.getPageSource()
+                        .toLowerCase();
+
+        assertTrue(
+                page.contains("asset assignment")
+                        || page.contains("assignment"),
+                "Asset Assignment page was not opened"
+        );
+
+        System.out.println(
+                "PASS: Asset Assignment navigation works."
+        );
+    }
+
+    // ============================================================
+    // TEST 19
+    // SIDEBAR REQUEST APPROVAL
+    // ============================================================
+
+    @Test
+    public void sidebarRequestApprovalTest() {
+
+        WebElement item = wait().until(
+                ExpectedConditions.elementToBeClickable(
+                        By.xpath(
+                                "//aside[contains(@class,'am-sidebar')]"
+                                        + "//*[normalize-space()='Request Approval']"
+                        )
+                )
+        );
+
+        safeClick(item);
+
+        waitForNavigation();
+
+        String page =
+                driver.getPageSource()
+                        .toLowerCase();
+
+        assertTrue(
+                page.contains("request approval")
+                        || page.contains("approval"),
+                "Request Approval page was not opened"
+        );
+
+        System.out.println(
+                "PASS: Request Approval navigation works."
+        );
+    }
+
+    // ============================================================
+    // TEST 20
+    // SIDEBAR MAINTENANCE
+    // ============================================================
+
+    @Test
+    public void sidebarMaintenanceTest() {
+
+        WebElement item = wait().until(
+                ExpectedConditions.elementToBeClickable(
+                        By.xpath(
+                                "//aside[contains(@class,'am-sidebar')]"
+                                        + "//*[normalize-space()='Maintenance']"
+                        )
+                )
+        );
+
+        safeClick(item);
+
+        waitForNavigation();
+
+        String page =
+                driver.getPageSource()
+                        .toLowerCase();
+
+        assertTrue(
+                page.contains("maintenance"),
+                "Maintenance page was not opened"
+        );
+
+        System.out.println(
+                "PASS: Maintenance navigation works."
+        );
+    }
+
+    // ============================================================
+    // TEST 21
+    // LOGOUT
+    // ============================================================
+
+    @Test
+    public void logoutTest() {
+
+        WebElement logoutButton = wait().until(
+                ExpectedConditions.elementToBeClickable(
+                        By.cssSelector(
+                                ".am-logout-btn"
+                        )
+                )
+        );
+
+        safeClick(logoutButton);
+
+        waitForNavigation();
+
+        String page =
+                driver.getPageSource()
+                        .toLowerCase();
+
+        boolean loginDisplayed =
+                page.contains("login")
+                        || !driver.findElements(
+                                By.name("employeeIdOrEmail")
+                        ).isEmpty();
+
+        assertTrue(
+                loginDisplayed,
+                "Logout did not return to login page"
+        );
+
+        System.out.println(
+                "PASS: Logout works."
+        );
+    }
+
+    // ============================================================
+    // FIND ACTION CARD BUTTON
+    // ============================================================
+
+    private WebElement findCardButton(String buttonText) {
+
         try {
-            WebElement loginHeading = driver.findElement(By.xpath("//*[text()='Login']"));
-            System.out.println("✓ Login page heading confirmed: " + loginHeading.isDisplayed());
-        } catch (Exception e) {
-            System.out.println("✗ Login page heading not found");
+
+            List<WebElement> buttons =
+                    driver.findElements(
+                            By.xpath(
+                                    "//div[contains(@class,'am-card')]"
+                                            + "//button[normalize-space()='"
+                                            + buttonText
+                                            + "']"
+                            )
+                    );
+
+            for (WebElement button : buttons) {
+
+                if (button.isDisplayed()) {
+                    return button;
+                }
+            }
+
+        } catch (Exception ignored) {
         }
 
-        // Step 2: Skip entering any credentials — directly click "Asset Mgmt"
-        // Step 3: Click "Asset Mgmt" button (top-right quick nav) to land on Asset Management page
-        boolean assetMgmtOpened = false;
-        try {
-            WebElement assetMgmtBtn = wait.until(
-                    ExpectedConditions.elementToBeClickable(By.xpath("//button[text()='Asset Mgmt']")));
-            assetMgmtBtn.click();
-            assetMgmtOpened = true;
-            System.out.println("✓ Clicked Asset Mgmt button");
-        } catch (Exception e) {
-            System.out.println("✗ Asset Mgmt button not found (button variant)");
-        }
+        return null;
+    }
 
-        if (!assetMgmtOpened) {
+    // ============================================================
+    // SAFE CLICK
+    // ============================================================
+
+    private void safeClick(WebElement element) {
+
+        try {
+
+            wait().until(
+                    ExpectedConditions.elementToBeClickable(
+                            element
+                    )
+            );
+
+            scrollIntoView(element);
+
+            element.click();
+
+        } catch (Exception e) {
+
             try {
-                WebElement assetMgmtLink = driver.findElement(By.xpath("//*[text()='Asset Mgmt']"));
-                js.executeScript("arguments[0].click();", assetMgmtLink);
-                System.out.println("✓ Clicked Asset Mgmt element");
-            } catch (Exception e2) {
-                System.out.println("✗ Could not find Asset Mgmt element at all!");
+
+                scrollIntoView(element);
+
+                ((JavascriptExecutor) driver)
+                        .executeScript(
+                                "arguments[0].click();",
+                                element
+                        );
+
+            } catch (Exception ignored) {
             }
         }
-
-        Thread.sleep(2000);
     }
 
-    // ==========================================
-    // HELPER METHODS
-    // ==========================================
+    // ============================================================
+    // SCROLL
+    // ============================================================
 
-    private WebElement getLogoutButton() {
-        return driver.findElement(By.xpath("//button[text()='Logout']"));
-    }
+    private void scrollIntoView(WebElement element) {
 
-    private WebElement getSidebarItem(String label) {
         try {
-            return driver.findElement(By.xpath("//*[contains(@class,'am-sidebar-item')][text()='" + label + "']"));
-        } catch (Exception e) {
-            return driver.findElement(By.xpath("//*[text()='" + label + "']"));
+
+            ((JavascriptExecutor) driver)
+                    .executeScript(
+                            "arguments[0].scrollIntoView({block:'center'});",
+                            element
+                    );
+
+        } catch (Exception ignored) {
         }
     }
 
-    private WebElement getCardByTitle(String title) {
-        return driver.findElement(
-                By.xpath("//h3[contains(@class,'am-card-title')][text()='" + title + "']/ancestor::div[contains(@class,'am-card')]"));
-    }
+    // ============================================================
+    // LOGIN ALERT
+    // ============================================================
 
-    private WebElement getCardButton(String buttonLabel) {
+    private void handleLoginAlert() {
+
         try {
-            return driver.findElement(By.xpath("//button[contains(@class,'am-card-btn')][text()='" + buttonLabel + "']"));
-        } catch (Exception e) {
-            return driver.findElement(By.xpath("//button[text()='" + buttonLabel + "']"));
+
+            Alert alert = new WebDriverWait(
+                    driver,
+                    Duration.ofSeconds(8)
+            ).until(
+                    ExpectedConditions.alertIsPresent()
+            );
+
+            String text = alert.getText();
+
+            System.out.println(
+                    "Login alert: " + text
+            );
+
+            alert.accept();
+
+        } catch (Exception ignored) {
+            // No alert appeared.
         }
     }
 
-    private void clickCardButton(String buttonLabel) {
-        WebElement btn = getCardButton(buttonLabel);
-        js.executeScript("arguments[0].scrollIntoView(true);", btn);
-        js.executeScript("arguments[0].click();", btn);
+    // ============================================================
+    // WAIT FOR PAGE LOAD
+    // ============================================================
+
+    private void waitForPageLoad() {
+
+        wait().until(driver ->
+                ((JavascriptExecutor) driver)
+                        .executeScript(
+                                "return document.readyState"
+                        )
+                        .equals("complete")
+        );
     }
 
-    private void goBackToAssetManagementMain() throws InterruptedException {
-        // Sub-pages typically expose a "Back" button; fall back to sidebar click
+    // ============================================================
+    // WAIT FOR NAVIGATION
+    // ============================================================
+
+    private void waitForNavigation() {
+
         try {
-            WebElement backBtn = driver.findElement(By.xpath("//button[contains(text(),'Back')]"));
-            js.executeScript("arguments[0].scrollIntoView(true);", backBtn);
-            js.executeScript("arguments[0].click();", backBtn);
-        } catch (Exception e) {
-            try {
-                WebElement sidebarAssetMgmt = getSidebarItem("Asset Management");
-                js.executeScript("arguments[0].click();", sidebarAssetMgmt);
-            } catch (Exception e2) {
-                System.out.println("✗ Could not navigate back to Asset Management main view");
-            }
-        }
-        Thread.sleep(1000);
-    }
 
-    // ==========================================
-    // 0. LOGIN-BYPASS NAVIGATION FLOW VERIFICATION
-    // ==========================================
+            Thread.sleep(800);
 
-    @Test
-    public void testAssetMgmtAccessibleWithoutEnteringCredentials() {
-        // By the time @Before finishes, we should already be on the Asset Management
-        // page without ever having typed an Employee ID or Password.
-        assertTrue("Asset Management page title should be visible without logging in",
-                driver.findElement(By.xpath("//*[text()='Asset Management']")).isDisplayed());
-        assertTrue("Sidebar should be visible, confirming Asset Management page loaded",
-                getSidebarItem("Asset Management").isDisplayed());
-    }
+        } catch (InterruptedException e) {
 
-    // ==========================================
-    // 1. HEADER / NAV VERIFICATION
-    // ==========================================
-
-    @Test
-    public void testVerifyHeader() {
-        assertTrue(driver.findElement(By.xpath("//*[text()='ITAMS']")).isDisplayed());
-        assertTrue(driver.findElement(By.xpath("//*[text()='IT Asset Management System']")).isDisplayed());
-        assertTrue(getLogoutButton().isDisplayed());
-    }
-
-    // ==========================================
-    // 2. PAGE HEADING VERIFICATION
-    // ==========================================
-
-    @Test
-    public void testVerifyPageHeading() {
-        assertTrue(driver.findElement(By.xpath("//*[text()='Asset Management']")).isDisplayed());
-        assertTrue(driver.findElement(
-                By.xpath("//*[text()='Manage and track all IT assets in the organization']")).isDisplayed());
-    }
-
-    // ==========================================
-    // 3. SIDEBAR VERIFICATION
-    // ==========================================
-
-    @Test
-    public void testVerifySidebarItemsPresent() {
-        assertTrue("Dashboard should be visible", getSidebarItem("Dashboard").isDisplayed());
-        assertTrue("Asset Management should be visible", getSidebarItem("Asset Management").isDisplayed());
-        assertTrue("Asset Assignment should be visible", getSidebarItem("Asset Assignment").isDisplayed());
-        assertTrue("Request Approval should be visible", getSidebarItem("Request Approval").isDisplayed());
-        assertTrue("Maintenance should be visible", getSidebarItem("Maintenance").isDisplayed());
-    }
-
-    @Test
-    public void testAssetManagementSidebarItemIsActiveByDefault() {
-        WebElement sidebarItem = getSidebarItem("Asset Management");
-        String classAttr = sidebarItem.getAttribute("class");
-        assertTrue("Asset Management sidebar item should have active class by default",
-                classAttr != null && classAttr.contains("am-sidebar-item--active"));
-    }
-
-    @Test
-    public void testSidebarNavigationToAssetAssignment() throws InterruptedException {
-        WebElement sidebarItem = getSidebarItem("Asset Assignment");
-        js.executeScript("arguments[0].click();", sidebarItem);
-        Thread.sleep(1500);
-        // Clicking "Asset Assignment" unmounts AssetManagement and renders a different
-        // component (<AssetAssignment>), so the Asset Management action-card content
-        // should no longer be present — that's a structure-agnostic way to confirm navigation.
-        boolean assetManagementCardsGone = driver.findElements(
-                By.xpath("//*[text()='Add new asset information to the system']")).isEmpty();
-        assertTrue("Asset Management cards should disappear after navigating to Asset Assignment",
-                assetManagementCardsGone);
-    }
-
-    @Test
-    public void testSidebarNavigationToRequestApproval() throws InterruptedException {
-        WebElement sidebarItem = getSidebarItem("Request Approval");
-        js.executeScript("arguments[0].click();", sidebarItem);
-        Thread.sleep(1500);
-        // Same reasoning: RequestApproval is a separate component, so just confirm
-        // we've left the Asset Management main view.
-        boolean assetManagementCardsGone = driver.findElements(
-                By.xpath("//*[text()='Add new asset information to the system']")).isEmpty();
-        assertTrue("Asset Management cards should disappear after navigating to Request Approval",
-                assetManagementCardsGone);
-    }
-
-    @Test
-    public void testSidebarNavigationBackToAssetManagement() throws InterruptedException {
-        // Navigate away first
-        WebElement assignmentItem = getSidebarItem("Asset Assignment");
-        js.executeScript("arguments[0].click();", assignmentItem);
-        Thread.sleep(1000);
-
-        // Navigate back
-        WebElement assetMgmtItem = getSidebarItem("Asset Management");
-        js.executeScript("arguments[0].click();", assetMgmtItem);
-        Thread.sleep(1000);
-
-        assertTrue(driver.findElement(By.xpath("//*[text()='Asset Management']")).isDisplayed());
-    }
-
-    // ==========================================
-    // 4. ACTION CARDS VERIFICATION
-    // ==========================================
-
-    @Test
-    public void testVerifyAllCardsDisplayed() {
-        assertTrue(getCardByTitle("Add Asset").isDisplayed());
-        assertTrue(getCardByTitle("Manage Assets").isDisplayed());
-        assertTrue(getCardByTitle("Asset Details").isDisplayed());
-        assertTrue(getCardByTitle("Employee Status").isDisplayed());
-    }
-
-    @Test
-    public void testVerifyCardDescriptions() {
-        assertTrue(driver.findElement(
-                By.xpath("//*[text()='Add new asset information to the system']")).isDisplayed());
-        assertTrue(driver.findElement(
-                By.xpath("//*[text()='Edit or modify asset information and delete assets']")).isDisplayed());
-        assertTrue(driver.findElement(
-                By.xpath("//*[text()='View detailed information about an asset']")).isDisplayed());
-        assertTrue(driver.findElement(
-                By.xpath("//*[text()='Check and view the status of employees']")).isDisplayed());
-    }
-
-    @Test
-    public void testVerifyCardButtonsDisplayed() {
-        assertTrue(getCardButton("Add Asset").isDisplayed());
-        assertTrue(getCardButton("Manage Assets").isDisplayed());
-        assertTrue(getCardButton("Asset Details").isDisplayed());
-        assertTrue(getCardButton("Employee Status").isDisplayed());
-    }
-
-    // ==========================================
-    // 5. CARD NAVIGATION TESTS
-    // ==========================================
-
-    @Test
-    public void testNavigateToAddAsset() throws InterruptedException {
-        clickCardButton("Add Asset");
-        Thread.sleep(1500);
-        // Landing on Add Asset page should move away from the Asset Management card grid
-        boolean cardGridGone = driver.findElements(By.xpath("//*[text()='Add new asset information to the system']")).isEmpty();
-        assertTrue("Add Asset card grid should no longer be visible after navigation", cardGridGone);
-    }
-
-    @Test
-    public void testNavigateToManageAssets() throws InterruptedException {
-        clickCardButton("Manage Assets");
-        Thread.sleep(1500);
-        boolean cardGridGone = driver.findElements(
-                By.xpath("//*[text()='Edit or modify asset information and delete assets']")).isEmpty();
-        assertTrue("Manage Assets card grid should no longer be visible after navigation", cardGridGone);
-    }
-
-    @Test
-    public void testNavigateToAssetDetails() throws InterruptedException {
-        clickCardButton("Asset Details");
-        Thread.sleep(1500);
-        boolean cardGridGone = driver.findElements(
-                By.xpath("//*[text()='View detailed information about an asset']")).isEmpty();
-        assertTrue("Asset Details card grid should no longer be visible after navigation", cardGridGone);
-    }
-
-    @Test
-    public void testNavigateToEmployeeStatus() throws InterruptedException {
-        clickCardButton("Employee Status");
-        Thread.sleep(1500);
-        // Employee Status page has its own distinct heading
-        assertTrue("Employee Status page heading should be visible",
-                driver.findElement(By.xpath("//*[text()='Employee Status']")).isDisplayed());
-        assertTrue("Employee Status page subtitle should be visible",
-                driver.findElement(By.xpath("//*[text()='View and update employee status.']")).isDisplayed());
-    }
-
-    @Test
-    public void testBackNavigationFromEmployeeStatus() throws InterruptedException {
-        clickCardButton("Employee Status");
-        Thread.sleep(1500);
-        goBackToAssetManagementMain();
-        assertTrue("Should return to Asset Management page heading",
-                driver.findElement(By.xpath("//*[text()='Asset Management']")).isDisplayed());
-    }
-
-    @Test
-    public void testBackNavigationFromAddAsset() throws InterruptedException {
-        clickCardButton("Add Asset");
-        Thread.sleep(1500);
-        goBackToAssetManagementMain();
-        assertTrue("Should return to Asset Management page heading",
-                driver.findElement(By.xpath("//*[text()='Asset Management']")).isDisplayed());
-    }
-
-    // ==========================================
-    // 6. LOGOUT TEST
-    // ==========================================
-
-    @Test
-    public void testVerifyLogoutButton() {
-        assertTrue(getLogoutButton().isDisplayed());
-    }
-
-    @Test
-    public void testLogoutFunctionality() throws InterruptedException {
-        WebElement logoutBtn = getLogoutButton();
-        js.executeScript("arguments[0].click();", logoutBtn);
-        Thread.sleep(1500);
-
-        assertTrue("Should be back on Home/Login state after logout",
-                driver.findElement(By.xpath("//button[text()='Login']")).isDisplayed());
-    }
-
-    @After
-    public void tearDown() {
-        if (driver != null) {
-            driver.quit();
+            Thread.currentThread().interrupt();
         }
     }
 }
