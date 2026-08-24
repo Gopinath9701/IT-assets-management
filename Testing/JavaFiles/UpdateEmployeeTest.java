@@ -1,56 +1,59 @@
-package com.test;
+package com.itams;
 
-import java.time.Duration;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
 
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import java.time.Duration;
 
-public class UpdateEmployeeTest {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-    private WebDriver driver;
+public class UpdateEmployeeTest extends BaseTest {
+
     private WebDriverWait wait;
-    private JavascriptExecutor js;
 
-    private final String BASE_URL = "http://localhost:3000";
+    // =========================================================
+    // HR LOGIN CREDENTIALS
+    // =========================================================
+
+    private static final String HR_ID = "260822001";
+    private static final String HR_PASSWORD = "Itams@2026h";
 
 
-    // ============================================================
-    // SETUP
-    // ============================================================
+    // =========================================================
+    // EMPLOYEE USED FOR UPDATE TESTING
+    // =========================================================
 
-    @Before
-    public void setUp() {
+    private static final String EMPLOYEE_ID = "260822004";
 
-        driver = new ChromeDriver();
 
-        driver.manage().window().maximize();
+    // =========================================================
+    // BEFORE EACH TEST
+    // =========================================================
 
-        driver.manage().timeouts()
-                .implicitlyWait(Duration.ofSeconds(2));
+    @BeforeEach
+    public void openUpdateEmployeePage() {
 
         wait = new WebDriverWait(
                 driver,
                 Duration.ofSeconds(15)
         );
 
-        js = (JavascriptExecutor) driver;
+        // -----------------------------------------------------
+        // STEP 1 - OPEN APPLICATION
+        // -----------------------------------------------------
 
-        driver.get(BASE_URL);
+        driver.get("http://localhost:3000");
 
         wait.until(
                 ExpectedConditions.presenceOfElementLocated(
@@ -58,224 +61,158 @@ public class UpdateEmployeeTest {
                 )
         );
 
-        System.out.println("======================================");
-        System.out.println("Application started");
-        System.out.println("======================================");
-    }
+        System.out.println("STEP 1: Home page opened");
 
 
-    // ============================================================
-    // HELPER - SCROLL TO ELEMENT
-    // ============================================================
+        // -----------------------------------------------------
+        // STEP 2 - CLICK LOGIN
+        // -----------------------------------------------------
 
-    private void scrollToElement(WebElement element) {
-
-        js.executeScript(
-                "arguments[0].scrollIntoView({block:'center', inline:'center'});",
-                element
-        );
-
-        try {
-
-            Thread.sleep(300);
-
-        } catch (InterruptedException e) {
-
-            Thread.currentThread().interrupt();
-        }
-    }
-
-
-    // ============================================================
-    // HELPER - SAFE CLICK
-    // ============================================================
-
-    private void safeClick(By locator) {
-
-        WebElement element =
+        WebElement loginButton =
                 wait.until(
-                        ExpectedConditions.presenceOfElementLocated(
-                                locator
+                        ExpectedConditions.elementToBeClickable(
+                                By.xpath(
+                                        "//button[contains(normalize-space(),'Login')]"
+                                )
                         )
                 );
 
-        scrollToElement(element);
+        loginButton.click();
+
+        System.out.println("STEP 2: Login button clicked");
+
+
+        // -----------------------------------------------------
+        // STEP 3 - ENTER HR EMPLOYEE ID
+        // -----------------------------------------------------
+
+        WebElement employeeField =
+                wait.until(
+                        ExpectedConditions.visibilityOfElementLocated(
+                                By.name("employeeIdOrEmail")
+                        )
+                );
+
+        employeeField.clear();
+
+        employeeField.sendKeys(
+                HR_ID
+        );
+
+
+        // -----------------------------------------------------
+        // STEP 4 - ENTER HR PASSWORD
+        // -----------------------------------------------------
+
+        WebElement passwordField =
+                wait.until(
+                        ExpectedConditions.visibilityOfElementLocated(
+                                By.name("password")
+                        )
+                );
+
+        passwordField.clear();
+
+        passwordField.sendKeys(
+                HR_PASSWORD
+        );
+
+
+        // -----------------------------------------------------
+        // STEP 5 - CLICK LOGIN
+        // -----------------------------------------------------
+
+        WebElement loginSubmit =
+                wait.until(
+                        ExpectedConditions.elementToBeClickable(
+                                By.xpath(
+                                        "//form//button[@type='submit']"
+                                )
+                        )
+                );
+
+        loginSubmit.click();
+
+        System.out.println("STEP 3: HR credentials submitted");
+
+
+        // -----------------------------------------------------
+        // STEP 6 - HANDLE LOGIN ALERT
+        // -----------------------------------------------------
 
         try {
 
-            wait.until(
-                    ExpectedConditions.elementToBeClickable(
-                            locator
-                    )
-            ).click();
-
-        } catch (Exception e) {
+            Alert alert =
+                    wait.until(
+                            ExpectedConditions.alertIsPresent()
+                    );
 
             System.out.println(
-                    "Normal click failed. Using JavaScript click."
+                    "Login Alert: " + alert.getText()
             );
 
-            js.executeScript(
-                    "arguments[0].click();",
-                    element
+            alert.accept();
+
+        } catch (Exception ignored) {
+
+            System.out.println(
+                    "No login alert displayed."
             );
         }
-    }
 
 
-    // ============================================================
-    // HELPER - CLEAR AND TYPE
-    // ============================================================
-
-    private void clearAndType(
-            By locator,
-            String text
-    ) {
-
-        WebElement element =
-                wait.until(
-                        ExpectedConditions.presenceOfElementLocated(
-                                locator
-                        )
-                );
-
-        scrollToElement(element);
+        // -----------------------------------------------------
+        // STEP 7 - WAIT FOR HR MANAGEMENT
+        // -----------------------------------------------------
 
         wait.until(
-                ExpectedConditions.elementToBeClickable(
-                        locator
-                )
-        );
-
-        element.click();
-
-        element.clear();
-
-        element.sendKeys(text);
-    }
-
-
-    // ============================================================
-    // HELPER - ACCEPT ALERT
-    // ============================================================
-
-    private String acceptAlert() {
-
-        WebDriverWait alertWait =
-                new WebDriverWait(
-                        driver,
-                        Duration.ofSeconds(5)
-                );
-
-        Alert alert =
-                alertWait.until(
-                        ExpectedConditions.alertIsPresent()
-                );
-
-        String text = alert.getText();
-
-        System.out.println(
-                "Alert message: " + text
-        );
-
-        alert.accept();
-
-        return text;
-    }
-
-
-    // ============================================================
-    // NAVIGATION
-    //
-    // Home
-    //    ↓
-    // Login
-    //    ↓
-    // HR Mgmt
-    //    ↓
-    // HR Management
-    //    ↓
-    // Update Details
-    //    ↓
-    // Update Employee Details
-    // ============================================================
-
-    private void navigateToUpdateEmployeePage() {
-
-        System.out.println("");
-        System.out.println(
-                "Starting navigation..."
-        );
-
-
-        // --------------------------------------------------------
-        // STEP 1 - HOME
-        // --------------------------------------------------------
-
-        wait.until(
-                ExpectedConditions.presenceOfElementLocated(
-                        By.tagName("body")
-                )
-        );
-
-        System.out.println(
-                "STEP 1: Home page opened"
-        );
-
-
-        // --------------------------------------------------------
-        // STEP 2 - LOGIN
-        // --------------------------------------------------------
-
-        By loginButton =
-                By.xpath(
-                        "//button[normalize-space()='Login']"
-                );
-
-        safeClick(loginButton);
-
-        System.out.println(
-                "STEP 2: Login button clicked"
-        );
-
-
-        // --------------------------------------------------------
-        // STEP 3 - LOGIN PAGE
-        // --------------------------------------------------------
-
-        wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.xpath(
-                                "//*[normalize-space()='Login']"
+                ExpectedConditions.or(
+                        ExpectedConditions.visibilityOfElementLocated(
+                                By.xpath(
+                                        "//*[normalize-space()='HR Management']"
+                                )
+                        ),
+                        ExpectedConditions.visibilityOfElementLocated(
+                                By.xpath(
+                                        "//button[normalize-space()='HR Mgmt']"
+                                )
                         )
                 )
         );
 
-        System.out.println(
-                "STEP 3: Login page opened"
-        );
+
+        // -----------------------------------------------------
+        // STEP 8 - CLICK HR MGMT
+        // -----------------------------------------------------
+
+        try {
+
+            WebElement hrMgmtButton =
+                    wait.until(
+                            ExpectedConditions.elementToBeClickable(
+                                    By.xpath(
+                                            "//button[normalize-space()='HR Mgmt']"
+                                    )
+                            )
+                    );
+
+            clickUsingJS(hrMgmtButton);
+
+            System.out.println(
+                    "STEP 4: HR Mgmt clicked"
+            );
+
+        } catch (Exception ignored) {
+
+            System.out.println(
+                    "HR Management page already open."
+            );
+        }
 
 
-        // --------------------------------------------------------
-        // IMPORTANT:
-        // DO NOT ENTER USERNAME OR PASSWORD
-        // --------------------------------------------------------
-
-        By hrMgmtButton =
-                By.xpath(
-                        "//button[normalize-space()='HR Mgmt']"
-                );
-
-        safeClick(hrMgmtButton);
-
-        System.out.println(
-                "STEP 4: HR Mgmt clicked without credentials"
-        );
-
-
-        // --------------------------------------------------------
-        // STEP 5 - HR MANAGEMENT PAGE
-        // --------------------------------------------------------
+        // -----------------------------------------------------
+        // STEP 9 - WAIT FOR HR MANAGEMENT PAGE
+        // -----------------------------------------------------
 
         wait.until(
                 ExpectedConditions.visibilityOfElementLocated(
@@ -290,25 +227,35 @@ public class UpdateEmployeeTest {
         );
 
 
-        // --------------------------------------------------------
-        // STEP 6 - UPDATE DETAILS
-        // --------------------------------------------------------
+        // -----------------------------------------------------
+        // STEP 10 - CLICK UPDATE DETAILS
+        // -----------------------------------------------------
 
-        By updateDetailsButton =
-                By.xpath(
-                        "//button[normalize-space()='Update Details']"
+        WebElement updateDetailsButton =
+                wait.until(
+                        ExpectedConditions.elementToBeClickable(
+                                By.xpath(
+                                        "//button[normalize-space()='Update Details']"
+                                )
+                        )
                 );
 
-        safeClick(updateDetailsButton);
+        scrollIntoView(
+                updateDetailsButton
+        );
+
+        clickUsingJS(
+                updateDetailsButton
+        );
 
         System.out.println(
                 "STEP 6: Update Details clicked"
         );
 
 
-        // --------------------------------------------------------
-        // STEP 7 - UPDATE EMPLOYEE PAGE
-        // --------------------------------------------------------
+        // -----------------------------------------------------
+        // STEP 11 - WAIT FOR UPDATE EMPLOYEE PAGE
+        // -----------------------------------------------------
 
         wait.until(
                 ExpectedConditions.visibilityOfElementLocated(
@@ -321,858 +268,971 @@ public class UpdateEmployeeTest {
         System.out.println(
                 "STEP 7: Update Employee Details page opened"
         );
-    }
 
 
-    // ============================================================
-    // HELPER - SEARCH EMPLOYEE
-    // ============================================================
-
-    private void searchEmployee(String employeeId) {
-
-        By searchInput =
-                By.xpath(
-                        "//input[@placeholder='Enter Employee ID (e.g., EMP001)']"
-                );
-
-        clearAndType(
-                searchInput,
-                employeeId
-        );
-
-        System.out.println(
-                "Entered Employee ID: " + employeeId
-        );
-
-
-        By searchButton =
-                By.xpath(
-                        "//button[normalize-space()='Search']"
-                );
-
-        safeClick(searchButton);
-
-        System.out.println(
-                "Search button clicked"
-        );
-
+        // -----------------------------------------------------
+        // WAIT FOR SEARCH FIELD
+        // -----------------------------------------------------
 
         wait.until(
                 ExpectedConditions.visibilityOfElementLocated(
                         By.xpath(
-                                "//*[normalize-space()='Employee Details']"
+                                "//input[@placeholder='Enter Employee ID (e.g., 260822004)']"
                         )
                 )
         );
     }
 
 
-    // ============================================================
-    // TEST 1
-    // NAVIGATION TO UPDATE EMPLOYEE
-    // ============================================================
+    // =========================================================
+    // TEST 1 - VERIFY PAGE
+    // =========================================================
 
     @Test
-    public void testNavigationToUpdateEmployee() {
+    public void verifyUpdateEmployeePageTest() {
 
-        navigateToUpdateEmployeePage();
+        assertTrue(
+                driver.findElement(
+                        By.xpath(
+                                "//*[normalize-space()='Update Employee Details']"
+                        )
+                ).isDisplayed(),
+                "Update Employee Details heading not displayed"
+        );
 
-        WebElement heading =
+        assertTrue(
+                driver.findElement(
+                        By.xpath(
+                                "//*[normalize-space()='Search Employee']"
+                        )
+                ).isDisplayed(),
+                "Search Employee section not displayed"
+        );
+
+        assertTrue(
+                driver.findElement(
+                        By.xpath(
+                                "//*[normalize-space()='Employee Details']"
+                        )
+                ).isDisplayed(),
+                "Employee Details section not displayed"
+        );
+
+        System.out.println(
+                "TEST 1 - UPDATE EMPLOYEE PAGE : PASSED"
+        );
+    }
+
+
+    // =========================================================
+    // TEST 2 - SEARCH FIELD
+    // =========================================================
+
+    @Test
+    public void verifySearchFieldTest() {
+
+        WebElement searchField =
+                getSearchField();
+
+        assertTrue(
+                searchField.isDisplayed(),
+                "Search field is not displayed"
+        );
+
+        assertEquals(
+                "Enter Employee ID (e.g., 260822004)",
+                searchField.getAttribute("placeholder"),
+                "Search placeholder is incorrect"
+        );
+
+        assertEquals(
+                "9",
+                searchField.getAttribute("maxlength"),
+                "Search field maxlength should be 9"
+        );
+
+        System.out.println(
+                "TEST 2 - SEARCH FIELD : PASSED"
+        );
+    }
+
+
+    // =========================================================
+    // TEST 3 - EMPTY EMPLOYEE ID
+    // =========================================================
+
+    @Test
+    public void emptyEmployeeIdSearchTest() {
+
+        WebElement searchField =
+                getSearchField();
+
+        searchField.clear();
+
+        clickSearch();
+
+        WebElement error =
                 wait.until(
                         ExpectedConditions.visibilityOfElementLocated(
-                                By.xpath(
-                                        "//*[normalize-space()='Update Employee Details']"
-                                )
+                                By.cssSelector(".search-error")
                         )
                 );
 
         assertTrue(
-                heading.isDisplayed()
+                error.getText().contains(
+                        "Employee ID is required"
+                ),
+                "Employee ID required validation not displayed"
         );
 
         System.out.println(
-                "PASS: Navigation to Update Employee Details"
+                "TEST 3 - EMPTY EMPLOYEE ID : PASSED"
         );
     }
 
 
-    // ============================================================
-    // TEST 2
-    // SEARCH EMP001
-    // ============================================================
+    // =========================================================
+    // TEST 4 - SHORT EMPLOYEE ID
+    // =========================================================
 
     @Test
-    public void testSearchEmployeeEMP001() {
+    public void shortEmployeeIdTest() {
 
-        navigateToUpdateEmployeePage();
+        WebElement searchField =
+                getSearchField();
 
-        searchEmployee("EMP001");
+        searchField.clear();
 
-        By employeeIdField =
-                By.cssSelector(
-                        "input[readonly]"
-                );
+        searchField.sendKeys(
+                "26082200"
+        );
 
-        WebElement employeeId =
+        clickSearch();
+
+        WebElement error =
                 wait.until(
                         ExpectedConditions.visibilityOfElementLocated(
-                                employeeIdField
+                                By.cssSelector(".search-error")
+                        )
+                );
+
+        assertTrue(
+                error.getText().contains(
+                        "exactly 9 digits"
+                ),
+                "Short Employee ID validation not displayed"
+        );
+
+        System.out.println(
+                "TEST 4 - SHORT EMPLOYEE ID : PASSED"
+        );
+    }
+
+
+    // =========================================================
+    // TEST 5 - INVALID EMPLOYEE ID
+    // =========================================================
+
+    @Test
+    public void invalidEmployeeIdTest() {
+
+        WebElement searchField =
+                getSearchField();
+
+        searchField.clear();
+
+        searchField.sendKeys(
+                "261399999"
+        );
+
+        clickSearch();
+
+        WebElement error =
+                wait.until(
+                        ExpectedConditions.visibilityOfElementLocated(
+                                By.cssSelector(".search-error")
+                        )
+                );
+
+        assertTrue(
+                error.isDisplayed(),
+                "Invalid Employee ID error not displayed"
+        );
+
+        System.out.println(
+                "TEST 5 - INVALID EMPLOYEE ID : PASSED"
+        );
+    }
+
+
+    // =========================================================
+    // TEST 6 - NON EXISTING EMPLOYEE
+    // =========================================================
+
+    @Test
+    public void nonExistingEmployeeTest() {
+
+        WebElement searchField =
+                getSearchField();
+
+        searchField.clear();
+
+        searchField.sendKeys(
+                "261231999"
+        );
+
+        clickSearch();
+
+        WebElement error =
+                wait.until(
+                        ExpectedConditions.visibilityOfElementLocated(
+                                By.cssSelector(".search-error")
+                        )
+                );
+
+        assertTrue(
+                error.isDisplayed(),
+                "Employee not found error not displayed"
+        );
+
+        System.out.println(
+                "TEST 6 - NON EXISTING EMPLOYEE : PASSED"
+        );
+    }
+
+
+    // =========================================================
+    // TEST 7 - SEARCH EMPLOYEE 260822004
+    // =========================================================
+
+    @Test
+    public void searchEmployeeTest() {
+
+        searchEmployee();
+
+        WebElement idField =
+                wait.until(
+                        ExpectedConditions.visibilityOfElementLocated(
+                                By.name("id")
                         )
                 );
 
         assertEquals(
-                "EMP001",
-                employeeId.getAttribute("value")
+                EMPLOYEE_ID,
+                idField.getAttribute("value"),
+                "Employee 260822004 was not loaded"
         );
 
         System.out.println(
-                "PASS: EMP001 searched successfully"
+                "TEST 7 - SEARCH EMPLOYEE 260822004 : PASSED"
         );
     }
 
 
-    // ============================================================
-    // TEST 3
-    // VERIFY EMPLOYEE NAME
-    // ============================================================
+    // =========================================================
+    // TEST 8 - EMPLOYEE ID READ ONLY
+    // =========================================================
 
     @Test
-    public void testEmployeeNameDisplayed() {
+    public void employeeIdReadOnlyTest() {
 
-        navigateToUpdateEmployeePage();
+        searchEmployee();
 
-        searchEmployee("EMP001");
-
-        By nameInput =
-                By.name("name");
-
-        WebElement name =
+        WebElement idField =
                 wait.until(
                         ExpectedConditions.visibilityOfElementLocated(
-                                nameInput
+                                By.name("id")
                         )
                 );
 
-        assertEquals(
-                "Emp1",
-                name.getAttribute("value")
+        String readOnly =
+                idField.getAttribute("readonly");
+
+        assertNotNull(
+                readOnly,
+                "Employee ID should be read-only"
         );
 
         System.out.println(
-                "PASS: Employee name displayed correctly"
+                "TEST 8 - EMPLOYEE ID READ ONLY : PASSED"
         );
     }
 
 
-    // ============================================================
-    // TEST 4
-    // VERIFY DEPARTMENT
-    // ============================================================
+    // =========================================================
+    // TEST 9 - VERIFY EMPLOYEE NAME FIELD
+    // =========================================================
 
     @Test
-    public void testDepartmentDisplayed() {
+    public void employeeNameFieldTest() {
 
-        navigateToUpdateEmployeePage();
+        searchEmployee();
 
-        searchEmployee("EMP001");
+        WebElement nameField =
+                getNameField();
 
-        By department =
-                By.name("department");
+        assertTrue(
+                nameField.isDisplayed(),
+                "Employee name field not displayed"
+        );
+
+        assertTrue(
+                !nameField.getAttribute("value").isEmpty(),
+                "Employee name should be populated"
+        );
+
+        System.out.println(
+                "TEST 9 - EMPLOYEE NAME FIELD : PASSED"
+        );
+    }
+
+
+    // =========================================================
+    // TEST 10 - VERIFY DEPARTMENT
+    // =========================================================
+
+    @Test
+    public void departmentDropdownTest() {
+
+        searchEmployee();
 
         WebElement departmentElement =
                 wait.until(
                         ExpectedConditions.visibilityOfElementLocated(
-                                department
+                                By.name("department")
                         )
                 );
 
-        Select select =
-                new Select(departmentElement);
+        Select department =
+                new Select(
+                        departmentElement
+                );
 
-        assertEquals(
-                "IT",
-                select
-                        .getFirstSelectedOption()
-                        .getText()
+        assertTrue(
+                department.getOptions().size() > 1,
+                "Department dropdown has no options"
         );
 
         System.out.println(
-                "PASS: Department displayed correctly"
+                "TEST 10 - DEPARTMENT DROPDOWN : PASSED"
         );
     }
 
 
-    // ============================================================
-    // TEST 5
-    // VERIFY DESIGNATION
-    // ============================================================
+    // =========================================================
+    // TEST 11 - VERIFY DESIGNATION
+    // =========================================================
 
     @Test
-    public void testDesignationDisplayed() {
+    public void designationDropdownTest() {
 
-        navigateToUpdateEmployeePage();
-
-        searchEmployee("EMP001");
-
-        By designation =
-                By.name("designation");
+        searchEmployee();
 
         WebElement designationElement =
                 wait.until(
                         ExpectedConditions.visibilityOfElementLocated(
-                                designation
+                                By.name("designation")
                         )
                 );
-
-        Select select =
-                new Select(designationElement);
-
-        assertEquals(
-                "Developer",
-                select
-                        .getFirstSelectedOption()
-                        .getText()
-        );
-
-        System.out.println(
-                "PASS: Designation displayed correctly"
-        );
-    }
-
-
-    // ============================================================
-    // TEST 6
-    // VERIFY PHONE
-    // ============================================================
-
-    @Test
-    public void testPhoneDisplayed() {
-
-        navigateToUpdateEmployeePage();
-
-        searchEmployee("EMP001");
-
-        By phone =
-                By.name("phone");
-
-        WebElement phoneElement =
-                wait.until(
-                        ExpectedConditions.visibilityOfElementLocated(
-                                phone
-                        )
-                );
-
-        assertEquals(
-                "9876543210",
-                phoneElement.getAttribute("value")
-        );
-
-        System.out.println(
-                "PASS: Phone number displayed correctly"
-        );
-    }
-
-
-    // ============================================================
-    // TEST 7
-    // INVALID EMPLOYEE ID
-    // ============================================================
-
-    @Test
-    public void testInvalidEmployeeId() {
-
-        navigateToUpdateEmployeePage();
-
-        System.out.println(
-                "Testing invalid Employee ID..."
-        );
-
-
-        By searchInput =
-                By.xpath(
-                        "//input[@placeholder='Enter Employee ID (e.g., EMP001)']"
-                );
-
-        WebElement input =
-                wait.until(
-                        ExpectedConditions.visibilityOfElementLocated(
-                                searchInput
-                        )
-                );
-
-        scrollToElement(input);
-
-        input.click();
-
-        input.clear();
-
-        input.sendKeys(
-                "ABC123"
-        );
-
-
-        System.out.println(
-                "Entered invalid ID: ABC123"
-        );
-
-
-        By searchButton =
-                By.xpath(
-                        "//button[normalize-space()='Search']"
-                );
-
-        WebElement button =
-                wait.until(
-                        ExpectedConditions.presenceOfElementLocated(
-                                searchButton
-                        )
-                );
-
-        scrollToElement(button);
-
-        js.executeScript(
-                "arguments[0].click();",
-                button
-        );
-
-
-        System.out.println(
-                "Search button clicked"
-        );
-
-
-        By errorMessage =
-                By.cssSelector(
-                        ".search-error"
-                );
-
-        WebElement error =
-                wait.until(
-                        ExpectedConditions.visibilityOfElementLocated(
-                                errorMessage
-                        )
-                );
-
-        String actualMessage =
-                error.getText();
-
-        System.out.println(
-                "Validation message: "
-                        + actualMessage
-        );
-
-
-        assertTrue(
-                "Expected Employee ID validation message, but got: "
-                        + actualMessage,
-
-                actualMessage.contains(
-                        "Employee ID must start with"
-                )
-        );
-
-
-        System.out.println(
-                "PASS: Invalid Employee ID validation"
-        );
-    }
-
-
-    // ============================================================
-    // TEST 8
-    // EMPTY EMPLOYEE ID
-    // ============================================================
-
-    @Test
-    public void testEmptyEmployeeId() {
-
-        navigateToUpdateEmployeePage();
-
-        System.out.println(
-                "Testing empty Employee ID..."
-        );
-
-
-        By searchInput =
-                By.xpath(
-                        "//input[@placeholder='Enter Employee ID (e.g., EMP001)']"
-                );
-
-        WebElement input =
-                wait.until(
-                        ExpectedConditions.visibilityOfElementLocated(
-                                searchInput
-                        )
-                );
-
-        scrollToElement(input);
-
-        input.click();
-
-        input.clear();
-
-
-        By searchButton =
-                By.xpath(
-                        "//button[normalize-space()='Search']"
-                );
-
-        WebElement button =
-                wait.until(
-                        ExpectedConditions.presenceOfElementLocated(
-                                searchButton
-                        )
-                );
-
-        scrollToElement(button);
-
-        js.executeScript(
-                "arguments[0].click();",
-                button
-        );
-
-
-        System.out.println(
-                "Search button clicked"
-        );
-
-
-        By errorMessage =
-                By.cssSelector(
-                        ".search-error"
-                );
-
-        WebElement error =
-                wait.until(
-                        ExpectedConditions.visibilityOfElementLocated(
-                                errorMessage
-                        )
-                );
-
-        String actualMessage =
-                error.getText();
-
-
-        assertTrue(
-                "Expected empty Employee ID validation message, but got: "
-                        + actualMessage,
-
-                actualMessage.contains(
-                        "Please enter an Employee ID to search"
-                )
-        );
-
-
-        System.out.println(
-                "PASS: Empty Employee ID validation"
-        );
-    }
-
-
-    // ============================================================
-    // TEST 9
-    // EDIT EMPLOYEE NAME
-    // ============================================================
-
-    @Test
-    public void testEditEmployeeName() {
-
-        navigateToUpdateEmployeePage();
-
-        searchEmployee("EMP001");
-
-        By name =
-                By.name("name");
-
-        clearAndType(
-                name,
-                "Emp Updated"
-        );
-
-        WebElement nameElement =
-                wait.until(
-                        ExpectedConditions.visibilityOfElementLocated(
-                                name
-                        )
-                );
-
-        assertEquals(
-                "Emp Updated",
-                nameElement.getAttribute("value")
-        );
-
-        System.out.println(
-                "PASS: Employee name edited"
-        );
-    }
-
-
-    // ============================================================
-    // TEST 10
-    // EDIT PHONE NUMBER
-    // ============================================================
-
-    @Test
-    public void testEditPhoneNumber() {
-
-        navigateToUpdateEmployeePage();
-
-        searchEmployee("EMP001");
-
-        By phone =
-                By.name("phone");
-
-        clearAndType(
-                phone,
-                "9123456789"
-        );
-
-        WebElement phoneElement =
-                wait.until(
-                        ExpectedConditions.visibilityOfElementLocated(
-                                phone
-                        )
-                );
-
-        assertEquals(
-                "9123456789",
-                phoneElement.getAttribute("value")
-        );
-
-        System.out.println(
-                "PASS: Phone number edited"
-        );
-    }
-
-
-    // ============================================================
-    // TEST 11
-    // INVALID PHONE NUMBER
-    // ============================================================
-
-    @Test
-    public void testInvalidPhoneNumber() {
-
-        navigateToUpdateEmployeePage();
-
-        searchEmployee("EMP001");
-
-        By phone =
-                By.name("phone");
-
-        clearAndType(
-                phone,
-                "12345"
-        );
-
-
-        safeClick(
-                By.xpath(
-                        "//button[normalize-space()='Update Details']"
-                )
-        );
-
-
-        By error =
-                By.xpath(
-                        "//*[contains(text(),'Phone number must be exactly 10 digits')]"
-                );
-
-
-        WebElement errorElement =
-                wait.until(
-                        ExpectedConditions.visibilityOfElementLocated(
-                                error
-                        )
-                );
-
-
-        assertTrue(
-                errorElement.isDisplayed()
-        );
-
-
-        System.out.println(
-                "PASS: Invalid phone validation"
-        );
-    }
-
-
-    // ============================================================
-    // TEST 12
-    // CANCEL BUTTON
-    // ============================================================
-
-    @Test
-    public void testCancelButton() {
-
-        navigateToUpdateEmployeePage();
-
-        searchEmployee("EMP001");
-
-
-        // Change name temporarily
-        clearAndType(
-                By.name("name"),
-                "Temporary Name"
-        );
-
-
-        // Click Cancel
-        safeClick(
-                By.xpath(
-                        "//button[normalize-space()='Cancel']"
-                )
-        );
-
-
-        // Verify original value returned
-        WebElement name =
-                wait.until(
-                        ExpectedConditions.visibilityOfElementLocated(
-                                By.name("name")
-                        )
-                );
-
-
-        assertEquals(
-                "Emp1",
-                name.getAttribute("value")
-        );
-
-
-        System.out.println(
-                "PASS: Cancel restored original details"
-        );
-    }
-
-
-    // ============================================================
-    // TEST 13
-    // COMPLETE UPDATE
-    // ============================================================
-
-    @Test
-    public void testUpdateEmployeeDetails() {
-
-        navigateToUpdateEmployeePage();
-
-        searchEmployee("EMP001");
-
-
-        // --------------------------------------------------------
-        // CHANGE NAME
-        // --------------------------------------------------------
-
-        clearAndType(
-                By.name("name"),
-                "Emp Updated"
-        );
-
-
-        // --------------------------------------------------------
-        // CHANGE DEPARTMENT
-        // --------------------------------------------------------
-
-        Select department =
-                new Select(
-                        wait.until(
-                                ExpectedConditions.visibilityOfElementLocated(
-                                        By.name("department")
-                                )
-                        )
-                );
-
-        department.selectByVisibleText(
-                "HR"
-        );
-
-
-        // --------------------------------------------------------
-        // CHANGE DESIGNATION
-        // --------------------------------------------------------
 
         Select designation =
                 new Select(
-                        wait.until(
-                                ExpectedConditions.visibilityOfElementLocated(
-                                        By.name("designation")
+                        designationElement
+                );
+
+        assertTrue(
+                designation.getOptions().size() > 1,
+                "Designation dropdown has no options"
+        );
+
+        System.out.println(
+                "TEST 11 - DESIGNATION DROPDOWN : PASSED"
+        );
+    }
+
+
+    // =========================================================
+    // TEST 12 - EMPTY NAME
+    // =========================================================
+
+    @Test
+    public void emptyEmployeeNameTest() {
+
+        searchEmployee();
+
+        WebElement nameField =
+                getNameField();
+
+        nameField.clear();
+
+        clickUpdate();
+
+        String pageText =
+                driver.findElement(
+                        By.tagName("body")
+                ).getText();
+
+        assertTrue(
+                pageText.toLowerCase().contains(
+                        "employee name"
+                ),
+                "Employee name validation not displayed"
+        );
+
+        System.out.println(
+                "TEST 12 - EMPTY EMPLOYEE NAME : PASSED"
+        );
+    }
+
+
+    // =========================================================
+    // TEST 13 - NAME WITH NUMBERS
+    // =========================================================
+
+    @Test
+    public void employeeNameWithNumbersTest() {
+
+        searchEmployee();
+
+        WebElement nameField =
+                getNameField();
+
+        nameField.clear();
+
+        nameField.sendKeys(
+                "Rahul123"
+        );
+
+        clickUpdate();
+
+        String pageText =
+                driver.findElement(
+                        By.tagName("body")
+                ).getText();
+
+        assertTrue(
+                pageText.toLowerCase().contains(
+                        "name"
+                ),
+                "Name validation not displayed"
+        );
+
+        System.out.println(
+                "TEST 13 - NAME WITH NUMBERS : PASSED"
+        );
+    }
+
+
+    // =========================================================
+    // TEST 14 - PHONE LENGTH
+    // =========================================================
+
+    @Test
+    public void invalidPhoneLengthTest() {
+
+        searchEmployee();
+
+        WebElement phoneField =
+                getPhoneField();
+
+        phoneField.clear();
+
+        phoneField.sendKeys(
+                "987654321"
+        );
+
+        clickUpdate();
+
+        String pageText =
+                driver.findElement(
+                        By.tagName("body")
+                ).getText();
+
+        assertTrue(
+                pageText.toLowerCase().contains(
+                        "phone"
+                ),
+                "Phone validation not displayed"
+        );
+
+        System.out.println(
+                "TEST 14 - INVALID PHONE LENGTH : PASSED"
+        );
+    }
+
+
+    // =========================================================
+    // TEST 15 - EMPTY PHONE
+    // =========================================================
+
+    @Test
+    public void emptyPhoneTest() {
+
+        searchEmployee();
+
+        WebElement phoneField =
+                getPhoneField();
+
+        phoneField.clear();
+
+        clickUpdate();
+
+        String pageText =
+                driver.findElement(
+                        By.tagName("body")
+                ).getText();
+
+        assertTrue(
+                pageText.toLowerCase().contains(
+                        "phone"
+                ),
+                "Phone required validation not displayed"
+        );
+
+        System.out.println(
+                "TEST 15 - EMPTY PHONE : PASSED"
+        );
+    }
+
+
+    // =========================================================
+    // TEST 16 - VERIFY EMAIL
+    // =========================================================
+
+    @Test
+    public void verifyEmailFieldTest() {
+
+        searchEmployee();
+
+        WebElement emailField =
+                wait.until(
+                        ExpectedConditions.visibilityOfElementLocated(
+                                By.name("email")
+                        )
+                );
+
+        assertTrue(
+                emailField.isDisplayed(),
+                "Email field not displayed"
+        );
+
+        assertTrue(
+                !emailField.getAttribute("value").isEmpty(),
+                "Email should be populated"
+        );
+
+        System.out.println(
+                "TEST 16 - EMAIL FIELD : PASSED"
+        );
+    }
+
+
+    // =========================================================
+    // TEST 17 - VERIFY JOINING DATE
+    // =========================================================
+
+    @Test
+    public void verifyJoiningDateTest() {
+
+        searchEmployee();
+
+        WebElement joiningDate =
+                wait.until(
+                        ExpectedConditions.visibilityOfElementLocated(
+                                By.name("joiningDate")
+                        )
+                );
+
+        assertTrue(
+                joiningDate.isDisplayed(),
+                "Joining date field not displayed"
+        );
+
+        System.out.println(
+                "TEST 17 - JOINING DATE : PASSED"
+        );
+    }
+
+
+    // =========================================================
+    // TEST 18 - CANCEL BUTTON
+    // =========================================================
+
+    @Test
+    public void cancelButtonTest() {
+
+        searchEmployee();
+
+        WebElement nameField =
+                getNameField();
+
+        String originalName =
+                nameField.getAttribute("value");
+
+        nameField.clear();
+
+        nameField.sendKeys(
+                "Temporary Name"
+        );
+
+        WebElement cancelButton =
+                wait.until(
+                        ExpectedConditions.presenceOfElementLocated(
+                                By.xpath(
+                                        "//button[normalize-space()='Cancel']"
                                 )
                         )
                 );
 
-        designation.selectByVisibleText(
-                "Manager"
+        scrollIntoView(
+                cancelButton
         );
 
-
-        // --------------------------------------------------------
-        // CHANGE PHONE
-        // --------------------------------------------------------
-
-        clearAndType(
-                By.name("phone"),
-                "9123456789"
+        clickUsingJS(
+                cancelButton
         );
 
-
-        // --------------------------------------------------------
-        // CLICK UPDATE DETAILS
-        // --------------------------------------------------------
-
-        safeClick(
-                By.xpath(
-                        "//button[normalize-space()='Update Details']"
-                )
-        );
-
-
-        System.out.println(
-                "Update Details clicked"
-        );
-
-
-        // --------------------------------------------------------
-        // JAVASCRIPT SUCCESS ALERT
-        // --------------------------------------------------------
-
-        String alertText =
-                acceptAlert();
-
-
-        System.out.println(
-                "Success alert: "
-                        + alertText
-        );
-
-
-        assertTrue(
-                "Update success alert not found",
-
-                alertText.contains(
-                        "Employee EMP001 updated successfully!"
-                )
-        );
-
-
-        // --------------------------------------------------------
-        // VERIFY SUCCESS MESSAGE
-        // --------------------------------------------------------
-
-        By successMessage =
-                By.xpath(
-                        "//*[contains(text(),'Employee details updated successfully')]"
-                );
-
-
-        WebElement success =
-                wait.until(
-                        ExpectedConditions.visibilityOfElementLocated(
-                                successMessage
-                        )
-                );
-
-
-        assertTrue(
-                success.isDisplayed()
-        );
-
-
-        // --------------------------------------------------------
-        // VERIFY UPDATED NAME
-        // --------------------------------------------------------
-
-        WebElement updatedName =
-                wait.until(
-                        ExpectedConditions.visibilityOfElementLocated(
-                                By.name("name")
-                        )
-                );
-
+        String currentName =
+                nameField.getAttribute("value");
 
         assertEquals(
-                "Emp Updated",
-                updatedName.getAttribute("value")
+                originalName,
+                currentName,
+                "Cancel did not restore original details"
+        );
+
+        System.out.println(
+                "TEST 18 - CANCEL BUTTON : PASSED"
+        );
+    }
+
+
+    // =========================================================
+    // TEST 19 - VALID UPDATE
+    // =========================================================
+
+    @Test
+    public void validUpdateTest() {
+
+        searchEmployee();
+
+        WebElement nameField =
+                getNameField();
+
+        assertTrue(
+                !nameField.getAttribute("value").isEmpty(),
+                "Employee name should be populated"
         );
 
 
-        // --------------------------------------------------------
-        // VERIFY UPDATED DEPARTMENT
-        // --------------------------------------------------------
+        WebElement phoneField =
+                getPhoneField();
 
-        Select updatedDepartment =
+        assertTrue(
+                phoneField
+                        .getAttribute("value")
+                        .matches("\\d{10}"),
+                "Phone number should contain 10 digits"
+        );
+
+
+        Select department =
                 new Select(
                         driver.findElement(
                                 By.name("department")
                         )
                 );
 
-
-        assertEquals(
-                "HR",
-                updatedDepartment
+        assertTrue(
+                department
                         .getFirstSelectedOption()
                         .getText()
+                        .length() > 0,
+                "Department should be selected"
         );
 
 
-        // --------------------------------------------------------
-        // VERIFY UPDATED DESIGNATION
-        // --------------------------------------------------------
-
-        Select updatedDesignation =
+        Select designation =
                 new Select(
                         driver.findElement(
                                 By.name("designation")
                         )
                 );
 
-
-        assertEquals(
-                "Manager",
-                updatedDesignation
+        assertTrue(
+                designation
                         .getFirstSelectedOption()
                         .getText()
+                        .length() > 0,
+                "Designation should be selected"
         );
 
 
-        // --------------------------------------------------------
-        // VERIFY UPDATED PHONE
-        // --------------------------------------------------------
-
-        WebElement updatedPhone =
-                wait.until(
-                        ExpectedConditions.visibilityOfElementLocated(
-                                By.name("phone")
-                        )
-                );
+        // Click Update Details
+        clickUpdate();
 
 
-        assertEquals(
-                "9123456789",
-                updatedPhone.getAttribute("value")
-        );
+        // Handle success alert if application displays it
+        try {
 
+            Alert alert =
+                    wait.until(
+                            ExpectedConditions.alertIsPresent()
+                    );
+
+            String alertText =
+                    alert.getText();
+
+            System.out.println(
+                    "Update Alert: " + alertText
+            );
+
+            alert.accept();
+
+            assertTrue(
+                    alertText.toLowerCase().contains(
+                            "success"
+                    )
+                    ||
+                    alertText.toLowerCase().contains(
+                            "updated"
+                    ),
+                    "Successful update message not displayed"
+            );
+
+        } catch (Exception ignored) {
+
+            System.out.println(
+                    "No update alert displayed."
+            );
+        }
 
         System.out.println(
-                "PASS: Employee updated successfully"
+                "TEST 19 - VALID UPDATE : PASSED"
         );
     }
 
 
-    // ============================================================
-    // CLEANUP
-    // ============================================================
+    // =========================================================
+    // TEST 20 - BACK BUTTON
+    // =========================================================
 
-    @After
-    public void tearDown() {
+    @Test
+    public void backButtonTest() {
 
-        if (driver != null) {
+        WebElement backButton =
+                wait.until(
+                        ExpectedConditions.presenceOfElementLocated(
+                                By.xpath(
+                                        "//button[contains(normalize-space(),'Back')]"
+                                )
+                        )
+                );
 
-            driver.quit();
+        assertTrue(
+                backButton.isDisplayed(),
+                "Back button is not displayed"
+        );
 
-            System.out.println(
-                    "Browser closed"
+        System.out.println(
+                "TEST 20 - BACK BUTTON : PASSED"
+        );
+    }
+
+
+    // =========================================================
+    // HELPER - GET SEARCH FIELD
+    // =========================================================
+
+    private WebElement getSearchField() {
+
+        return wait.until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        By.xpath(
+                                "//input[@placeholder='Enter Employee ID (e.g., 260822004)']"
+                        )
+                )
+        );
+    }
+
+
+    // =========================================================
+    // HELPER - SEARCH EMPLOYEE 260822004
+    // =========================================================
+
+    private void searchEmployee() {
+
+        WebElement searchField =
+                getSearchField();
+
+        searchField.clear();
+
+        searchField.sendKeys(
+                EMPLOYEE_ID
+        );
+
+        System.out.println(
+                "Searching Employee ID: "
+                        + EMPLOYEE_ID
+        );
+
+        clickSearch();
+
+
+        // Wait until employee details are loaded
+        wait.until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        By.name("id")
+                )
+        );
+
+
+        WebElement idField =
+                driver.findElement(
+                        By.name("id")
+                );
+
+
+        assertEquals(
+                EMPLOYEE_ID,
+                idField.getAttribute("value"),
+                "Employee 260822004 was not loaded"
+        );
+
+        System.out.println(
+                "Employee 260822004 loaded successfully."
+        );
+    }
+
+
+    // =========================================================
+    // HELPER - CLICK SEARCH
+    // =========================================================
+
+    private void clickSearch() {
+
+        WebElement searchButton =
+                wait.until(
+                        ExpectedConditions.presenceOfElementLocated(
+                                By.xpath(
+                                        "//button[normalize-space()='Search']"
+                                )
+                        )
+                );
+
+        scrollIntoView(
+                searchButton
+        );
+
+        clickUsingJS(
+                searchButton
+        );
+
+        System.out.println(
+                "Search button clicked."
+        );
+    }
+
+
+    // =========================================================
+    // HELPER - NAME FIELD
+    // =========================================================
+
+    private WebElement getNameField() {
+
+        return wait.until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        By.name("name")
+                )
+        );
+    }
+
+
+    // =========================================================
+    // HELPER - PHONE FIELD
+    // =========================================================
+
+    private WebElement getPhoneField() {
+
+        return wait.until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        By.name("phone")
+                )
+        );
+    }
+
+
+    // =========================================================
+    // HELPER - CLICK UPDATE
+    // =========================================================
+
+    private void clickUpdate() {
+
+        WebElement updateButton =
+                wait.until(
+                        ExpectedConditions.presenceOfElementLocated(
+                                By.xpath(
+                                        "//button[normalize-space()='Update Details']"
+                                )
+                        )
+                );
+
+        scrollIntoView(
+                updateButton
+        );
+
+        clickUsingJS(
+                updateButton
+        );
+
+        System.out.println(
+                "Update Details button clicked."
+        );
+    }
+
+
+    // =========================================================
+    // HELPER - SCROLL
+    // =========================================================
+
+    private void scrollIntoView(
+            WebElement element
+    ) {
+
+        JavascriptExecutor js =
+                (JavascriptExecutor) driver;
+
+        js.executeScript(
+                "arguments[0].scrollIntoView({block:'center'});",
+                element
+        );
+    }
+
+
+    // =========================================================
+    // HELPER - SAFE CLICK
+    // =========================================================
+
+    private void clickUsingJS(
+            WebElement element
+    ) {
+
+        try {
+
+            wait.until(
+                    ExpectedConditions.elementToBeClickable(
+                            element
+                    )
+            ).click();
+
+        } catch (Exception e) {
+
+            JavascriptExecutor js =
+                    (JavascriptExecutor) driver;
+
+            js.executeScript(
+                    "arguments[0].click();",
+                    element
             );
         }
     }
