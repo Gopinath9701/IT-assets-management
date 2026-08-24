@@ -1,8 +1,5 @@
 pipeline {
     agent any
-    tools {
-        maven 'Maven-3.9'
-    }
 
     environment {
         DEVOPS_EMAIL = "24211A6718@bvrit.ac.in"
@@ -10,6 +7,7 @@ pipeline {
 
     stages {
 
+        // ---------------- Checkout ----------------
         stage('Checkout') {
             steps {
                 checkout scm
@@ -30,134 +28,135 @@ pipeline {
         }
 
         // ---------------- Lead Developer ----------------
-       stage('Lead Developer') {
-    when {
-        branch 'Lead-Developer'
-    }
-    steps {
-        echo 'Lead Developer Integration Build'
+        stage('Lead Developer') {
+            when {
+                branch 'Lead-Developer'
+            }
+            steps {
+                echo 'Lead Developer Integration Build'
 
-        dir('frontend') {
-            bat 'npm install'
-            bat 'npm run build'
+                dir('frontend') {
+                    bat 'npm install'
+                    bat 'npm run build'
+                }
+
+                dir('backend') {
+                    bat 'npm install'
+                }
+
+                echo 'Integration Build Successful'
+            }
         }
-
-        dir('backend') {
-            bat 'mvn clean install'
-        }
-
-        echo 'Integration Build Successful'
-    }
-}
 
         // ---------------- Frontend ----------------
         stage('Frontend CI') {
-    when {
-        branch 'frontend-developer'
-    }
-    steps {
-        echo 'Running Frontend CI'
+            when {
+                branch 'frontend-developer'
+            }
+            steps {
+                echo 'Running Frontend CI'
 
-        dir('frontend') {
-            bat 'npm install'
-            bat 'npm run build'
-        
+                dir('frontend') {
+                    bat 'npm install'
+                    bat 'npm run build'
+                }
+            }
         }
-    }
-}
 
         // ---------------- Backend ----------------
         stage('Backend CI') {
-    when {
-        branch 'BackendEngineer'
-    }
-    steps {
-        echo 'Running Backend CI'
+            when {
+                branch 'BackendEngineer'
+            }
+            steps {
+                echo 'Running Backend CI'
 
-        dir('backend') {
-            bat 'mvn clean install'
+                dir('backend') {
+                    bat 'npm install'
+                }
+
+                echo 'Backend CI Completed Successfully'
+            }
         }
-    }
-}
 
         // ---------------- QA ----------------
         stage('QA CI') {
-    when {
-        branch 'QA-Engineer'
-    }
-    steps {
-        echo 'Running QA Validation'
+            when {
+                branch 'QA-Engineer'
+            }
+            steps {
+                echo 'Running QA Validation'
 
-        dir('backend') {
-            bat 'mvn test'
+                dir('backend') {
+                    bat 'npm install'
+                    bat 'npm test --if-present'
+                }
+
+                echo 'QA Tests Completed Successfully'
+            }
         }
-
-        echo 'QA Tests Completed Successfully'
-    }
-}
 
         // ---------------- DevOps (Git/Jenkins) ----------------
         stage('DevOps Monitoring') {
-    when {
-        branch 'DevopsEngineer'
-    }
-    steps {
-        echo 'Monitoring CI Pipeline'
+            when {
+                branch 'DevopsEngineer'
+            }
+            steps {
+                echo 'Monitoring CI Pipeline'
 
-        bat 'echo Workspace: %WORKSPACE%'
-        bat 'echo Branch: %BRANCH_NAME%'
+                bat 'echo Workspace: %WORKSPACE%'
+                bat 'echo Branch: %BRANCH_NAME%'
 
-        echo 'Checking pipeline health'
-        echo 'Checking build history'
-        echo 'Monitoring notifications'
-    }
-}
+                echo 'Checking pipeline health'
+                echo 'Checking build history'
+                echo 'Monitoring notifications'
+            }
+        }
 
         // ---------------- Deployment ----------------
-       stage('Deployment') {
-    when {
-        branch 'Deployment-1'
-    }
-    steps {
-        echo 'Preparing Deployment'
+        stage('Deployment') {
+            when {
+                branch 'Deployment-1'
+            }
+            steps {
+                echo 'Preparing Deployment'
 
-        dir('backend') {
-            bat 'mvn clean package'
+                dir('backend') {
+                    bat 'npm install'
+                }
+
+                echo 'Deployment Build Ready'
+            }
         }
 
-        echo 'Deployment Build Ready'
-    }
-}
         // ---------------- Main ----------------
-       stage('Main Integration') {
-    when {
-        branch 'main'
-    }
-    steps {
-        echo 'Running Final Integration'
+        stage('Main Integration') {
+            when {
+                branch 'main'
+            }
+            steps {
+                echo 'Running Final Integration'
 
-        dir('frontend') {
-            bat 'npm install'
-            bat 'npm run build'
+                dir('frontend') {
+                    bat 'npm install'
+                    bat 'npm run build'
+                }
+
+                dir('backend') {
+                    bat 'npm install'
+                }
+
+                echo 'Final Integration Successful'
+            }
         }
-
-        dir('backend') {
-            bat 'mvn clean install'
-        }
-
-        echo 'Final Integration Successful'
     }
-}
-    }
+
     post {
         always {
-            archiveArtifacts artifacts: 'backend/target/*.jar', allowEmptyArchive: true
             archiveArtifacts artifacts: 'frontend/build/**', allowEmptyArchive: true
         }
 
-
         success {
-
             script {
 
                 def recipients = ""
@@ -222,7 +221,6 @@ Jenkins CI Pipeline
         }
 
         failure {
-
             script {
 
                 def recipients = ""
