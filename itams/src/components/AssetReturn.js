@@ -160,9 +160,11 @@ const AssetReturn = ({ username = "username", onLogout, onBack }) => {
             assetId,
             employeeId: h.employee_id,
             assetType: h.asset_type || "-",
-            returnDate: "-",
-            condition: "-",
-            remarks: "-",
+            returnDate: h.returned_date
+              ? new Date(h.returned_date).toLocaleDateString("en-GB").replace(/\//g, "-")
+              : "-",
+            condition: h.condition || "-",
+            remarks: h.remarks || "-",
           };
         })
       );
