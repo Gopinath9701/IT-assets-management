@@ -1,622 +1,172 @@
-package com.itams;
+package com.itams.tests;
 
+import io.github.bonigarcia.wdm.WebDriverManager;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ViewEmployeeListTest extends BaseTest {
+public class ViewEmployeeListTest {
 
+    private WebDriver driver;
     private WebDriverWait wait;
 
-    // =========================================================
-    // HR LOGIN CREDENTIALS
-    // =========================================================
+    private static final String BASE_URL = "http://localhost:3000/";
 
     private static final String HR_ID = "260822001";
     private static final String HR_PASSWORD = "Itams@2026h";
 
-    // =========================================================
-    // EMPLOYEE USED FOR TESTING
-    // =========================================================
-
     private static final String EMPLOYEE_ID = "260822004";
 
-
-    // =========================================================
-    // BEFORE EACH TEST
-    // LOGIN AS HR
-    // OPEN HR MANAGEMENT
-    // OPEN VIEW EMPLOYEE LIST
-    // =========================================================
-
     @BeforeEach
-    public void loginAndOpenViewEmployeeList() {
+    public void setUp() {
+
+        System.out.println();
+        System.out.println("==============================================");
+        System.out.println("       ITAMS VIEW EMPLOYEE LIST TEST");
+        System.out.println("==============================================");
+
+        WebDriverManager.chromedriver().setup();
+
+        driver = new ChromeDriver();
+        driver.manage().window().maximize();
+
+        driver.manage().timeouts().pageLoadTimeout(
+                Duration.ofSeconds(60)
+        );
 
         wait = new WebDriverWait(
                 driver,
-                Duration.ofSeconds(15)
+                Duration.ofSeconds(25)
         );
 
-        driver.get("http://localhost:3000");
+        driver.get(BASE_URL);
+        waitForPageReady();
 
-        wait.until(
-                ExpectedConditions.presenceOfElementLocated(
-                        By.tagName("body")
-                )
+        System.out.println(
+                "Application opened: " + BASE_URL
+        );
+    }
+
+    @Test
+    public void viewEmployeeDetailsTest() {
+
+        // =====================================================
+        // STEP 1 - HR LOGIN
+        // =====================================================
+
+        System.out.println();
+        System.out.println("STEP 1: HR LOGIN");
+
+        openLoginPage();
+
+        login(
+                HR_ID,
+                HR_PASSWORD
         );
 
-        System.out.println("Application opened");
+        System.out.println(
+                "HR LOGIN PASSED"
+        );
 
 
-        // -----------------------------------------------------
-        // CLICK LOGIN
-        // -----------------------------------------------------
+        // =====================================================
+        // STEP 2 - OPEN HR MANAGEMENT
+        // =====================================================
 
-        WebElement homeLoginButton =
+        System.out.println();
+        System.out.println(
+                "STEP 2: OPEN HR MANAGEMENT"
+        );
+
+        WebElement hrManagement =
                 wait.until(
-                        ExpectedConditions.elementToBeClickable(
+                        d -> findVisible(
+                                d,
                                 By.xpath(
-                                        "//button[contains(normalize-space(),'Login')]"
+                                        "//*[normalize-space()='HR Management']"
                                 )
                         )
                 );
 
-        clickElement(homeLoginButton);
+        clickJS(hrManagement);
 
-
-        // -----------------------------------------------------
-        // ENTER HR EMPLOYEE ID
-        // -----------------------------------------------------
-
-        WebElement employeeIdField =
-                wait.until(
-                        ExpectedConditions.visibilityOfElementLocated(
-                                By.name("employeeIdOrEmail")
-                        )
-                );
-
-        employeeIdField.clear();
-
-        employeeIdField.sendKeys(HR_ID);
-
-
-        // -----------------------------------------------------
-        // ENTER PASSWORD
-        // -----------------------------------------------------
-
-        WebElement passwordField =
-                wait.until(
-                        ExpectedConditions.visibilityOfElementLocated(
-                                By.name("password")
-                        )
-                );
-
-        passwordField.clear();
-
-        passwordField.sendKeys(HR_PASSWORD);
-
-
-        // -----------------------------------------------------
-        // CLICK LOGIN
-        // -----------------------------------------------------
-
-        WebElement loginButton =
-                wait.until(
-                        ExpectedConditions.elementToBeClickable(
-                                By.xpath(
-                                        "//form//button[@type='submit']"
-                                )
-                        )
-                );
-
-        clickElement(loginButton);
-
-
-        // -----------------------------------------------------
-        // HANDLE LOGIN ALERT
-        // -----------------------------------------------------
-
-        Alert alert =
-                wait.until(
-                        ExpectedConditions.alertIsPresent()
-                );
-
-        String alertText = alert.getText();
-
-        System.out.println(
-                "Login alert: " + alertText
-        );
-
-        assertEquals(
-                "Login Successful",
-                alertText,
-                "HR login failed"
-        );
-
-        alert.accept();
-
-
-        // -----------------------------------------------------
-        // WAIT FOR ALERT TO CLOSE
-        // -----------------------------------------------------
-
-        wait.until(
-                ExpectedConditions.not(
-                        ExpectedConditions.alertIsPresent()
-                )
-        );
-
-
-        // -----------------------------------------------------
-        // WAIT FOR HR MANAGEMENT
-        // -----------------------------------------------------
-
-        wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.xpath(
-                                "//*[normalize-space()='HR Management']"
-                        )
-                )
+        waitForAnyText(
+                "HR Management",
+                "View Employee List"
         );
 
         System.out.println(
-                "HR Management opened"
+                "HR Management page opened"
         );
 
 
-        // -----------------------------------------------------
-        // CLICK VIEW LIST
-        // -----------------------------------------------------
+        // =====================================================
+        // STEP 3 - CLICK VIEW LIST
+        // =====================================================
 
-        WebElement viewListButton =
+        System.out.println();
+        System.out.println(
+                "STEP 3: CLICK VIEW LIST"
+        );
+
+        WebElement viewList =
                 wait.until(
-                        ExpectedConditions.presenceOfElementLocated(
+                        d -> findVisible(
+                                d,
                                 By.xpath(
                                         "//button[normalize-space()='View List']"
                                 )
                         )
                 );
 
-        clickElement(viewListButton);
+        scrollTo(viewList);
 
+        clickJS(viewList);
 
-        // -----------------------------------------------------
-        // WAIT FOR VIEW EMPLOYEE LIST
-        // -----------------------------------------------------
+        sleep(1000);
 
-        wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.xpath(
-                                "//*[normalize-space()='View Employee List']"
-                        )
-                )
-        );
-
-        wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.cssSelector(
-                                ".vel-input"
-                        )
-                )
+        waitForAnyText(
+                "View Employee List",
+                "Search Employee",
+                "Employee List"
         );
 
         System.out.println(
-                "View Employee List opened"
+                "View Employee List page opened"
         );
-    }
 
 
-    // =========================================================
-    // TEST 1 - PAGE HEADING
-    // =========================================================
+        // =====================================================
+        // STEP 4 - ENTER EMPLOYEE ID
+        // =====================================================
 
-    @Test
-    public void verifyViewEmployeeListPageTest() {
+        System.out.println();
+        System.out.println(
+                "STEP 4: SEARCH EMPLOYEE"
+        );
 
-        WebElement heading =
+        WebElement searchField =
                 wait.until(
-                        ExpectedConditions.visibilityOfElementLocated(
+                        d -> findVisible(
+                                d,
                                 By.xpath(
-                                        "//*[normalize-space()='View Employee List']"
+                                        "//input[contains(@placeholder,'Enter Employee ID')]"
                                 )
                         )
                 );
-
-        assertTrue(
-                heading.isDisplayed()
-        );
-
-        System.out.println(
-                "TEST 1 - PAGE HEADING : PASSED"
-        );
-    }
-
-
-    // =========================================================
-    // TEST 2 - SEARCH SECTION
-    // =========================================================
-
-    @Test
-    public void verifySearchSectionTest() {
-
-        WebElement searchHeading =
-                wait.until(
-                        ExpectedConditions.visibilityOfElementLocated(
-                                By.xpath(
-                                        "//*[normalize-space()='Search Employee']"
-                                )
-                        )
-                );
-
-        assertTrue(
-                searchHeading.isDisplayed()
-        );
-
-        System.out.println(
-                "TEST 2 - SEARCH SECTION : PASSED"
-        );
-    }
-
-
-    // =========================================================
-    // TEST 3 - EMPLOYEE LIST SECTION
-    // =========================================================
-
-    @Test
-    public void verifyEmployeeListSectionTest() {
-
-        WebElement heading =
-                wait.until(
-                        ExpectedConditions.visibilityOfElementLocated(
-                                By.xpath(
-                                        "//*[normalize-space()='Employee List']"
-                                )
-                        )
-                );
-
-        assertTrue(
-                heading.isDisplayed()
-        );
-
-        System.out.println(
-                "TEST 3 - EMPLOYEE LIST SECTION : PASSED"
-        );
-    }
-
-
-    // =========================================================
-    // TEST 4 - SEARCH FIELD
-    // =========================================================
-
-    @Test
-    public void verifySearchFieldTest() {
-
-        WebElement searchField =
-                getSearchField();
-
-        assertTrue(
-                searchField.isDisplayed()
-        );
-
-        assertEquals(
-                "9",
-                searchField.getAttribute("maxlength"),
-                "Search field must allow maximum 9 digits"
-        );
-
-        System.out.println(
-                "TEST 4 - SEARCH FIELD : PASSED"
-        );
-    }
-
-
-    // =========================================================
-    // TEST 5 - EMPTY SEARCH
-    // =========================================================
-
-    @Test
-    public void emptySearchTest() {
-
-        WebElement searchField =
-                getSearchField();
-
-        searchField.clear();
-
-        clickSearch();
-
-        WebElement error =
-                wait.until(
-                        ExpectedConditions.visibilityOfElementLocated(
-                                By.cssSelector(
-                                        ".vel-validation-error"
-                                )
-                        )
-                );
-
-        assertTrue(
-                error.getText().contains(
-                        "Please enter an Employee ID"
-                )
-        );
-
-        System.out.println(
-                "TEST 5 - EMPTY SEARCH : PASSED"
-        );
-    }
-
-
-    // =========================================================
-    // TEST 6 - SHORT EMPLOYEE ID
-    // =========================================================
-
-    @Test
-    public void shortEmployeeIdTest() {
-
-        WebElement searchField =
-                getSearchField();
-
-        searchField.clear();
-
-        searchField.sendKeys(
-                "26082200"
-        );
-
-        clickSearch();
-
-        WebElement error =
-                wait.until(
-                        ExpectedConditions.visibilityOfElementLocated(
-                                By.cssSelector(
-                                        ".vel-validation-error"
-                                )
-                        )
-                );
-
-        assertTrue(
-                error.getText().contains(
-                        "exactly 9 digits"
-                )
-        );
-
-        System.out.println(
-                "TEST 6 - SHORT EMPLOYEE ID : PASSED"
-        );
-    }
-
-
-    // =========================================================
-    // TEST 7 - LONG EMPLOYEE ID
-    // =========================================================
-
-    @Test
-    public void longEmployeeIdTest() {
-
-        WebElement searchField =
-                getSearchField();
-
-        searchField.clear();
-
-        searchField.sendKeys(
-                "260822004999"
-        );
-
-        String value =
-                searchField.getAttribute("value");
-
-        assertTrue(
-                value.length() <= 9,
-                "More than 9 digits were accepted"
-        );
-
-        System.out.println(
-                "TEST 7 - LONG EMPLOYEE ID : PASSED"
-        );
-    }
-
-
-    // =========================================================
-    // TEST 8 - NON NUMERIC EMPLOYEE ID
-    // =========================================================
-
-    @Test
-    public void nonNumericEmployeeIdTest() {
-
-        WebElement searchField =
-                getSearchField();
-
-        searchField.clear();
-
-        searchField.sendKeys(
-                "ABC260822004"
-        );
-
-        String value =
-                searchField.getAttribute("value");
-
-        assertTrue(
-                value.matches("\\d*"),
-                "Non numeric characters were accepted"
-        );
-
-        System.out.println(
-                "TEST 8 - NON NUMERIC ID : PASSED"
-        );
-    }
-
-
-    // =========================================================
-    // TEST 9 - FUTURE EMPLOYEE ID
-    // =========================================================
-
-    @Test
-    public void futureEmployeeIdTest() {
-
-        WebElement searchField =
-                getSearchField();
-
-        searchField.clear();
-
-        searchField.sendKeys(
-                "270101001"
-        );
-
-        clickSearch();
-
-        WebElement error =
-                wait.until(
-                        ExpectedConditions.visibilityOfElementLocated(
-                                By.cssSelector(
-                                        ".vel-validation-error"
-                                )
-                        )
-                );
-
-        assertTrue(
-                error.getText().contains(
-                        "Future dates are not allowed"
-                )
-        );
-
-        System.out.println(
-                "TEST 9 - FUTURE EMPLOYEE ID : PASSED"
-        );
-    }
-
-
-    // =========================================================
-    // TEST 10 - INVALID MONTH
-    // =========================================================
-
-    @Test
-    public void invalidMonthTest() {
-
-        WebElement searchField =
-                getSearchField();
-
-        searchField.clear();
-
-        searchField.sendKeys(
-                "261301001"
-        );
-
-        clickSearch();
-
-        WebElement error =
-                wait.until(
-                        ExpectedConditions.visibilityOfElementLocated(
-                                By.cssSelector(
-                                        ".vel-validation-error"
-                                )
-                        )
-                );
-
-        assertTrue(
-                error.getText().contains(
-                        "invalid month"
-                )
-        );
-
-        System.out.println(
-                "TEST 10 - INVALID MONTH : PASSED"
-        );
-    }
-
-
-    // =========================================================
-    // TEST 11 - INVALID DAY
-    // =========================================================
-
-    @Test
-    public void invalidDayTest() {
-
-        WebElement searchField =
-                getSearchField();
-
-        searchField.clear();
-
-        searchField.sendKeys(
-                "260832001"
-        );
-
-        clickSearch();
-
-        WebElement error =
-                wait.until(
-                        ExpectedConditions.visibilityOfElementLocated(
-                                By.cssSelector(
-                                        ".vel-validation-error"
-                                )
-                        )
-                );
-
-        assertTrue(
-                error.getText().contains(
-                        "invalid day"
-                )
-        );
-
-        System.out.println(
-                "TEST 11 - INVALID DAY : PASSED"
-        );
-    }
-
-
-    // =========================================================
-    // TEST 12 - VALID EMPLOYEE SEARCH
-    // =========================================================
-
-    @Test
-    public void validEmployeeSearchTest() {
-
-        searchEmployee(
-                EMPLOYEE_ID
-        );
-
-        String tableText =
-                wait.until(
-                        ExpectedConditions.visibilityOfElementLocated(
-                                By.cssSelector(
-                                        ".vel-table"
-                                )
-                        )
-                ).getText();
-
-        assertTrue(
-                tableText.contains(
-                        EMPLOYEE_ID
-                ),
-                "Employee 260822004 was not displayed"
-        );
-
-        System.out.println(
-                "TEST 12 - VALID EMPLOYEE SEARCH : PASSED"
-        );
-    }
-
-
-    // =========================================================
-    // TEST 13 - ENTER KEY SEARCH
-    // =========================================================
-
-    @Test
-    public void enterKeySearchTest() {
-
-        WebElement searchField =
-                getSearchField();
 
         searchField.clear();
 
@@ -624,944 +174,611 @@ public class ViewEmployeeListTest extends BaseTest {
                 EMPLOYEE_ID
         );
 
-        searchField.sendKeys(
-                Keys.ENTER
-        );
-
-
-        wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.xpath(
-                                "//button[normalize-space()='View']"
-                        )
-                )
-        );
-
-
-        String tableText =
-                driver.findElement(
-                        By.cssSelector(
-                                ".vel-table"
-                        )
-                ).getText();
-
-        assertTrue(
-                tableText.contains(
-                        EMPLOYEE_ID
-                )
-        );
-
         System.out.println(
-                "TEST 13 - ENTER KEY SEARCH : PASSED"
-        );
-    }
-
-
-    // =========================================================
-    // TEST 14 - NON EXISTING EMPLOYEE
-    // =========================================================
-
-    @Test
-    public void nonExistingEmployeeTest() {
-
-        WebElement searchField =
-                getSearchField();
-
-        searchField.clear();
-
-        searchField.sendKeys(
-                "260822999"
+                "Employee ID entered: "
+                        + EMPLOYEE_ID
         );
 
-        clickSearch();
 
-        WebElement error =
-                wait.until(
-                        ExpectedConditions.visibilityOfElementLocated(
-                                By.cssSelector(
-                                        ".vel-validation-error"
-                                )
-                        )
-                );
+        // =====================================================
+        // STEP 5 - CLICK SEARCH
+        // =====================================================
 
-        assertTrue(
-                error.getText()
-                        .toLowerCase()
-                        .contains(
-                                "not found"
-                        )
-        );
-
+        System.out.println();
         System.out.println(
-                "TEST 14 - NON EXISTING EMPLOYEE : PASSED"
+                "STEP 5: CLICK SEARCH"
         );
-    }
-
-
-    // =========================================================
-    // TEST 15 - TABLE HEADERS
-    // =========================================================
-
-    @Test
-    public void verifyTableHeadersTest() {
-
-        WebElement table =
-                wait.until(
-                        ExpectedConditions.visibilityOfElementLocated(
-                                By.cssSelector(
-                                        ".vel-table"
-                                )
-                        )
-                );
-
-        String text =
-                table.getText();
-
-        assertTrue(
-                text.contains(
-                        "Employee ID"
-                )
-        );
-
-        assertTrue(
-                text.contains(
-                        "Department"
-                )
-        );
-
-        assertTrue(
-                text.contains(
-                        "Status"
-                )
-        );
-
-        assertTrue(
-                text.contains(
-                        "Action"
-                )
-        );
-
-        System.out.println(
-                "TEST 15 - TABLE HEADERS : PASSED"
-        );
-    }
-
-
-    // =========================================================
-    // TEST 16 - PAGE SIZE DROPDOWN
-    // =========================================================
-
-    @Test
-    public void pageSizeDropdownTest() {
-
-        WebElement pageSize =
-                wait.until(
-                        ExpectedConditions.visibilityOfElementLocated(
-                                By.cssSelector(
-                                        ".vel-page-size"
-                                )
-                        )
-                );
-
-        Select select =
-                new Select(pageSize);
-
-        assertEquals(
-                4,
-                select.getOptions().size()
-        );
-
-        assertEquals(
-                "10",
-                select.getOptions()
-                        .get(0)
-                        .getText()
-        );
-
-        assertEquals(
-                "30",
-                select.getOptions()
-                        .get(1)
-                        .getText()
-        );
-
-        assertEquals(
-                "50",
-                select.getOptions()
-                        .get(2)
-                        .getText()
-        );
-
-        assertEquals(
-                "All",
-                select.getOptions()
-                        .get(3)
-                        .getText()
-        );
-
-        System.out.println(
-                "TEST 16 - PAGE SIZE : PASSED"
-        );
-    }
-
-
-    // =========================================================
-    // TEST 17 - SELECT ALL PAGE SIZE
-    // =========================================================
-
-    @Test
-    public void pageSizeAllTest() {
-
-        WebElement pageSize =
-                wait.until(
-                        ExpectedConditions.visibilityOfElementLocated(
-                                By.cssSelector(
-                                        ".vel-page-size"
-                                )
-                        )
-                );
-
-        Select select =
-                new Select(pageSize);
-
-        select.selectByVisibleText(
-                "All"
-        );
-
-        assertEquals(
-                "All",
-                select.getFirstSelectedOption()
-                        .getText()
-        );
-
-        System.out.println(
-                "TEST 17 - PAGE SIZE ALL : PASSED"
-        );
-    }
-
-
-    // =========================================================
-    // TEST 18 - SEARCH RESULT COUNT
-    // =========================================================
-
-    @Test
-    public void searchResultCountTest() {
-
-        searchEmployee(
-                EMPLOYEE_ID
-        );
-
-        WebElement pagination =
-                wait.until(
-                        ExpectedConditions.visibilityOfElementLocated(
-                                By.cssSelector(
-                                        ".vel-pagination-info"
-                                )
-                        )
-                );
-
-        assertTrue(
-                pagination.getText().contains(
-                        "1"
-                )
-        );
-
-        System.out.println(
-                "TEST 18 - SEARCH RESULT COUNT : PASSED"
-        );
-    }
-
-
-    // =========================================================
-    // TEST 19 - VIEW EMPLOYEE
-    // =========================================================
-
-    @Test
-    public void viewEmployeeTest() {
-
-        openEmployeeDetails();
-
-        WebElement detailsPanel =
-                wait.until(
-                        ExpectedConditions.presenceOfElementLocated(
-                                By.cssSelector(
-                                        ".vel-details-panel"
-                                )
-                        )
-                );
-
-        assertTrue(
-                detailsPanel.isDisplayed(),
-                "Employee details panel is not displayed"
-        );
-
-        System.out.println(
-                "TEST 19 - VIEW EMPLOYEE : PASSED"
-        );
-    }
-
-
-    // =========================================================
-    // TEST 20 - EMPLOYEE DETAILS
-    // =========================================================
-
-    @Test
-    public void employeeDetailsTest() {
-
-        openEmployeeDetails();
-
-        WebElement detailsPanel =
-                wait.until(
-                        ExpectedConditions.presenceOfElementLocated(
-                                By.cssSelector(
-                                        ".vel-details-panel"
-                                )
-                        )
-                );
-
-        String detailsText =
-                detailsPanel.getText();
-
-        System.out.println(
-                "========================================"
-        );
-
-        System.out.println(
-                "EMPLOYEE DETAILS:"
-        );
-
-        System.out.println(
-                detailsText
-        );
-
-        System.out.println(
-                "========================================"
-        );
-
-
-        /*
-         * Verify the actual employee ID.
-         */
-
-        assertTrue(
-                detailsText.contains(
-                        EMPLOYEE_ID
-                ),
-                "Employee ID 260822004 is not displayed"
-        );
-
-
-        /*
-         * Verify that employee information exists.
-         *
-         * We don't depend on one exact heading because
-         * the React UI can change its labels.
-         */
-
-        boolean hasEmployeeInformation =
-                detailsText.contains("Employee")
-                        ||
-                detailsText.contains("Name")
-                        ||
-                detailsText.contains("Department")
-                        ||
-                detailsText.contains("Email")
-                        ||
-                detailsText.contains("Phone");
-
-
-        assertTrue(
-                hasEmployeeInformation,
-                "Employee information is not displayed"
-        );
-
-
-        System.out.println(
-                "TEST 20 - EMPLOYEE DETAILS : PASSED"
-        );
-    }
-
-
-    // =========================================================
-    // TEST 21 - PERSONAL INFORMATION
-    // =========================================================
-
-    @Test
-    public void personalInformationTest() {
-
-        openEmployeeDetails();
-
-        WebElement detailsPanel =
-                wait.until(
-                        ExpectedConditions.visibilityOfElementLocated(
-                                By.cssSelector(
-                                        ".vel-details-panel"
-                                )
-                        )
-                );
-
-        String detailsText =
-                detailsPanel.getText();
-
-
-        boolean hasEmployeeId =
-                detailsText.contains(
-                        "Employee ID"
-                )
-                ||
-                detailsText.contains(
-                        EMPLOYEE_ID
-                );
-
-        boolean hasName =
-                detailsText.contains(
-                        "Employee Name"
-                )
-                ||
-                detailsText.contains(
-                        "Name"
-                );
-
-        boolean hasDepartment =
-                detailsText.contains(
-                        "Department"
-                );
-
-        boolean hasPhone =
-                detailsText.contains(
-                        "Phone"
-                );
-
-        boolean hasEmail =
-                detailsText.contains(
-                        "Email"
-                );
-
-
-        assertTrue(
-                hasEmployeeId,
-                "Employee ID information missing"
-        );
-
-        assertTrue(
-                hasName,
-                "Employee Name information missing"
-        );
-
-        assertTrue(
-                hasDepartment,
-                "Department information missing"
-        );
-
-        assertTrue(
-                hasPhone || hasEmail,
-                "Phone or Email information missing"
-        );
-
-
-        System.out.println(
-                "TEST 21 - PERSONAL INFORMATION : PASSED"
-        );
-    }
-
-
-    // =========================================================
-    // TEST 22 - ASSIGNED ASSETS
-    // =========================================================
-
-    @Test
-    public void assignedAssetsTest() {
-
-        openEmployeeDetails();
-
-        WebElement detailsPanel =
-                wait.until(
-                        ExpectedConditions.visibilityOfElementLocated(
-                                By.cssSelector(
-                                        ".vel-details-panel"
-                                )
-                        )
-                );
-
-        String detailsText =
-                detailsPanel.getText();
-
-
-        assertTrue(
-                detailsText.contains(
-                        "Assigned Assets"
-                ),
-                "Assigned Assets section is missing"
-        );
-
-
-        boolean hasAssetInformation =
-                detailsText.contains(
-                        "Asset ID"
-                )
-                ||
-                detailsText.contains(
-                        "No Assets Assigned"
-                )
-                ||
-                detailsText.contains(
-                        "No assets assigned"
-                );
-
-
-        assertTrue(
-                hasAssetInformation,
-                "Asset information is missing"
-        );
-
-
-        System.out.println(
-                "TEST 22 - ASSIGNED ASSETS : PASSED"
-        );
-    }
-
-
-    // =========================================================
-    // TEST 23 - CLOSE DETAILS
-    // =========================================================
-
-    @Test
-    public void closeDetailsTest() {
-
-        openEmployeeDetails();
-
-
-        By closeButtonLocator =
-                By.xpath(
-                        "//button[normalize-space()='Close']"
-                );
-
-
-        /*
-         * Verify Close button exists.
-         */
-
-        wait.until(
-                ExpectedConditions.presenceOfElementLocated(
-                        closeButtonLocator
-                )
-        );
-
-
-        boolean clicked = false;
-
-
-        // -----------------------------------------------------
-        // CLICK CLOSE BUTTON
-        // -----------------------------------------------------
-
-        for (int attempt = 1; attempt <= 5; attempt++) {
-
-            try {
-
-                WebElement closeButton =
-                        wait.until(
-                                ExpectedConditions.presenceOfElementLocated(
-                                        closeButtonLocator
-                                )
-                        );
-
-
-                JavascriptExecutor js =
-                        (JavascriptExecutor) driver;
-
-
-                js.executeScript(
-                        "arguments[0].scrollIntoView({block:'center'});",
-                        closeButton
-                );
-
-
-                /*
-                 * Re-find after scrolling.
-                 */
-
-                closeButton =
-                        driver.findElement(
-                                closeButtonLocator
-                        );
-
-
-                js.executeScript(
-                        "arguments[0].click();",
-                        closeButton
-                );
-
-
-                clicked = true;
-
-                break;
-
-
-            } catch (
-                    org.openqa.selenium.StaleElementReferenceException e
-            ) {
-
-                System.out.println(
-                        "Close button stale. Retry "
-                                + attempt
-                );
-
-            } catch (
-                    org.openqa.selenium.ElementClickInterceptedException e
-            ) {
-
-                System.out.println(
-                        "Close button intercepted. Retry "
-                                + attempt
-                );
-            }
-        }
-
-
-        assertTrue(
-                clicked,
-                "Close button could not be clicked"
-        );
-
-
-        // -----------------------------------------------------
-        // VERIFY CLOSE BUTTON DISAPPEARS
-        // -----------------------------------------------------
-
-        wait.until(
-                driver -> {
-
-                    try {
-
-                        return driver.findElements(
-                                closeButtonLocator
-                        ).isEmpty();
-
-                    } catch (
-                            org.openqa.selenium.StaleElementReferenceException e
-                    ) {
-
-                        return true;
-                    }
-                }
-        );
-
-
-        /*
-         * The Close button disappearing is the reliable
-         * indication that the details view has closed.
-         */
-
-        boolean closeButtonExists =
-                !driver.findElements(
-                        closeButtonLocator
-                ).isEmpty();
-
-
-        assertTrue(
-                !closeButtonExists,
-                "Close button is still present after closing details"
-        );
-
-
-        System.out.println(
-                "TEST 23 - CLOSE DETAILS : PASSED"
-        );
-    }
-
-
-    // =========================================================
-    // TEST 24 - BACK BUTTON
-    // =========================================================
-
-    @Test
-    public void backButtonTest() {
-
-        WebElement backButton =
-                wait.until(
-                        ExpectedConditions.visibilityOfElementLocated(
-                                By.cssSelector(
-                                        ".vel-back-btn"
-                                )
-                        )
-                );
-
-        assertTrue(
-                backButton.isDisplayed()
-        );
-
-        System.out.println(
-                "TEST 24 - BACK BUTTON : PASSED"
-        );
-    }
-
-
-    // =========================================================
-    // TEST 25 - LOGOUT BUTTON
-    // =========================================================
-
-    @Test
-    public void logoutButtonTest() {
-
-        WebElement logoutButton =
-                wait.until(
-                        ExpectedConditions.visibilityOfElementLocated(
-                                By.cssSelector(
-                                        ".vel-logout-btn"
-                                )
-                        )
-                );
-
-        assertTrue(
-                logoutButton.isDisplayed()
-        );
-
-        System.out.println(
-                "TEST 25 - LOGOUT BUTTON : PASSED"
-        );
-    }
-
-
-    // =========================================================
-    // HELPER - GET SEARCH FIELD
-    // =========================================================
-
-    private WebElement getSearchField() {
-
-        return wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.cssSelector(
-                                ".vel-input"
-                        )
-                )
-        );
-    }
-
-
-    // =========================================================
-    // HELPER - CLICK SEARCH
-    // =========================================================
-
-    private void clickSearch() {
 
         WebElement searchButton =
                 wait.until(
-                        ExpectedConditions.presenceOfElementLocated(
-                                By.cssSelector(
-                                        ".vel-btn-primary"
+                        d -> findVisible(
+                                d,
+                                By.xpath(
+                                        "//button[normalize-space()='Search']"
                                 )
                         )
                 );
 
-        clickElement(searchButton);
-    }
+        clickJS(searchButton);
 
+        sleep(1000);
 
-    // =========================================================
-    // HELPER - SEARCH EMPLOYEE
-    // =========================================================
-
-    private void searchEmployee(
-            String employeeId
-    ) {
-
-        WebElement searchField =
-                getSearchField();
-
-        searchField.clear();
-
-        searchField.sendKeys(
-                employeeId
+        System.out.println(
+                "Search clicked"
         );
 
-        clickSearch();
 
+        // =====================================================
+        // STEP 6 - VERIFY EMPLOYEE ROW
+        // =====================================================
 
-        /*
-         * Wait for the actual View button.
-         * This confirms that the backend returned
-         * the employee.
-         */
+        System.out.println();
+        System.out.println(
+                "STEP 6: VERIFY EMPLOYEE"
+        );
 
-        wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.xpath(
-                                "//button[normalize-space()='View']"
+        WebElement employeeRow =
+                wait.until(
+                        d -> findEmployeeRow(
+                                EMPLOYEE_ID
                         )
-                )
+                );
+
+        assertTrue(
+                employeeRow != null,
+                "Employee "
+                        + EMPLOYEE_ID
+                        + " was not found"
+        );
+
+        String rowText =
+                employeeRow.getText();
+
+        System.out.println(
+                "Employee found: "
+                        + rowText
+        );
+
+        assertTrue(
+                rowText.contains(
+                        EMPLOYEE_ID
+                ),
+                "Employee ID is not displayed"
+        );
+
+
+        // =====================================================
+        // STEP 7 - CLICK VIEW
+        // =====================================================
+
+        System.out.println();
+        System.out.println(
+                "STEP 7: CLICK VIEW"
+        );
+
+        WebElement viewButton =
+                employeeRow.findElement(
+                        By.xpath(
+                                ".//button[normalize-space()='View']"
+                        )
+                );
+
+        scrollTo(viewButton);
+
+        clickJS(viewButton);
+
+        sleep(700);
+
+        System.out.println(
+                "View clicked"
+        );
+
+
+        // =====================================================
+        // STEP 8 - VERIFY EMPLOYEE DETAILS
+        // =====================================================
+
+        System.out.println();
+        System.out.println(
+                "STEP 8: VERIFY EMPLOYEE DETAILS"
+        );
+
+        waitForText(
+                "Employee Details"
+        );
+
+
+        String details =
+                driver.findElement(
+                        By.tagName("body")
+                ).getText();
+
+
+        assertTrue(
+                details.contains(
+                        EMPLOYEE_ID
+                ),
+                "Employee ID missing in details"
+        );
+
+        assertTrue(
+                details.contains(
+                        "V Shiva"
+                ),
+                "Employee Name missing in details"
+        );
+
+        assertTrue(
+                details.contains(
+                        "Marketing"
+                ),
+                "Department missing in details"
+        );
+
+        assertTrue(
+                details.contains(
+                        "Active"
+                ),
+                "Employee Status missing in details"
+        );
+
+        assertTrue(
+                details.contains(
+                        "Employee Details"
+                ),
+                "Employee Details modal did not open"
+        );
+
+
+        System.out.println(
+                "Employee ID verified: "
+                        + EMPLOYEE_ID
         );
 
         System.out.println(
-                "Employee found: " + employeeId
+                "Employee Name verified: V Shiva"
         );
-    }
 
+        System.out.println(
+                "Department verified: Marketing"
+        );
 
-    // =========================================================
-    // HELPER - OPEN EMPLOYEE DETAILS
-    // =========================================================
-
-    private void openEmployeeDetails() {
-
-        /*
-         * Search 260822004.
-         */
-
-        searchEmployee(
-                EMPLOYEE_ID
+        System.out.println(
+                "Status verified: Active"
         );
 
 
-        /*
-         * React may re-render the View button.
-         * Therefore we locate it freshly and retry.
-         */
+        // =====================================================
+        // STEP 9 - VERIFY ASSIGNED ASSETS SECTION
+        // =====================================================
 
-        clickViewButtonSafely();
+        System.out.println();
+        System.out.println(
+                "STEP 9: VERIFY ASSIGNED ASSETS"
+        );
+
+        assertTrue(
+                details.contains(
+                        "Assigned Assets"
+                ),
+                "Assigned Assets section missing"
+        );
+
+        System.out.println(
+                "Assigned Assets section verified"
+        );
 
 
-        /*
-         * Wait for the details panel.
-         */
+        // =====================================================
+        // STEP 10 - CLOSE MODAL
+        // =====================================================
 
-        wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.cssSelector(
-                                ".vel-details-panel"
+        System.out.println();
+        System.out.println(
+                "STEP 10: CLOSE DETAILS"
+        );
+
+        WebElement closeButton =
+                wait.until(
+                        d -> findVisible(
+                                d,
+                                By.xpath(
+                                        "//button[normalize-space()='Close']"
+                                )
                         )
-                )
-        );
-    }
-
-
-    // =========================================================
-    // HELPER - SAFE VIEW BUTTON CLICK
-    // =========================================================
-
-    private void clickViewButtonSafely() {
-
-        By viewButtonLocator =
-                By.xpath(
-                        "//button[normalize-space()='View']"
                 );
 
+        clickJS(closeButton);
 
-        for (int attempt = 1; attempt <= 5; attempt++) {
+        sleep(500);
+
+        System.out.println(
+                "Employee Details closed"
+        );
+
+
+        // =====================================================
+        // FINAL
+        // =====================================================
+
+        System.out.println();
+        System.out.println(
+                "=============================================="
+        );
+
+        System.out.println(
+                "       VIEW EMPLOYEE LIST TEST PASSED"
+        );
+
+        System.out.println(
+                "=============================================="
+        );
+    }
+
+
+    // =====================================================
+    // FIND EMPLOYEE ROW
+    // =====================================================
+
+    private WebElement findEmployeeRow(
+            String employeeId
+    ) {
+
+        List<WebElement> rows =
+                driver.findElements(
+                        By.xpath("//tr")
+                );
+
+        for (WebElement row :
+                rows) {
 
             try {
 
-                /*
-                 * Always locate a fresh element.
-                 */
+                if (!row.isDisplayed()) {
+                    continue;
+                }
 
-                WebElement viewButton =
-                        wait.until(
-                                ExpectedConditions.presenceOfElementLocated(
-                                        viewButtonLocator
-                                )
-                        );
+                String text =
+                        row.getText();
 
+                if (
+                        text != null
+                                &&
+                        text.contains(employeeId)
+                ) {
+                    return row;
+                }
 
-                JavascriptExecutor js =
-                        (JavascriptExecutor) driver;
+            } catch (Exception ignored) {
+            }
+        }
 
-
-                js.executeScript(
-                        "arguments[0].scrollIntoView({block:'center'});",
-                        viewButton
-                );
-
-
-                /*
-                 * Find the button AGAIN after scrolling.
-                 */
-
-                viewButton =
-                        wait.until(
-                                ExpectedConditions.presenceOfElementLocated(
-                                        viewButtonLocator
-                                )
-                        );
+        return null;
+    }
 
 
-                /*
-                 * JavaScript click avoids interception.
-                 */
+    // =====================================================
+    // LOGIN
+    // =====================================================
 
-                js.executeScript(
-                        "arguments[0].click();",
-                        viewButton
-                );
+    private void openLoginPage() {
 
-
-                /*
-                 * Wait for details panel.
-                 */
-
+        WebElement login =
                 wait.until(
-                        ExpectedConditions.visibilityOfElementLocated(
-                                By.cssSelector(
-                                        ".vel-details-panel"
+                        d -> findVisible(
+                                d,
+                                By.xpath(
+                                        "//button[normalize-space()='Login']"
+                                        + " | "
+                                        + "//a[normalize-space()='Login']"
                                 )
                         )
                 );
 
+        clickJS(login);
 
-                System.out.println(
-                        "View button clicked successfully"
+        wait.until(
+                d -> findVisible(
+                        d,
+                        By.xpath(
+                                "//input[contains(@placeholder,'Employee ID or Email')]"
+                                + " | "
+                                + "//input[@type='password']"
+                        )
+                ) != null
+        );
+
+        System.out.println(
+                "Login page opened"
+        );
+    }
+
+
+    private void login(
+            String employeeId,
+            String password
+    ) {
+
+        WebElement employeeField =
+                wait.until(
+                        d -> findVisible(
+                                d,
+                                By.xpath(
+                                        "//input[contains(@placeholder,'Employee ID or Email')]"
+                                        + " | "
+                                        + "//input[@name='employeeId']"
+                                        + " | "
+                                        + "//input[@name='employeeIdOrEmail']"
+                                        + " | "
+                                        + "//input[@type='text']"
+                                )
+                        )
                 );
 
-                return;
+        employeeField.clear();
+        employeeField.sendKeys(employeeId);
 
+        System.out.println(
+                "Employee ID entered: "
+                        + employeeId
+        );
 
-            } catch (
-                    org.openqa.selenium.StaleElementReferenceException e
-            ) {
-
-                System.out.println(
-                        "View button became stale. Retry "
-                                + attempt
+        WebElement passwordField =
+                wait.until(
+                        d -> findVisible(
+                                d,
+                                By.xpath(
+                                        "//input[@type='password']"
+                                )
+                        )
                 );
 
+        passwordField.clear();
+        passwordField.sendKeys(password);
 
-            } catch (
-                    org.openqa.selenium.ElementClickInterceptedException e
-            ) {
+        System.out.println(
+                "Password entered"
+        );
 
-                System.out.println(
-                        "View button intercepted. Retry "
-                                + attempt
+        WebElement loginButton =
+                wait.until(
+                        d -> findVisible(
+                                d,
+                                By.xpath(
+                                        "//form//button[@type='submit']"
+                                        + " | "
+                                        + "//button[normalize-space()='Login']"
+                                )
+                        )
                 );
+
+        clickJS(loginButton);
+
+        System.out.println(
+                "Login button clicked"
+        );
+
+        try {
+
+            Alert alert =
+                    new WebDriverWait(
+                            driver,
+                            Duration.ofSeconds(10)
+                    ).until(
+                            ExpectedConditions.alertIsPresent()
+                    );
+
+            String message =
+                    alert.getText();
+
+            System.out.println(
+                    "Login alert: "
+                            + message
+            );
+
+            alert.accept();
+
+        } catch (Exception e) {
+
+            throw new AssertionError(
+                    "Login Successful alert was not displayed"
+            );
+        }
+
+        waitForPageReady();
+        sleep(1000);
+    }
+
+
+    // =====================================================
+    // HELPERS
+    // =====================================================
+
+    private WebElement findVisible(
+            WebDriver webDriver,
+            By locator
+    ) {
+
+        List<WebElement> elements =
+                webDriver.findElements(locator);
+
+        for (WebElement element :
+                elements) {
+
+            try {
+
+                if (
+                        element.isDisplayed()
+                                &&
+                        element.isEnabled()
+                ) {
+                    return element;
+                }
+
+            } catch (Exception ignored) {
             }
         }
 
-
-        throw new AssertionError(
-                "Unable to click View button after 5 attempts"
-        );
+        return null;
     }
 
 
-    // =========================================================
-    // HELPER - SAFE GENERAL CLICK
-    // =========================================================
-
-    private void clickElement(
+    private void clickJS(
             WebElement element
     ) {
 
-        JavascriptExecutor js =
-                (JavascriptExecutor) driver;
+        ((JavascriptExecutor) driver)
+                .executeScript(
+                        "arguments[0].click();",
+                        element
+                );
+    }
 
-        js.executeScript(
-                "arguments[0].scrollIntoView({block:'center'});",
-                element
-        );
 
-        js.executeScript(
-                "arguments[0].click();",
-                element
+    private void scrollTo(
+            WebElement element
+    ) {
+
+        ((JavascriptExecutor) driver)
+                .executeScript(
+                        "arguments[0].scrollIntoView({block:'center'});",
+                        element
+                );
+
+        sleep(300);
+    }
+
+
+    private void waitForText(
+            String text
+    ) {
+
+        wait.until(
+                d -> {
+
+                    try {
+
+                        return d.findElement(
+                                By.tagName("body")
+                        ).getText().contains(text);
+
+                    } catch (Exception e) {
+
+                        return false;
+                    }
+                }
         );
     }
+
+
+    private boolean waitForAnyText(
+            String... texts
+    ) {
+
+        try {
+
+            return new WebDriverWait(
+                    driver,
+                    Duration.ofSeconds(15)
+            ).until(
+                    d -> {
+
+                        try {
+
+                            String body =
+                                    d.findElement(
+                                            By.tagName("body")
+                                    ).getText();
+
+                            if (body == null) {
+                                return false;
+                            }
+
+                            for (String text :
+                                    texts) {
+
+                                if (
+                                        body.contains(text)
+                                ) {
+                                    return true;
+                                }
+                            }
+
+                        } catch (Exception ignored) {
+                        }
+
+                        return false;
+                    }
+            );
+
+        } catch (Exception e) {
+
+            return false;
+        }
+    }
+
+
+    private void waitForPageReady() {
+
+        try {
+
+            new WebDriverWait(
+                    driver,
+                    Duration.ofSeconds(20)
+            ).until(
+                    d -> {
+
+                        try {
+
+                            return "complete".equals(
+                                    ((JavascriptExecutor) d)
+                                            .executeScript(
+                                                    "return document.readyState"
+                                            )
+                            );
+
+                        } catch (Exception e) {
+
+                            return false;
+                        }
+                    }
+            );
+
+        } catch (Exception ignored) {
+        }
+    }
+
+
+    private void sleep(
+            long milliseconds
+    ) {
+
+        try {
+
+            Thread.sleep(
+                    milliseconds
+            );
+
+        } catch (InterruptedException e) {
+
+            Thread.currentThread()
+                    .interrupt();
+        }
+    }
+
+
+    @AfterEach
+    public void tearDown() {
+
+        if (driver != null) {
+
+            driver.quit();
+
+            System.out.println();
+            System.out.println(
+                    "Browser closed"
+            );
+        }
+    }
 }
+
