@@ -170,11 +170,21 @@ const validateEmployeeCount = (count) => {
 
   const number = Number(count);
 
-  if (number > 1000) {
+  // Minimum 1
+  if (number < 1) {
     return {
       isValid: false,
       message:
-        "Number of Employees cannot exceed 1000",
+        "Number of Employees must be at least 1",
+    };
+  }
+
+  // Maximum 100
+  if (number > 100) {
+    return {
+      isValid: false,
+      message:
+        "Number of Employees cannot exceed 100",
     };
   }
 
