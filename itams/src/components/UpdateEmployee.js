@@ -549,6 +549,18 @@ const UpdateEmployee = ({
   // ====================================================
 
   const handleUpdate = async () => {
+    const hasChanges =
+      formData.name !== employee.name ||
+      formData.email !== employee.email ||
+      formData.department !== employee.department ||
+      formData.designation !== employee.designation ||
+      formData.phone !== employee.phone;
+
+    // Do not update if nothing changed
+    if (!hasChanges) {
+      return;
+    }
+
     const isValid = validateForm();
 
     if (!isValid) {
@@ -593,6 +605,20 @@ const UpdateEmployee = ({
       );
     }
   };
+
+  // ====================================================
+  // CHECK FOR CHANGES
+  // ====================================================
+
+  const hasChanges =
+    employee &&
+    (
+      formData.name !== employee.name ||
+      formData.email !== employee.email ||
+      formData.department !== employee.department ||
+      formData.designation !== employee.designation ||
+      formData.phone !== employee.phone
+    );
 
   // ====================================================
   // CANCEL
@@ -943,6 +969,7 @@ const UpdateEmployee = ({
                 <button
                   className="update-btn"
                   onClick={handleUpdate}
+                  disabled={!hasChanges}
                 >
                   Update Details
                 </button>
