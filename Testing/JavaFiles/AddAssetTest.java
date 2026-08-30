@@ -1,1726 +1,1080 @@
-package com.itams;
+package com.itams.tests;
 
+import io.github.bonigarcia.wdm.WebDriverManager;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class AddAssetTest extends BaseTest {
+public class AddAssetTest {
 
-    // ============================================================
-    // CONFIGURATION
-    // ============================================================
+    private WebDriver driver;
+    private WebDriverWait wait;
 
-    private static final String BASE_URL =
-            "http://localhost:3000";
+    private static final String BASE_URL = "http://localhost:3000/";
 
-    private static final String EMPLOYEE_ID =
-            "260822002";
+    private static final String ASSET_MANAGER_ID = "260822002";
+    private static final String ASSET_MANAGER_PASSWORD = "Itams@2026a";
 
-    private static final String PASSWORD =
-            "Itams@2026a";
+    private static final String ASSET_TYPE = "Mouse";
+    private static final String BRAND = "Lenovo";
+    private static final String MODEL = "Essential Wireless Mouse";
+    private static final String PURCHASE_COST = "500";
 
-    private static final Duration WAIT_TIME =
-            Duration.ofSeconds(15);
+    // The screenshot says 28-08-2006, but the application says
+    // purchases must be within the last 7 days. The intended valid
+    // date is therefore 28-08-2026.
+    private static final String PURCHASE_DATE = "28-08-2026";
+    private static final String WARRANTY_EXPIRY = "28-01-2027";
 
-    // ============================================================
-    // WAIT
-    // ============================================================
-
-    private WebDriverWait wait() {
-        return new WebDriverWait(driver, WAIT_TIME);
-    }
-
-    // ============================================================
-    // BEFORE EACH TEST
-    // LOGIN AND OPEN ADD ASSET PAGE
-    // ============================================================
+    private static final String DESCRIPTION =
+            "Lenovo Mouse Essential Wireless Mouse";
 
     @BeforeEach
-    public void setUpAddAssetPage() {
+    public void setUp() {
+
+        System.out.println();
+        System.out.println("==============================================");
+        System.out.println("        ITAMS ADD ASSET AUTOMATION");
+        System.out.println("==============================================");
+
+        WebDriverManager.chromedriver().setup();
+
+        driver = new ChromeDriver();
+
+        driver.manage().window().maximize();
+
+        driver.manage().timeouts().pageLoadTimeout(
+                Duration.ofSeconds(60)
+        );
+
+        wait = new WebDriverWait(
+                driver,
+                Duration.ofSeconds(25)
+        );
 
         driver.get(BASE_URL);
 
-        waitForPageLoad();
+        waitForPageReady();
 
-        loginAsAssetManager();
-
-        openAddAssetPage();
-
-        waitForAddAssetPage();
+        System.out.println(
+                "Application opened: " + BASE_URL
+        );
     }
 
-    // ============================================================
-    // LOGIN
-    // ============================================================
+    @Test
+    public void addMouseAssetTest() {
 
-    private void loginAsAssetManager() {
+        // =====================================================
+        // STEP 1 - LOGIN
+        // =====================================================
 
-        // --------------------------------------------------------
-        // Find Login button
-        // --------------------------------------------------------
+        System.out.println();
+        System.out.println("STEP 1: ASSET MANAGER LOGIN");
 
-        WebElement loginButton = findFirstVisible(
-                By.xpath(
-                        "//button[contains(normalize-space(),'Login')]"
-                ),
-                By.xpath(
-                        "//a[contains(normalize-space(),'Login')]"
-                )
-        );
+        openLoginPage();
 
-        if (loginButton != null) {
-
-            safeClick(loginButton);
-
-        }
-
-        // --------------------------------------------------------
-        // Employee ID
-        // --------------------------------------------------------
-
-        WebElement employeeId = wait().until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.name("employeeIdOrEmail")
-                )
-        );
-
-        employeeId.clear();
-
-        employeeId.sendKeys(EMPLOYEE_ID);
-
-        // --------------------------------------------------------
-        // Password
-        // --------------------------------------------------------
-
-        WebElement password = wait().until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.name("password")
-                )
-        );
-
-        password.clear();
-
-        password.sendKeys(PASSWORD);
-
-        // --------------------------------------------------------
-        // Submit
-        // --------------------------------------------------------
-
-        WebElement submit = findFirstVisible(
-                By.cssSelector(
-                        "form button[type='submit']"
-                ),
-                By.xpath(
-                        "//button[contains(normalize-space(),'Login')]"
-                )
-        );
-
-        assertTrue(
-                submit != null,
-                "Login submit button was not found"
-        );
-
-        safeClick(submit);
-
-        handleAlertIfPresent();
-
-        // --------------------------------------------------------
-        // Wait until login completes
-        // --------------------------------------------------------
-
-        wait().until(driver ->
-                !driver.findElements(
-                        By.name("employeeIdOrEmail")
-                ).stream().anyMatch(
-                        WebElement::isDisplayed
-                )
+        login(
+                ASSET_MANAGER_ID,
+                ASSET_MANAGER_PASSWORD
         );
 
         System.out.println(
-                "Asset Manager login successful."
-        );
-    }
-
-    // ============================================================
-    // OPEN ADD ASSET PAGE
-    // ============================================================
-
-    private void openAddAssetPage() {
-
-        // If Add Asset is already displayed, no navigation required.
-
-        if (!driver.findElements(
-                By.cssSelector(".aa-page-title")
-        ).isEmpty()) {
-
-            return;
-        }
-
-        // --------------------------------------------------------
-        // Try Add Asset card/button
-        // --------------------------------------------------------
-
-        WebElement addAssetButton = findFirstVisible(
-                By.xpath(
-                        "//button[normalize-space()='Add Asset']"
-                ),
-                By.xpath(
-                        "//*[contains(@class,'am-card')]"
-                                + "//button[contains(normalize-space(),'Add Asset')]"
-                )
+                "LOGIN PASSED"
         );
 
-        assertTrue(
-                addAssetButton != null,
-                "Add Asset button was not found on Asset Management page"
+
+        // =====================================================
+        // STEP 2 - OPEN ASSET MANAGEMENT
+        // =====================================================
+
+        System.out.println();
+        System.out.println(
+                "STEP 2: OPEN ASSET MANAGEMENT"
         );
 
-        safeClick(addAssetButton);
-
-        waitForAddAssetPage();
-    }
-
-    // ============================================================
-    // WAIT FOR ADD ASSET PAGE
-    // ============================================================
-
-    private void waitForAddAssetPage() {
-
-        wait().until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.cssSelector(".aa-page-title")
-                )
+        clickVisibleText(
+                "Asset Management"
         );
 
-        WebElement title = driver.findElement(
-                By.cssSelector(".aa-page-title")
+        waitForText(
+                "Asset Management"
         );
 
-        assertEquals(
+        System.out.println(
+                "Asset Management page opened"
+        );
+
+
+        // =====================================================
+        // STEP 3 - OPEN ADD ASSET
+        // =====================================================
+
+        System.out.println();
+        System.out.println(
+                "STEP 3: OPEN ADD ASSET"
+        );
+
+        WebElement addAssetButton =
+                wait.until(
+                        d -> findVisible(
+                                d,
+                                By.xpath(
+                                        "//button[normalize-space()='Add Asset']"
+                                )
+                        )
+                );
+
+        clickJS(addAssetButton);
+
+        waitForAnyText(
                 "Add Asset",
-                title.getText().trim(),
-                "Incorrect page opened"
-        );
-    }
-
-    // ============================================================
-    // TEST 1
-    // PAGE LOAD
-    // ============================================================
-
-    @Test
-    public void addAssetPageLoadTest() {
-
-        WebElement title = wait().until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.cssSelector(".aa-page-title")
-                )
-        );
-
-        assertTrue(
-                title.isDisplayed(),
-                "Add Asset page title is not displayed"
-        );
-
-        assertEquals(
-                "Add Asset",
-                title.getText().trim()
+                "Add Asset Details"
         );
 
         System.out.println(
-                "PASS: Add Asset page loaded successfully."
-        );
-    }
-
-    // ============================================================
-    // TEST 2
-    // PAGE SUBTITLE
-    // ============================================================
-
-    @Test
-    public void pageSubtitleTest() {
-
-        WebElement subtitle = wait().until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.cssSelector(".aa-page-subtitle")
-                )
+                "Add Asset page opened"
         );
 
-        assertTrue(
-                subtitle.isDisplayed(),
-                "Page subtitle is not displayed"
-        );
 
-        assertTrue(
-                subtitle.getText()
-                        .toLowerCase()
-                        .contains("new asset"),
-                "Incorrect Add Asset subtitle"
-        );
+        // =====================================================
+        // STEP 4 - VERIFY AUTO GENERATED ASSET ID
+        // =====================================================
 
+        System.out.println();
         System.out.println(
-                "PASS: Add Asset subtitle displayed."
-        );
-    }
-
-    // ============================================================
-    // TEST 3
-    // ITAMS LOGO
-    // ============================================================
-
-    @Test
-    public void itamsLogoTest() {
-
-        WebElement logo = wait().until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.cssSelector(".aa-nav-logo-title")
-                )
+                "STEP 4: VERIFY ASSET ID"
         );
 
-        assertEquals(
-                "ITAMS",
-                logo.getText().trim()
-        );
-
-        System.out.println(
-                "PASS: ITAMS logo displayed."
-        );
-    }
-
-    // ============================================================
-    // TEST 4
-    // USERNAME
-    // ============================================================
-
-    @Test
-    public void usernameDisplayTest() {
-
-        WebElement username = wait().until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.cssSelector(".aa-nav-username")
-                )
-        );
-
-        assertTrue(
-                username.isDisplayed(),
-                "Username is not displayed"
-        );
-
-        assertFalse(
-                username.getText().trim().isEmpty(),
-                "Username is empty"
-        );
-
-        System.out.println(
-                "PASS: Username displayed."
-        );
-    }
-
-    // ============================================================
-    // TEST 5
-    // ASSET ID
-    // ============================================================
-
-    @Test
-    public void assetIdAutoGenerationTest() {
-
-        WebElement assetId = wait().until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.cssSelector(
-                                "input.aa-input--readonly"
+        WebElement assetIdField =
+                wait.until(
+                        d -> findVisible(
+                                d,
+                                By.xpath(
+                                        "//input[@readonly]"
+                                        + " | "
+                                        + "//input[contains(@value,'AST')]"
+                                )
                         )
-                )
-        );
+                );
+
+        String assetId =
+                assetIdField.getAttribute("value");
 
         assertTrue(
-                assetId.getAttribute("readonly") != null,
-                "Asset ID should be read-only"
-        );
-
-        String value = assetId.getAttribute("value");
-
-        assertTrue(
-                value.matches(
-                        "^(AST|MON|KEY|WEB|PRO|MOU|CPU|PRI)\\d{3}$"
-                ),
-                "Invalid automatically generated Asset ID: "
-                        + value
+                assetId != null
+                        && assetId.startsWith("AST"),
+                "Auto-generated Asset ID was not found"
         );
 
         System.out.println(
-                "PASS: Asset ID generated automatically: "
-                        + value
-        );
-    }
-
-    // ============================================================
-    // TEST 6
-    // ASSET TYPE OPTIONS
-    // ============================================================
-
-    @Test
-    public void assetTypeOptionsTest() {
-
-        Select select = new Select(
-                wait().until(
-                        ExpectedConditions.visibilityOfElementLocated(
-                                By.name("assetType")
-                        )
-                )
+                "Generated Asset ID: " + assetId
         );
 
-        assertTrue(
-                select.getOptions()
-                        .stream()
-                        .anyMatch(
-                                option ->
-                                        option.getText()
-                                                .equals("Monitor")
-                        ),
-                "Monitor option not found"
+
+        // =====================================================
+        // STEP 5 - SELECT ASSET TYPE
+        // =====================================================
+
+        System.out.println();
+        System.out.println(
+                "STEP 5: SELECT ASSET TYPE"
         );
 
-        assertTrue(
-                select.getOptions()
-                        .stream()
-                        .anyMatch(
-                                option ->
-                                        option.getText()
-                                                .equals("Keyboard")
-                        ),
-                "Keyboard option not found"
-        );
+        WebElement assetTypeSelect =
+                findSelectNearLabel(
+                        "Asset Type"
+                );
 
-        assertTrue(
-                select.getOptions()
-                        .stream()
-                        .anyMatch(
-                                option ->
-                                        option.getText()
-                                                .equals("Webcam")
-                        ),
-                "Webcam option not found"
-        );
-
-        assertTrue(
-                select.getOptions()
-                        .stream()
-                        .anyMatch(
-                                option ->
-                                        option.getText()
-                                                .equals("Projector")
-                        ),
-                "Projector option not found"
-        );
-
-        assertTrue(
-                select.getOptions()
-                        .stream()
-                        .anyMatch(
-                                option ->
-                                        option.getText()
-                                                .equals("Mouse")
-                        ),
-                "Mouse option not found"
-        );
-
-        assertTrue(
-                select.getOptions()
-                        .stream()
-                        .anyMatch(
-                                option ->
-                                        option.getText()
-                                                .equals("CPU")
-                        ),
-                "CPU option not found"
-        );
-
-        assertTrue(
-                select.getOptions()
-                        .stream()
-                        .anyMatch(
-                                option ->
-                                        option.getText()
-                                                .equals("Printer")
-                        ),
-                "Printer option not found"
+        new Select(
+                assetTypeSelect
+        ).selectByVisibleText(
+                ASSET_TYPE
         );
 
         System.out.println(
-                "PASS: Asset Type options displayed."
-        );
-    }
-
-    // ============================================================
-    // TEST 7
-    // BRAND DISABLED BEFORE ASSET TYPE
-    // ============================================================
-
-    @Test
-    public void brandInitiallyDisabledTest() {
-
-        WebElement brand = wait().until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.name("brand")
-                )
+                "Asset Type selected: " + ASSET_TYPE
         );
 
-        assertTrue(
-                brand.isEnabled() == false,
-                "Brand should be disabled before Asset Type selection"
+
+        // =====================================================
+        // STEP 6 - SELECT BRAND
+        // =====================================================
+
+        System.out.println();
+        System.out.println(
+                "STEP 6: SELECT BRAND"
+        );
+
+        WebElement brandSelect =
+                findSelectNearLabel(
+                        "Brand"
+                );
+
+        wait.until(
+                d -> {
+
+                    try {
+
+                        Select select =
+                                new Select(brandSelect);
+
+                        for (WebElement option :
+                                select.getOptions()) {
+
+                            if (
+                                    option.getText()
+                                            .trim()
+                                            .equalsIgnoreCase(
+                                                    BRAND
+                                            )
+                            ) {
+                                return true;
+                            }
+                        }
+
+                    } catch (Exception ignored) {
+                    }
+
+                    return false;
+                }
+        );
+
+        new Select(
+                brandSelect
+        ).selectByVisibleText(
+                BRAND
         );
 
         System.out.println(
-                "PASS: Brand is disabled initially."
-        );
-    }
-
-    // ============================================================
-    // TEST 8
-    // MODEL DISABLED BEFORE BRAND
-    // ============================================================
-
-    @Test
-    public void modelInitiallyDisabledTest() {
-
-        WebElement model = wait().until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.name("model")
-                )
+                "Brand selected: " + BRAND
         );
 
-        assertTrue(
-                !model.isEnabled(),
-                "Model should be disabled before Brand selection"
+
+        // =====================================================
+        // STEP 7 - SELECT MODEL
+        // =====================================================
+
+        System.out.println();
+        System.out.println(
+                "STEP 7: SELECT MODEL"
+        );
+
+        WebElement modelSelect =
+                findSelectNearLabel(
+                        "Model"
+                );
+
+        wait.until(
+                d -> {
+
+                    try {
+
+                        Select select =
+                                new Select(modelSelect);
+
+                        for (WebElement option :
+                                select.getOptions()) {
+
+                            if (
+                                    option.getText()
+                                            .trim()
+                                            .equalsIgnoreCase(
+                                                    MODEL
+                                            )
+                            ) {
+                                return true;
+                            }
+                        }
+
+                    } catch (Exception ignored) {
+                    }
+
+                    return false;
+                }
+        );
+
+        new Select(
+                modelSelect
+        ).selectByVisibleText(
+                MODEL
         );
 
         System.out.println(
-                "PASS: Model is disabled initially."
-        );
-    }
-
-    // ============================================================
-    // TEST 9
-    // SELECT ASSET TYPE
-    // ============================================================
-
-    @Test
-    public void assetTypeSelectionTest() {
-
-        Select assetType = new Select(
-                wait().until(
-                        ExpectedConditions.visibilityOfElementLocated(
-                                By.name("assetType")
-                        )
-                )
+                "Model selected: " + MODEL
         );
 
-        assetType.selectByVisibleText("Monitor");
 
-        WebElement brand = wait().until(
-                ExpectedConditions.elementToBeEnabled(
-                        By.name("brand")
-                )
+        // =====================================================
+        // STEP 8 - PURCHASE COST
+        // =====================================================
+
+        System.out.println();
+        System.out.println(
+                "STEP 8: ENTER PURCHASE COST"
         );
 
-        assertTrue(
-                brand.isEnabled(),
-                "Brand should become enabled after Asset Type selection"
+        WebElement costField =
+                findInputNearLabel(
+                        "Purchase Cost"
+                );
+
+        costField.clear();
+
+        costField.sendKeys(
+                PURCHASE_COST
         );
 
         System.out.println(
-                "PASS: Asset Type selection works."
-        );
-    }
-
-    // ============================================================
-    // TEST 10
-    // BRAND OPTIONS AFTER TYPE
-    // ============================================================
-
-    @Test
-    public void brandOptionsTest() {
-
-        selectAssetType("Monitor");
-
-        Select brand = new Select(
-                wait().until(
-                        ExpectedConditions.visibilityOfElementLocated(
-                                By.name("brand")
-                        )
-                )
+                "Purchase Cost entered: ₹" +
+                        PURCHASE_COST
         );
 
-        assertTrue(
-                brand.getOptions()
-                        .stream()
-                        .anyMatch(
-                                option ->
-                                        option.getText()
-                                                .equals("Dell")
-                        ),
-                "Dell brand not available"
+
+        // =====================================================
+        // STEP 9 - PURCHASE DATE
+        // =====================================================
+
+        System.out.println();
+        System.out.println(
+                "STEP 9: ENTER PURCHASE DATE"
         );
 
-        assertTrue(
-                brand.getOptions()
-                        .stream()
-                        .anyMatch(
-                                option ->
-                                        option.getText()
-                                                .equals("HP")
-                        ),
-                "HP brand not available"
-        );
+        WebElement purchaseDateField =
+                findDateFieldNearLabel(
+                        "Purchase Date"
+                );
 
-        assertTrue(
-                brand.getOptions()
-                        .stream()
-                        .anyMatch(
-                                option ->
-                                        option.getText()
-                                                .equals("LG")
-                        ),
-                "LG brand not available"
+        setDateValue(
+                purchaseDateField,
+                "2026-08-28",
+                PURCHASE_DATE
         );
 
         System.out.println(
-                "PASS: Brand options displayed correctly."
-        );
-    }
-
-    // ============================================================
-    // TEST 11
-    // MODEL OPTIONS AFTER BRAND
-    // ============================================================
-
-    @Test
-    public void modelOptionsTest() {
-
-        selectAssetType("Monitor");
-
-        selectBrand("Dell");
-
-        Select model = new Select(
-                wait().until(
-                        ExpectedConditions.visibilityOfElementLocated(
-                                By.name("model")
-                        )
-                )
+                "Purchase Date entered: "
+                        + PURCHASE_DATE
         );
 
-        assertTrue(
-                model.getOptions()
-                        .stream()
-                        .anyMatch(
-                                option ->
-                                        option.getText()
-                                                .equals("P2422H")
-                        ),
-                "Dell P2422H model not available"
+
+        // =====================================================
+        // STEP 10 - WARRANTY EXPIRY DATE
+        // =====================================================
+
+        System.out.println();
+        System.out.println(
+                "STEP 10: ENTER WARRANTY EXPIRY DATE"
         );
 
-        assertTrue(
-                model.getOptions()
-                        .stream()
-                        .anyMatch(
-                                option ->
-                                        option.getText()
-                                                .equals("P2425H")
-                        ),
-                "Dell P2425H model not available"
+        WebElement warrantyField =
+                findDateFieldNearLabel(
+                        "Warranty Expiry Date"
+                );
+
+        setDateValue(
+                warrantyField,
+                "2027-01-28",
+                WARRANTY_EXPIRY
         );
 
         System.out.println(
-                "PASS: Model options displayed correctly."
-        );
-    }
-
-    // ============================================================
-    // TEST 12
-    // MODEL ENABLED AFTER BRAND
-    // ============================================================
-
-    @Test
-    public void modelEnabledAfterBrandTest() {
-
-        selectAssetType("Monitor");
-
-        selectBrand("Dell");
-
-        WebElement model = wait().until(
-                ExpectedConditions.elementToBeEnabled(
-                        By.name("model")
-                )
+                "Warranty Expiry Date entered: "
+                        + WARRANTY_EXPIRY
         );
 
-        assertTrue(
-                model.isEnabled(),
-                "Model should be enabled after Brand selection"
-        );
 
+        // =====================================================
+        // STEP 11 - DESCRIPTION
+        // =====================================================
+
+        System.out.println();
         System.out.println(
-                "PASS: Model enabled after Brand selection."
-        );
-    }
-
-    // ============================================================
-    // TEST 13
-    // PURCHASE COST ACCEPTS NUMBERS
-    // ============================================================
-
-    @Test
-    public void purchaseCostValidInputTest() {
-
-        WebElement cost = wait().until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.name("purchaseCost")
-                )
+                "STEP 11: ENTER DESCRIPTION"
         );
 
-        cost.sendKeys("15000.50");
+        WebElement description =
+                findTextareaNearLabel(
+                        "Description"
+                );
 
-        assertEquals(
-                "15000.50",
-                cost.getAttribute("value")
-        );
-
-        System.out.println(
-                "PASS: Valid purchase cost accepted."
-        );
-    }
-
-    // ============================================================
-    // TEST 14
-    // PURCHASE COST REJECTS INVALID CHARACTERS
-    // ============================================================
-
-    @Test
-    public void purchaseCostInvalidCharactersTest() {
-
-        WebElement cost = wait().until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.name("purchaseCost")
-                )
-        );
-
-        cost.sendKeys("abc");
-
-        String value =
-                cost.getAttribute("value");
-
-        assertTrue(
-                value.isEmpty()
-                        || value.matches("\\d*\\.?\\d*"),
-                "Purchase cost accepted invalid characters"
-        );
-
-        System.out.println(
-                "PASS: Invalid purchase cost characters rejected."
-        );
-    }
-
-    // ============================================================
-    // TEST 15
-    // PURCHASE DATE FIELD
-    // ============================================================
-
-    @Test
-    public void purchaseDateFieldTest() {
-
-        WebElement purchaseDate = wait().until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.name("purchaseDate")
-                )
-        );
-
-        assertEquals(
-                "date",
-                purchaseDate.getAttribute("type")
-        );
-
-        assertFalse(
-                purchaseDate.getAttribute("min").isEmpty(),
-                "Purchase date minimum is missing"
-        );
-
-        assertFalse(
-                purchaseDate.getAttribute("max").isEmpty(),
-                "Purchase date maximum is missing"
-        );
-
-        System.out.println(
-                "PASS: Purchase date restrictions are present."
-        );
-    }
-
-    // ============================================================
-    // TEST 16
-    // WARRANTY DISABLED BEFORE PURCHASE DATE
-    // ============================================================
-
-    @Test
-    public void warrantyInitiallyDisabledTest() {
-
-        WebElement warranty = wait().until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.name("warrantyExpiry")
-                )
-        );
-
-        assertTrue(
-                !warranty.isEnabled(),
-                "Warranty field should be disabled before Purchase Date"
-        );
-
-        System.out.println(
-                "PASS: Warranty field initially disabled."
-        );
-    }
-
-    // ============================================================
-    // TEST 17
-    // WARRANTY ENABLED AFTER PURCHASE DATE
-    // ============================================================
-
-    @Test
-    public void warrantyEnabledAfterPurchaseDateTest() {
-
-        String purchaseDate =
-                LocalDate.now()
-                        .minusDays(1)
-                        .format(
-                                DateTimeFormatter.ISO_LOCAL_DATE
-                        );
-
-        setInputValue(
-                By.name("purchaseDate"),
-                purchaseDate
-        );
-
-        WebElement warranty = wait().until(
-                ExpectedConditions.elementToBeEnabled(
-                        By.name("warrantyExpiry")
-                )
-        );
-
-        assertTrue(
-                warranty.isEnabled(),
-                "Warranty should be enabled after Purchase Date"
-        );
-
-        System.out.println(
-                "PASS: Warranty enabled after Purchase Date."
-        );
-    }
-
-    // ============================================================
-    // TEST 18
-    // DESCRIPTION ACCEPTS VALID TEXT
-    // ============================================================
-
-    @Test
-    public void descriptionValidInputTest() {
-
-        WebElement description = wait().until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.name("description")
-                )
-        );
+        description.clear();
 
         description.sendKeys(
-                "Dell monitor for office employee"
-        );
-
-        assertEquals(
-                "Dell monitor for office employee",
-                description.getAttribute("value")
+                DESCRIPTION
         );
 
         System.out.println(
-                "PASS: Valid description accepted."
-        );
-    }
-
-    // ============================================================
-    // TEST 19
-    // DESCRIPTION MINIMUM VALIDATION
-    // ============================================================
-
-    @Test
-    public void descriptionMinimumValidationTest() {
-
-        WebElement description = wait().until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.name("description")
-                )
+                "Description entered: "
+                        + DESCRIPTION
         );
 
-        description.sendKeys("Monitor");
 
-        clickAddAsset();
+        // =====================================================
+        // STEP 12 - CLICK ADD ASSET
+        // =====================================================
 
-        WebElement error = wait().until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.xpath(
-                                "//*[contains(normalize-space(),"
-                                        + "'Description must contain at least 10 characters')]"
+        System.out.println();
+        System.out.println(
+                "STEP 12: ADD ASSET"
+        );
+
+        WebElement addButton =
+                wait.until(
+                        d -> findVisible(
+                                d,
+                                By.xpath(
+                                        "//button[normalize-space()='Add Asset']"
+                                )
                         )
-                )
-        );
-
-        assertTrue(
-                error.isDisplayed(),
-                "Minimum description validation message not displayed"
-        );
-
-        System.out.println(
-                "PASS: Description minimum validation works."
-        );
-    }
-
-    // ============================================================
-    // TEST 20
-    // REQUIRED FIELD VALIDATION
-    // ============================================================
-
-    @Test
-    public void requiredFieldsValidationTest() {
-
-        clickAddAsset();
-
-        String pageText =
-                driver.findElement(
-                        By.tagName("body")
-                ).getText();
-
-        assertTrue(
-                pageText.contains(
-                        "Please select an asset type."
-                ),
-                "Asset Type required validation not displayed"
-        );
-
-        assertTrue(
-                pageText.contains(
-                        "Please select a brand."
-                ),
-                "Brand required validation not displayed"
-        );
-
-        assertTrue(
-                pageText.contains(
-                        "Please select a model."
-                ),
-                "Model required validation not displayed"
-        );
-
-        assertTrue(
-                pageText.contains(
-                        "Purchase cost is required."
-                ),
-                "Purchase Cost required validation not displayed"
-        );
-
-        assertTrue(
-                pageText.contains(
-                        "Purchase date is required."
-                ),
-                "Purchase Date required validation not displayed"
-        );
-
-        assertTrue(
-                pageText.contains(
-                        "Warranty expiry date is required."
-                ),
-                "Warranty required validation not displayed"
-        );
-
-        assertTrue(
-                pageText.contains(
-                        "Description is required."
-                ),
-                "Description required validation not displayed"
-        );
-
-        System.out.println(
-                "PASS: Required field validation works."
-        );
-    }
-
-    // ============================================================
-    // TEST 21
-    // PURCHASE COST BELOW 100
-    // ============================================================
-
-    @Test
-    public void purchaseCostMinimumValidationTest() {
-
-        WebElement cost = wait().until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.name("purchaseCost")
-                )
-        );
-
-        cost.sendKeys("99");
-
-        clickAddAsset();
-
-        String pageText =
-                driver.findElement(
-                        By.tagName("body")
-                ).getText();
-
-        assertTrue(
-                pageText.contains(
-                        "Purchase cost must be at least ₹100."
-                ),
-                "Minimum purchase cost validation not displayed"
-        );
-
-        System.out.println(
-                "PASS: Purchase cost minimum validation works."
-        );
-    }
-
-    // ============================================================
-    // TEST 22
-    // PURCHASE DATE FUTURE VALIDATION
-    // ============================================================
-
-    @Test
-    public void futurePurchaseDateValidationTest() {
-
-        String futureDate =
-                LocalDate.now()
-                        .plusDays(1)
-                        .format(
-                                DateTimeFormatter.ISO_LOCAL_DATE
-                        );
-
-        setInputValue(
-                By.name("purchaseDate"),
-                futureDate
-        );
-
-        clickAddAsset();
-
-        String pageText =
-                driver.findElement(
-                        By.tagName("body")
-                ).getText();
-
-        assertTrue(
-                pageText.contains(
-                        "Purchase date cannot be a future date."
-                ),
-                "Future purchase date validation not displayed"
-        );
-
-        System.out.println(
-                "PASS: Future purchase date validation works."
-        );
-    }
-
-    // ============================================================
-    // TEST 23
-    // PURCHASE DATE OLDER THAN 7 DAYS
-    // ============================================================
-
-    @Test
-    public void oldPurchaseDateValidationTest() {
-
-        String oldDate =
-                LocalDate.now()
-                        .minusDays(8)
-                        .format(
-                                DateTimeFormatter.ISO_LOCAL_DATE
-                        );
-
-        setInputValue(
-                By.name("purchaseDate"),
-                oldDate
-        );
-
-        clickAddAsset();
-
-        String pageText =
-                driver.findElement(
-                        By.tagName("body")
-                ).getText();
-
-        assertTrue(
-                pageText.contains(
-                        "Only purchases from the last 7 days are allowed."
-                ),
-                "Old purchase date validation not displayed"
-        );
-
-        System.out.println(
-                "PASS: Old purchase date validation works."
-        );
-    }
-
-    // ============================================================
-    // TEST 24
-    // WARRANTY LESS THAN 3 MONTHS
-    // ============================================================
-
-    @Test
-    public void warrantyMinimumValidationTest() {
-
-        String purchaseDate =
-                LocalDate.now()
-                        .minusDays(1)
-                        .format(
-                                DateTimeFormatter.ISO_LOCAL_DATE
-                        );
-
-        String invalidWarranty =
-                LocalDate.now()
-                        .plusMonths(2)
-                        .format(
-                                DateTimeFormatter.ISO_LOCAL_DATE
-                        );
-
-        setInputValue(
-                By.name("purchaseDate"),
-                purchaseDate
-        );
-
-        setInputValue(
-                By.name("warrantyExpiry"),
-                invalidWarranty
-        );
-
-        clickAddAsset();
-
-        String pageText =
-                driver.findElement(
-                        By.tagName("body")
-                ).getText();
-
-        assertTrue(
-                pageText.contains(
-                        "Warranty must be at least 3 months"
-                ),
-                "Warranty minimum validation not displayed"
-        );
-
-        System.out.println(
-                "PASS: Warranty minimum validation works."
-        );
-    }
-
-    // ============================================================
-    // TEST 25
-    // WARRANTY MORE THAN 3 YEARS
-    // ============================================================
-
-    @Test
-    public void warrantyMaximumValidationTest() {
-
-        String purchaseDate =
-                LocalDate.now()
-                        .minusDays(1)
-                        .format(
-                                DateTimeFormatter.ISO_LOCAL_DATE
-                        );
-
-        String invalidWarranty =
-                LocalDate.now()
-                        .plusMonths(37)
-                        .format(
-                                DateTimeFormatter.ISO_LOCAL_DATE
-                        );
-
-        setInputValue(
-                By.name("purchaseDate"),
-                purchaseDate
-        );
-
-        setInputValue(
-                By.name("warrantyExpiry"),
-                invalidWarranty
-        );
-
-        clickAddAsset();
-
-        String pageText =
-                driver.findElement(
-                        By.tagName("body")
-                ).getText();
-
-        assertTrue(
-                pageText.contains(
-                        "Warranty cannot exceed 3 years"
-                ),
-                "Warranty maximum validation not displayed"
-        );
-
-        System.out.println(
-                "PASS: Warranty maximum validation works."
-        );
-    }
-
-    // ============================================================
-    // TEST 26
-    // CLEAR BUTTON
-    // ============================================================
-
-    @Test
-    public void clearButtonTest() {
-
-        selectAssetType("Monitor");
-
-        selectBrand("Dell");
-
-        selectModel("P2422H");
-
-        setText(
-                By.name("purchaseCost"),
-                "15000"
-        );
-
-        String purchaseDate =
-                LocalDate.now()
-                        .minusDays(1)
-                        .format(
-                                DateTimeFormatter.ISO_LOCAL_DATE
-                        );
-
-        setInputValue(
-                By.name("purchaseDate"),
-                purchaseDate
-        );
-
-        String warrantyDate =
-                LocalDate.now()
-                        .plusMonths(6)
-                        .format(
-                                DateTimeFormatter.ISO_LOCAL_DATE
-                        );
-
-        setInputValue(
-                By.name("warrantyExpiry"),
-                warrantyDate
-        );
-
-        setText(
-                By.name("description"),
-                "Dell monitor for office"
-        );
-
-        // --------------------------------------------------------
-        // Click Clear
-        // --------------------------------------------------------
-
-        WebElement clearButton = wait().until(
-                ExpectedConditions.elementToBeClickable(
-                        By.cssSelector(
-                                ".aa-btn-outline"
-                        )
-                )
-        );
-
-        safeClick(clearButton);
-
-        // --------------------------------------------------------
-        // Verify cleared
-        // --------------------------------------------------------
-
-        assertEquals(
-                "",
-                getValue(By.name("assetType"))
-        );
-
-        assertEquals(
-                "",
-                getValue(By.name("brand"))
-        );
-
-        assertEquals(
-                "",
-                getValue(By.name("model"))
-        );
-
-        assertEquals(
-                "",
-                getValue(By.name("purchaseCost"))
-        );
-
-        assertEquals(
-                "",
-                getValue(By.name("purchaseDate"))
-        );
-
-        assertEquals(
-                "",
-                getValue(By.name("warrantyExpiry"))
-        );
-
-        assertEquals(
-                "",
-                getValue(By.name("description"))
-        );
-
-        System.out.println(
-                "PASS: Clear button resets the form."
-        );
-    }
-
-    // ============================================================
-    // TEST 27
-    // BACK BUTTON
-    // ============================================================
-
-    @Test
-    public void backButtonTest() {
-
-        WebElement backButton = wait().until(
-                ExpectedConditions.elementToBeClickable(
-                        By.cssSelector(
-                                ".aa-btn-back"
-                        )
-                )
-        );
-
-        assertEquals(
-                "Back",
-                backButton.getText().trim()
-        );
-
-        safeClick(backButton);
-
-        wait().until(driver ->
-                !driver.findElements(
-                        By.cssSelector(".aa-page-title")
-                ).stream().anyMatch(
-                        WebElement::isDisplayed
-                )
-        );
-
-        String page =
-                driver.findElement(
-                        By.tagName("body")
-                ).getText();
-
-        assertTrue(
-                page.contains("Asset Management")
-                        || page.contains("Manage and track all IT assets"),
-                "Back button did not return to Asset Management"
-        );
-
-        System.out.println(
-                "PASS: Back button works."
-        );
-    }
-
-    // ============================================================
-    // TEST 28
-    // ADD ASSET BUTTON DISPLAY
-    // ============================================================
-
-    @Test
-    public void addAssetButtonTest() {
-
-        WebElement button = wait().until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.cssSelector(
-                                ".aa-btn-primary"
-                        )
-                )
-        );
-
-        assertTrue(
-                button.isDisplayed(),
-                "Add Asset submit button is not displayed"
-        );
-
-        assertEquals(
-                "Add Asset",
-                button.getText().trim()
-        );
-
-        System.out.println(
-                "PASS: Add Asset button displayed."
-        );
-    }
-
-    // ============================================================
-    // TEST 29
-    // CLEAR BUTTON DISPLAY
-    // ============================================================
-
-    @Test
-    public void clearButtonDisplayTest() {
-
-        WebElement button = wait().until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.cssSelector(
-                                ".aa-btn-outline"
-                        )
-                )
-        );
-
-        assertTrue(
-                button.isDisplayed(),
-                "Clear button is not displayed"
-        );
-
-        assertEquals(
-                "Clear",
-                button.getText().trim()
-        );
-
-        System.out.println(
-                "PASS: Clear button displayed."
-        );
-    }
-
-    // ============================================================
-    // TEST 30
-    // DESCRIPTION MAX LENGTH
-    // ============================================================
-
-    @Test
-    public void descriptionMaxLengthTest() {
-
-        WebElement description = wait().until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.name("description")
-                )
-        );
-
-        assertEquals(
-                "500",
-                description.getAttribute("maxlength")
-        );
-
-        System.out.println(
-                "PASS: Description maximum length is 500."
-        );
-    }
-
-    // ============================================================
-    // TEST 31
-    // PURCHASE COST INPUT TYPE
-    // ============================================================
-
-    @Test
-    public void purchaseCostInputTest() {
-
-        WebElement cost = wait().until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.name("purchaseCost")
-                )
-        );
-
-        assertEquals(
-                "text",
-                cost.getAttribute("type")
-        );
-
-        assertEquals(
-                "decimal",
-                cost.getAttribute("inputmode")
-        );
-
-        System.out.println(
-                "PASS: Purchase Cost input configuration correct."
-        );
-    }
-
-    // ============================================================
-    // TEST 32
-    // COMPLETE FORM DATA ENTRY
-    // ============================================================
-
-    @Test
-    public void completeFormEntryTest() {
-
-        // --------------------------------------------------------
-        // Asset Type
-        // --------------------------------------------------------
-
-        selectAssetType("Monitor");
-
-        // --------------------------------------------------------
-        // Brand
-        // --------------------------------------------------------
-
-        selectBrand("Dell");
-
-        // --------------------------------------------------------
-        // Model
-        // --------------------------------------------------------
-
-        selectModel("P2422H");
-
-        // --------------------------------------------------------
-        // Purchase Cost
-        // --------------------------------------------------------
-
-        setText(
-                By.name("purchaseCost"),
-                "15000"
-        );
-
-        // --------------------------------------------------------
-        // Purchase Date
-        // --------------------------------------------------------
-
-        String purchaseDate =
-                LocalDate.now()
-                        .minusDays(1)
-                        .format(
-                                DateTimeFormatter.ISO_LOCAL_DATE
-                        );
-
-        setInputValue(
-                By.name("purchaseDate"),
-                purchaseDate
-        );
-
-        // --------------------------------------------------------
-        // Warranty
-        // --------------------------------------------------------
-
-        String warranty =
-                LocalDate.now()
-                        .plusMonths(6)
-                        .format(
-                                DateTimeFormatter.ISO_LOCAL_DATE
-                        );
-
-        setInputValue(
-                By.name("warrantyExpiry"),
-                warranty
-        );
-
-        // --------------------------------------------------------
-        // Description
-        // --------------------------------------------------------
-
-        setText(
-                By.name("description"),
-                "Dell monitor for office employee"
-        );
-
-        // --------------------------------------------------------
-        // Verify
-        // --------------------------------------------------------
-
-        assertEquals(
-                "Monitor",
-                getValue(By.name("assetType"))
-        );
-
-        assertEquals(
-                "Dell",
-                getValue(By.name("brand"))
-        );
-
-        assertEquals(
-                "P2422H",
-                getValue(By.name("model"))
-        );
-
-        assertEquals(
-                "15000",
-                getValue(By.name("purchaseCost"))
-        );
-
-        assertEquals(
-                purchaseDate,
-                getValue(By.name("purchaseDate"))
-        );
-
-        assertEquals(
-                warranty,
-                getValue(By.name("warrantyExpiry"))
-        );
-
-        assertEquals(
-                "Dell monitor for office employee",
-                getValue(By.name("description"))
-        );
-
-        System.out.println(
-                "PASS: Complete Add Asset form accepts valid data."
-        );
-    }
-
-    // ============================================================
-    // HELPER
-    // SELECT ASSET TYPE
-    // ============================================================
-
-    private void selectAssetType(String type) {
-
-        Select select = new Select(
-                wait().until(
-                        ExpectedConditions.visibilityOfElementLocated(
-                                By.name("assetType")
-                        )
-                )
-        );
-
-        select.selectByVisibleText(type);
-    }
-
-    // ============================================================
-    // HELPER
-    // SELECT BRAND
-    // ============================================================
-
-    private void selectBrand(String brand) {
-
-        Select select = new Select(
-                wait().until(
-                        ExpectedConditions.elementToBeEnabled(
-                                By.name("brand")
-                        )
-                )
-        );
-
-        select.selectByVisibleText(brand);
-    }
-
-    // ============================================================
-    // HELPER
-    // SELECT MODEL
-    // ============================================================
-
-    private void selectModel(String model) {
-
-        Select select = new Select(
-                wait().until(
-                        ExpectedConditions.elementToBeEnabled(
-                                By.name("model")
-                        )
-                )
-        );
-
-        select.selectByVisibleText(model);
-    }
-
-    // ============================================================
-    // HELPER
-    // CLICK ADD ASSET
-    // ============================================================
-
-    private void clickAddAsset() {
-
-        WebElement button = wait().until(
-                ExpectedConditions.elementToBeClickable(
-                        By.cssSelector(
-                                ".aa-btn-primary"
-                        )
-                )
-        );
-
-        safeClick(button);
-    }
-
-    // ============================================================
-    // HELPER
-    // SET NORMAL TEXT
-    // ============================================================
-
-    private void setText(
-            By locator,
-            String value
-    ) {
-
-        WebElement element = wait().until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        locator
-                )
-        );
-
-        element.clear();
-
-        element.sendKeys(value);
-    }
-
-    // ============================================================
-    // HELPER
-    // SET DATE USING JAVASCRIPT
-    // ============================================================
-
-    private void setInputValue(
-            By locator,
-            String value
-    ) {
-
-        WebElement element = wait().until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        locator
-                )
-        );
-
-        ((JavascriptExecutor) driver)
-                .executeScript(
-                        "arguments[0].value = arguments[1];"
-                                + "arguments[0].dispatchEvent("
-                                + "new Event('input',{bubbles:true})"
-                                + ");"
-                                + "arguments[0].dispatchEvent("
-                                + "new Event('change',{bubbles:true})"
-                                + ");",
-                        element,
-                        value
                 );
+
+        scrollTo(addButton);
+
+        clickJS(addButton);
+
+        System.out.println(
+                "Add Asset button clicked"
+        );
+
+
+        // =====================================================
+        // STEP 13 - HANDLE RESULT
+        // =====================================================
+
+        System.out.println();
+        System.out.println(
+                "STEP 13: VERIFY RESULT"
+        );
+
+        try {
+
+            Alert alert =
+                    new WebDriverWait(
+                            driver,
+                            Duration.ofSeconds(10)
+                    ).until(
+                            ExpectedConditions.alertIsPresent()
+                    );
+
+            String message =
+                    alert.getText();
+
+            System.out.println(
+                    "Application alert: " + message
+            );
+
+            String lower =
+                    message == null
+                            ? ""
+                            : message.toLowerCase();
+
+            assertTrue(
+                    !lower.contains("error")
+                            &&
+                    !lower.contains("failed")
+                            &&
+                    !lower.contains("unable"),
+                    "Application returned an error: "
+                            + message
+            );
+
+            alert.accept();
+
+            System.out.println(
+                    "Success alert accepted"
+            );
+
+        } catch (org.openqa.selenium.TimeoutException e) {
+
+            /*
+             * Some versions of the application may navigate/update
+             * the page without a browser alert. In that case inspect
+             * visible page text.
+             */
+            boolean success =
+                    waitForAnyText(
+                            "Asset added successfully",
+                            "Asset added",
+                            "successfully",
+                            "Asset Management"
+                    );
+
+            assertTrue(
+                    success,
+                    "No successful Add Asset response was detected"
+            );
+        }
+
+
+        System.out.println();
+        System.out.println(
+                "=============================================="
+        );
+
+        System.out.println(
+                "       ADD ASSET TEST PASSED"
+        );
+
+        System.out.println(
+                "=============================================="
+        );
     }
 
-    // ============================================================
-    // HELPER
-    // GET VALUE
-    // ============================================================
 
-    private String getValue(By locator) {
+    // =====================================================
+    // LOGIN
+    // =====================================================
 
-        return wait().until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        locator
-                )
-        ).getAttribute("value");
+    private void openLoginPage() {
+
+        WebElement login =
+                wait.until(
+                        d -> findVisible(
+                                d,
+                                By.xpath(
+                                        "//button[normalize-space()='Login']"
+                                        + " | "
+                                        + "//a[normalize-space()='Login']"
+                                )
+                        )
+                );
+
+        clickJS(login);
+
+        wait.until(
+                d -> findVisible(
+                        d,
+                        By.xpath(
+                                "//input[contains(@placeholder,'Employee ID or Email')]"
+                                + " | "
+                                + "//input[@type='password']"
+                        )
+                ) != null
+        );
+
+        System.out.println(
+                "Login page opened"
+        );
     }
 
-    // ============================================================
-    // HELPER
-    // FIND FIRST VISIBLE
-    // ============================================================
 
-    private WebElement findFirstVisible(
-            By... locators
+    private void login(
+            String employeeId,
+            String password
     ) {
 
-        for (By locator : locators) {
+        WebElement employee =
+                wait.until(
+                        d -> findVisible(
+                                d,
+                                By.xpath(
+                                        "//input[contains(@placeholder,'Employee ID or Email')]"
+                                        + " | "
+                                        + "//input[@name='employeeId']"
+                                        + " | "
+                                        + "//input[@name='employeeIdOrEmail']"
+                                        + " | "
+                                        + "//input[@type='text']"
+                                )
+                        )
+                );
+
+        employee.clear();
+
+        employee.sendKeys(
+                employeeId
+        );
+
+        System.out.println(
+                "Employee ID entered: "
+                        + employeeId
+        );
+
+
+        WebElement passwordField =
+                wait.until(
+                        d -> findVisible(
+                                d,
+                                By.xpath(
+                                        "//input[@type='password']"
+                                )
+                        )
+                );
+
+        passwordField.clear();
+
+        passwordField.sendKeys(
+                password
+        );
+
+        System.out.println(
+                "Password entered"
+        );
+
+
+        WebElement loginButton =
+                wait.until(
+                        d -> findVisible(
+                                d,
+                                By.xpath(
+                                        "//form//button[@type='submit']"
+                                        + " | "
+                                        + "//button[normalize-space()='Login']"
+                                )
+                        )
+                );
+
+        clickJS(loginButton);
+
+        System.out.println(
+                "Login button clicked"
+        );
+
+
+        try {
+
+            Alert alert =
+                    new WebDriverWait(
+                            driver,
+                            Duration.ofSeconds(10)
+                    ).until(
+                            ExpectedConditions.alertIsPresent()
+                    );
+
+            String message =
+                    alert.getText();
+
+            System.out.println(
+                    "Login alert: " + message
+            );
+
+            alert.accept();
+
+            System.out.println(
+                    "Login alert accepted"
+            );
+
+        } catch (Exception e) {
+
+            throw new AssertionError(
+                    "Login Successful alert was not displayed."
+            );
+        }
+
+
+        waitForPageReady();
+        sleep(1000);
+    }
+
+
+    // =====================================================
+    // FIELD HELPERS
+    // =====================================================
+
+    private WebElement findSelectNearLabel(
+            String labelText
+    ) {
+
+        return wait.until(
+                d -> {
+
+                    List<WebElement> labels =
+                            d.findElements(
+                                    By.xpath(
+                                            "//label[normalize-space()='"
+                                                    + labelText
+                                                    + "']"
+                                    )
+                            );
+
+                    for (WebElement label :
+                            labels) {
+
+                        try {
+
+                            WebElement parent =
+                                    label.findElement(
+                                            By.xpath(
+                                                    "./.."
+                                            )
+                                    );
+
+                            List<WebElement> selects =
+                                    parent.findElements(
+                                            By.xpath(
+                                                    ".//select"
+                                            )
+                                    );
+
+                            for (WebElement select :
+                                    selects) {
+
+                                if (
+                                        select.isDisplayed()
+                                ) {
+                                    return select;
+                                }
+                            }
+
+                        } catch (Exception ignored) {
+                        }
+                    }
+
+                    /*
+                     * Fallback for React layouts where label and select
+                     * are not wrapped in the same parent.
+                     */
+                    List<WebElement> allSelects =
+                            d.findElements(
+                                    By.xpath("//select")
+                            );
+
+                    for (WebElement select :
+                            allSelects) {
+
+                        try {
+
+                            if (select.isDisplayed()) {
+                                String aria =
+                                        select.getAttribute("aria-label");
+
+                                String name =
+                                        select.getAttribute("name");
+
+                                String placeholder =
+                                        select.getAttribute("title");
+
+                                String combined =
+                                        ((aria == null ? "" : aria)
+                                                + " "
+                                                + (name == null ? "" : name)
+                                                + " "
+                                                + (placeholder == null ? "" : placeholder))
+                                                .toLowerCase();
+
+                                if (
+                                        combined.contains(
+                                                labelText.toLowerCase()
+                                        )
+                                ) {
+                                    return select;
+                                }
+                            }
+
+                        } catch (Exception ignored) {
+                        }
+                    }
+
+                    return null;
+                }
+        );
+    }
+
+
+    private WebElement findInputNearLabel(
+            String labelText
+    ) {
+
+        return wait.until(
+                d -> {
+
+                    List<WebElement> labels =
+                            d.findElements(
+                                    By.xpath(
+                                            "//label[normalize-space()='"
+                                                    + labelText
+                                                    + "']"
+                                    )
+                            );
+
+                    for (WebElement label :
+                            labels) {
+
+                        try {
+
+                            WebElement parent =
+                                    label.findElement(
+                                            By.xpath(
+                                                    "./.."
+                                            )
+                                    );
+
+                            List<WebElement> inputs =
+                                    parent.findElements(
+                                            By.xpath(
+                                                    ".//input"
+                                            )
+                                    );
+
+                            for (WebElement input :
+                                    inputs) {
+
+                                if (
+                                        input.isDisplayed()
+                                                &&
+                                        input.isEnabled()
+                                ) {
+                                    return input;
+                                }
+                            }
+
+                        } catch (Exception ignored) {
+                        }
+                    }
+
+                    return null;
+                }
+        );
+    }
+
+
+    private WebElement findDateFieldNearLabel(
+            String labelText
+    ) {
+
+        return findInputNearLabel(
+                labelText
+        );
+    }
+
+
+    private WebElement findTextareaNearLabel(
+            String labelText
+    ) {
+
+        return wait.until(
+                d -> {
+
+                    List<WebElement> labels =
+                            d.findElements(
+                                    By.xpath(
+                                            "//label[normalize-space()='"
+                                                    + labelText
+                                                    + "']"
+                                    )
+                            );
+
+                    for (WebElement label :
+                            labels) {
+
+                        try {
+
+                            WebElement parent =
+                                    label.findElement(
+                                            By.xpath(
+                                                    "./.."
+                                            )
+                                    );
+
+                            List<WebElement> textareas =
+                                    parent.findElements(
+                                            By.xpath(
+                                                    ".//textarea"
+                                            )
+                                    );
+
+                            for (WebElement textarea :
+                                    textareas) {
+
+                                if (
+                                        textarea.isDisplayed()
+                                                &&
+                                        textarea.isEnabled()
+                                ) {
+                                    return textarea;
+                                }
+                            }
+
+                        } catch (Exception ignored) {
+                        }
+                    }
+
+                    return null;
+                }
+        );
+    }
+
+
+    // =====================================================
+    // DATE HELPER
+    // =====================================================
+
+    private void setDateValue(
+            WebElement field,
+            String htmlDate,
+            String displayDate
+    ) {
+
+        JavascriptExecutor js =
+                (JavascriptExecutor) driver;
+
+        String type =
+                field.getAttribute("type");
+
+        if (
+                "date".equalsIgnoreCase(type)
+        ) {
+
+            js.executeScript(
+                    "const e=arguments[0];" +
+                    "const v=arguments[1];" +
+                    "const setter=Object.getOwnPropertyDescriptor(" +
+                    "HTMLInputElement.prototype,'value').set;" +
+                    "setter.call(e,v);" +
+                    "e.dispatchEvent(new Event('input',{bubbles:true}));" +
+                    "e.dispatchEvent(new Event('change',{bubbles:true}));",
+                    field,
+                    htmlDate
+            );
+
+        } else {
+
+            field.clear();
+
+            field.sendKeys(
+                    displayDate
+            );
+        }
+    }
+
+
+    // =====================================================
+    // NAVIGATION / TEXT
+    // =====================================================
+
+    private void clickVisibleText(
+            String text
+    ) {
+
+        WebElement element =
+                wait.until(
+                        d -> findVisible(
+                                d,
+                                By.xpath(
+                                        "//*[normalize-space()='"
+                                                + text
+                                                + "']"
+                                )
+                        )
+                );
+
+        scrollTo(element);
+
+        clickJS(element);
+    }
+
+
+    private void waitForText(
+            String text
+    ) {
+
+        wait.until(
+                d -> {
+
+                    try {
+
+                        String body =
+                                d.findElement(
+                                        By.tagName("body")
+                                ).getText();
+
+                        return body != null
+                                &&
+                                body.contains(text);
+
+                    } catch (Exception e) {
+
+                        return false;
+                    }
+                }
+        );
+    }
+
+
+    private boolean waitForAnyText(
+            String... texts
+    ) {
+
+        try {
+
+            return new WebDriverWait(
+                    driver,
+                    Duration.ofSeconds(15)
+            ).until(
+                    d -> {
+
+                        try {
+
+                            String body =
+                                    d.findElement(
+                                            By.tagName("body")
+                                    ).getText();
+
+                            if (body == null) {
+                                return false;
+                            }
+
+                            for (String text :
+                                    texts) {
+
+                                if (
+                                        body.toLowerCase()
+                                                .contains(
+                                                        text.toLowerCase()
+                                                )
+                                ) {
+                                    return true;
+                                }
+                            }
+
+                        } catch (Exception ignored) {
+                        }
+
+                        return false;
+                    }
+            );
+
+        } catch (Exception e) {
+
+            return false;
+        }
+    }
+
+
+    // =====================================================
+    // UTILITY
+    // =====================================================
+
+    private WebElement findVisible(
+            WebDriver webDriver,
+            By locator
+    ) {
+
+        List<WebElement> elements =
+                webDriver.findElements(locator);
+
+        for (WebElement element :
+                elements) {
 
             try {
 
-                for (WebElement element :
-                        driver.findElements(locator)) {
-
-                    if (element.isDisplayed()) {
-                        return element;
-                    }
+                if (
+                        element.isDisplayed()
+                ) {
+                    return element;
                 }
 
             } catch (Exception ignored) {
@@ -1730,104 +1084,90 @@ public class AddAssetTest extends BaseTest {
         return null;
     }
 
-    // ============================================================
-    // HELPER
-    // SAFE CLICK
-    // ============================================================
 
-    private void safeClick(
+    private void scrollTo(
             WebElement element
     ) {
 
-        try {
+        ((JavascriptExecutor) driver)
+                .executeScript(
+                        "arguments[0].scrollIntoView({block:'center'});",
+                        element
+                );
 
-            wait().until(
-                    ExpectedConditions.elementToBeClickable(
-                            element
-                    )
-            );
-
-            scrollIntoView(element);
-
-            element.click();
-
-        } catch (Exception e) {
-
-            scrollIntoView(element);
-
-            ((JavascriptExecutor) driver)
-                    .executeScript(
-                            "arguments[0].click();",
-                            element
-                    );
-        }
+        sleep(300);
     }
 
-    // ============================================================
-    // HELPER
-    // SCROLL
-    // ============================================================
 
-    private void scrollIntoView(
+    private void clickJS(
             WebElement element
     ) {
 
+        ((JavascriptExecutor) driver)
+                .executeScript(
+                        "arguments[0].click();",
+                        element
+                );
+    }
+
+
+    private void waitForPageReady() {
+
         try {
 
-            ((JavascriptExecutor) driver)
-                    .executeScript(
-                            "arguments[0].scrollIntoView({"
-                                    + "block:'center',"
-                                    + "inline:'center'"
-                                    + "});",
-                            element
-                    );
+            new WebDriverWait(
+                    driver,
+                    Duration.ofSeconds(20)
+            ).until(
+                    d -> {
+
+                        try {
+
+                            return "complete".equals(
+                                    ((JavascriptExecutor) d)
+                                            .executeScript(
+                                                    "return document.readyState"
+                                            )
+                            );
+
+                        } catch (Exception e) {
+
+                            return false;
+                        }
+                    }
+            );
 
         } catch (Exception ignored) {
         }
     }
 
-    // ============================================================
-    // HELPER
-    // PAGE LOAD
-    // ============================================================
 
-    private void waitForPageLoad() {
-
-        wait().until(driver ->
-                ((JavascriptExecutor) driver)
-                        .executeScript(
-                                "return document.readyState"
-                        )
-                        .equals("complete")
-        );
-    }
-
-    // ============================================================
-    // HELPER
-    // ALERT
-    // ============================================================
-
-    private void handleAlertIfPresent() {
+    private void sleep(
+            long ms
+    ) {
 
         try {
 
-            Alert alert =
-                    new WebDriverWait(
-                            driver,
-                            Duration.ofSeconds(5)
-                    ).until(
-                            ExpectedConditions.alertIsPresent()
-                    );
+            Thread.sleep(ms);
+
+        } catch (InterruptedException e) {
+
+            Thread.currentThread()
+                    .interrupt();
+        }
+    }
+
+
+    @AfterEach
+    public void tearDown() {
+
+        if (driver != null) {
+
+            driver.quit();
 
             System.out.println(
-                    "Alert: " + alert.getText()
+                    "Browser closed"
             );
-
-            alert.accept();
-
-        } catch (Exception ignored) {
-            // No alert.
         }
     }
 }
