@@ -187,8 +187,12 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
       return "Designation must contain at least 2 characters.";
     }
 
-    if (!/^[A-Za-z0-9 ]+$/.test(value)) {
-      return "Designation can contain only letters, numbers and spaces.";
+    if (/ {2,}/.test(value)) {
+      return "Only a single space is allowed between words.";
+    }
+
+    if (!/^[A-Za-z]+( [A-Za-z]+)*$/.test(value)) {
+      return "Designation can contain only letters and single spaces between words.";
     }
 
     return "";
@@ -362,7 +366,13 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
   };
 
   const handleDesignationChange = (e) => {
-    const value = e.target.value;
+    let value = e.target.value;
+
+    // allow only letters and spaces (blocks numbers and all symbols)
+    value = value.replace(/[^A-Za-z ]/g, "");
+
+    // collapse multiple spaces into a single space
+    value = value.replace(/ {2,}/g, " ");
 
     setDesignation(value);
 
@@ -416,21 +426,25 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
 
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:5000/api/employees", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          employeeName,
-          email,
-          department,
-          designation,
-          phone: `+91${phone}`,
-          joiningDate: dateOfJoining,
-        }),
-      });
+
+      const response = await fetch(
+        "http://localhost:5000/api/employees",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            employeeName,
+            email,
+            department,
+            designation,
+            phone: `+91${phone}`,
+            joiningDate: dateOfJoining,
+          }),
+        }
+      );
 
       const data = await response.json();
 
@@ -439,7 +453,9 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
         return;
       }
 
-      alert(`✅ Employee added successfully! Employee ID: ${data.employeeId}`);
+      alert(
+        `✅ Employee added successfully! Employee ID: ${data.employeeId}`
+      );
 
       setEmployeeName("");
       setEmployeeId("");
@@ -451,7 +467,10 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
       setErrors({});
     } catch (error) {
       console.error("Add Employee Error:", error);
-      alert("Unable to connect to server. Please make sure the backend is running.");
+
+      alert(
+        "Unable to connect to server. Please make sure the backend is running."
+      );
     }
   };
 
@@ -478,7 +497,7 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
   const minDateString = getDateString(getPreviousSevenDays());
 
   // =========================================================
-  // UI — SAME STRUCTURE
+  // UI
   // =========================================================
 
   return (
@@ -488,17 +507,26 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
       <header className="employee-header">
 
         <div className="logo-section">
-          <div className="logo">ITAMS</div>
+
+          <div className="logo">
+            ITAMS
+          </div>
 
           <div className="logo-subtitle">
             IT Asset Management System
           </div>
+
         </div>
 
         <div className="user-section">
-          <span>{username}</span>
 
-          <span className="divider">|</span>
+          <span>
+            {username}
+          </span>
+
+          <span className="divider">
+            |
+          </span>
 
           <button
             type="button"
@@ -507,6 +535,7 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
           >
             Logout
           </button>
+
         </div>
 
       </header>
@@ -514,7 +543,9 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
       {/* MAIN */}
       <main className="employee-container">
 
-        <h1>Add Employee</h1>
+        <h1>
+          Add Employee
+        </h1>
 
         <p className="subtitle">
           Fill in the employee details below.
@@ -522,16 +553,24 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
 
         <div className="employee-card">
 
-          <h2>Employee Information</h2>
+          <h2>
+            Employee Information
+          </h2>
 
           <hr />
 
-          <form onSubmit={handleSubmit} noValidate>
+          <form
+            onSubmit={handleSubmit}
+            noValidate
+          >
 
             <div className="form-grid">
 
-              {/* EMPLOYEE NAME */}
-              <div className="form-group">
+              {/* =================================================
+                  ROW 1 - EMPLOYEE NAME
+              ================================================= */}
+
+              <div className="form-group employee-name-field">
 
                 <label>
                   Employee Name *
@@ -543,7 +582,9 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
                   value={employeeName}
                   onChange={handleNameChange}
                   className={
-                    errors.employeeName ? "input-error" : ""
+                    errors.employeeName
+                      ? "input-error"
+                      : ""
                   }
                 />
 
@@ -555,8 +596,44 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
 
               </div>
 
-              {/* EMPLOYEE ID */}
-              <div className="form-group">
+
+              {/* =================================================
+                  ROW 1 - DATE OF JOINING
+              ================================================= */}
+
+              <div className="form-group date-field">
+
+                <label>
+                  Date of Joining *
+                </label>
+
+                <input
+                  type="date"
+                  value={dateOfJoining}
+                  onChange={handleDateChange}
+                  min={minDateString}
+                  max={todayString}
+                  className={
+                    errors.dateOfJoining
+                      ? "input-error"
+                      : ""
+                  }
+                />
+
+                {errors.dateOfJoining && (
+                  <div className="error">
+                    {errors.dateOfJoining}
+                  </div>
+                )}
+
+              </div>
+
+
+              {/* =================================================
+                  ROW 2 - EMPLOYEE ID
+              ================================================= */}
+
+              <div className="form-group employee-id-field">
 
                 <label>
                   Employee ID *
@@ -570,7 +647,9 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
                   maxLength={9}
                   inputMode="numeric"
                   className={
-                    errors.employeeId ? "input-error" : ""
+                    errors.employeeId
+                      ? "input-error"
+                      : ""
                   }
                 />
 
@@ -582,8 +661,12 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
 
               </div>
 
-              {/* EMAIL */}
-              <div className="form-group">
+
+              {/* =================================================
+                  ROW 2 - EMAIL
+              ================================================= */}
+
+              <div className="form-group email-field">
 
                 <label>
                   Email *
@@ -595,7 +678,9 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
                   value={email}
                   onChange={handleEmailChange}
                   className={
-                    errors.email ? "input-error" : ""
+                    errors.email
+                      ? "input-error"
+                      : ""
                   }
                 />
 
@@ -607,71 +692,12 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
 
               </div>
 
-              {/* DEPARTMENT */}
-              <div className="form-group">
 
-                <label>
-                  Department *
-                </label>
+              {/* =================================================
+                  ROW 2 - PHONE
+              ================================================= */}
 
-                <select
-                  value={department}
-                  onChange={handleDepartmentChange}
-                  className={
-                    errors.department ? "input-error" : ""
-                  }
-                >
-
-                  <option value="">
-                    Select Department
-                  </option>
-
-                  {DEPARTMENTS.map((dept) => (
-                    <option
-                      key={dept}
-                      value={dept}
-                    >
-                      {dept}
-                    </option>
-                  ))}
-
-                </select>
-
-                {errors.department && (
-                  <div className="error">
-                    {errors.department}
-                  </div>
-                )}
-
-              </div>
-
-              {/* DESIGNATION */}
-              <div className="form-group">
-
-                <label>
-                  Designation *
-                </label>
-
-                <input
-                  type="text"
-                  placeholder="Enter designation"
-                  value={designation}
-                  onChange={handleDesignationChange}
-                  className={
-                    errors.designation ? "input-error" : ""
-                  }
-                />
-
-                {errors.designation && (
-                  <div className="error">
-                    {errors.designation}
-                  </div>
-                )}
-
-              </div>
-
-              {/* PHONE */}
-              <div className="form-group">
+              <div className="form-group phone-field">
 
                 <label>
                   Phone Number *
@@ -712,7 +738,9 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
                       boxSizing: "border-box",
                     }}
                     className={
-                      errors.phone ? "input-error" : ""
+                      errors.phone
+                        ? "input-error"
+                        : ""
                     }
                   />
 
@@ -726,27 +754,76 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
 
               </div>
 
-              {/* DATE OF JOINING */}
-              <div className="form-group">
+
+              {/* =================================================
+                  ROW 3 - DEPARTMENT
+              ================================================= */}
+
+              <div className="form-group department-field">
 
                 <label>
-                  Date of Joining *
+                  Department *
+                </label>
+
+                <select
+                  value={department}
+                  onChange={handleDepartmentChange}
+                  className={
+                    errors.department
+                      ? "input-error"
+                      : ""
+                  }
+                >
+
+                  <option value="">
+                    Select Department
+                  </option>
+
+                  {DEPARTMENTS.map((dept) => (
+                    <option
+                      key={dept}
+                      value={dept}
+                    >
+                      {dept}
+                    </option>
+                  ))}
+
+                </select>
+
+                {errors.department && (
+                  <div className="error">
+                    {errors.department}
+                  </div>
+                )}
+
+              </div>
+
+
+              {/* =================================================
+                  ROW 3 - DESIGNATION
+              ================================================= */}
+
+              <div className="form-group designation-field">
+
+                <label>
+                  Designation *
                 </label>
 
                 <input
-                  type="date"
-                  value={dateOfJoining}
-                  onChange={handleDateChange}
-                  min={minDateString}
-                  max={todayString}
+                  type="text"
+                  placeholder="Enter designation"
+                  value={designation}
+                  onChange={handleDesignationChange}
                   className={
-                    errors.dateOfJoining ? "input-error" : ""
+                    errors.designation
+                      ? "input-error"
+                      : ""
                   }
                 />
 
-                {errors.dateOfJoining && (
+                {errors.designation && (
                   <div className="error">
-                    {errors.dateOfJoining}
+                    {errors.designation}
                   </div>
                 )}
 
@@ -754,7 +831,11 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
 
             </div>
 
-            {/* BUTTONS */}
+
+            {/* =================================================
+                BUTTONS
+            ================================================= */}
+
             <div className="button-group">
 
               <button
@@ -778,7 +859,9 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
 
         </div>
 
+
         {/* BACK */}
+
         {onBack && (
           <button
             type="button"
