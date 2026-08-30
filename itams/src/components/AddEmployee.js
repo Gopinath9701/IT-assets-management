@@ -78,6 +78,10 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
       return "Employee Name must contain at least 4 characters.";
     }
 
+    if (/ {2,}/.test(value)) {
+      return "Only a single space is allowed between words.";
+    }
+
     if (!/^[A-Za-z ]+$/.test(value)) {
       return "Employee Name can contain only letters and spaces.";
     }
@@ -315,7 +319,8 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
   // =========================================================
 
   const handleNameChange = (e) => {
-    const value = e.target.value;
+    // collapse multiple spaces into a single space
+    const value = e.target.value.replace(/ {2,}/g, " ");
 
     setEmployeeName(value);
 
