@@ -31,11 +31,14 @@ async function getEmployeeById(req, res, next) {
       return res.status(404).json({ success: false, message: "Employee not found" });
     }
 
+    // assignment_id included so a caller (e.g. the Asset Return page) can act
+    // on a specific assignment — POST /api/asset-assignments/:assignmentId/return
+    // needs it and had no other way to get it.
     const { rows: assets } = await pool.query(
-      `SELECT a.asset_id, a.asset_type, aa.assigned_date
+      `SELECT aa.assignment_id, a.asset_id, a.asset_type, aa.assigned_date
        FROM asset_assignments aa
        JOIN assets a ON a.asset_id = aa.asset_id
-       WHERE aa.employee_id = $1 AND aa.returned_date IS NULL`,
+       WHERE aa.employee_id = $1 AND aa.status = 'Assigned'`,
       [employeeId]
     );
 

@@ -1,8 +1,18 @@
 const nodemailer = require("nodemailer");
 require("dotenv").config();
 
+// Explicit host/port instead of the "service: gmail" shorthand (which forces
+// port 465/SSL) so EMAIL_SMTP_PORT can be overridden to 587 (STARTTLS) —
+// some hosts block outbound 465 but allow 587. If BOTH are blocked, this is
+// a network-level restriction on the host, not something a config change
+// here can work around; switching to an HTTP-based email API (SendGrid,
+// Resend, Mailgun) is the real fix in that case, since outbound HTTPS is
+// essentially never blocked the way SMTP ports are.
+const smtpPort = Number(process.env.EMAIL_SMTP_PORT) || 465;
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: smtpPort,
+  secure: smtpPort === 465,
   auth: {
     user: process.env.GMAIL_USER,
     pass: process.env.GMAIL_APP_PASSWORD,
