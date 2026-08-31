@@ -70,30 +70,39 @@ async function assignAsset(req, res, next) {
       return res.status(400).json({ success: false, message: "requestId and assetId are required" });
     }
 
+    // Everything from here runs inside one transaction with the asset row
+    // locked (SELECT ... FOR UPDATE) — without this, two near-simultaneous
+    // requests for the same asset (e.g. a double-click on "Assign") can both
+    // read status='Not In Use' before either commits, and both succeed,
+    // leaving the same physical asset with two active assignment rows.
+    await client.query("BEGIN");
+
+    const assetRows = await client.query(
+      "SELECT * FROM assets WHERE asset_id = $1 AND status = 'Not In Use' FOR UPDATE",
+      [assetId]
+    );
+    if (assetRows.rows.length === 0) {
+      await client.query("ROLLBACK");
+      return res.status(400).json({ success: false, message: "Asset not found or not available for assignment" });
+    }
+
     const reqRows = await client.query(
-      "SELECT * FROM asset_requests WHERE request_id = $1 AND status = 'Approved'",
+      "SELECT * FROM asset_requests WHERE request_id = $1 AND status = 'Approved' FOR UPDATE",
       [requestId]
     );
     if (reqRows.rows.length === 0) {
+      await client.query("ROLLBACK");
       return res.status(400).json({ success: false, message: "Request not found or not approved" });
     }
     const existing = await client.query("SELECT id FROM asset_assignments WHERE request_id = $1", [requestId]);
     if (existing.rows.length > 0) {
+      await client.query("ROLLBACK");
       return res.status(409).json({ success: false, message: "This request has already been assigned" });
-    }
-
-    const assetRows = await client.query(
-      "SELECT * FROM assets WHERE asset_id = $1 AND status = 'Not In Use'",
-      [assetId]
-    );
-    if (assetRows.rows.length === 0) {
-      return res.status(400).json({ success: false, message: "Asset not found or not available for assignment" });
     }
 
     const employeeId = reqRows.rows[0].employee_id;
     const assignmentId = await generateAssignmentId();
 
-    await client.query("BEGIN");
     await client.query(
       `INSERT INTO asset_assignments (assignment_id, request_id, employee_id, asset_id, assigned_date)
        VALUES ($1, $2, $3, $4, NOW())`,
@@ -124,11 +133,17 @@ async function reassignAsset(req, res, next) {
       return res.status(400).json({ success: false, message: "assignmentId and employeeId are required" });
     }
 
+    // Same TOCTOU concern as assignAsset: lock rows inside the transaction
+    // instead of checking availability before BEGIN, so a duplicate-submit
+    // can't reassign the same target asset to two different assignments.
+    await client.query("BEGIN");
+
     const assignmentResult = await client.query(
-      "SELECT * FROM asset_assignments WHERE assignment_id = $1 AND status = 'Assigned'",
+      "SELECT * FROM asset_assignments WHERE assignment_id = $1 AND status = 'Assigned' FOR UPDATE",
       [assignmentId]
     );
     if (assignmentResult.rows.length === 0) {
+      await client.query("ROLLBACK");
       return res.status(404).json({ success: false, message: "Active assignment not found" });
     }
 
@@ -137,21 +152,22 @@ async function reassignAsset(req, res, next) {
 
     const employeeResult = await client.query("SELECT employee_id FROM employees WHERE employee_id = $1", [employeeId]);
     if (employeeResult.rows.length === 0) {
+      await client.query("ROLLBACK");
       return res.status(400).json({ success: false, message: "Employee does not exist" });
     }
 
-    const assetResult = await client.query("SELECT * FROM assets WHERE asset_id = $1", [targetAssetId]);
+    const assetResult = await client.query("SELECT * FROM assets WHERE asset_id = $1 FOR UPDATE", [targetAssetId]);
     if (assetResult.rows.length === 0) {
+      await client.query("ROLLBACK");
       return res.status(404).json({ success: false, message: "Asset not found" });
     }
     // If reassigning to a DIFFERENT physical asset, that asset must actually be
     // free right now — otherwise this would silently steal it from whoever
     // currently holds it without closing out their assignment.
     if (targetAssetId !== currentAssignment.asset_id && assetResult.rows[0].status !== "Not In Use") {
+      await client.query("ROLLBACK");
       return res.status(400).json({ success: false, message: "Target asset is not available for assignment" });
     }
-
-    await client.query("BEGIN");
 
     await client.query(
       "UPDATE asset_assignments SET returned_date = NOW(), status = 'Returned' WHERE assignment_id = $1",
