@@ -79,7 +79,19 @@ async function sendOtp(req, res, next) {
       [user.id, otp, expiresAt]
     );
 
-    await sendOtpEmail(user.email, otp, user.name);
+    // Isolated from the outer catch on purpose: an SMTP failure (e.g. the
+    // deployment host blocking outbound port 465/587) shouldn't fall through
+    // to the generic error handler as an opaque 500 — it needs its own
+    // clear, honest message instead of looking like an unrelated server bug.
+    try {
+      await sendOtpEmail(user.email, otp, user.name);
+    } catch (emailErr) {
+      console.error("Failed to send OTP email:", emailErr.message);
+      return res.status(502).json({
+        success: false,
+        message: "Unable to send the OTP email right now. Please try again in a few minutes.",
+      });
+    }
 
     res.json({ success: true, message: `OTP sent to ${maskEmail(user.email)}` });
   } catch (err) {
