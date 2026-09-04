@@ -17,9 +17,12 @@ const transporter = nodemailer.createTransport({
     user: process.env.GMAIL_USER,
     pass: process.env.GMAIL_APP_PASSWORD,
   },
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
-  socketTimeout: 10000,
+  // Kept short so a blocked port fails fast with a clear error instead of
+  // hanging near (or past) whatever request timeout the deployment host's
+  // own reverse proxy/load balancer enforces in front of this server.
+  connectionTimeout: 5000,
+  greetingTimeout: 5000,
+  socketTimeout: 5000,
 });
 
 async function sendOtpEmail(toEmail, otp, name = "") {
