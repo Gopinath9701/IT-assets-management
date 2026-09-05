@@ -1,35 +1,22 @@
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 require("dotenv").config();
 
-// Explicit host/port instead of the "service: gmail" shorthand (which forces
-// port 465/SSL) so EMAIL_SMTP_PORT can be overridden to 587 (STARTTLS) —
-// some hosts block outbound 465 but allow 587. If BOTH are blocked, this is
-// a network-level restriction on the host, not something a config change
-// here can work around; switching to an HTTP-based email API (SendGrid,
-// Resend, Mailgun) is the real fix in that case, since outbound HTTPS is
-// essentially never blocked the way SMTP ports are.
-const smtpPort = Number(process.env.EMAIL_SMTP_PORT) || 465;
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: smtpPort,
-  secure: smtpPort === 465,
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_APP_PASSWORD,
-  },
-  // Kept short so a blocked port fails fast with a clear error instead of
-  // hanging near (or past) whatever request timeout the deployment host's
-  // own reverse proxy/load balancer enforces in front of this server.
-  connectionTimeout: 5000,
-  greetingTimeout: 5000,
-  socketTimeout: 5000,
-});
+// Replaces Gmail SMTP — several deployment hosts block outbound SMTP ports
+// (465/587) entirely, which no amount of port/timeout tuning can work around.
+// Resend sends over plain HTTPS, which isn't blocked the same way.
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+// Resend's shared sandbox address (onboarding@resend.dev) only delivers to
+// the Resend account's own verified email while no custom domain is set up —
+// set RESEND_FROM_EMAIL to an address on a verified domain to send to
+// arbitrary recipients (i.e. real OTP delivery to real users).
+const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
 
 async function sendOtpEmail(toEmail, otp, name = "") {
   const fromName = process.env.EMAIL_FROM_NAME || "ITAMS Support";
 
-  await transporter.sendMail({
-    from: `"${fromName}" <${process.env.GMAIL_USER}>`,
+  const { error } = await resend.emails.send({
+    from: `${fromName} <${FROM_ADDRESS}>`,
     to: toEmail,
     subject: "Your ITAMS Password Reset OTP",
     html: `
@@ -52,15 +39,22 @@ async function sendOtpEmail(toEmail, otp, name = "") {
       </div>
     `,
   });
+
+  if (error) {
+    throw new Error(error.message || "Failed to send OTP email");
+  }
 }
 
+// Resend is a stateless HTTPS API, not a persistent connection like SMTP —
+// there's nothing to "verify" upfront the way transporter.verify() checked a
+// live socket. This just confirms the API key is present so a missing one
+// fails loudly at startup instead of silently on the first real OTP request.
 async function verifyEmailTransport() {
-  try {
-    await transporter.verify();
-    console.log("✅ Gmail SMTP transporter ready");
-  } catch (err) {
-    console.error("⚠️  Gmail SMTP verification failed:", err.message);
+  if (!process.env.RESEND_API_KEY) {
+    console.error("⚠️  RESEND_API_KEY is not set — OTP emails will fail.");
+    return;
   }
+  console.log("✅ Resend configured");
 }
 
 module.exports = { sendOtpEmail, verifyEmailTransport };
