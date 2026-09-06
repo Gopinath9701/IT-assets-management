@@ -3,15 +3,17 @@ import "./ManageAsset.css";
 
 const ASSET_TYPES = [
   "All Assets",
+  "Laptop",
+  "Desktop",
   "Monitor",
   "Keyboard",
-  "Laptop",
-  "Mouse",
-  "Printer",
-  "Desktop",
   "Webcam",
-  "Scanner",
   "Projector",
+  "Mouse",
+  "CPU",
+  "Printer",
+  "Headset",
+  "Scanner",
 ];
 
 const ROWS_PER_PAGE_OPTIONS = [10, 30, 50, "All"];

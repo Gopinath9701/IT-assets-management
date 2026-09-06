@@ -273,6 +273,112 @@ const AddAsset = ({
         "M2070",
       ],
     },
+
+    Laptop: {
+      Dell: [
+        "Latitude 5440",
+        "Latitude 5540",
+        "Vostro 3520",
+        "Inspiron 15",
+        "XPS 13",
+      ],
+      HP: [
+        "ProBook 440",
+        "ProBook 450",
+        "EliteBook 840",
+        "Pavilion 15",
+      ],
+      Lenovo: [
+        "ThinkPad E14",
+        "ThinkPad T14",
+        "IdeaPad Slim 3",
+        "V15",
+      ],
+      ASUS: [
+        "VivoBook 15",
+        "ExpertBook B1",
+        "Zenbook 14",
+      ],
+      Acer: [
+        "Aspire 5",
+        "TravelMate P2",
+        "Swift 3",
+      ],
+      Apple: [
+        "MacBook Air M2",
+        "MacBook Pro 14",
+      ],
+    },
+
+    Desktop: {
+      Dell: [
+        "OptiPlex 3080",
+        "OptiPlex 7080",
+        "Vostro 3888",
+      ],
+      HP: [
+        "ProDesk 400",
+        "ProDesk 600",
+        "EliteDesk 800",
+      ],
+      Lenovo: [
+        "ThinkCentre M70",
+        "ThinkCentre M90",
+        "IdeaCentre 3",
+      ],
+      ASUS: [
+        "ExpertCenter D5",
+        "ExpertCenter D500",
+      ],
+      Acer: [
+        "Veriton X2",
+        "Veriton M6",
+      ],
+    },
+
+    Headset: {
+      Jabra: [
+        "Evolve 20",
+        "Evolve 30",
+        "Evolve2 40",
+      ],
+      Logitech: [
+        "H390",
+        "H570e",
+        "Zone 300",
+      ],
+      JBL: [
+        "Quantum 100",
+        "Quantum 200",
+      ],
+      Sony: [
+        "WH-CH510",
+      ],
+      Sennheiser: [
+        "SC 30",
+        "SC 60",
+      ],
+    },
+
+    Scanner: {
+      Canon: [
+        "LiDE 300",
+        "LiDE 400",
+        "imageFORMULA R10",
+      ],
+      HP: [
+        "ScanJet Pro 2000",
+        "ScanJet Pro 3000",
+      ],
+      Epson: [
+        "WorkForce ES-50",
+        "DS-320",
+      ],
+      Brother: [
+        "DS-640",
+        "ADS-1700W",
+      ],
+    },
   };
 
   // =====================================================
@@ -280,6 +386,8 @@ const AddAsset = ({
   // =====================================================
 
   const assetTypes = [
+    "Laptop",
+    "Desktop",
     "Monitor",
     "Keyboard",
     "Webcam",
@@ -287,6 +395,8 @@ const AddAsset = ({
     "Mouse",
     "CPU",
     "Printer",
+    "Headset",
+    "Scanner",
   ];
 
   // =====================================================
@@ -294,6 +404,8 @@ const AddAsset = ({
   // =====================================================
 
   const prefixes = {
+    Laptop: "LAP",
+    Desktop: "DSK",
     Monitor: "MON",
     Keyboard: "KEY",
     Webcam: "WEB",
@@ -301,6 +413,8 @@ const AddAsset = ({
     Mouse: "MOU",
     CPU: "CPU",
     Printer: "PRI",
+    Headset: "HEA",
+    Scanner: "SCN",
   };
 
   // =====================================================

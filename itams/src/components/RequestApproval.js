@@ -4,11 +4,16 @@ import "./RequestApproval.css";
 const ASSET_TYPES = [
   "All Assets",
   "Laptop",
+  "Desktop",
   "Monitor",
   "Keyboard",
+  "Webcam",
+  "Projector",
   "Mouse",
+  "CPU",
   "Printer",
-  "Desktop",
+  "Headset",
+  "Scanner",
 ];
 
 const ROWS_OPTIONS = [10, 30, 50, "All"];

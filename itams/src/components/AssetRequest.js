@@ -42,13 +42,16 @@ const INITIAL_REQUESTS = [
 
 const ASSET_TYPES = [
   "Laptop",
+  "Desktop",
   "Monitor",
   "Keyboard",
-  "Printer",
-  "Desktop",
-  "Mouse",
-  "Headset",
   "Webcam",
+  "Projector",
+  "Mouse",
+  "CPU",
+  "Printer",
+  "Headset",
+  "Scanner",
 ];
 
 // =====================================================

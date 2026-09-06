@@ -3,14 +3,17 @@ import "./AssetInventory.css";
 
 const ASSET_FILTER_OPTIONS = [
   "All Assets (Complete Inventory)",
+  "Laptop",
+  "Desktop",
   "Monitor",
   "Keyboard",
-  "Mouse",
-  "Printer",
-  "Laptop",
-  "CPU",
   "Webcam",
   "Projector",
+  "Mouse",
+  "CPU",
+  "Printer",
+  "Headset",
+  "Scanner",
 ];
 
 /* =========================================================
