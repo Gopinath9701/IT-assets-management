@@ -1,5 +1,5 @@
 const { pool } = require("../config/db");
-const { generateAssignmentId } = require("../utils/idGenerator");
+const { generateAssignmentId, acquireIdLock } = require("../utils/idGenerator");
 const { validateAssetReturnPayload } = require("../utils/validators");
 
 async function getPending(req, res, next) {
@@ -101,7 +101,11 @@ async function assignAsset(req, res, next) {
     }
 
     const employeeId = reqRows.rows[0].employee_id;
-    const assignmentId = await generateAssignmentId();
+
+    // Lock held for the rest of this transaction so two concurrent
+    // assignments can never compute the same assignmentId (see idGenerator.js).
+    await acquireIdLock(client, "assignment");
+    const assignmentId = await generateAssignmentId(client);
 
     await client.query(
       `INSERT INTO asset_assignments (assignment_id, request_id, employee_id, asset_id, assigned_date)
@@ -117,6 +121,9 @@ async function assignAsset(req, res, next) {
     res.status(201).json({ success: true, message: "Asset assigned successfully", assignmentId });
   } catch (err) {
     await client.query("ROLLBACK");
+    if (err.code === "23505") {
+      return res.status(409).json({ success: false, message: "Assignment ID already exists, please try again" });
+    }
     next(err);
   } finally {
     client.release();
@@ -175,7 +182,10 @@ async function reassignAsset(req, res, next) {
     );
     await client.query("UPDATE assets SET status = 'Not In Use', assigned_to = NULL WHERE asset_id = $1", [currentAssignment.asset_id]);
 
-    const newAssignmentId = await generateAssignmentId();
+    // Lock held for the rest of this transaction so two concurrent
+    // reassignments can never compute the same assignmentId (see idGenerator.js).
+    await acquireIdLock(client, "assignment");
+    const newAssignmentId = await generateAssignmentId(client);
     await client.query(
       `INSERT INTO asset_assignments (assignment_id, request_id, employee_id, asset_id, assigned_date, status)
        VALUES ($1, $2, $3, $4, NOW(), 'Assigned')`,
@@ -190,6 +200,9 @@ async function reassignAsset(req, res, next) {
     res.status(201).json({ success: true, message: "Asset reassigned successfully", assignmentId: newAssignmentId });
   } catch (err) {
     await client.query("ROLLBACK");
+    if (err.code === "23505") {
+      return res.status(409).json({ success: false, message: "Assignment ID already exists, please try again" });
+    }
     next(err);
   } finally {
     client.release();

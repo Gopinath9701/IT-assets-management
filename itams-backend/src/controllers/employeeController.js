@@ -1,6 +1,6 @@
 const { pool } = require("../config/db");
 const { validateEmployeePayload, validateEmployeeIdFormat, buildEmployeeEmail } = require("../utils/validators");
-const { generateEmployeeId } = require("../utils/idGenerator");
+const { generateEmployeeId, acquireIdLock } = require("../utils/idGenerator");
 
 // GET /api/employees?search=
 async function getEmployees(req, res, next) {
@@ -57,6 +57,7 @@ async function getEmployeeById(req, res, next) {
 // created — per spec, only HR/Asset Manager/Inventory Manager accounts exist
 // in `users`; employees don't log in.
 async function addEmployee(req, res, next) {
+  const client = await pool.connect();
   try {
     const { employeeName, department, designation, phone, joiningDate } = req.body;
 
@@ -68,21 +69,30 @@ async function addEmployee(req, res, next) {
       return res.status(400).json({ success: false, message: validationError });
     }
 
-    const employeeId = await generateEmployeeId(joiningDate);
+    // Lock held for the rest of this transaction so two concurrent
+    // submissions can never compute the same employeeId (see idGenerator.js).
+    await client.query("BEGIN");
+    await acquireIdLock(client, "employee");
+
+    const employeeId = await generateEmployeeId(client, joiningDate);
     const email = buildEmployeeEmail(employeeId);
 
-    await pool.query(
+    await client.query(
       `INSERT INTO employees (employee_id, employee_name, email, department, designation, phone, joining_date)
        VALUES ($1, $2, $3, $4, $5, $6, $7)`,
       [employeeId, employeeName, email, department, designation || null, phone || null, joiningDate]
     );
+    await client.query("COMMIT");
 
     res.status(201).json({ success: true, message: "Employee Added Successfully!", employeeId, email });
   } catch (err) {
+    await client.query("ROLLBACK");
     if (err.code === "23505") {
       return res.status(409).json({ success: false, message: "Employee ID or email already exists" });
     }
     next(err);
+  } finally {
+    client.release();
   }
 }
 

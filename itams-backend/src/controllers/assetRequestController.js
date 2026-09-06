@@ -1,5 +1,5 @@
 const { pool } = require("../config/db");
-const { generateRequestId } = require("../utils/idGenerator");
+const { generateRequestId, acquireIdLock } = require("../utils/idGenerator");
 const { validatePurpose, validateRequiredDate, validateRejectionReason, ASSET_TYPES } = require("../utils/validators");
 
 async function getRequests(req, res, next) {
@@ -39,6 +39,7 @@ async function getRequests(req, res, next) {
 }
 
 async function createRequest(req, res, next) {
+  const client = await pool.connect();
   try {
     const { employeeId, assetType, purpose, requiredDate } = req.body;
 
@@ -63,17 +64,29 @@ async function createRequest(req, res, next) {
       return res.status(400).json({ success: false, message: requiredDateError });
     }
 
-    const requestId = await generateRequestId();
+    // Lock held for the rest of this transaction so two concurrent
+    // submissions can never compute the same requestId (see idGenerator.js).
+    await client.query("BEGIN");
+    await acquireIdLock(client, "request");
 
-    await pool.query(
+    const requestId = await generateRequestId(client);
+
+    await client.query(
       `INSERT INTO asset_requests (request_id, employee_id, asset_type, purpose, required_date)
        VALUES ($1, $2, $3, $4, $5)`,
       [requestId, employeeId, assetType, purpose.trim(), requiredDate]
     );
+    await client.query("COMMIT");
 
     res.status(201).json({ success: true, message: "Asset request submitted", requestId });
   } catch (err) {
+    await client.query("ROLLBACK");
+    if (err.code === "23505") {
+      return res.status(409).json({ success: false, message: "Request ID already exists, please try again" });
+    }
     next(err);
+  } finally {
+    client.release();
   }
 }
 

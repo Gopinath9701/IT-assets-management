@@ -1,5 +1,6 @@
 const { pool } = require("../config/db");
 const { validateMaintenancePayload } = require("../utils/validators");
+const { generateMaintenanceRequestId, acquireIdLock } = require("../utils/idGenerator");
 
 // LEFT JOIN so a ticket with no linked asset (asset_id NULL) still comes
 // back — asset_type is just null for it instead of dropping the row.
@@ -22,6 +23,7 @@ async function getMaintenanceRequests(req, res, next) {
 }
 
 async function createMaintenanceRequest(req, res, next) {
+  const client = await pool.connect();
   try {
     const { employeeId, assetId, issueCategory, description, priority } = req.body;
 
@@ -33,19 +35,29 @@ async function createMaintenanceRequest(req, res, next) {
       return res.status(400).json({ success: false, message: validationError });
     }
 
-    const { rows } = await pool.query("SELECT COUNT(*) as count FROM maintenance_requests");
-    const count = Number(rows[0].count);
-    const requestId = `MR${String(count + 1).padStart(3, "0")}`;
+    // Lock held for the rest of this transaction so two concurrent
+    // submissions can never compute the same requestId (see idGenerator.js).
+    await client.query("BEGIN");
+    await acquireIdLock(client, "maintenance");
 
-    await pool.query(
+    const requestId = await generateMaintenanceRequestId(client);
+
+    await client.query(
       `INSERT INTO maintenance_requests (request_id, employee_id, asset_id, issue_category, description, priority, report_date)
        VALUES ($1, $2, $3, $4, $5, $6, NOW())`,
       [requestId, employeeId, assetId || null, issueCategory, description, priority]
     );
+    await client.query("COMMIT");
 
     res.status(201).json({ success: true, message: "Maintenance request submitted", requestId });
   } catch (err) {
+    await client.query("ROLLBACK");
+    if (err.code === "23505") {
+      return res.status(409).json({ success: false, message: "Request ID already exists, please try again" });
+    }
     next(err);
+  } finally {
+    client.release();
   }
 }
 

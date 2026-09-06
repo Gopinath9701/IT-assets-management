@@ -1,4 +1,4 @@
-const { generateDepartmentId } = require("../utils/idGenerator");
+const { generateDepartmentId, acquireIdLock } = require("../utils/idGenerator");
 const { pool } = require("../config/db");
 const { validateDepartmentPayload } = require("../utils/validators");
 
@@ -15,6 +15,7 @@ async function getDepartments(req, res, next) {
   }
 }   
 async function addDepartment(req, res, next) {
+  const client = await pool.connect();
   try {
     const { departmentName, departmentHead, employeeCount } = req.body;
 
@@ -23,19 +24,28 @@ async function addDepartment(req, res, next) {
       return res.status(400).json({ success: false, message: validationError });
     }
 
-    const departmentId = await generateDepartmentId();
+    // Lock held for the rest of this transaction so two concurrent
+    // submissions can never compute the same departmentId (see idGenerator.js).
+    await client.query("BEGIN");
+    await acquireIdLock(client, "department");
 
-    await pool.query(
+    const departmentId = await generateDepartmentId(client);
+
+    await client.query(
       "INSERT INTO departments (department_id, name, head, employee_count) VALUES ($1, $2, $3, $4)",
       [departmentId, departmentName, departmentHead, employeeCount]
     );
+    await client.query("COMMIT");
 
     res.status(201).json({ success: true, message: "Department added", departmentId });
   } catch (err) {
+    await client.query("ROLLBACK");
     if (err.code === "23505") {
       return res.status(409).json({ success: false, message: "Department already exists" });
     }
     next(err);
+  } finally {
+    client.release();
   }
 }
 

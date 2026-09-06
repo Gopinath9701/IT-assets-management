@@ -1,5 +1,5 @@
 const { pool } = require("../config/db");
-const { generateAssetId, ASSET_TYPE_PREFIXES } = require("../utils/idGenerator");
+const { generateAssetId, ASSET_TYPE_PREFIXES, acquireIdLock } = require("../utils/idGenerator");
 const { validateNewAssetPayload, validateAssetUpdatePayload, validateAssetIdFormat } = require("../utils/validators");
 
 // GET /api/assets?search=&type=
@@ -42,6 +42,7 @@ async function getAssetById(req, res, next) {
 // Asset ID generated server-side (type-prefix + sequence) — the frontend's own
 // localStorage-based counter can't guarantee uniqueness across sessions/devices.
 async function addAsset(req, res, next) {
+  const client = await pool.connect();
   try {
     const { assetType, brand, model, purchaseDate, warrantyExpiry, purchaseCost, description } = req.body;
 
@@ -50,17 +51,29 @@ async function addAsset(req, res, next) {
       return res.status(400).json({ success: false, message: validationError });
     }
 
-    const assetId = await generateAssetId(assetType);
+    // Lock held for the rest of this transaction so two concurrent
+    // submissions can never compute the same assetId (see idGenerator.js).
+    await client.query("BEGIN");
+    await acquireIdLock(client, "asset");
 
-    await pool.query(
+    const assetId = await generateAssetId(client, assetType);
+
+    await client.query(
       `INSERT INTO assets (asset_id, asset_type, brand, model, purchase_date, warranty_expiry, purchase_cost, description)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
       [assetId, assetType, brand || null, model || null, purchaseDate || null, warrantyExpiry || null, purchaseCost || null, description || null]
     );
+    await client.query("COMMIT");
 
     res.status(201).json({ success: true, message: "Asset added successfully", assetId });
   } catch (err) {
+    await client.query("ROLLBACK");
+    if (err.code === "23505") {
+      return res.status(409).json({ success: false, message: "Asset ID already exists" });
+    }
     next(err);
+  } finally {
+    client.release();
   }
 }
 
