@@ -1,5 +1,7 @@
 import React, { useState } from "react";import "./DepartmentManagement.css";
 
+const PAGE_SIZE_OPTIONS = [10, 30, 50, "All"];
+
 // =====================================================
 // VALIDATION - DEPARTMENT NAME
 // =====================================================
@@ -283,6 +285,7 @@ const DepartmentManagement = ({
   const [searchApplied, setSearchApplied] = useState("");
   const [searchError, setSearchError] = useState("");
   const [searchTouched, setSearchTouched] = useState(false);
+  const [pageSize, setPageSize] = useState(10);
 
   // =====================================================
   // FORM STATES
@@ -446,6 +449,11 @@ const DepartmentManagement = ({
               (searchApplied || "").toLowerCase()
             )
         );
+
+  const displayedDepartments =
+    pageSize === "All"
+      ? filteredDepartments
+      : filteredDepartments.slice(0, pageSize);
 
   // =====================================================
   // FORM VALIDATION
@@ -865,9 +873,9 @@ const DepartmentManagement = ({
 
               <tbody>
 
-                {filteredDepartments.length > 0 ? (
+                {displayedDepartments.length > 0 ? (
 
-                  filteredDepartments.map(
+                  displayedDepartments.map(
                     (dept) => (
                       <tr key={dept.id}>
 
@@ -905,6 +913,30 @@ const DepartmentManagement = ({
               </tbody>
 
             </table>
+
+          </div>
+
+          <div className="dm-table-footer">
+
+            <span className="dm-pagination-info">
+              Showing {displayedDepartments.length} of{" "}
+              {filteredDepartments.length} departments
+            </span>
+
+            <select
+              className="dm-rows-select"
+              value={pageSize}
+              onChange={(e) => {
+                const value = e.target.value;
+                setPageSize(value === "All" ? "All" : Number(value));
+              }}
+            >
+              {PAGE_SIZE_OPTIONS.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
 
           </div>
 

@@ -280,6 +280,11 @@
   background: white;
 }
 
+.page-size-info {
+  color: #6b7280;
+  font-size: 13px;
+}
+
 /* =========================
    MODAL
 ========================= */

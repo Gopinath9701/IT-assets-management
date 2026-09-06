@@ -1,11 +1,14 @@
 import React, { useState } from "react";
 import "./AssetReturn.css";
 
+const PAGE_SIZE_OPTIONS = [10, 30, 50, "All"];
+
 const AssetReturn = ({ username = "username", onLogout, onBack }) => {
   const [employeeId, setEmployeeId] = useState("");
   const [employeeIdError, setEmployeeIdError] = useState("");
   const [assignedAssets, setAssignedAssets] = useState([]);
   const [returnHistory, setReturnHistory] = useState([]);
+  const [historyPageSize, setHistoryPageSize] = useState(10);
 
   const [selectedAsset, setSelectedAsset] = useState(null);
 
@@ -663,7 +666,10 @@ const AssetReturn = ({ username = "username", onLogout, onBack }) => {
 
               <tbody>
 
-                {returnHistory.map(
+                {(historyPageSize === "All"
+                  ? returnHistory
+                  : returnHistory.slice(0, historyPageSize)
+                ).map(
                   (item, index) => (
 
                     <tr
@@ -718,12 +724,27 @@ const AssetReturn = ({ username = "username", onLogout, onBack }) => {
             ← Back
           </button>
 
-          <select className="page-size">
+          <span className="page-size-info">
+            Showing{" "}
+            {historyPageSize === "All"
+              ? returnHistory.length
+              : Math.min(historyPageSize, returnHistory.length)}{" "}
+            of {returnHistory.length} returns
+          </span>
 
-            <option>10</option>
-            <option>20</option>
-            <option>50</option>
-
+          <select
+            className="page-size"
+            value={historyPageSize}
+            onChange={(e) => {
+              const value = e.target.value;
+              setHistoryPageSize(value === "All" ? "All" : Number(value));
+            }}
+          >
+            {PAGE_SIZE_OPTIONS.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
           </select>
 
         </div>

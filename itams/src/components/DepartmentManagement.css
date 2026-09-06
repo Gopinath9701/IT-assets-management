@@ -290,6 +290,33 @@
   overflow-x: auto;
 }
 
+.dm-table-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.dm-pagination-info {
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.dm-rows-select {
+  height: 36px;
+  padding: 0 32px 0 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  color: #111827;
+  background-color: #ffffff;
+  cursor: pointer;
+}
+
 .dm-table {
   width: 100%;
   border-collapse: collapse;

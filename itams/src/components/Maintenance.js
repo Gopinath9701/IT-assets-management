@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import "./Maintenance.css";
 
+const PAGE_SIZE_OPTIONS = [10, 30, 50, "All"];
+
 const Maintenance = ({
   username = "username",
   onLogout,
@@ -12,6 +14,19 @@ const Maintenance = ({
   const [tickets, setTickets] = useState([]);
   const [inProgressTickets, setInProgressTickets] = useState([]);
   const [history, setHistory] = useState([]);
+
+  const [queuePageSize, setQueuePageSize] = useState(10);
+  const [inProgressPageSize, setInProgressPageSize] = useState(10);
+  const [historyPageSize, setHistoryPageSize] = useState(10);
+
+  const displayedTickets =
+    queuePageSize === "All" ? tickets : tickets.slice(0, queuePageSize);
+  const displayedInProgressTickets =
+    inProgressPageSize === "All"
+      ? inProgressTickets
+      : inProgressTickets.slice(0, inProgressPageSize);
+  const displayedHistory =
+    historyPageSize === "All" ? history : history.slice(0, historyPageSize);
 
   // Load maintenance requests from backend on mount
   useEffect(() => {
@@ -283,9 +298,9 @@ const Maintenance = ({
 
                 <tbody>
 
-                  {tickets.length > 0 ? (
+                  {displayedTickets.length > 0 ? (
 
-                    tickets.map((ticket) => (
+                    displayedTickets.map((ticket) => (
 
                       <tr key={ticket.ticket}>
 
@@ -350,10 +365,21 @@ const Maintenance = ({
             </div>
 
             <div className="maintenance-pagination">
-              <select>
-                <option>10</option>
-                <option>20</option>
-                <option>50</option>
+              <span className="maintenance-pagination-info">
+                Showing {displayedTickets.length} of {tickets.length} tickets
+              </span>
+              <select
+                value={queuePageSize}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setQueuePageSize(value === "All" ? "All" : Number(value));
+                }}
+              >
+                {PAGE_SIZE_OPTIONS.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -385,9 +411,9 @@ const Maintenance = ({
 
                 <tbody>
 
-                  {inProgressTickets.length > 0 ? (
+                  {displayedInProgressTickets.length > 0 ? (
 
-                    inProgressTickets.map((ticket) => (
+                    displayedInProgressTickets.map((ticket) => (
 
                       <tr key={ticket.ticket}>
 
@@ -439,10 +465,21 @@ const Maintenance = ({
             </div>
 
             <div className="maintenance-pagination">
-              <select>
-                <option>10</option>
-                <option>20</option>
-                <option>50</option>
+              <span className="maintenance-pagination-info">
+                Showing {displayedInProgressTickets.length} of {inProgressTickets.length} tickets
+              </span>
+              <select
+                value={inProgressPageSize}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setInProgressPageSize(value === "All" ? "All" : Number(value));
+                }}
+              >
+                {PAGE_SIZE_OPTIONS.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -476,7 +513,7 @@ const Maintenance = ({
 
                 <tbody>
 
-                  {history.length > 0 ? history.map((ticket) => (
+                  {displayedHistory.length > 0 ? displayedHistory.map((ticket) => (
 
                     <tr key={ticket.ticket}>
 
@@ -517,10 +554,21 @@ const Maintenance = ({
             </div>
 
             <div className="maintenance-pagination">
-              <select>
-                <option>10</option>
-                <option>20</option>
-                <option>50</option>
+              <span className="maintenance-pagination-info">
+                Showing {displayedHistory.length} of {history.length} tickets
+              </span>
+              <select
+                value={historyPageSize}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setHistoryPageSize(value === "All" ? "All" : Number(value));
+                }}
+              >
+                {PAGE_SIZE_OPTIONS.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
               </select>
             </div>
 

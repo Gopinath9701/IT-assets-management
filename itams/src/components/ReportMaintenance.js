@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import "./ReportMaintenance.css";
 
+const PAGE_SIZE_OPTIONS = [10, 30, 50, "All"];
+
 // =====================================================
 // EMPLOYEE ID VALIDATION
 //
@@ -376,6 +378,10 @@ const ReportMaintenance = ({
   // SAMPLE REPORTS (fallback — cleared once API loads)
   // =====================================================
   const [reports, setReports] = useState([]);
+  const [pageSize, setPageSize] = useState(10);
+
+  const displayedReports =
+    pageSize === "All" ? reports : reports.slice(0, pageSize);
 
   // =====================================================
   // FORM VALIDATION
@@ -888,9 +894,9 @@ const ReportMaintenance = ({
 
               <tbody>
 
-                {reports.length > 0 ? (
+                {displayedReports.length > 0 ? (
 
-                  reports.map((report) => (
+                  displayedReports.map((report) => (
 
                     <tr key={report.id}>
 
@@ -958,6 +964,29 @@ const ReportMaintenance = ({
               </tbody>
 
             </table>
+
+          </div>
+
+          <div className="report-table-footer">
+
+            <span className="report-pagination-info">
+              Showing {displayedReports.length} of {reports.length} requests
+            </span>
+
+            <select
+              className="report-rows-select"
+              value={pageSize}
+              onChange={(e) => {
+                const value = e.target.value;
+                setPageSize(value === "All" ? "All" : Number(value));
+              }}
+            >
+              {PAGE_SIZE_OPTIONS.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
 
           </div>
 

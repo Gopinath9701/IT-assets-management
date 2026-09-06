@@ -302,12 +302,6 @@ const Dashboard = ({
 
               </div>
 
-              <select className="table-select">
-                <option>10</option>
-                <option>20</option>
-                <option>50</option>
-              </select>
-
             </section>
 
 
@@ -459,12 +453,6 @@ const Dashboard = ({
               </table>
 
             </div>
-
-            <select className="activity-select">
-              <option>10</option>
-              <option>20</option>
-              <option>50</option>
-            </select>
 
           </section>
 
