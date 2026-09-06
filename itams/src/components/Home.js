@@ -96,8 +96,8 @@ export default function Home({ onLoginClick }) {
             </div>
             <div className="card-content">
               <h3>Contact Us</h3>
-              <p>Email: support@itams.com</p>
-              <p>Phone: +91 12345 67890</p>
+              <p>Email: 24211a6716@gmail.com</p>
+              <p>Phone: +91 8688912492</p>
             </div>
           </div>
         </div>
