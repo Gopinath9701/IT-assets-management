@@ -17,6 +17,8 @@ const STATUS_CLASS = {
 // ==========================================
 const ASSET_TYPE_OPTIONS = [
   "All Asset Types",
+  "Laptop",
+  "Desktop",
   "Monitor",
   "Keyboard",
   "Webcam",
@@ -24,6 +26,7 @@ const ASSET_TYPE_OPTIONS = [
   "Mouse",
   "Projector",
   "Printer",
+  "Scanner",
 ];
 
 // ==========================================
