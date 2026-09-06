@@ -1,25 +1,22 @@
-const { Resend } = require("resend");
+const { BrevoClient } = require("@getbrevo/brevo");
 require("dotenv").config();
 
-// Replaces Gmail SMTP — several deployment hosts block outbound SMTP ports
-// (465/587) entirely, which no amount of port/timeout tuning can work around.
-// Resend sends over plain HTTPS, which isn't blocked the same way.
-const resend = new Resend(process.env.RESEND_API_KEY);
-
-// Resend's shared sandbox address (onboarding@resend.dev) only delivers to
-// the Resend account's own verified email while no custom domain is set up —
-// set RESEND_FROM_EMAIL to an address on a verified domain to send to
-// arbitrary recipients (i.e. real OTP delivery to real users).
-const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
+// Replaces Mailgun/Resend — both only let you send to a small fixed set of
+// explicitly pre-authorized recipients (or a full verified domain) before
+// you can email anyone. Brevo verifies only the SENDER address (a one-time
+// email-link click, no domain, no card) and then lets that sender email
+// ANY recipient — no per-recipient whitelist to maintain.
+const brevo = new BrevoClient({ apiKey: process.env.BREVO_API_KEY });
 
 async function sendOtpEmail(toEmail, otp, name = "") {
   const fromName = process.env.EMAIL_FROM_NAME || "ITAMS Support";
+  const fromEmail = process.env.BREVO_FROM_EMAIL;
 
-  const { error } = await resend.emails.send({
-    from: `${fromName} <${FROM_ADDRESS}>`,
-    to: toEmail,
+  await brevo.transactionalEmails.sendTransacEmail({
+    sender: { name: fromName, email: fromEmail },
+    to: [{ email: toEmail, name: name || undefined }],
     subject: "Your ITAMS Password Reset OTP",
-    html: `
+    htmlContent: `
       <div style="font-family:Segoe UI,Arial,sans-serif;max-width:480px;margin:auto;border:1px solid #e4e8f0;border-radius:12px;overflow:hidden;">
         <div style="background:#1d63ff;padding:20px 30px;">
           <h2 style="color:#fff;margin:0;">ITAMS</h2>
@@ -39,22 +36,19 @@ async function sendOtpEmail(toEmail, otp, name = "") {
       </div>
     `,
   });
-
-  if (error) {
-    throw new Error(error.message || "Failed to send OTP email");
-  }
 }
 
-// Resend is a stateless HTTPS API, not a persistent connection like SMTP —
+// Brevo is a stateless HTTPS API, not a persistent connection like SMTP —
 // there's nothing to "verify" upfront the way transporter.verify() checked a
-// live socket. This just confirms the API key is present so a missing one
-// fails loudly at startup instead of silently on the first real OTP request.
+// live socket. This just confirms the required config is present so a
+// missing one fails loudly at startup instead of silently on the first real
+// OTP request.
 async function verifyEmailTransport() {
-  if (!process.env.RESEND_API_KEY) {
-    console.error("⚠️  RESEND_API_KEY is not set — OTP emails will fail.");
+  if (!process.env.BREVO_API_KEY || !process.env.BREVO_FROM_EMAIL) {
+    console.error("⚠️  BREVO_API_KEY / BREVO_FROM_EMAIL is not set — OTP emails will fail.");
     return;
   }
-  console.log("✅ Resend configured");
+  console.log("✅ Brevo configured");
 }
 
 module.exports = { sendOtpEmail, verifyEmailTransport };
