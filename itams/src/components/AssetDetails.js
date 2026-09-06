@@ -22,10 +22,11 @@ const ASSET_TYPE_OPTIONS = [
   "Monitor",
   "Keyboard",
   "Webcam",
-  "CPU",
-  "Mouse",
   "Projector",
+  "Mouse",
+  "CPU",
   "Printer",
+  "Headset",
   "Scanner",
 ];
 
