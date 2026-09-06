@@ -36,14 +36,17 @@ Rebuilt to match the team's written spec (login/HR requirements) as of Aug 22, 2
 Paste the full contents of `sql/schema.sql` into Neon's **SQL Editor** and run it.
 (19 statements: 1 function, 8 tables, 3 triggers, 7 indexes.)
 
-## 3. Set up Gmail SMTP
+## 3. Set up Brevo (OTP email)
 
-Same as before: 2-Step Verification → App Password at
-https://myaccount.google.com/apppasswords → put the 16-char code in
-`GMAIL_APP_PASSWORD`.
+1. brevo.com → sign up (free, no card required).
+2. Profile icon → **SMTP & API** → **API Keys** tab → generate a key → put it
+   in `BREVO_API_KEY`.
+3. Settings → **Senders, Domains & Dedicated IPs** → **Senders** → **Add a
+   Sender** → enter any email you control → click the confirmation link
+   Brevo sends to it → put that address in `BREVO_FROM_EMAIL`.
 
-Set `SEED_HR_EMAIL`, `SEED_ASSET_MANAGER_EMAIL`, and
-`SEED_INVENTORY_MANAGER_EMAIL` to **real Gmail inboxes you control**.
+Once that sender is verified, it can email any recipient — no per-recipient
+whitelist to maintain, unlike Mailgun/Resend's sandbox modes.
 
 `DEFAULT_SEED_PASSWORD` must satisfy the password policy above — the
 default (`Itams@2026`) does.
@@ -56,11 +59,13 @@ npm run seed
 npm run dev
 ```
 
-The seed script prints each account's generated 9-digit login ID, e.g.:
+Login emails aren't set via env vars — they're generated automatically as
+`{loginId}a@gmail.com` (per `Login.js`'s spec). The seed script prints each
+account's generated 9-digit login ID and email, e.g.:
 ```
-✅ Seeded HR: login ID 260822001 | email your.hr@gmail.com | password Itams@2026
-✅ Seeded AssetManager: login ID 260822002 | email your.am@gmail.com | password Itams@2026
-✅ Seeded InventoryManager: login ID 260822003 | email your.im@gmail.com | password Itams@2026
+✅ Seeded HR: login ID 260822001 | email 260822001a@gmail.com | password Itams@2026
+✅ Seeded AssetManager: login ID 260822002 | email 260822002a@gmail.com | password Itams@2026
+✅ Seeded InventoryManager: login ID 260822003 | email 260822003a@gmail.com | password Itams@2026
 ```
 
 Log in with the **email** (matches `Login.js`'s `@gmail.com` requirement) or
