@@ -1502,27 +1502,6 @@ const ManageAsset = ({
             assets in the organization.
           </p>
 
-          {/* DEMO MODE MESSAGE */}
-
-          {isDemoMode && (
-            <div
-              style={{
-                padding: "10px 14px",
-                marginBottom: "15px",
-                borderRadius: "6px",
-                background: "#eef6ff",
-                border: "1px solid #b8d8ff",
-                color: "#1557a0",
-                fontSize: "14px",
-              }}
-            >
-              ℹ️ Demo assets are displayed
-              because no database assets
-              were found. You can test
-              Search, Edit and Delete.
-            </div>
-          )}
-
           {/* SEARCH CARD */}
 
           <div className="ma-card">
