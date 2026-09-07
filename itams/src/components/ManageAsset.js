@@ -24,16 +24,23 @@ const API_URL = "http://localhost:5000/api/assets";
    ASSET TYPE PREFIX
 ========================================================= */
 
+// Matches the backend's canonical prefix map (idGenerator.js) exactly —
+// this one was missing CPU/Headset entirely and had wrong prefixes for
+// Desktop ("DES" instead of "DSK") and Scanner ("SCA" instead of "SCN"),
+// which meant the edit-preview ID wouldn't match what the backend actually
+// generates for those types.
 const ASSET_PREFIXES = {
+  Laptop: "LAP",
+  Desktop: "DSK",
   Monitor: "MON",
   Keyboard: "KEY",
-  Laptop: "LAP",
-  Mouse: "MOU",
-  Printer: "PRI",
-  Desktop: "DES",
   Webcam: "WEB",
-  Scanner: "SCA",
   Projector: "PRO",
+  Mouse: "MOU",
+  CPU: "CPU",
+  Printer: "PRI",
+  Headset: "HEA",
+  Scanner: "SCN",
 };
 
 /* =========================================================
