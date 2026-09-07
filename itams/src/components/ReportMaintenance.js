@@ -152,12 +152,9 @@ const validateEmployeeId = (id) => {
 
 // =====================================================
 // ASSET ID VALIDATION
-// FORMAT:
-// LAP001
-// MON001
-// MOU001
-// KEY001
-// PRI001
+// FORMAT: [3-letter type prefix][3-digit number], e.g. LAP001, WEB001 —
+// covers all 11 asset types, matching the canonical prefix list used
+// everywhere else in the app (AddAsset.js, ManageAsset.js, etc.).
 // =====================================================
 const validateAssetId = (id) => {
   if (!id || id.length === 0) {
@@ -202,17 +199,23 @@ const validateAssetId = (id) => {
 
   const validPrefixes = [
     "LAP",
+    "DSK",
     "MON",
-    "MOU",
     "KEY",
+    "WEB",
+    "PRO",
+    "MOU",
+    "CPU",
     "PRI",
+    "HEA",
+    "SCN",
   ];
 
   if (!validPrefixes.includes(prefix)) {
     return {
       isValid: false,
       message:
-        "Asset ID must start with LAP, MON, MOU, KEY or PRI",
+        "Asset ID must start with LAP, DSK, MON, KEY, WEB, PRO, MOU, CPU, PRI, HEA or SCN",
     };
   }
 
@@ -671,8 +674,9 @@ const ReportMaintenance = ({
               )}
 
               <small>
-                Format: LAP001 / MON001 / MOU001 /
-                KEY001 / PRI001
+                Format: LAP001 / DSK001 / MON001 / KEY001 /
+                WEB001 / PRO001 / MOU001 / CPU001 / PRI001 /
+                HEA001 / SCN001
               </small>
 
             </div>
