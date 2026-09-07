@@ -584,9 +584,19 @@ const ManageAsset = ({
         );
 
         setIsDemoMode(false);
-      } else {
+      } else if (!search.trim() && type === "All Assets") {
+        // No search/filter applied AND the database genuinely has zero
+        // assets - fall back to demo data so the page isn't just blank.
         setAssets(DEMO_ASSETS);
         setIsDemoMode(true);
+      } else {
+        // A specific search/filter was applied and simply matched nothing -
+        // that's a normal outcome, not a sign the backend is unavailable.
+        // Show a real (empty) result instead of switching to demo mode,
+        // which was falsely claiming "no database assets were found" for
+        // what was actually just an unmatched search.
+        setAssets([]);
+        setIsDemoMode(false);
       }
     } catch (error) {
       console.error("Fetch Assets Error:", error);
