@@ -400,46 +400,6 @@ const AddAsset = ({
   ];
 
   // =====================================================
-  // PREFIXES
-  // =====================================================
-
-  const prefixes = {
-    Laptop: "LAP",
-    Desktop: "DSK",
-    Monitor: "MON",
-    Keyboard: "KEY",
-    Webcam: "WEB",
-    Projector: "PRO",
-    Mouse: "MOU",
-    CPU: "CPU",
-    Printer: "PRI",
-    Headset: "HEA",
-    Scanner: "SCN",
-  };
-
-  // =====================================================
-  // GENERATE NEXT ASSET ID
-  // =====================================================
-
-  const getNextAssetId = (assetType) => {
-    if (!assetType) {
-      return "AST001";
-    }
-
-    const prefix = prefixes[assetType] || "AST";
-
-    const storageKey = `itams_${prefix}_counter`;
-
-    const currentNumber = Number(
-      localStorage.getItem(storageKey) || "0"
-    );
-
-    return `${prefix}${String(
-      currentNumber + 1
-    ).padStart(3, "0")}`;
-  };
-
-  // =====================================================
   // FORM DATA
   // =====================================================
 
@@ -474,9 +434,14 @@ const AddAsset = ({
 
   // =====================================================
   // ASSET ID
+  // Only ever set to the REAL id the backend assigns after a successful
+  // submission (see handleSubmit) - never guessed client-side. A prior
+  // version guessed this from a per-browser localStorage counter, which
+  // had no relationship to the database and routinely suggested IDs that
+  // already existed.
   // =====================================================
 
-  const [assetId, setAssetId] = useState("AST001");
+  const [assetId, setAssetId] = useState("");
 
   // =====================================================
   // GET TODAY
@@ -648,10 +613,6 @@ const AddAsset = ({
         brand: "",
         model: "",
       }));
-
-      setAssetId(
-        getNextAssetId(value)
-      );
 
       setErrors((prev) => ({
         ...prev,
@@ -960,43 +921,13 @@ const AddAsset = ({
 
     try {
       // =================================================
-      // GENERATE ASSET ID
-      // =================================================
-
-      const prefix =
-        prefixes[
-          formData.assetType
-        ] || "AST";
-
-      const storageKey =
-        `itams_${prefix}_counter`;
-
-      let counter = Number(
-        localStorage.getItem(
-          storageKey
-        ) || "0"
-      );
-
-      counter += 1;
-
-      localStorage.setItem(
-        storageKey,
-        String(counter)
-      );
-
-      const generatedAssetId =
-        `${prefix}${String(
-          counter
-        ).padStart(3, "0")}`;
-
-      // =================================================
       // REQUEST BODY
+      // The backend generates and owns the real asset ID server-side
+      // (idGenerator.js) - it doesn't read an assetId from this request
+      // even if one is sent, so there's nothing to generate here.
       // =================================================
 
       const requestBody = {
-        assetId:
-          generatedAssetId,
-
         assetType:
           formData.assetType,
 
@@ -1082,8 +1013,10 @@ const AddAsset = ({
       // =================================================
 
       setSuccessMessage(
-        `Asset added successfully! Asset ID: ${generatedAssetId}`
+        `Asset added successfully! Asset ID: ${data.assetId}`
       );
+
+      setAssetId(data.assetId);
 
       // =================================================
       // CLEAR FORM
@@ -1100,13 +1033,6 @@ const AddAsset = ({
       });
 
       setErrors({});
-
-      // Next default ID
-      setAssetId(
-        `${prefix}${String(
-          counter + 1
-        ).padStart(3, "0")}`
-      );
 
     } catch (error) {
       console.error(
@@ -1144,7 +1070,7 @@ const AddAsset = ({
 
     setApiError("");
 
-    setAssetId("AST001");
+    setAssetId("");
   };
 
   // =====================================================
@@ -1307,6 +1233,7 @@ const AddAsset = ({
               type="text"
               className="aa-input aa-input--readonly"
               value={assetId}
+              placeholder="Assigned automatically after you submit"
               readOnly
             />
 
