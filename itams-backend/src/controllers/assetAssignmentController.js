@@ -122,6 +122,11 @@ async function assignAsset(req, res, next) {
   } catch (err) {
     await client.query("ROLLBACK");
     if (err.code === "23505") {
+      // Distinguish which constraint actually fired - both share the same
+      // Postgres error code, but mean very different things to the user.
+      if (err.constraint === "idx_one_active_assignment_per_asset") {
+        return res.status(409).json({ success: false, message: "This asset is already assigned to someone." });
+      }
       return res.status(409).json({ success: false, message: "Assignment ID already exists, please try again" });
     }
     next(err);
@@ -201,6 +206,11 @@ async function reassignAsset(req, res, next) {
   } catch (err) {
     await client.query("ROLLBACK");
     if (err.code === "23505") {
+      // Distinguish which constraint actually fired - both share the same
+      // Postgres error code, but mean very different things to the user.
+      if (err.constraint === "idx_one_active_assignment_per_asset") {
+        return res.status(409).json({ success: false, message: "This asset is already assigned to someone." });
+      }
       return res.status(409).json({ success: false, message: "Assignment ID already exists, please try again" });
     }
     next(err);

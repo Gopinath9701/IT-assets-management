@@ -40,6 +40,25 @@ async function createMaintenanceRequest(req, res, next) {
     await client.query("BEGIN");
     await acquireIdLock(client, "maintenance");
 
+    // An asset can only have one open (Pending/In Progress) ticket at a
+    // time - idx_one_open_maintenance_per_asset (migration 006) enforces
+    // this at the DB level regardless of what checks this app-level code
+    // does, but checking here first gives a clear, specific message
+    // instead of a generic one after the INSERT fails.
+    if (assetId) {
+      const { rows: openForAsset } = await client.query(
+        `SELECT request_id FROM maintenance_requests WHERE asset_id = $1 AND status IN ('Pending', 'In Progress')`,
+        [assetId]
+      );
+      if (openForAsset.length > 0) {
+        await client.query("ROLLBACK");
+        return res.status(409).json({
+          success: false,
+          message: `This asset already has an open maintenance request (${openForAsset[0].request_id}).`,
+        });
+      }
+    }
+
     const requestId = await generateMaintenanceRequestId(client);
 
     await client.query(
@@ -53,6 +72,14 @@ async function createMaintenanceRequest(req, res, next) {
   } catch (err) {
     await client.query("ROLLBACK");
     if (err.code === "23505") {
+      // Distinguish which constraint actually fired - both share the same
+      // Postgres error code, but mean very different things to the user.
+      if (err.constraint === "idx_one_open_maintenance_per_asset") {
+        return res.status(409).json({
+          success: false,
+          message: "This asset already has an open maintenance request.",
+        });
+      }
       return res.status(409).json({ success: false, message: "Request ID already exists, please try again" });
     }
     next(err);
