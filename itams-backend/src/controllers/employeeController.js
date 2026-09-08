@@ -88,7 +88,14 @@ async function addEmployee(req, res, next) {
   } catch (err) {
     await client.query("ROLLBACK");
     if (err.code === "23505") {
-      return res.status(409).json({ success: false, message: "Employee ID or email already exists" });
+      // email is a deterministic function of employeeId (buildEmployeeEmail),
+      // so in practice only employee_id can independently collide - but
+      // check err.constraint anyway rather than guessing, same as the
+      // maintenance/assignment fixes.
+      if (err.constraint === "employees_email_key") {
+        return res.status(409).json({ success: false, message: "Employee email already exists" });
+      }
+      return res.status(409).json({ success: false, message: "Employee ID already exists, please try again" });
     }
     next(err);
   } finally {
