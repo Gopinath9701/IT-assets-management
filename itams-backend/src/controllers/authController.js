@@ -5,6 +5,8 @@ const { sendOtpEmail } = require("../utils/email");
 const { generateOtp, otpExpiryDate } = require("../utils/otp");
 const { validatePassword, validateOtp } = require("../utils/validators");
 
+const OTP_EXPIRY_MINUTES = 10;
+
 async function findUserByIdentifier(identifier) {
   const { rows } = await pool.query(
     "SELECT * FROM users WHERE login_id = $1 OR email = $1 LIMIT 1",
@@ -77,7 +79,7 @@ async function sendOtp(req, res, next) {
     }
 
     const otp = generateOtp();
-    const expiresAt = otpExpiryDate(10);
+    const expiresAt = otpExpiryDate(OTP_EXPIRY_MINUTES);
 
     await pool.query(
       "INSERT INTO password_resets (user_id, otp_code, expires_at) VALUES ($1, $2, $3)",
@@ -98,7 +100,10 @@ async function sendOtp(req, res, next) {
       });
     }
 
-    res.json({ success: true, message: `OTP sent to ${maskEmail(user.email)}` });
+    res.json({
+      success: true,
+      message: `OTP sent to ${maskEmail(user.email)}. It expires in ${OTP_EXPIRY_MINUTES} minutes.`,
+    });
   } catch (err) {
     next(err);
   }

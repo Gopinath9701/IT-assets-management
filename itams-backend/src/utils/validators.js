@@ -168,6 +168,13 @@ function validateAssetIdFormat(assetId) {
   if (!ASSET_ID_REGEX.test(assetId)) {
     return "Asset ID must be 3 capital letters followed by 3 numbers (e.g. LAP001).";
   }
+  // The numeric part is a 1-indexed serial (generateAssetId in idGenerator.js
+  // always starts at 001) - "000" can never be real, so reject it at the
+  // format-validation stage instead of letting it through to a DB lookup
+  // that was always going to fail.
+  if (assetId.slice(3) === "000") {
+    return "Asset ID number cannot be 000.";
+  }
   return null;
 }
 
