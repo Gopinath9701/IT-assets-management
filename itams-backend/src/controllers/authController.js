@@ -63,11 +63,16 @@ async function sendOtp(req, res, next) {
       return res.status(400).json({ success: false, message: "Email or Employee ID is required" });
     }
 
+    // Explicitly tells the caller whether the account exists, rather than
+    // the vague "if an account exists..." pattern typical apps use to stop
+    // attackers enumerating valid accounts — not a meaningful risk here
+    // with exactly 3 fixed, known login accounts, and a clear answer is
+    // more useful than a deliberately ambiguous one.
     const user = await findUserByIdentifier(identifier);
     if (!user) {
-      return res.json({
-        success: true,
-        message: "If an account exists for that Email/ID, an OTP has been sent.",
+      return res.status(404).json({
+        success: false,
+        message: "No account found for that Email/ID.",
       });
     }
 
