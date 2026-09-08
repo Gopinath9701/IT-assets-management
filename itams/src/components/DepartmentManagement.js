@@ -1,6 +1,5 @@
-import React, { useState } from "react";import "./DepartmentManagement.css";
-
-const PAGE_SIZE_OPTIONS = [10, 30, 50, "All"];
+import React, { useState, useEffect } from "react";
+import "./DepartmentManagement.css";
 
 // =====================================================
 // VALIDATION - DEPARTMENT NAME
@@ -28,7 +27,6 @@ const validateDepartmentName = (name) => {
     };
   }
 
-  // No multiple consecutive spaces
   if (/\s{2,}/.test(name)) {
     return {
       isValid: false,
@@ -40,20 +38,17 @@ const validateDepartmentName = (name) => {
   if (name.length < 2) {
     return {
       isValid: false,
-      message:
-        "Department Name must be at least 2 characters",
+      message: "Department Name must be at least 2 characters",
     };
   }
 
   if (name.length > 100) {
     return {
       isValid: false,
-      message:
-        "Department Name cannot exceed 100 characters",
+      message: "Department Name cannot exceed 100 characters",
     };
   }
 
-  // ONLY LETTERS AND SPACES
   if (!/^[A-Za-z\s]+$/.test(name)) {
     return {
       isValid: false,
@@ -94,7 +89,6 @@ const validateDepartmentHead = (head) => {
     };
   }
 
-  // No multiple consecutive spaces
   if (/\s{2,}/.test(head)) {
     return {
       isValid: false,
@@ -106,20 +100,17 @@ const validateDepartmentHead = (head) => {
   if (head.length < 2) {
     return {
       isValid: false,
-      message:
-        "Department Head must be at least 2 characters",
+      message: "Department Head must be at least 2 characters",
     };
   }
 
   if (head.length > 100) {
     return {
       isValid: false,
-      message:
-        "Department Head cannot exceed 100 characters",
+      message: "Department Head cannot exceed 100 characters",
     };
   }
 
-  // ONLY LETTERS AND SPACES
   if (!/^[A-Za-z\s]+$/.test(head)) {
     return {
       isValid: false,
@@ -148,8 +139,7 @@ const validateEmployeeCount = (count) => {
   if (count.trim() === "") {
     return {
       isValid: false,
-      message:
-        "Number of Employees cannot contain only spaces",
+      message: "Number of Employees cannot contain only spaces",
     };
   }
 
@@ -161,32 +151,26 @@ const validateEmployeeCount = (count) => {
     };
   }
 
-  // Numbers only
   if (!/^[0-9]+$/.test(count)) {
     return {
       isValid: false,
-      message:
-        "Number of Employees must contain numbers only",
+      message: "Number of Employees must contain numbers only",
     };
   }
 
   const number = Number(count);
 
-  // Minimum 1
   if (number < 1) {
     return {
       isValid: false,
-      message:
-        "Number of Employees must be at least 1",
+      message: "Number of Employees must be at least 1",
     };
   }
 
-  // Maximum 100
   if (number > 100) {
     return {
       isValid: false,
-      message:
-        "Number of Employees cannot exceed 100",
+      message: "Number of Employees cannot exceed 100",
     };
   }
 
@@ -203,16 +187,14 @@ const validateSearch = (search) => {
   if (search.length === 0) {
     return {
       isValid: false,
-      message:
-        "Department Name is required for search",
+      message: "Department Name is required for search",
     };
   }
 
   if (search.trim() === "") {
     return {
       isValid: false,
-      message:
-        "Search cannot contain only spaces",
+      message: "Search cannot contain only spaces",
     };
   }
 
@@ -224,43 +206,31 @@ const validateSearch = (search) => {
     };
   }
 
-  // ===================================================
-  // ONLY A SINGLE SPACE IS ALLOWED BETWEEN WORDS
-  // ===================================================
-
   if (/\s{2,}/.test(search)) {
     return {
       isValid: false,
-      message:
-        "Only a single space is allowed between words",
+      message: "Only a single space is allowed between words",
     };
   }
 
   if (search.length < 2) {
     return {
       isValid: false,
-      message:
-        "Search must contain at least 2 characters",
+      message: "Search must contain at least 2 characters",
     };
   }
 
   if (search.length > 100) {
     return {
       isValid: false,
-      message:
-        "Search cannot exceed 100 characters",
+      message: "Search cannot exceed 100 characters",
     };
   }
-
-  // ===================================================
-  // ONLY LETTERS AND SPACES
-  // ===================================================
 
   if (!/^[A-Za-z ]+$/.test(search)) {
     return {
       isValid: false,
-      message:
-        "Search should contain only letters and spaces",
+      message: "Search should contain only letters and spaces",
     };
   }
 
@@ -281,11 +251,18 @@ const DepartmentManagement = ({
   // =====================================================
   // SEARCH STATES
   // =====================================================
+
+  // What user is currently typing
   const [search, setSearch] = useState("");
+
+  // Search value ONLY after Search button is clicked
   const [searchApplied, setSearchApplied] = useState("");
+
+  // Search error
   const [searchError, setSearchError] = useState("");
+
+  // Whether Search button has been clicked
   const [searchTouched, setSearchTouched] = useState(false);
-  const [pageSize, setPageSize] = useState(10);
 
   // =====================================================
   // FORM STATES
@@ -304,19 +281,24 @@ const DepartmentManagement = ({
   // =====================================================
   // FETCH DEPARTMENTS FROM BACKEND
   // =====================================================
-
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchDepartments = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch("http://localhost:5000/api/departments", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
+
+        const response = await fetch(
+          "http://localhost:5000/api/departments",
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
         const data = await response.json();
+
         if (response.ok && data.departments) {
           setDepartments(
             data.departments.map((dept) => ({
@@ -331,6 +313,7 @@ const DepartmentManagement = ({
         console.error("Fetch Departments Error:", err);
       }
     };
+
     fetchDepartments();
   }, []);
 
@@ -346,84 +329,64 @@ const DepartmentManagement = ({
 
   // =====================================================
   // SEARCH INPUT CHANGE
+  // IMPORTANT:
+  // Typing DOES NOT perform search
   // =====================================================
   const handleSearchChange = (e) => {
     let value = e.target.value;
 
-    // ===================================================
-    // ONLY LETTERS AND SPACES ARE ALLOWED WHILE TYPING
-    // Numbers and special characters are automatically
-    // rejected.
-    // ===================================================
-
+    // Only letters and spaces allowed
     if (!/^[A-Za-z ]*$/.test(value)) {
       return;
     }
 
-    // collapse multiple spaces into a single space
+    // Convert multiple spaces into one
     value = value.replace(/ {2,}/g, " ");
 
+    // Update only the input value
     setSearch(value);
+
+    // IMPORTANT:
+    // Do NOT change searchApplied here.
+    // Do NOT filter the list while typing.
     setSearchTouched(false);
-
-    if (value === "") {
-      setSearchError("");
-      setSearchApplied("");
-      return;
-    }
-
-    const result = validateSearch(value);
-
-    if (!result.isValid) {
-      setSearchError(result.message);
-    } else {
-      setSearchError("");
-    }
+    setSearchError("");
   };
 
   // =====================================================
-  // SEARCH
+  // SEARCH BUTTON
+  // SEARCH HAPPENS ONLY HERE
   // =====================================================
-  const handleSearch = async () => {
+  const handleSearch = () => {
     setSearchTouched(true);
 
     const result = validateSearch(search);
 
+    // Invalid search
     if (!result.isValid) {
       setSearchError(result.message);
       setSearchApplied(null);
       return;
     }
 
-    setSearchError("");
-    setSearchApplied(search);
+    const searchValue = search.trim().toLowerCase();
 
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(
-        `http://localhost:5000/api/departments?search=${encodeURIComponent(search)}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      const data = await response.json();
-      if (response.ok && data.departments) {
-        setDepartments(
-          data.departments.map((dept) => ({
-            id: dept.department_id,
-            name: dept.name,
-            head: dept.head || "",
-            employees: dept.employee_count || 0,
-          }))
-        );
-      }
-    } catch (err) {
-      console.error("Search Departments Error:", err);
+    // EXACT department name match
+    const found = departments.some(
+      (dept) =>
+        dept.name.trim().toLowerCase() === searchValue
+    );
+
+    // No department found
+    if (!found) {
+      setSearchApplied(null);
+      setSearchError("No department found.");
+      return;
     }
+
+    // Department found
+    setSearchApplied(search.trim());
+    setSearchError("");
   };
 
   // =====================================================
@@ -438,22 +401,19 @@ const DepartmentManagement = ({
 
   // =====================================================
   // FILTER DEPARTMENTS
+  // IMPORTANT:
+  // Uses searchApplied, NOT search
   // =====================================================
   const filteredDepartments =
     searchApplied === null
       ? []
-      : departments.filter((dept) =>
-          dept.name
-            .toLowerCase()
-            .includes(
-              (searchApplied || "").toLowerCase()
-            )
+      : searchApplied === ""
+      ? departments
+      : departments.filter(
+          (dept) =>
+            dept.name.trim().toLowerCase() ===
+            searchApplied.trim().toLowerCase()
         );
-
-  const displayedDepartments =
-    pageSize === "All"
-      ? filteredDepartments
-      : filteredDepartments.slice(0, pageSize);
 
   // =====================================================
   // FORM VALIDATION
@@ -465,24 +425,21 @@ const DepartmentManagement = ({
       validateDepartmentName(departmentName);
 
     if (!nameResult.isValid) {
-      newErrors.departmentName =
-        nameResult.message;
+      newErrors.departmentName = nameResult.message;
     }
 
     const headResult =
       validateDepartmentHead(departmentHead);
 
     if (!headResult.isValid) {
-      newErrors.departmentHead =
-        headResult.message;
+      newErrors.departmentHead = headResult.message;
     }
 
     const countResult =
       validateEmployeeCount(employeeCount);
 
     if (!countResult.isValid) {
-      newErrors.employeeCount =
-        countResult.message;
+      newErrors.employeeCount = countResult.message;
     }
 
     setErrors(newErrors);
@@ -520,12 +477,11 @@ const DepartmentManagement = ({
 
   // =====================================================
   // EMPLOYEE COUNT CHANGE HANDLER
-  // Blocks minus sign and any non-digit character while typing
   // =====================================================
   const handleEmployeeCountChange = (e) => {
     const value = e.target.value;
 
-    // Only allow digits (blocks "-", "+", ".", letters, etc.)
+    // Only digits
     if (!/^[0-9]*$/.test(value)) {
       return;
     }
@@ -544,7 +500,9 @@ const DepartmentManagement = ({
 
     setErrors((prev) => ({
       ...prev,
-      employeeCount: result.isValid ? "" : result.message,
+      employeeCount: result.isValid
+        ? ""
+        : result.message,
     }));
   };
 
@@ -576,18 +534,22 @@ const DepartmentManagement = ({
 
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:5000/api/departments", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          departmentName: departmentName.trim(),
-          departmentHead: departmentHead.trim(),
-          employeeCount: Number(employeeCount),
-        }),
-      });
+
+      const response = await fetch(
+        "http://localhost:5000/api/departments",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            departmentName: departmentName.trim(),
+            departmentHead: departmentHead.trim(),
+            employeeCount: Number(employeeCount),
+          }),
+        }
+      );
 
       const data = await response.json();
 
@@ -595,24 +557,38 @@ const DepartmentManagement = ({
         if (response.status === 409) {
           setErrors((prev) => ({
             ...prev,
-            departmentName: "This Department already exists",
+            departmentName:
+              "This Department already exists",
           }));
           return;
         }
-        alert(data.message || "Failed to add department.");
+
+        alert(
+          data.message || "Failed to add department."
+        );
+
         return;
       }
 
       // Refresh departments list
-      const refreshResponse = await fetch("http://localhost:5000/api/departments", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const refreshData = await refreshResponse.json();
-      if (refreshResponse.ok && refreshData.departments) {
+      const refreshResponse = await fetch(
+        "http://localhost:5000/api/departments",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const refreshData =
+        await refreshResponse.json();
+
+      if (
+        refreshResponse.ok &&
+        refreshData.departments
+      ) {
         setDepartments(
           refreshData.departments.map((dept) => ({
             id: dept.department_id,
@@ -628,12 +604,20 @@ const DepartmentManagement = ({
       setDepartmentHead("");
       setEmployeeCount("");
       setErrors({});
+
+      // Reset search and show all departments
+      setSearch("");
       setSearchApplied("");
+      setSearchError("");
+      setSearchTouched(false);
 
       alert("✅ Department added successfully!");
     } catch (error) {
       console.error("Add Department Error:", error);
-      alert("Unable to connect to server. Please make sure the backend is running.");
+
+      alert(
+        "Unable to connect to server. Please make sure the backend is running."
+      );
     }
   };
 
@@ -657,6 +641,7 @@ const DepartmentManagement = ({
       <nav className="dm-nav">
 
         <div className="dm-nav-logo">
+
           <span className="dm-nav-title">
             ITAMS
           </span>
@@ -664,6 +649,7 @@ const DepartmentManagement = ({
           <span className="dm-nav-sub">
             IT Asset Management System
           </span>
+
         </div>
 
         <div className="dm-nav-right">
@@ -722,12 +708,12 @@ const DepartmentManagement = ({
                 onKeyDown={handleSearchKeyDown}
               />
 
-              {searchError &&
-                searchTouched && (
-                  <span className="dm-error-text">
-                    ⚠️ {searchError}
-                  </span>
-                )}
+              {/* RED SEARCH ERROR */}
+              {searchError && searchTouched && (
+                <span className="dm-error-text">
+                  ⚠️ {searchError}
+                </span>
+              )}
 
             </div>
 
@@ -873,9 +859,9 @@ const DepartmentManagement = ({
 
               <tbody>
 
-                {displayedDepartments.length > 0 ? (
+                {filteredDepartments.length > 0 ? (
 
-                  displayedDepartments.map(
+                  filteredDepartments.map(
                     (dept) => (
                       <tr key={dept.id}>
 
@@ -913,30 +899,6 @@ const DepartmentManagement = ({
               </tbody>
 
             </table>
-
-          </div>
-
-          <div className="dm-table-footer">
-
-            <span className="dm-pagination-info">
-              Showing {displayedDepartments.length} of{" "}
-              {filteredDepartments.length} departments
-            </span>
-
-            <select
-              className="dm-rows-select"
-              value={pageSize}
-              onChange={(e) => {
-                const value = e.target.value;
-                setPageSize(value === "All" ? "All" : Number(value));
-              }}
-            >
-              {PAGE_SIZE_OPTIONS.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
 
           </div>
 
