@@ -206,36 +206,6 @@ const validatePassword = (password) => {
 };
 
 // =====================================================
-// PASSWORD REQUIREMENT ITEM
-// =====================================================
-
-const PasswordRequirement = ({ valid, children }) => {
-  return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: "7px",
-        fontSize: "13px",
-        marginTop: "4px",
-        color: valid ? "#188038" : "#5f6368",
-      }}
-    >
-      <span
-        style={{
-          fontWeight: "bold",
-          fontSize: "14px",
-        }}
-      >
-        {valid ? "✓" : "○"}
-      </span>
-
-      <span>{children}</span>
-    </div>
-  );
-};
-
-// =====================================================
 // LOGIN COMPONENT
 // =====================================================
 
@@ -433,15 +403,6 @@ export default function Login({
   };
 
   // ===================================================
-  // PASSWORD REQUIREMENTS
-  // ===================================================
-
-  const passwordRequirements =
-    getPasswordRequirements(
-      formData.password
-    );
-
-  // ===================================================
   // LOGIN UI
   // ===================================================
 
@@ -551,67 +512,6 @@ export default function Login({
 
         </div>
 
-        {/* PASSWORD REQUIREMENTS */}
-
-        {formData.password.length > 0 && (
-          <div
-            style={{
-              marginTop: "8px",
-              marginBottom: "10px",
-            }}
-          >
-
-            <PasswordRequirement
-              valid={
-                passwordRequirements.minLength
-              }
-            >
-              Use 8 characters or more
-            </PasswordRequirement>
-
-            <PasswordRequirement
-              valid={
-                passwordRequirements.uppercase
-              }
-            >
-              Include at least one uppercase letter
-            </PasswordRequirement>
-
-            <PasswordRequirement
-              valid={
-                passwordRequirements.lowercase
-              }
-            >
-              Include at least one lowercase letter
-            </PasswordRequirement>
-
-            <PasswordRequirement
-              valid={
-                passwordRequirements.number
-              }
-            >
-              Include at least one number
-            </PasswordRequirement>
-
-            <PasswordRequirement
-              valid={
-                passwordRequirements.special
-              }
-            >
-              Include at least one special character
-            </PasswordRequirement>
-
-            <PasswordRequirement
-              valid={
-                passwordRequirements.noSpaces
-              }
-            >
-              Do not use spaces
-            </PasswordRequirement>
-
-          </div>
-        )}
-
         {/* PASSWORD ERROR */}
 
         {passwordError &&
@@ -621,6 +521,7 @@ export default function Login({
               style={{
                 color: "#d93025",
                 fontSize: "12px",
+                marginTop: "5px",
                 marginBottom: "8px",
               }}
             >
