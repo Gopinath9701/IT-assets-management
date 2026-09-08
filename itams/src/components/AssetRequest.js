@@ -15,8 +15,7 @@ const INITIAL_REQUESTS = [
   },
   {
     id: "AR002 (Automatic Generated)",
-    assetType: "Monitor",
-    employeeId: "250615002",
+    assetType: "Monitor",    employeeId: "250615002",
     status: "Approved",
     date: "28-06-2026",
   },
@@ -53,7 +52,6 @@ const ASSET_TYPES = [
   "Headset",
   "Scanner",
 ];
-
 // =====================================================
 // PAGE SIZE OPTIONS
 // =====================================================
