@@ -234,11 +234,20 @@ async function returnAsset(req, res, next) {
       return res.status(400).json({ success: false, message: validationError });
     }
 
+    // Same TOCTOU concern as assignAsset/reassignAsset: lock the row inside
+    // the transaction instead of checking status before BEGIN, so a
+    // duplicate-submit (double-click, retry) can't return the same
+    // assignment twice with two different conditions — whichever commits
+    // last would otherwise silently overwrite the other's condition/remarks
+    // with no error to either caller.
+    await client.query("BEGIN");
+
     const assignmentResult = await client.query(
-      "SELECT * FROM asset_assignments WHERE assignment_id = $1 AND status = 'Assigned'",
+      "SELECT * FROM asset_assignments WHERE assignment_id = $1 AND status = 'Assigned' FOR UPDATE",
       [assignmentId]
     );
     if (assignmentResult.rows.length === 0) {
+      await client.query("ROLLBACK");
       return res.status(404).json({ success: false, message: "Active assignment not found" });
     }
     const assignment = assignmentResult.rows[0];
@@ -246,6 +255,7 @@ async function returnAsset(req, res, next) {
     const assignedDate = new Date(assignment.assigned_date); assignedDate.setHours(0, 0, 0, 0);
     const rDate = new Date(returnDate); rDate.setHours(0, 0, 0, 0);
     if (rDate < assignedDate) {
+      await client.query("ROLLBACK");
       return res.status(400).json({ success: false, message: "Return Date cannot be before Assigned Date" });
     }
 
@@ -256,7 +266,6 @@ async function returnAsset(req, res, next) {
     // was recorded — same reasoning as report_date on maintenance requests:
     // a client-supplied date has no time component, so trusting it verbatim
     // would leave returned_date permanently stuck at midnight.
-    await client.query("BEGIN");
     await client.query(
       `UPDATE asset_assignments SET status = 'Returned', returned_date = NOW(), condition = $1, remarks = $2
        WHERE assignment_id = $3`,
