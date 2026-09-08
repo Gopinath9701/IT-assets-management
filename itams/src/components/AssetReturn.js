@@ -3,6 +3,18 @@ import "./AssetReturn.css";
 
 const PAGE_SIZE_OPTIONS = [10, 30, 50, "All"];
 
+// Local date parts, not toISOString() (which is UTC) — under IST that can
+// roll the date by one: a timestamp like 20:00 UTC is already 1:30am the
+// NEXT day in IST, so .toISOString().slice(0,10) would report the wrong
+// calendar day for anything stored/read near a day boundary.
+const toLocalIso = (date) => {
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+};
+const todayIso = () => toLocalIso(new Date());
+
 const AssetReturn = ({ username = "username", onLogout, onBack }) => {
   const [employeeId, setEmployeeId] = useState("");
   const [employeeIdError, setEmployeeIdError] = useState("");
@@ -147,6 +159,11 @@ const AssetReturn = ({ username = "username", onLogout, onBack }) => {
             assignedDate: h.assigned_date
               ? new Date(h.assigned_date).toLocaleDateString("en-GB").replace(/\//g, "-")
               : "-",
+            // ISO form kept alongside the display string above so the return
+            // modal's date picker can set min= to this exact date.
+            assignedDateIso: h.assigned_date
+              ? toLocalIso(new Date(h.assigned_date))
+              : null,
           };
         })
       );
@@ -201,14 +218,8 @@ const AssetReturn = ({ username = "username", onLogout, onBack }) => {
 
     setSelectedAsset(asset);
 
-    const today = new Date();
-
-    const day = String(today.getDate()).padStart(2, "0");
-    const month = String(today.getMonth() + 1).padStart(2, "0");
-    const year = today.getFullYear();
-
     setReturnForm({
-      returnDate: `${day}-${month}-${year}`,
+      returnDate: todayIso(),
       condition: "Good",
       remarks: "",
     });
@@ -237,87 +248,29 @@ const AssetReturn = ({ username = "username", onLogout, onBack }) => {
   };
 
   // =====================================================
-  // DATE CONVERSION
-  // =====================================================
-
-  const convertToDate = (dateString) => {
-    if (!dateString) {
-      return null;
-    }
-
-    const parts = dateString.split("-");
-
-    if (parts.length !== 3) {
-      return null;
-    }
-
-    const day = Number(parts[0]);
-    const month = Number(parts[1]) - 1;
-    const year = Number(parts[2]);
-
-    const date = new Date(year, month, day);
-
-    date.setHours(0, 0, 0, 0);
-
-    return date;
-  };
-
-  // =====================================================
   // RETURN DATE VALIDATION
+  // Return Date is a native <input type="date">, whose value is always
+  // either "" or a real, well-formed YYYY-MM-DD calendar date (the browser
+  // guarantees this) — plain string comparison is enough for before/after
+  // checks since zero-padded ISO dates sort lexicographically in date
+  // order, with no Date-object/timezone parsing to get wrong.
   // =====================================================
 
   const validateReturnDate = (dateString) => {
-    if (!dateString || dateString.trim() === "") {
+    if (!dateString) {
       return "Return Date is required.";
     }
 
-    if (/\s/.test(dateString)) {
-      return "Return Date should not contain spaces.";
-    }
-
-    if (!/^\d{2}-\d{2}-\d{4}$/.test(dateString)) {
-      return "Return Date must be in DD-MM-YYYY format.";
-    }
-
-    const selectedDate = convertToDate(dateString);
-
-    if (!selectedDate || isNaN(selectedDate.getTime())) {
-      return "Please enter a valid Return Date.";
-    }
-
-    const day = selectedDate.getDate();
-    const month = selectedDate.getMonth() + 1;
-    const year = selectedDate.getFullYear();
-
-    const originalParts = dateString.split("-");
-
-    if (
-      Number(originalParts[0]) !== day ||
-      Number(originalParts[1]) !== month ||
-      Number(originalParts[2]) !== year
-    ) {
-      return "Please enter a valid calendar date.";
-    }
-
-    const today = new Date();
-
-    today.setHours(0, 0, 0, 0);
-
-    if (selectedDate > today) {
+    if (dateString > todayIso()) {
       return "Return Date cannot be a future date.";
     }
 
-    if (selectedAsset) {
-      const assignedDate = convertToDate(
-        selectedAsset.assignedDate
-      );
-
-      if (
-        assignedDate &&
-        selectedDate < assignedDate
-      ) {
-        return "Return Date cannot be before Assigned Date.";
-      }
+    if (
+      selectedAsset &&
+      selectedAsset.assignedDateIso &&
+      dateString < selectedAsset.assignedDateIso
+    ) {
+      return "Return Date cannot be before Assigned Date.";
     }
 
     return "";
@@ -401,10 +354,6 @@ const AssetReturn = ({ username = "username", onLogout, onBack }) => {
     if (remarksErrorMessage) { setRemarksError(remarksErrorMessage); return; }
     setRemarksError("");
 
-    // Convert DD-MM-YYYY to YYYY-MM-DD for backend
-    const parts = returnForm.returnDate.split("-");
-    const isoDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
-
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
@@ -413,7 +362,8 @@ const AssetReturn = ({ username = "username", onLogout, onBack }) => {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
           body: JSON.stringify({
-            returnDate: isoDate,
+            // returnForm.returnDate is already YYYY-MM-DD (native date input).
+            returnDate: returnForm.returnDate,
             condition: returnForm.condition,
             remarks: returnForm.remarks.trim() || null,
           }),
@@ -838,7 +788,7 @@ const AssetReturn = ({ username = "username", onLogout, onBack }) => {
                       ? "input-error"
                       : ""
                   }
-                  type="text"
+                  type="date"
                   value={returnForm.returnDate}
                   onChange={(e) => {
                     setReturnForm({
@@ -849,8 +799,11 @@ const AssetReturn = ({ username = "username", onLogout, onBack }) => {
 
                     setReturnDateError("");
                   }}
-                  placeholder="DD-MM-YYYY"
-                  maxLength={10}
+                  min={
+                    selectedAsset?.assignedDateIso ||
+                    undefined
+                  }
+                  max={todayIso()}
                 />
 
                 {returnDateError && (
