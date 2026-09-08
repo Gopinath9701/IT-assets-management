@@ -227,6 +227,13 @@ const validateAssetId = (id) => {
     };
   }
 
+  if (numberPart === "000") {
+    return {
+      isValid: false,
+      message: "Asset ID number cannot be 000",
+    };
+  }
+
   return {
     isValid: true,
     message: "",

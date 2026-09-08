@@ -191,6 +191,10 @@ const AssetDetails = ({
       return "Asset ID must be 3 capital letters followed by 3 numbers (Example: LAP001)";
     }
 
+    if (value.slice(3) === "000") {
+      return "Asset ID number cannot be 000";
+    }
+
     return "";
   };
 

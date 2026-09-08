@@ -304,6 +304,7 @@ export default function ForgotPassword({
 }) {
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
   const [newPassword, setNewPassword] =
     useState("");
   const [confirmPassword, setConfirmPassword] =
@@ -459,6 +460,8 @@ export default function ForgotPassword({
       const data = await response.json();
 
       if (response.ok) {
+        setOtpSent(true);
+
         alert(
           data.message ||
             "OTP sent successfully."
@@ -744,6 +747,18 @@ export default function ForgotPassword({
 
           <label>Enter OTP</label>
 
+          {otpSent && (
+            <div
+              style={{
+                color: "#5f6368",
+                fontSize: "12px",
+                marginBottom: "5px",
+              }}
+            >
+              An OTP has been sent to your email. It expires in 10 minutes.
+            </div>
+          )}
+
           <input
             type="text"
             placeholder="Enter 6-digit OTP"
@@ -778,6 +793,25 @@ export default function ForgotPassword({
           >
             Verify OTP
           </button>
+
+          {otpSent && (
+            <button
+              type="button"
+              className="link-btn"
+              onClick={handleSendOTP}
+              style={{
+                background: "none",
+                border: "none",
+                color: "#1a73e8",
+                fontSize: "13px",
+                cursor: "pointer",
+                padding: "5px 0",
+                textAlign: "left",
+              }}
+            >
+              Didn't get it? Resend OTP
+            </button>
+          )}
 
           {/* ==========================================
               NEW PASSWORD
