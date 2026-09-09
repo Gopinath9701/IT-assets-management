@@ -103,10 +103,10 @@ const validateEmployeeId = (value) => {
 // =====================================================
 //
 // Employee ID:
-// 260821001
+// 200822001
 //
 // Email:
-// 260821001a@gmail.com
+// 200822001a@gmail.com
 //
 // =====================================================
 
@@ -124,13 +124,13 @@ const validateEmployeeIdOrEmail = (value) => {
     return validateEmployeeId(value);
   }
 
-  // Email — requires 260821001a@gmail.com format
+  // Email
+  // Required format: 9-digit Employee ID + a@gmail.com
   if (value.includes("@")) {
-    const emailPattern =
-      /^[0-9]{9}a@gmail\.com$/;
+    const emailPattern = /^[0-9]{9}a@gmail\.com$/;
 
     if (!emailPattern.test(value)) {
-      return "Email must be in this format: 260821001a@gmail.com";
+      return "Email must be in this format: 200822001a@gmail.com";
     }
 
     // Validate Employee ID part
@@ -159,7 +159,7 @@ const getPasswordRequirements = (password) => {
     uppercase: /[A-Z]/.test(password),
     lowercase: /[a-z]/.test(password),
     number: /[0-9]/.test(password),
-    special: /[!@#$%^&*(),.?":{}|<>_\-[\]/`~+=;']/.test(
+    special: /[!@#$%^&*(),.?":{}|<>\_\-\/`~+=;'\[\]\\]/.test(
       password
     ),
     noSpaces: !/\s/.test(password),
@@ -330,7 +330,10 @@ export default function Login({
       return;
     }
 
-    // Login request
+    // =================================================
+    // LOGIN REQUEST
+    // =================================================
+
     try {
       setLoading(true);
 
@@ -357,7 +360,10 @@ export default function Login({
         data
       );
 
-      // Login success
+      // =================================================
+      // LOGIN SUCCESS
+      // =================================================
+
       if (response.ok && data.success) {
         localStorage.setItem(
           "token",
@@ -381,11 +387,14 @@ export default function Login({
         }
       }
 
-      // Login failed
+      // =================================================
+      // LOGIN FAILED
+      // =================================================
+
       else {
-        alert(
-          data.message ||
-            "Invalid credentials."
+        setIdentifierTouched(true);
+        setIdentifierError(
+          "System data not found."
         );
       }
     } catch (error) {
@@ -445,20 +454,6 @@ export default function Login({
               }}
             >
               ⚠️ {identifierError}
-            </div>
-          )}
-
-        {!identifierError &&
-          identifierTouched &&
-          formData.employeeIdOrEmail && (
-            <div
-              style={{
-                color: "#188038",
-                fontSize: "12px",
-                marginTop: "5px",
-              }}
-            >
-              ✓ Valid Employee ID or Email
             </div>
           )}
 
