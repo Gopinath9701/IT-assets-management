@@ -1,74 +1,57 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import "../App.css";
 
 // =====================================================
-// VALIDATE EMPLOYEE ID
+// REGISTERED LOGIN EMAILS
 // =====================================================
-//
-// Format:
-// YYMMDD + 3-digit employee number
-//
-// Example:
-// 260821001
-//
-// YY = 26
-// MM = 08
-// DD = 21
-// Employee number = 001
-//
-// Rules:
-// - Past dates are allowed
-// - Today is allowed
-// - Future dates are NOT allowed
-// - Exactly 9 digits
-// - No spaces
-// - Employee number cannot be 000
+
+const REGISTERED_EMAILS = {
+  "260822001a@gmail.com": "HR",
+  "260822002a@gmail.com": "Asset",
+  "260822003a@gmail.com": "Inventory",
+};
+
+// =====================================================
+// VALIDATE EMPLOYEE ID
 // =====================================================
 
 const validateEmployeeId = (value) => {
-  // Empty
   if (value.length === 0) {
     return "Please enter Employee ID.";
   }
 
-  // Spaces
   if (/\s/.test(value)) {
     return "Spaces are not allowed.";
   }
 
-  // Numbers only
   if (!/^[0-9]+$/.test(value)) {
     return "Employee ID must contain numbers only.";
   }
 
-  // Exactly 9 digits
   if (!/^[0-9]{9}$/.test(value)) {
     return "Employee ID must be exactly 9 digits.";
   }
 
-  // ----------------------------------------
-  // YYMMDD + 3 digits
-  // ----------------------------------------
-
-  const year  = Number(value.substring(0, 2));
+  const year = Number(value.substring(0, 2));
   const month = Number(value.substring(2, 4));
-  const day   = Number(value.substring(4, 6));
+  const day = Number(value.substring(4, 6));
 
-  // Month validation
   if (month < 1 || month > 12) {
     return "Invalid month in Employee ID.";
   }
 
-  // Day validation
   if (day < 1 || day > 31) {
     return "Invalid day in Employee ID.";
   }
 
-  // Validate actual calendar date
   const fullYear = 2000 + year;
 
-  const employeeDate = new Date(fullYear, month - 1, day);
+  const employeeDate = new Date(
+    fullYear,
+    month - 1,
+    day
+  );
 
   if (
     employeeDate.getFullYear() !== fullYear ||
@@ -78,21 +61,16 @@ const validateEmployeeId = (value) => {
     return "Invalid date in Employee ID.";
   }
 
-  // Future date validation
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+
   employeeDate.setHours(0, 0, 0, 0);
 
   if (employeeDate > today) {
     return "Future date Employee IDs are not allowed.";
   }
 
-  // Employee number (last 3 digits)
   const employeeNumber = value.substring(6);
-
-  if (!/^[0-9]{3}$/.test(employeeNumber)) {
-    return "Last 3 digits must be the employee number.";
-  }
 
   if (employeeNumber === "000") {
     return "Employee number cannot be 000.";
@@ -104,54 +82,31 @@ const validateEmployeeId = (value) => {
 // =====================================================
 // VALIDATE EMAIL
 // =====================================================
-//
-// Email MUST match the Employee ID with 'a' suffix.
-//
-// Example:
-//
-// Employee ID:
-// 260821001
-//
-// Email:
-// 260821001a@gmail.com
-//
-// These are NOT allowed:
-//
-// 260821001@gmail.com   (missing 'a')
-// shravan@gmail.com
-// abc260821001a@gmail.com
-// 260821001a@yahoo.com
-// =====================================================
 
 const validateEmail = (value) => {
-  // Empty
   if (value.length === 0) {
     return "Please enter your Email.";
   }
 
-  // Spaces
   if (/\s/.test(value)) {
     return "Spaces are not allowed.";
   }
 
-  // Maximum length
   if (value.length > 50) {
     return "Email is too long.";
   }
 
-  // Exactly 9 digits + a + @gmail.com
-  const emailPattern = /^([0-9]{9})a@gmail\.com$/;
+  const emailPattern =
+    /^([0-9]{9})a@gmail\.com$/;
 
   const match = value.match(emailPattern);
 
   if (!match) {
-    return "Email must be in this format: 260821001a@gmail.com";
+    return "Email must be in this format: YYMMDDXXXa@gmail.com";
   }
 
-  // Get Employee ID from email
   const employeeId = match[1];
 
-  // Validate Employee ID
   const employeeIdError =
     validateEmployeeId(employeeId);
 
@@ -163,7 +118,18 @@ const validateEmail = (value) => {
 };
 
 // =====================================================
-// OTP VALIDATION
+// CHECK REGISTERED EMAIL
+// =====================================================
+
+const isRegisteredEmail = (email) => {
+  return Object.prototype.hasOwnProperty.call(
+    REGISTERED_EMAILS,
+    email
+  );
+};
+
+// =====================================================
+// VALIDATE OTP
 // =====================================================
 
 const validateOTP = (value) => {
@@ -192,9 +158,10 @@ const getPasswordRequirements = (password) => {
     uppercase: /[A-Z]/.test(password),
     lowercase: /[a-z]/.test(password),
     number: /[0-9]/.test(password),
-    special: /[!@#$%^&*(),.?":{}|<>_\-+=;'/`~[\]\\]/.test(
-      password
-    ),
+    special:
+      /[!@#$%^&*(),.?":{}|<>_\-+=;'/`~[\]\\]/.test(
+        password
+      ),
     noSpaces: !/\s/.test(password),
   };
 };
@@ -207,12 +174,10 @@ const validatePassword = (
   password,
   confirmPassword
 ) => {
-  // Empty
   if (password.length === 0) {
     return "Please enter a new password.";
   }
 
-  // Maximum 20 characters
   if (password.length > 20) {
     return "Password cannot exceed 20 characters.";
   }
@@ -220,37 +185,30 @@ const validatePassword = (
   const requirements =
     getPasswordRequirements(password);
 
-  // No spaces
   if (!requirements.noSpaces) {
     return "Password cannot contain spaces.";
   }
 
-  // Minimum 8 characters
   if (!requirements.minLength) {
     return "Password must contain at least 8 characters.";
   }
 
-  // Uppercase
   if (!requirements.uppercase) {
     return "Password must contain at least one uppercase letter.";
   }
 
-  // Lowercase
   if (!requirements.lowercase) {
     return "Password must contain at least one lowercase letter.";
   }
 
-  // Number
   if (!requirements.number) {
     return "Password must contain at least one number.";
   }
 
-  // Special character
   if (!requirements.special) {
     return "Password must contain at least one special character.";
   }
 
-  // Confirm password
   if (confirmPassword.length === 0) {
     return "Please confirm your password.";
   }
@@ -296,7 +254,20 @@ const PasswordRequirement = ({
 };
 
 // =====================================================
-// LOGIN COMPONENT
+// FORMAT TIMER
+// =====================================================
+
+const formatTime = (seconds) => {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+
+  return `${String(minutes).padStart(2, "0")}:${String(
+    remainingSeconds
+  ).padStart(2, "0")}`;
+};
+
+// =====================================================
+// FORGOT PASSWORD COMPONENT
 // =====================================================
 
 export default function ForgotPassword({
@@ -304,11 +275,20 @@ export default function ForgotPassword({
 }) {
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
+
   const [otpSent, setOtpSent] = useState(false);
+  const [otpVerified, setOtpVerified] =
+    useState(false);
+
   const [newPassword, setNewPassword] =
     useState("");
+
   const [confirmPassword, setConfirmPassword] =
     useState("");
+
+  // ===================================================
+  // PASSWORD VISIBILITY
+  // ===================================================
 
   const [showNewPassword, setShowNewPassword] =
     useState(false);
@@ -318,9 +298,15 @@ export default function ForgotPassword({
     setShowConfirmPassword,
   ] = useState(false);
 
-  // Validation states
+  // ===================================================
+  // VALIDATION STATES
+  // ===================================================
+
   const [emailError, setEmailError] =
     useState("");
+
+  const [emailFound, setEmailFound] =
+    useState(false);
 
   const [otpError, setOtpError] =
     useState("");
@@ -330,43 +316,132 @@ export default function ForgotPassword({
     setConfirmPasswordError,
   ] = useState("");
 
-  // =====================================================
+  // ===================================================
+  // MESSAGES
+  // ===================================================
+
+  const [successMessage, setSuccessMessage] =
+    useState("");
+
+  const [serverError, setServerError] =
+    useState("");
+
+  // ===================================================
+  // OTP TIMER
+  // ===================================================
+
+  const [otpTimer, setOtpTimer] =
+    useState(0);
+
+  // ===================================================
+  // LOADING
+  // ===================================================
+
+  const [sendingOTP, setSendingOTP] =
+    useState(false);
+
+  const [verifyingOTP, setVerifyingOTP] =
+    useState(false);
+
+  const [resettingPassword, setResettingPassword] =
+    useState(false);
+
+  // ===================================================
   // PASSWORD REQUIREMENTS
-  // =====================================================
+  // ===================================================
 
   const passwordRequirements =
     getPasswordRequirements(newPassword);
 
-  // =====================================================
+  // ===================================================
+  // OTP COUNTDOWN
+  // ===================================================
+
+  useEffect(() => {
+    if (!otpSent || otpTimer <= 0) {
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setOtpTimer((previous) => {
+        if (previous <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+
+        return previous - 1;
+      });
+    }, 1000);
+
+    return () => {
+      clearInterval(timer);
+    };
+  }, [otpSent, otpTimer]);
+
+  // ===================================================
   // EMAIL CHANGE
-  // =====================================================
+  // ===================================================
 
   const handleEmailChange = (e) => {
-    const value = e.target.value;
+    const value = e.target.value.toLowerCase();
 
     setEmail(value);
 
+    // Reset OTP flow when email changes
+    setOtpSent(false);
+    setOtpVerified(false);
+    setOtpTimer(0);
+    setOtp("");
+
+    setOtpError("");
+    setSuccessMessage("");
+    setServerError("");
+
+    setEmailFound(false);
+
+    // Empty email
     if (value === "") {
       setEmailError("");
       return;
     }
 
-    const error = validateEmail(value);
+    // Validate format
+    const formatError =
+      validateEmail(value);
 
-    setEmailError(error);
+    if (formatError) {
+      setEmailError(formatError);
+      return;
+    }
+
+    // Registered email
+    if (isRegisteredEmail(value)) {
+      // IMPORTANT:
+      // Valid email = NO GREEN MESSAGE
+      setEmailFound(true);
+      setEmailError("");
+    } else {
+      // Invalid email = RED MESSAGE
+      setEmailFound(false);
+      setEmailError("Email does not exist.");
+    }
   };
 
-  // =====================================================
+  // ===================================================
   // OTP CHANGE
-  // =====================================================
+  // ===================================================
 
   const handleOTPChange = (e) => {
     const value = e.target.value;
 
     setOtp(value);
+    setOtpVerified(false);
+
+    setOtpError("");
+    setSuccessMessage("");
+    setServerError("");
 
     if (value === "") {
-      setOtpError("");
       return;
     }
 
@@ -375,16 +450,16 @@ export default function ForgotPassword({
     setOtpError(error);
   };
 
-  // =====================================================
+  // ===================================================
   // NEW PASSWORD CHANGE
-  // =====================================================
+  // ===================================================
 
   const handleNewPasswordChange = (e) => {
     const value = e.target.value;
 
     setNewPassword(value);
+    setServerError("");
 
-    // Validate confirm password if already entered
     if (
       confirmPassword.length > 0 &&
       value !== confirmPassword
@@ -397,14 +472,15 @@ export default function ForgotPassword({
     }
   };
 
-  // =====================================================
+  // ===================================================
   // CONFIRM PASSWORD CHANGE
-  // =====================================================
+  // ===================================================
 
   const handleConfirmPasswordChange = (e) => {
     const value = e.target.value;
 
     setConfirmPassword(value);
+    setServerError("");
 
     if (value === "") {
       setConfirmPasswordError("");
@@ -420,23 +496,39 @@ export default function ForgotPassword({
     }
   };
 
-  // =====================================================
+  // ===================================================
   // SEND OTP
-  // =====================================================
+  // ===================================================
 
   const handleSendOTP = async (e) => {
     e.preventDefault();
 
+    setSuccessMessage("");
+    setServerError("");
+    setOtpError("");
+
+    // Validate email
     const emailValidation =
       validateEmail(email);
 
     if (emailValidation) {
       setEmailError(emailValidation);
-      alert(emailValidation);
+      setEmailFound(false);
       return;
     }
 
+    // Check registered email
+    if (!isRegisteredEmail(email)) {
+      setEmailFound(false);
+      setEmailError("Email not found.");
+      return;
+    }
+
+    // Valid email
     setEmailError("");
+    setEmailFound(true);
+
+    setSendingOTP(true);
 
     try {
       const response = await fetch(
@@ -450,27 +542,54 @@ export default function ForgotPassword({
 
           body: JSON.stringify({
             email: email,
-
-            // Compatibility with old backend
             emailOrId: email,
           }),
         }
       );
 
-      const data = await response.json();
+      let data = {};
+
+      try {
+        data = await response.json();
+      } catch {
+        data = {};
+      }
 
       if (response.ok) {
         setOtpSent(true);
+        setOtpVerified(false);
 
-        alert(
+        // 3-minute countdown
+        setOtpTimer(180);
+
+        setOtp("");
+        setOtpError("");
+
+        setSuccessMessage(
           data.message ||
             "OTP sent successfully."
         );
+
+        setServerError("");
       } else {
-        alert(
-          data.message ||
-            "Unable to send OTP."
-        );
+        setOtpSent(false);
+        setOtpVerified(false);
+        setOtpTimer(0);
+
+        // IMPORTANT:
+        // Never put backend error under Email
+        setEmailError("");
+
+        if (response.status === 429) {
+          setServerError(
+            "Too many attempts. Please try again later."
+          );
+        } else {
+          setServerError(
+            data.message ||
+              "Unable to send OTP."
+          );
+        }
       }
     } catch (error) {
       console.error(
@@ -478,39 +597,70 @@ export default function ForgotPassword({
         error
       );
 
-      alert(
+      // Keep email clean
+      setEmailError("");
+
+      setServerError(
         "Unable to connect to server. Please make sure the backend is running."
       );
+    } finally {
+      setSendingOTP(false);
     }
   };
 
-  // =====================================================
+  // ===================================================
   // VERIFY OTP
-  // =====================================================
+  // ===================================================
 
   const handleVerifyOTP = async (e) => {
     e.preventDefault();
 
+    setSuccessMessage("");
+    setServerError("");
+
+    // Validate email
     const emailValidation =
       validateEmail(email);
 
     if (emailValidation) {
       setEmailError(emailValidation);
-      alert(emailValidation);
       return;
     }
 
+    // Registered email
+    if (!isRegisteredEmail(email)) {
+      setEmailFound(false);
+      setEmailError("Email not found.");
+      return;
+    }
+
+    // Validate OTP
     const otpValidation =
       validateOTP(otp);
 
     if (otpValidation) {
       setOtpError(otpValidation);
-      alert(otpValidation);
+      return;
+    }
+
+    if (!otpSent) {
+      setOtpError(
+        "Please request an OTP first."
+      );
+      return;
+    }
+
+    if (otpTimer <= 0) {
+      setOtpError(
+        "OTP has expired. Please request a new OTP."
+      );
       return;
     }
 
     setEmailError("");
     setOtpError("");
+
+    setVerifyingOTP(true);
 
     try {
       const response = await fetch(
@@ -525,22 +675,33 @@ export default function ForgotPassword({
           body: JSON.stringify({
             email: email,
             otp: otp,
-
-            // Compatibility with old backend
             emailOrId: email,
           }),
         }
       );
 
-      const data = await response.json();
+      let data = {};
+
+      try {
+        data = await response.json();
+      } catch {
+        data = {};
+      }
 
       if (response.ok) {
-        alert(
+        setOtpVerified(true);
+
+        setSuccessMessage(
           data.message ||
             "OTP verified successfully."
         );
+
+        setOtpError("");
+        setServerError("");
       } else {
-        alert(
+        setOtpVerified(false);
+
+        setOtpError(
           data.message ||
             "Invalid OTP."
         );
@@ -551,40 +712,73 @@ export default function ForgotPassword({
         error
       );
 
-      alert(
+      setOtpVerified(false);
+
+      setServerError(
         "Unable to connect to server. Please make sure the backend is running."
       );
+    } finally {
+      setVerifyingOTP(false);
     }
   };
 
-  // =====================================================
+  // ===================================================
   // RESET PASSWORD
-  // =====================================================
+  // ===================================================
 
   const handleResetPassword = async (e) => {
     e.preventDefault();
 
-    // Email validation
+    setSuccessMessage("");
+    setServerError("");
+
+    // Validate email
     const emailValidation =
       validateEmail(email);
 
     if (emailValidation) {
       setEmailError(emailValidation);
-      alert(emailValidation);
       return;
     }
 
-    // OTP validation
+    // Registered email
+    if (!isRegisteredEmail(email)) {
+      setEmailFound(false);
+      setEmailError("Email not found.");
+      return;
+    }
+
+    // Validate OTP
     const otpValidation =
       validateOTP(otp);
 
     if (otpValidation) {
       setOtpError(otpValidation);
-      alert(otpValidation);
       return;
     }
 
-    // Password validation
+    if (!otpSent) {
+      setOtpError(
+        "Please request an OTP first."
+      );
+      return;
+    }
+
+    if (!otpVerified) {
+      setOtpError(
+        "Please verify OTP before resetting password."
+      );
+      return;
+    }
+
+    if (otpTimer <= 0) {
+      setOtpError(
+        "OTP has expired. Please request a new OTP."
+      );
+      return;
+    }
+
+    // Validate password
     const passwordValidation =
       validatePassword(
         newPassword,
@@ -599,15 +793,20 @@ export default function ForgotPassword({
         setConfirmPasswordError(
           passwordValidation
         );
+      } else {
+        setServerError(
+          passwordValidation
+        );
       }
 
-      alert(passwordValidation);
       return;
     }
 
     setEmailError("");
     setOtpError("");
     setConfirmPasswordError("");
+
+    setResettingPassword(true);
 
     try {
       const response = await fetch(
@@ -623,22 +822,26 @@ export default function ForgotPassword({
             email: email,
             otp: otp,
             newPassword: newPassword,
-
-            // Compatibility with old backend
             emailOrId: email,
           }),
         }
       );
 
-      const data = await response.json();
+      let data = {};
+
+      try {
+        data = await response.json();
+      } catch {
+        data = {};
+      }
 
       if (response.ok) {
-        alert(
+        setSuccessMessage(
           data.message ||
             "Password reset successfully."
         );
 
-        // Clear fields
+        // Clear form
         setEmail("");
         setOtp("");
         setNewPassword("");
@@ -648,12 +851,20 @@ export default function ForgotPassword({
         setOtpError("");
         setConfirmPasswordError("");
 
-        // Return to Login
+        setEmailFound(false);
+        setOtpSent(false);
+        setOtpVerified(false);
+        setOtpTimer(0);
+
+        setServerError("");
+
         if (onLoginClick) {
-          onLoginClick();
+          setTimeout(() => {
+            onLoginClick();
+          }, 1200);
         }
       } else {
-        alert(
+        setServerError(
           data.message ||
             "Unable to reset password."
         );
@@ -664,15 +875,27 @@ export default function ForgotPassword({
         error
       );
 
-      alert(
+      setServerError(
         "Unable to connect to server. Please make sure the backend is running."
       );
+    } finally {
+      setResettingPassword(false);
     }
   };
 
-  // =====================================================
+  // ===================================================
+  // BACK TO LOGIN
+  // ===================================================
+
+  const handleBackToLogin = () => {
+    if (onLoginClick) {
+      onLoginClick();
+    }
+  };
+
+  // ===================================================
   // UI
-  // =====================================================
+  // ===================================================
 
   return (
     <div
@@ -696,7 +919,7 @@ export default function ForgotPassword({
 
           <input
             type="text"
-            placeholder="Enter your Email (e.g. 260821001a@gmail.com)"
+            placeholder="Enter your Email (e.g. YYMMDDXXXa@gmail.com)"
             value={email}
             onChange={handleEmailChange}
             autoComplete="email"
@@ -707,6 +930,8 @@ export default function ForgotPassword({
                 : ""
             }
           />
+
+          {/* ONLY RED EMAIL ERRORS */}
 
           {emailError && (
             <div
@@ -720,26 +945,52 @@ export default function ForgotPassword({
             </div>
           )}
 
-          {!emailError &&
-            email.length > 0 && (
-              <div
-                style={{
-                  color: "#188038",
-                  fontSize: "12px",
-                  marginTop: "5px",
-                }}
-              >
-                ✓ Valid Employee Email
-              </div>
-            )}
+          {/* ==========================================
+              SEND OTP
+          ========================================== */}
 
           <button
             type="button"
             className="action-btn"
             onClick={handleSendOTP}
+            disabled={sendingOTP}
           >
-            Send OTP
+            {sendingOTP
+              ? "Sending..."
+              : "Send OTP"}
           </button>
+
+          {/* ==========================================
+              SUCCESS MESSAGE
+          ========================================== */}
+
+          {successMessage && (
+            <div
+              style={{
+                color: "#188038",
+                fontSize: "12px",
+                marginTop: "7px",
+              }}
+            >
+              ✓ {successMessage}
+            </div>
+          )}
+
+          {/* ==========================================
+              SERVER ERROR
+          ========================================== */}
+
+          {serverError && (
+            <div
+              style={{
+                color: "#d93025",
+                fontSize: "12px",
+                marginTop: "7px",
+              }}
+            >
+              ⚠️ {serverError}
+            </div>
+          )}
 
           {/* ==========================================
               OTP
@@ -750,12 +1001,19 @@ export default function ForgotPassword({
           {otpSent && (
             <div
               style={{
-                color: "#5f6368",
+                color:
+                  otpTimer > 0
+                    ? "#5f6368"
+                    : "#d93025",
                 fontSize: "12px",
                 marginBottom: "5px",
               }}
             >
-              An OTP has been sent to your email. It expires in 10 minutes.
+              {otpTimer > 0
+                ? `An OTP has been sent to your email. It expires in ${formatTime(
+                    otpTimer
+                  )}.`
+                : "OTP has expired. Please request a new OTP."}
             </div>
           )}
 
@@ -790,26 +1048,61 @@ export default function ForgotPassword({
             type="button"
             className="action-btn"
             onClick={handleVerifyOTP}
+            disabled={verifyingOTP}
           >
-            Verify OTP
+            {verifyingOTP
+              ? "Verifying..."
+              : "Verify OTP"}
           </button>
+
+          {/* OTP VERIFIED */}
+
+          {otpVerified && (
+            <div
+              style={{
+                color: "#188038",
+                fontSize: "12px",
+                marginTop: "5px",
+              }}
+            >
+              ✓ OTP verified
+            </div>
+          )}
+
+          {/* ==========================================
+              RESEND OTP
+          ========================================== */}
 
           {otpSent && (
             <button
               type="button"
               className="link-btn"
               onClick={handleSendOTP}
+              disabled={
+                otpTimer > 0 || sendingOTP
+              }
               style={{
                 background: "none",
                 border: "none",
-                color: "#1a73e8",
+                color:
+                  otpTimer > 0
+                    ? "#9aa0a6"
+                    : "#1a73e8",
                 fontSize: "13px",
-                cursor: "pointer",
+                cursor:
+                  otpTimer > 0 ||
+                  sendingOTP
+                    ? "default"
+                    : "pointer",
                 padding: "5px 0",
                 textAlign: "left",
               }}
             >
-              Didn't get it? Resend OTP
+              {otpTimer > 0
+                ? `Resend OTP in ${formatTime(
+                    otpTimer
+                  )}`
+                : "Didn't get it? Resend OTP"}
             </button>
           )}
 
@@ -860,7 +1153,7 @@ export default function ForgotPassword({
           </div>
 
           {/* ==========================================
-              GOOGLE-STYLE PASSWORD REQUIREMENTS
+              PASSWORD REQUIREMENTS
           ========================================== */}
 
           {newPassword.length > 0 && (
@@ -1007,13 +1300,42 @@ export default function ForgotPassword({
             type="button"
             className="action-btn"
             onClick={handleResetPassword}
+            disabled={resettingPassword}
           >
-            Reset Password
+            {resettingPassword
+              ? "Resetting..."
+              : "Reset Password"}
+          </button>
+
+          {/* ==========================================
+              BACK TO LOGIN — BOTTOM
+          ========================================== */}
+
+          <button
+            type="button"
+            className="back-login-btn"
+            onClick={handleBackToLogin}
+            style={{
+              width: "100%",
+              marginTop: "8px",
+              padding: "8px 12px",
+              background: "#ffffff",
+              border: "1px solid #dadce0",
+              borderRadius: "4px",
+              color: "#333333",
+              fontSize: "13px",
+              cursor: "pointer",
+            }}
+          >
+            ← Back to Login
           </button>
 
         </form>
-
       </div>
+
+      {/* ==========================================
+          FOOTER
+      ========================================== */}
 
       <footer
         style={{
@@ -1022,7 +1344,6 @@ export default function ForgotPassword({
       >
         © 2026 ITAMS
       </footer>
-
     </div>
   );
 }
