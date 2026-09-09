@@ -1,59 +1,105 @@
 import React, { useState, useEffect } from "react";
-import "./DepartmentManagement.css";
+import "./ReportMaintenance.css";
 
 // =====================================================
-// VALIDATION - DEPARTMENT NAME
+// EMPLOYEE ID VALIDATION
+// FORMAT: YYMMDDXXX
 // =====================================================
-const validateDepartmentName = (name) => {
-  if (name.length === 0) {
+
+const validateEmployeeId = (id) => {
+  if (!id || id.length === 0) {
     return {
       isValid: false,
-      message: "Department Name is required",
+      message: "Employee ID is required",
     };
   }
 
-  if (name.trim() === "") {
-    return {
-      isValid: false,
-      message: "Department Name cannot contain only spaces",
-    };
-  }
-
-  if (name !== name.trim()) {
+  if (id !== id.trim()) {
     return {
       isValid: false,
       message:
-        "Department Name should not have leading or trailing spaces",
+        "Employee ID should not have leading or trailing spaces",
     };
   }
 
-  if (/\s{2,}/.test(name)) {
+  if (/\s/.test(id)) {
+    return {
+      isValid: false,
+      message: "Employee ID should not contain spaces",
+    };
+  }
+
+  if (!/^\d+$/.test(id)) {
+    return {
+      isValid: false,
+      message: "Employee ID must contain numbers only",
+    };
+  }
+
+  if (id.length !== 9) {
     return {
       isValid: false,
       message:
-        "Department Name should not contain multiple consecutive spaces",
+        "Employee ID must be exactly 9 digits (YYMMDDXXX)",
     };
   }
 
-  if (name.length < 2) {
+  const yearShort = Number(id.substring(0, 2));
+  const month = Number(id.substring(2, 4));
+  const day = Number(id.substring(4, 6));
+  const employeeNumber = Number(id.substring(6, 9));
+
+  const fullYear = 2000 + yearShort;
+
+  if (month < 1 || month > 12) {
     return {
       isValid: false,
-      message: "Department Name must be at least 2 characters",
+      message: "Employee ID contains an invalid month",
     };
   }
 
-  if (name.length > 100) {
+  if (day < 1 || day > 31) {
     return {
       isValid: false,
-      message: "Department Name cannot exceed 100 characters",
+      message: "Employee ID contains an invalid day",
     };
   }
 
-  if (!/^[A-Za-z\s]+$/.test(name)) {
+  if (employeeNumber < 1 || employeeNumber > 999) {
     return {
       isValid: false,
       message:
-        "Department Name should contain only letters and spaces",
+        "Employee number must be between 001 and 999",
+    };
+  }
+
+  const employeeDate = new Date(
+    fullYear,
+    month - 1,
+    day
+  );
+
+  employeeDate.setHours(0, 0, 0, 0);
+
+  if (
+    employeeDate.getFullYear() !== fullYear ||
+    employeeDate.getMonth() !== month - 1 ||
+    employeeDate.getDate() !== day
+  ) {
+    return {
+      isValid: false,
+      message: "Employee ID contains an invalid date",
+    };
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  if (employeeDate > today) {
+    return {
+      isValid: false,
+      message:
+        "Future dates are not allowed. Employee ID must contain a past or today's date.",
     };
   }
 
@@ -64,58 +110,105 @@ const validateDepartmentName = (name) => {
 };
 
 // =====================================================
-// VALIDATION - DEPARTMENT HEAD
+// ASSET ID VALIDATION
+//
+// ALL 11 ASSET TYPES
+//
+// LAP001 - LAP999  = Laptop
+// DES001 - DES999  = Desktop
+// MON001 - MON999  = Monitor
+// KEY001 - KEY999  = Keyboard
+// WEB001 - WEB999  = Webcam
+// PRO001 - PRO999  = Projector
+// MOU001 - MOU999  = Mouse
+// CPU001 - CPU999  = CPU
+// PRI001 - PRI999  = Printer
+// HEA001 - HEA999  = Headset
+// SCN001 - SCN999  = Scanner
+//
+// INVALID:
+// LAP000
+// LAP1000
+// LAPABC
+// LAP01
+// XYZ001
 // =====================================================
-const validateDepartmentHead = (head) => {
-  if (head.length === 0) {
+
+const ASSET_PREFIXES = [
+  "LAP",
+  "DES",
+  "MON",
+  "KEY",
+  "WEB",
+  "PRO",
+  "MOU",
+  "CPU",
+  "PRI",
+  "HEA",
+  "SCN",
+];
+
+const validateAssetId = (id) => {
+  if (!id || id.length === 0) {
     return {
       isValid: false,
-      message: "Department Head is required",
+      message: "Asset ID is required",
     };
   }
 
-  if (head.trim() === "") {
-    return {
-      isValid: false,
-      message: "Department Head cannot contain only spaces",
-    };
-  }
-
-  if (head !== head.trim()) {
+  if (id !== id.trim()) {
     return {
       isValid: false,
       message:
-        "Department Head should not have leading or trailing spaces",
+        "Asset ID should not have leading or trailing spaces",
     };
   }
 
-  if (/\s{2,}/.test(head)) {
+  if (/\s/.test(id)) {
+    return {
+      isValid: false,
+      message: "Asset ID should not contain spaces",
+    };
+  }
+
+  const value = id.toUpperCase();
+
+  if (value.length !== 6) {
+    return {
+      isValid: false,
+      message: "Asset ID must be exactly 6 characters",
+    };
+  }
+
+  const prefix = value.substring(0, 3);
+  const numberPart = value.substring(3);
+
+  // Check asset prefix
+  if (!ASSET_PREFIXES.includes(prefix)) {
     return {
       isValid: false,
       message:
-        "Department Head should not contain multiple consecutive spaces",
+        "Invalid Asset ID prefix. Use LAP, DES, MON, KEY, WEB, PRO, MOU, CPU, PRI, HEA or SCN",
     };
   }
 
-  if (head.length < 2) {
-    return {
-      isValid: false,
-      message: "Department Head must be at least 2 characters",
-    };
-  }
-
-  if (head.length > 100) {
-    return {
-      isValid: false,
-      message: "Department Head cannot exceed 100 characters",
-    };
-  }
-
-  if (!/^[A-Za-z\s]+$/.test(head)) {
+  // Last 3 characters must be numbers
+  if (!/^\d{3}$/.test(numberPart)) {
     return {
       isValid: false,
       message:
-        "Department Head should contain only letters and spaces",
+        "Last 3 characters of Asset ID must be numbers",
+    };
+  }
+
+  const assetNumber = Number(numberPart);
+
+  // 001 - 999 only
+  if (assetNumber < 1 || assetNumber > 999) {
+    return {
+      isValid: false,
+      message:
+        "Asset number must be between 001 and 999",
     };
   }
 
@@ -126,51 +219,97 @@ const validateDepartmentHead = (head) => {
 };
 
 // =====================================================
-// VALIDATION - EMPLOYEE COUNT
+// ISSUE DESCRIPTION VALIDATION
 // =====================================================
-const validateEmployeeCount = (count) => {
-  if (count.length === 0) {
+
+const validateDescription = (desc) => {
+  if (!desc || desc.length === 0) {
     return {
       isValid: false,
-      message: "Number of Employees is required",
+      message: "Issue description is required",
     };
   }
 
-  if (count.trim() === "") {
-    return {
-      isValid: false,
-      message: "Number of Employees cannot contain only spaces",
-    };
-  }
-
-  if (count !== count.trim()) {
+  if (desc.trim() === "") {
     return {
       isValid: false,
       message:
-        "Number of Employees should not have leading or trailing spaces",
+        "Issue description cannot contain only spaces",
     };
   }
 
-  if (!/^[0-9]+$/.test(count)) {
+  if (desc !== desc.trim()) {
     return {
       isValid: false,
-      message: "Number of Employees must contain numbers only",
+      message:
+        "Issue description should not have leading or trailing spaces",
     };
   }
 
-  const number = Number(count);
-
-  if (number < 1) {
+  // Multiple consecutive spaces are not allowed
+  if (/ {2,}/.test(desc)) {
     return {
       isValid: false,
-      message: "Number of Employees must be at least 1",
+      message:
+        "Issue description should not contain multiple consecutive spaces",
     };
   }
 
-  if (number > 100) {
+  // Minimum 10 characters
+  if (desc.length < 10) {
     return {
       isValid: false,
-      message: "Number of Employees cannot exceed 100",
+      message:
+        "Issue description must be at least 10 characters long",
+    };
+  }
+
+  // Maximum 500 characters
+  if (desc.length > 500) {
+    return {
+      isValid: false,
+      message:
+        "Issue description cannot exceed 500 characters",
+    };
+  }
+
+  // Repeated special characters
+  if (/([.,;:'"()[\]*&#@!%$^])\1+/.test(desc)) {
+    return {
+      isValid: false,
+      message:
+        "Issue description should not contain repeated special characters",
+    };
+  }
+
+  // Invalid repeated combinations
+  if (
+    /(\.\.|,,|;;|\/\/|\\\\|\]\]|\[\[|\)\)|\(\(|\*\*|&&|\^\^|%%|\$\$|##|@@|!!)/.test(
+      desc
+    )
+  ) {
+    return {
+      isValid: false,
+      message:
+        "Issue description contains invalid repeated symbols",
+    };
+  }
+
+  // Allowed characters
+  if (!/^[A-Za-z0-9\s.,!?;:'"()/%-]+$/.test(desc)) {
+    return {
+      isValid: false,
+      message:
+        "Issue description contains invalid characters",
+    };
+  }
+
+  // Must contain at least one letter or number
+  if (!/[A-Za-z0-9]/.test(desc)) {
+    return {
+      isValid: false,
+      message:
+        "Issue description must contain letters or numbers",
     };
   }
 
@@ -181,265 +320,330 @@ const validateEmployeeCount = (count) => {
 };
 
 // =====================================================
-// VALIDATION - SEARCH
+// PAGE SIZE OPTIONS
 // =====================================================
-const validateSearch = (search) => {
-  if (search.length === 0) {
-    return {
-      isValid: false,
-      message: "Department Name is required for search",
-    };
-  }
 
-  if (search.trim() === "") {
-    return {
-      isValid: false,
-      message: "Search cannot contain only spaces",
-    };
-  }
-
-  if (search !== search.trim()) {
-    return {
-      isValid: false,
-      message:
-        "Search should not have leading or trailing spaces",
-    };
-  }
-
-  if (/\s{2,}/.test(search)) {
-    return {
-      isValid: false,
-      message: "Only a single space is allowed between words",
-    };
-  }
-
-  if (search.length < 2) {
-    return {
-      isValid: false,
-      message: "Search must contain at least 2 characters",
-    };
-  }
-
-  if (search.length > 100) {
-    return {
-      isValid: false,
-      message: "Search cannot exceed 100 characters",
-    };
-  }
-
-  if (!/^[A-Za-z ]+$/.test(search)) {
-    return {
-      isValid: false,
-      message: "Search should contain only letters and spaces",
-    };
-  }
-
-  return {
-    isValid: true,
-    message: "",
-  };
-};
+const PAGE_SIZE_OPTIONS = [10, 30, 50, "All"];
 
 // =====================================================
 // MAIN COMPONENT
 // =====================================================
-const DepartmentManagement = ({
+
+const ReportMaintenance = ({
   username = "username",
   onLogout,
   onBack,
 }) => {
-  // =====================================================
-  // SEARCH STATES
-  // =====================================================
-
-  // What user is currently typing
-  const [search, setSearch] = useState("");
-
-  // Search value ONLY after Search button is clicked
-  const [searchApplied, setSearchApplied] = useState("");
-
-  // Search error
-  const [searchError, setSearchError] = useState("");
-
-  // Whether Search button has been clicked
-  const [searchTouched, setSearchTouched] = useState(false);
-
-  // =====================================================
+  // ===================================================
   // FORM STATES
-  // =====================================================
-  const [departmentName, setDepartmentName] = useState("");
-  const [departmentHead, setDepartmentHead] = useState("");
-  const [employeeCount, setEmployeeCount] = useState("");
+  // ===================================================
+
+  const [employeeId, setEmployeeId] = useState("");
+  const [assetId, setAssetId] = useState("");
+  const [issueCategory, setIssueCategory] = useState("");
+  const [description, setDescription] = useState("");
+  const [priority, setPriority] = useState("");
+
+  // ===================================================
+  // ERROR STATES
+  // ===================================================
 
   const [errors, setErrors] = useState({});
 
-  // =====================================================
-  // DEPARTMENT DATA
-  // =====================================================
-  const [departments, setDepartments] = useState([]);
+  // ===================================================
+  // REPORT STATES
+  // ===================================================
 
-  // =====================================================
-  // FETCH DEPARTMENTS FROM BACKEND
-  // =====================================================
-  useEffect(() => {
-    const fetchDepartments = async () => {
-      try {
-        const token = localStorage.getItem("token");
+  const [reports, setReports] = useState([]);
 
-        const response = await fetch(
-          "http://localhost:5000/api/departments",
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+  // ===================================================
+  // PAGE SIZE
+  // ===================================================
 
-        const data = await response.json();
+  const [pageSize, setPageSize] = useState(10);
 
-        if (response.ok && data.departments) {
-          setDepartments(
-            data.departments.map((dept) => ({
-              id: dept.department_id,
-              name: dept.name,
-              head: dept.head || "",
-              employees: dept.employee_count || 0,
-            }))
-          );
+  // ===================================================
+  // LOAD REPORTS FROM BACKEND
+  // ===================================================
+
+  const loadReports = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const response = await fetch(
+        "http://localhost:5000/api/maintenance",
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
         }
-      } catch (err) {
-        console.error("Fetch Departments Error:", err);
-      }
-    };
+      );
 
-    fetchDepartments();
+      const data = await response.json();
+
+      if (data.success && data.reports) {
+        setReports(
+          data.reports.map((r) => ({
+            id: r.request_id,
+            assetId: r.asset_id || "-",
+            category: r.issue_category || "-",
+            description: r.description || "-",
+            priority: r.priority || "-",
+            status: r.status || "-",
+            date: r.report_date
+              ? new Date(r.report_date)
+                  .toLocaleDateString("en-GB")
+                  .replace(/\//g, "-")
+              : "-",
+          }))
+        );
+      }
+    } catch (error) {
+      console.error(
+        "Load Maintenance Reports Error:",
+        error
+      );
+    }
+  };
+
+  useEffect(() => {
+    loadReports();
   }, []);
 
-  // =====================================================
-  // GENERATE DEPARTMENT ID
-  // =====================================================
-  // eslint-disable-next-line no-unused-vars
-  const generateDepartmentId = () => {
-    const nextNumber = departments.length + 1;
+  // ===================================================
+  // EMPLOYEE ID CHANGE
+  // NUMBERS ONLY
+  // ===================================================
 
-    return `DEP${String(nextNumber).padStart(3, "0")}`;
-  };
+  const handleEmployeeIdChange = (e) => {
+    const value = e.target.value;
 
-  // =====================================================
-  // SEARCH INPUT CHANGE
-  // IMPORTANT:
-  // Typing DOES NOT perform search
-  // =====================================================
-  const handleSearchChange = (e) => {
-    let value = e.target.value;
-
-    // Only letters and spaces allowed
-    if (!/^[A-Za-z ]*$/.test(value)) {
+    // Allow numbers only
+    if (!/^\d*$/.test(value)) {
       return;
     }
 
-    // Convert multiple spaces into one
-    value = value.replace(/ {2,}/g, " ");
-
-    // Update only the input value
-    setSearch(value);
-
-    // IMPORTANT:
-    // Do NOT change searchApplied here.
-    // Do NOT filter the list while typing.
-    setSearchTouched(false);
-    setSearchError("");
-  };
-
-  // =====================================================
-  // SEARCH BUTTON
-  // SEARCH HAPPENS ONLY HERE
-  // =====================================================
-  const handleSearch = () => {
-    setSearchTouched(true);
-
-    const result = validateSearch(search);
-
-    // Invalid search
-    if (!result.isValid) {
-      setSearchError(result.message);
-      setSearchApplied(null);
+    // Maximum 9 digits
+    if (value.length > 9) {
       return;
     }
 
-    const searchValue = search.trim().toLowerCase();
+    setEmployeeId(value);
 
-    // EXACT department name match
-    const found = departments.some(
-      (dept) =>
-        dept.name.trim().toLowerCase() === searchValue
-    );
-
-    // No department found
-    if (!found) {
-      setSearchApplied(null);
-      setSearchError("No department found.");
+    if (value === "") {
+      setErrors((previous) => ({
+        ...previous,
+        employeeId: "",
+      }));
       return;
     }
 
-    // Department found
-    setSearchApplied(search.trim());
-    setSearchError("");
+    const result = validateEmployeeId(value);
+
+    setErrors((previous) => ({
+      ...previous,
+      employeeId: result.isValid
+        ? ""
+        : result.message,
+    }));
   };
 
-  // =====================================================
-  // SEARCH ENTER KEY
-  // =====================================================
-  const handleSearchKeyDown = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleSearch();
+  // ===================================================
+  // ASSET ID CHANGE
+  //
+  // Allowed:
+  // LAP / DES / MON / KEY / WEB / PRO /
+  // MOU / CPU / PRI / HEA / SCN
+  //
+  // Then 001 - 999
+  // ===================================================
+
+  const handleAssetIdChange = (e) => {
+    let value = e.target.value.toUpperCase();
+
+    // Remove spaces automatically
+    value = value.replace(/\s/g, "");
+
+    // Only letters and numbers
+    if (!/^[A-Z0-9]*$/.test(value)) {
+      return;
+    }
+
+    // Maximum 6 characters
+    if (value.length > 6) {
+      return;
+    }
+
+    // First 3 characters
+    if (value.length <= 3) {
+      // First three positions must be letters
+      if (!/^[A-Z]*$/.test(value)) {
+        return;
+      }
+
+      // If 3 letters entered, check prefix
+      if (
+        value.length === 3 &&
+        !ASSET_PREFIXES.includes(value)
+      ) {
+        setAssetId(value);
+
+        setErrors((previous) => ({
+          ...previous,
+          assetId:
+            "Invalid Asset ID prefix. Use LAP, DES, MON, KEY, WEB, PRO, MOU, CPU, PRI, HEA or SCN",
+        }));
+
+        return;
+      }
+    }
+
+    // After first 3 characters, only numbers
+    if (
+      value.length > 3 &&
+      !/^[A-Z]{3}\d*$/.test(value)
+    ) {
+      return;
+    }
+
+    setAssetId(value);
+
+    // Empty
+    if (value === "") {
+      setErrors((previous) => ({
+        ...previous,
+        assetId: "",
+      }));
+      return;
+    }
+
+    // Validate complete Asset ID
+    if (value.length === 6) {
+      const result = validateAssetId(value);
+
+      setErrors((previous) => ({
+        ...previous,
+        assetId: result.isValid
+          ? ""
+          : result.message,
+      }));
+    } else {
+      setErrors((previous) => ({
+        ...previous,
+        assetId: "",
+      }));
     }
   };
 
-  // =====================================================
-  // FILTER DEPARTMENTS
-  // IMPORTANT:
-  // Uses searchApplied, NOT search
-  // =====================================================
-  const filteredDepartments =
-    searchApplied === null
-      ? []
-      : searchApplied === ""
-      ? departments
-      : departments.filter(
-          (dept) =>
-            dept.name.trim().toLowerCase() ===
-            searchApplied.trim().toLowerCase()
-        );
+  // ===================================================
+  // ISSUE CATEGORY CHANGE
+  // ===================================================
 
-  // =====================================================
+  const handleCategoryChange = (e) => {
+    const value = e.target.value;
+
+    setIssueCategory(value);
+
+    setErrors((previous) => ({
+      ...previous,
+      issueCategory:
+        value === ""
+          ? "Issue category is required"
+          : "",
+    }));
+  };
+
+  // ===================================================
+  // DESCRIPTION CHANGE
+  // ===================================================
+
+  const handleDescriptionChange = (e) => {
+    const value = e.target.value;
+
+    if (value.length > 500) {
+      return;
+    }
+
+    setDescription(value);
+
+    if (value === "") {
+      setErrors((previous) => ({
+        ...previous,
+        description: "",
+      }));
+      return;
+    }
+
+    const result = validateDescription(value);
+
+    setErrors((previous) => ({
+      ...previous,
+      description: result.isValid
+        ? ""
+        : result.message,
+    }));
+  };
+
+  // ===================================================
+  // PRIORITY CHANGE
+  // ===================================================
+
+  const handlePriorityChange = (e) => {
+    const value = e.target.value;
+
+    setPriority(value);
+
+    setErrors((previous) => ({
+      ...previous,
+      priority: "",
+    }));
+  };
+
+  // ===================================================
   // FORM VALIDATION
-  // =====================================================
+  // ===================================================
+
   const validateForm = () => {
     const newErrors = {};
 
-    const nameResult =
-      validateDepartmentName(departmentName);
+    // Employee ID
+    const employeeResult =
+      validateEmployeeId(employeeId);
 
-    if (!nameResult.isValid) {
-      newErrors.departmentName = nameResult.message;
+    if (!employeeResult.isValid) {
+      newErrors.employeeId =
+        employeeResult.message;
     }
 
-    const headResult =
-      validateDepartmentHead(departmentHead);
+    // Asset ID
+    const assetResult =
+      validateAssetId(assetId);
 
-    if (!headResult.isValid) {
-      newErrors.departmentHead = headResult.message;
+    if (!assetResult.isValid) {
+      newErrors.assetId =
+        assetResult.message;
     }
 
-    const countResult =
-      validateEmployeeCount(employeeCount);
+    // Issue Category
+    if (!issueCategory) {
+      newErrors.issueCategory =
+        "Issue category is required";
+    }
 
-    if (!countResult.isValid) {
-      newErrors.employeeCount = countResult.message;
+    // Description
+    const descriptionResult =
+      validateDescription(description);
+
+    if (!descriptionResult.isValid) {
+      newErrors.description =
+        descriptionResult.message;
+    }
+
+    // Priority
+    if (!priority) {
+      newErrors.priority =
+        "Priority is required";
     }
 
     setErrors(newErrors);
@@ -447,88 +651,12 @@ const DepartmentManagement = ({
     return Object.keys(newErrors).length === 0;
   };
 
-  // =====================================================
-  // FIELD CHANGE HANDLER
-  // =====================================================
-  const handleFieldChange =
-    (setter, field, validator) => (e) => {
-      const value = e.target.value;
+  // ===================================================
+  // SUBMIT REQUEST
+  // ===================================================
 
-      setter(value);
-
-      // Empty field - don't show error until Add
-      if (value === "") {
-        setErrors((prev) => ({
-          ...prev,
-          [field]: "",
-        }));
-        return;
-      }
-
-      const result = validator(value);
-
-      setErrors((prev) => ({
-        ...prev,
-        [field]: result.isValid
-          ? ""
-          : result.message,
-      }));
-    };
-
-  // =====================================================
-  // EMPLOYEE COUNT CHANGE HANDLER
-  // =====================================================
-  const handleEmployeeCountChange = (e) => {
-    const value = e.target.value;
-
-    // Only digits
-    if (!/^[0-9]*$/.test(value)) {
-      return;
-    }
-
-    setEmployeeCount(value);
-
-    if (value === "") {
-      setErrors((prev) => ({
-        ...prev,
-        employeeCount: "",
-      }));
-      return;
-    }
-
-    const result = validateEmployeeCount(value);
-
-    setErrors((prev) => ({
-      ...prev,
-      employeeCount: result.isValid
-        ? ""
-        : result.message,
-    }));
-  };
-
-  // =====================================================
-  // ADD DEPARTMENT
-  // =====================================================
-  const addDepartment = async () => {
-    // Validate all fields
+  const submitRequest = async () => {
     if (!validateForm()) {
-      return;
-    }
-
-    // Check duplicate locally
-    const duplicate = departments.some(
-      (dept) =>
-        dept.name.toLowerCase() ===
-        departmentName.trim().toLowerCase()
-    );
-
-    if (duplicate) {
-      setErrors((prev) => ({
-        ...prev,
-        departmentName:
-          "This Department already exists",
-      }));
-
       return;
     }
 
@@ -536,7 +664,7 @@ const DepartmentManagement = ({
       const token = localStorage.getItem("token");
 
       const response = await fetch(
-        "http://localhost:5000/api/departments",
+        "http://localhost:5000/api/maintenance",
         {
           method: "POST",
           headers: {
@@ -544,9 +672,11 @@ const DepartmentManagement = ({
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            departmentName: departmentName.trim(),
-            departmentHead: departmentHead.trim(),
-            employeeCount: Number(employeeCount),
+            employeeId,
+            assetId: assetId.toUpperCase(),
+            issueCategory,
+            description: description.trim(),
+            priority,
           }),
         }
       );
@@ -554,66 +684,27 @@ const DepartmentManagement = ({
       const data = await response.json();
 
       if (!response.ok) {
-        if (response.status === 409) {
-          setErrors((prev) => ({
-            ...prev,
-            departmentName:
-              "This Department already exists",
-          }));
-          return;
-        }
-
         alert(
-          data.message || "Failed to add department."
+          data.message ||
+            "Failed to submit maintenance request."
         );
-
         return;
       }
 
-      // Refresh departments list
-      const refreshResponse = await fetch(
-        "http://localhost:5000/api/departments",
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      alert(
+        "✅ Maintenance request submitted successfully!"
       );
 
-      const refreshData =
-        await refreshResponse.json();
-
-      if (
-        refreshResponse.ok &&
-        refreshData.departments
-      ) {
-        setDepartments(
-          refreshData.departments.map((dept) => ({
-            id: dept.department_id,
-            name: dept.name,
-            head: dept.head || "",
-            employees: dept.employee_count || 0,
-          }))
-        );
-      }
+      // Reload reports after submission
+      await loadReports();
 
       // Clear form
-      setDepartmentName("");
-      setDepartmentHead("");
-      setEmployeeCount("");
-      setErrors({});
-
-      // Reset search and show all departments
-      setSearch("");
-      setSearchApplied("");
-      setSearchError("");
-      setSearchTouched(false);
-
-      alert("✅ Department added successfully!");
+      clearForm();
     } catch (error) {
-      console.error("Add Department Error:", error);
+      console.error(
+        "Submit Maintenance Error:",
+        error
+      );
 
       alert(
         "Unable to connect to server. Please make sure the backend is running."
@@ -621,49 +712,75 @@ const DepartmentManagement = ({
     }
   };
 
-  // =====================================================
-  // CANCEL
-  // =====================================================
-  const handleCancel = () => {
-    setDepartmentName("");
-    setDepartmentHead("");
-    setEmployeeCount("");
+  // ===================================================
+  // CLEAR FORM
+  // ===================================================
+
+  const clearForm = () => {
+    setEmployeeId("");
+    setAssetId("");
+    setIssueCategory("");
+    setDescription("");
+    setPriority("");
     setErrors({});
   };
 
-  // =====================================================
-  // UI
-  // =====================================================
+  // ===================================================
+  // STATUS CLASS
+  // ===================================================
+
+  const getStatusClass = (status) => {
+    return `status-${String(status)
+      .toLowerCase()
+      .replace(/\s+/g, "-")}`;
+  };
+
+  // ===================================================
+  // PAGINATION / VISIBLE REPORTS
+  // ===================================================
+
+  const visibleReports =
+    pageSize === "All"
+      ? reports
+      : reports.slice(0, Number(pageSize));
+
+  // ===================================================
+  // RENDER
+  // ===================================================
+
   return (
-    <div className="dm-page">
+    <div className="report-page">
 
-      {/* NAVBAR */}
-      <nav className="dm-nav">
+      {/* =================================================
+          NAVBAR
+      ================================================= */}
 
-        <div className="dm-nav-logo">
+      <nav className="report-nav">
 
-          <span className="dm-nav-title">
+        <div className="report-nav-logo">
+
+          <span className="report-nav-title">
             ITAMS
           </span>
 
-          <span className="dm-nav-sub">
+          <span className="report-nav-sub">
             IT Asset Management System
           </span>
 
         </div>
 
-        <div className="dm-nav-right">
+        <div className="report-nav-right">
 
-          <span className="dm-nav-user">
+          <span className="report-nav-user">
             {username}
           </span>
 
-          <span className="dm-nav-divider">
+          <span className="report-nav-divider">
             |
           </span>
 
           <button
-            className="dm-logout-btn"
+            className="report-logout-btn"
             onClick={onLogout}
           >
             Logout
@@ -673,223 +790,396 @@ const DepartmentManagement = ({
 
       </nav>
 
-      {/* BODY */}
-      <div className="dm-body">
+      {/* =================================================
+          BODY
+      ================================================= */}
 
-        <h1 className="dm-page-title">
-          Department Management
-        </h1>
+      <div className="report-body">
 
-        <p className="dm-page-sub">
-          Manage organization departments.
-        </p>
+        <div className="report-header">
 
-        {/* SEARCH CARD */}
-        <div className="dm-card">
+          <h1 className="report-page-title">
+            Report Maintenance
+          </h1>
 
-          <h2 className="dm-card-title">
-            Search Department
+          <p className="report-page-sub">
+            Report issues related to IT assets.
+          </p>
+
+        </div>
+
+        {/* =================================================
+            FORM CARD
+        ================================================= */}
+
+        <div className="report-card">
+
+          <h2 className="report-card-title">
+            Maintenance Request Form
           </h2>
 
-          <div className="dm-search-row">
+          <div className="form-grid">
 
-            <div className="dm-search-input-wrapper">
+            {/* =================================================
+                EMPLOYEE ID
+            ================================================= */}
+
+            <div className="form-group">
+
+              <label>
+                Employee ID *
+              </label>
 
               <input
-                className={`dm-input ${
-                  searchError && searchTouched
-                    ? "dm-input-error"
+                type="text"
+                className={`report-input ${
+                  errors.employeeId
+                    ? "report-input-error"
                     : ""
                 }`}
-                type="text"
-                placeholder="Enter Department Name"
-                value={search}
-                onChange={handleSearchChange}
-                onKeyDown={handleSearchKeyDown}
+                value={employeeId}
+                onChange={handleEmployeeIdChange}
+                placeholder="Enter Employee ID (e.g., 260821001)"
+                maxLength={9}
+                inputMode="numeric"
               />
 
-              {/* RED SEARCH ERROR */}
-              {searchError && searchTouched && (
-                <span className="dm-error-text">
-                  ⚠️ {searchError}
+              {errors.employeeId && (
+                <span className="report-error-text">
+                  ⚠️ {errors.employeeId}
+                </span>
+              )}
+
+              <small>
+                Format: YYMMDD + 3 employee numbers
+              </small>
+
+            </div>
+
+            {/* =================================================
+                ASSET ID
+            ================================================= */}
+
+            <div className="form-group">
+
+              <label>
+                Asset ID *
+              </label>
+
+              <input
+                type="text"
+                className={`report-input ${
+                  errors.assetId
+                    ? "report-input-error"
+                    : ""
+                }`}
+                value={assetId}
+                onChange={handleAssetIdChange}
+                placeholder="e.g., LAP001"
+                maxLength={6}
+                autoCapitalize="characters"
+              />
+
+              {errors.assetId && (
+                <span className="report-error-text">
+                  ⚠️ {errors.assetId}
+                </span>
+              )}
+
+              <small>
+                Format: LAP001 / DES001 / MON001 / KEY001 /
+                WEB001 / PRO001 / MOU001 / CPU001 /
+                PRI001 / HEA001 / SCN001
+              </small>
+
+            </div>
+
+            {/* =================================================
+                ISSUE CATEGORY
+            ================================================= */}
+
+            <div className="form-group">
+
+              <label>
+                Issue Category *
+              </label>
+
+              <select
+                className={`report-select ${
+                  errors.issueCategory
+                    ? "report-input-error"
+                    : ""
+                }`}
+                value={issueCategory}
+                onChange={handleCategoryChange}
+              >
+
+                <option value="">
+                  Select Category
+                </option>
+
+                <option value="Hardware Issue">
+                  Hardware Issue
+                </option>
+
+                <option value="Software Issue">
+                  Software Issue
+                </option>
+
+                <option value="Performance Issue">
+                  Performance Issue
+                </option>
+
+                <option value="Security Issue">
+                  Security Issue
+                </option>
+
+                <option value="Network Issue">
+                  Network Issue
+                </option>
+
+                <option value="Other">
+                  Other
+                </option>
+
+              </select>
+
+              {errors.issueCategory && (
+                <span className="report-error-text">
+                  ⚠️ {errors.issueCategory}
                 </span>
               )}
 
             </div>
 
+          </div>
+
+          {/* =================================================
+              DESCRIPTION
+          ================================================= */}
+
+          <div className="form-group">
+
+            <label>
+              Issue Description *
+            </label>
+
+            <textarea
+              className={`report-textarea ${
+                errors.description
+                  ? "report-input-error"
+                  : ""
+              }`}
+              rows="4"
+              value={description}
+              onChange={handleDescriptionChange}
+              placeholder="Enter issue description (minimum 10 characters)"
+              maxLength={500}
+            />
+
+            {errors.description && (
+              <span className="report-error-text">
+                ⚠️ {errors.description}
+              </span>
+            )}
+
+            <small>
+              {description.length}/500 characters
+            </small>
+
+          </div>
+
+          {/* =================================================
+              PRIORITY
+          ================================================= */}
+
+          <div className="priority-group">
+
+            <label>
+              Priority *
+            </label>
+
+            <div className="radio-group">
+
+              <label className="radio-option">
+
+                <input
+                  type="radio"
+                  value="Low"
+                  checked={priority === "Low"}
+                  onChange={handlePriorityChange}
+                />
+
+                <span className="priority-low">
+                  Low
+                </span>
+
+              </label>
+
+              <label className="radio-option">
+
+                <input
+                  type="radio"
+                  value="Medium"
+                  checked={priority === "Medium"}
+                  onChange={handlePriorityChange}
+                />
+
+                <span className="priority-medium">
+                  Medium
+                </span>
+
+              </label>
+
+              <label className="radio-option">
+
+                <input
+                  type="radio"
+                  value="High"
+                  checked={priority === "High"}
+                  onChange={handlePriorityChange}
+                />
+
+                <span className="priority-high">
+                  High
+                </span>
+
+              </label>
+
+            </div>
+
+            {errors.priority && (
+              <span className="report-error-text">
+                ⚠️ {errors.priority}
+              </span>
+            )}
+
+          </div>
+
+          {/* =================================================
+              BUTTONS
+          ================================================= */}
+
+          <div className="buttons">
+
             <button
-              className="dm-btn-primary"
-              onClick={handleSearch}
+              type="button"
+              className="submit-btn"
+              onClick={submitRequest}
             >
-              Search
+              Submit Request
+            </button>
+
+            <button
+              type="button"
+              className="clear-btn"
+              onClick={clearForm}
+            >
+              Clear
             </button>
 
           </div>
 
         </div>
 
-        {/* ADD NEW DEPARTMENT */}
-        <div className="dm-card">
+        {/* =================================================
+            MAINTENANCE REQUEST TABLE
+        ================================================= */}
 
-          <h2 className="dm-card-title">
-            Add New Department
+        <div className="table-card">
+
+          <h2 className="report-card-title">
+            My Maintenance Requests
           </h2>
 
-          <div className="dm-add-form">
+          <div className="table-wrapper">
 
-            {/* DEPARTMENT NAME */}
-            <div className="dm-form-group">
-
-              <input
-                className={`dm-input ${
-                  errors.departmentName
-                    ? "dm-input-error"
-                    : ""
-                }`}
-                type="text"
-                placeholder="Department Name"
-                value={departmentName}
-                onChange={handleFieldChange(
-                  setDepartmentName,
-                  "departmentName",
-                  validateDepartmentName
-                )}
-              />
-
-              {errors.departmentName && (
-                <span className="dm-error-text">
-                  ⚠️ {errors.departmentName}
-                </span>
-              )}
-
-            </div>
-
-            {/* DEPARTMENT HEAD */}
-            <div className="dm-form-group">
-
-              <input
-                className={`dm-input ${
-                  errors.departmentHead
-                    ? "dm-input-error"
-                    : ""
-                }`}
-                type="text"
-                placeholder="Department Head"
-                value={departmentHead}
-                onChange={handleFieldChange(
-                  setDepartmentHead,
-                  "departmentHead",
-                  validateDepartmentHead
-                )}
-              />
-
-              {errors.departmentHead && (
-                <span className="dm-error-text">
-                  ⚠️ {errors.departmentHead}
-                </span>
-              )}
-
-            </div>
-
-            {/* NUMBER OF EMPLOYEES */}
-            <div className="dm-form-group">
-
-              <input
-                className={`dm-input ${
-                  errors.employeeCount
-                    ? "dm-input-error"
-                    : ""
-                }`}
-                type="text"
-                inputMode="numeric"
-                placeholder="Number of Employees"
-                value={employeeCount}
-                onChange={handleEmployeeCountChange}
-              />
-
-              {errors.employeeCount && (
-                <span className="dm-error-text">
-                  ⚠️ {errors.employeeCount}
-                </span>
-              )}
-
-            </div>
-
-            {/* BUTTONS */}
-            <div className="dm-btn-row">
-
-              <button
-                className="dm-btn-add"
-                onClick={addDepartment}
-              >
-                Add
-              </button>
-
-              <button
-                className="dm-btn-cancel"
-                onClick={handleCancel}
-              >
-                Cancel
-              </button>
-
-            </div>
-
-          </div>
-
-        </div>
-
-        {/* DEPARTMENT LIST */}
-        <div className="dm-card">
-
-          <h2 className="dm-card-title">
-            Department List
-          </h2>
-
-          <div className="dm-table-wrapper">
-
-            <table className="dm-table">
+            <table>
 
               <thead>
+
                 <tr>
-                  <th>Department Name</th>
-                  <th>Department Head</th>
-                  <th>Number of Employees</th>
+                  <th>Request ID</th>
+                  <th>Asset ID</th>
+                  <th>Issue Category</th>
+                  <th>Issue Description</th>
+                  <th>Priority</th>
+                  <th>Status</th>
+                  <th>Report Date</th>
                 </tr>
+
               </thead>
 
               <tbody>
 
-                {filteredDepartments.length > 0 ? (
+                {visibleReports.length > 0 ? (
 
-                  filteredDepartments.map(
-                    (dept) => (
-                      <tr key={dept.id}>
+                  visibleReports.map((report) => (
 
-                        <td>
-                          {dept.name}
-                        </td>
+                    <tr key={report.id}>
 
-                        <td>
-                          {dept.head}
-                        </td>
+                      <td className="report-id">
+                        {report.id}
+                      </td>
 
-                        <td>
-                          {dept.employees}
-                        </td>
+                      <td className="asset-id">
+                        {report.assetId}
+                      </td>
 
-                      </tr>
-                    )
-                  )
+                      {/* ISSUE CATEGORY */}
+                      <td>
+                        {report.category}
+                      </td>
+
+                      {/* ISSUE DESCRIPTION */}
+                      <td className="desc-cell">
+                        {report.description}
+                      </td>
+
+                      {/* PRIORITY */}
+                      <td>
+
+                        <span
+                          className={`priority-badge priority-${String(
+                            report.priority
+                          ).toLowerCase()}`}
+                        >
+                          {report.priority}
+                        </span>
+
+                      </td>
+
+                      {/* STATUS */}
+                      <td>
+
+                        <span
+                          className={`status-badge ${getStatusClass(
+                            report.status
+                          )}`}
+                        >
+                          {report.status}
+                        </span>
+
+                      </td>
+
+                      {/* REPORT DATE */}
+                      <td>
+                        {report.date}
+                      </td>
+
+                    </tr>
+
+                  ))
 
                 ) : (
 
                   <tr>
 
                     <td
-                      colSpan="3"
-                      className="dm-no-data"
+                      colSpan="7"
+                      className="no-data"
                     >
-                      No Department Found
+                      No maintenance requests found.
                     </td>
 
                   </tr>
@@ -902,11 +1192,49 @@ const DepartmentManagement = ({
 
           </div>
 
+          {/* =================================================
+              PAGE SIZE DROPDOWN
+          ================================================= */}
+
+          <div className="report-pagination-row">
+
+            <select
+              className="report-page-size"
+              value={pageSize}
+              onChange={(e) => {
+                const value = e.target.value;
+
+                setPageSize(
+                  value === "All"
+                    ? "All"
+                    : Number(value)
+                );
+              }}
+            >
+
+              {PAGE_SIZE_OPTIONS.map((option) => (
+
+                <option
+                  key={option}
+                  value={option}
+                >
+                  {option}
+                </option>
+
+              ))}
+
+            </select>
+
+          </div>
+
         </div>
 
-        {/* BACK BUTTON */}
+        {/* =================================================
+            BACK BUTTON
+        ================================================= */}
+
         <button
-          className="dm-back-btn"
+          className="report-back-btn"
           onClick={onBack}
         >
           ← Back
@@ -918,4 +1246,4 @@ const DepartmentManagement = ({
   );
 };
 
-export default DepartmentManagement;
+export default ReportMaintenance;
