@@ -5,51 +5,15 @@ const PAGE_SIZE_OPTIONS = [10, 30, 50, "All"];
 
 // ======================================================
 // EMPLOYEE ID VALIDATION
-//
-// FORMAT:
-// YYMMDDXXX
-//
-// YY  = Year
-// MM  = Month
-// DD  = Day
-// XXX = Employee number (001 - 999)
-//
-// EXAMPLES:
-//
-// 250808001 -> 08-08-2025 -> ALLOWED
-// 260808001 -> 08-08-2026 -> ALLOWED
-// 260821001 -> 21-08-2026 -> ALLOWED (TODAY)
-// 261006001 -> 06-10-2026 -> FUTURE if today is 21-08-2026
-// 260822001 -> 22-08-2026 -> NOT ALLOWED
-// 270808001 -> 08-08-2027 -> NOT ALLOWED
-//
-// RULES:
-// 1. Exactly 9 digits
-// 2. Numbers only
-// 3. No spaces
-// 4. Valid calendar date
-// 5. Past dates allowed
-// 6. Today's date allowed
-// 7. Future dates NOT allowed
-// 8. Last 3 digits must be 001 - 999
-// 9. YY represents the actual year
 // ======================================================
 
 const validateEmployeeId = (id) => {
-  // ====================================================
-  // EMPTY
-  // ====================================================
-
   if (!id || id.length === 0) {
     return {
       isValid: false,
       message: "Employee ID is required.",
     };
   }
-
-  // ====================================================
-  // SPACES
-  // ====================================================
 
   if (/\s/.test(id)) {
     return {
@@ -58,20 +22,12 @@ const validateEmployeeId = (id) => {
     };
   }
 
-  // ====================================================
-  // ONLY NUMBERS
-  // ====================================================
-
   if (!/^\d+$/.test(id)) {
     return {
       isValid: false,
       message: "Employee ID must contain only numbers.",
     };
   }
-
-  // ====================================================
-  // EXACTLY 9 DIGITS
-  // ====================================================
 
   if (id.length !== 9) {
     return {
@@ -81,26 +37,12 @@ const validateEmployeeId = (id) => {
     };
   }
 
-  // ====================================================
-  // SPLIT ID
-  //
-  // YY MM DD XXX
-  // ====================================================
-
   const yearShort = Number(id.substring(0, 2));
   const month = Number(id.substring(2, 4));
   const day = Number(id.substring(4, 6));
   const employeeNumber = Number(id.substring(6, 9));
 
-  // ====================================================
-  // ACTUAL YEAR
-  // ====================================================
-
   const fullYear = 2000 + yearShort;
-
-  // ====================================================
-  // MONTH
-  // ====================================================
 
   if (month < 1 || month > 12) {
     return {
@@ -109,22 +51,12 @@ const validateEmployeeId = (id) => {
     };
   }
 
-  // ====================================================
-  // DAY
-  // ====================================================
-
   if (day < 1 || day > 31) {
     return {
       isValid: false,
       message: "Employee ID contains an invalid day.",
     };
   }
-
-  // ====================================================
-  // EMPLOYEE NUMBER
-  //
-  // 001 - 999
-  // ====================================================
 
   if (
     employeeNumber < 1 ||
@@ -137,10 +69,6 @@ const validateEmployeeId = (id) => {
     };
   }
 
-  // ====================================================
-  // VALID CALENDAR DATE
-  // ====================================================
-
   const employeeDate = new Date(
     fullYear,
     month - 1,
@@ -148,14 +76,6 @@ const validateEmployeeId = (id) => {
   );
 
   employeeDate.setHours(0, 0, 0, 0);
-
-  // ====================================================
-  // PREVENT INVALID DATES
-  //
-  // Example:
-  // 260231001 -> February 31
-  // 260431001 -> April 31
-  // ====================================================
 
   if (
     employeeDate.getFullYear() !== fullYear ||
@@ -168,21 +88,8 @@ const validateEmployeeId = (id) => {
     };
   }
 
-  // ====================================================
-  // TODAY
-  // ====================================================
-
   const today = new Date();
-
   today.setHours(0, 0, 0, 0);
-
-  // ====================================================
-  // FUTURE DATE CHECK
-  //
-  // Past  -> ALLOWED
-  // Today -> ALLOWED
-  // Future -> NOT ALLOWED
-  // ====================================================
 
   if (employeeDate > today) {
     return {
@@ -192,16 +99,11 @@ const validateEmployeeId = (id) => {
     };
   }
 
-  // ====================================================
-  // VALID
-  // ====================================================
-
   return {
     isValid: true,
     message: "",
   };
 };
-
 
 // ======================================================
 // CHECK WHETHER SEARCH IS AN EMPLOYEE ID
@@ -212,49 +114,12 @@ const looksLikeEmployeeId = (value) => {
     return false;
   }
 
-  // Starts with a number
   if (/^\d/.test(value)) {
     return true;
   }
 
   return false;
 };
-
-
-// ======================================================
-// CREATE EMPLOYEE FOR A VALID ID
-//
-// FORMAT:
-// YYMMDDXXX
-// ======================================================
-
-const createEmployeeFromId = (employeeId) => {
-  const employeeNumber = Number(
-    employeeId.substring(6, 9)
-  );
-
-  const names = [
-    "Arjun Reddy",
-    "Sneha Sharma",
-    "Rahul Kumar",
-    "Priya Reddy",
-    "Vikram Singh",
-    "Ananya Rao",
-    "Kiran Kumar",
-    "Neha Patel",
-    "Rohit Sharma",
-    "Pooja Reddy",
-  ];
-
-  return {
-    id: employeeId,
-    name:
-      names[(employeeNumber - 1) % names.length],
-    department: "IT",
-    status: "Active",
-  };
-};
-
 
 // ======================================================
 // MAIN COMPONENT
@@ -265,7 +130,6 @@ const EmployeeStatus = ({
   onLogout,
   onBack,
 }) => {
-
   // ====================================================
   // SEARCH
   // ====================================================
@@ -273,7 +137,7 @@ const EmployeeStatus = ({
   const [search, setSearch] = useState("");
 
   const [searchApplied, setSearchApplied] =
-    useState("");
+    useState(null);
 
   // ====================================================
   // PAGINATION
@@ -296,9 +160,6 @@ const EmployeeStatus = ({
 
   // ====================================================
   // EMPLOYEE DATA
-  //
-  // FORMAT:
-  // YYMMDDXXX
   // ====================================================
 
   const [employees, setEmployees] = useState([]);
@@ -310,16 +171,27 @@ const EmployeeStatus = ({
   React.useEffect(() => {
     const fetchEmployees = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const response = await fetch("http://localhost:5000/api/employees", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        const data = await response.json();
-        if (response.ok && data.employees) {
+        const token =
+          localStorage.getItem("token");
+
+        const response = await fetch(
+          "http://localhost:5000/api/employees",
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const data =
+          await response.json();
+
+        if (
+          response.ok &&
+          data.employees
+        ) {
           setEmployees(
             data.employees.map((emp) => ({
               id: emp.employee_id,
@@ -330,9 +202,13 @@ const EmployeeStatus = ({
           );
         }
       } catch (err) {
-        console.error("Fetch Employees Error:", err);
+        console.error(
+          "Fetch Employees Error:",
+          err
+        );
       }
     };
+
     fetchEmployees();
   }, []);
 
@@ -343,53 +219,37 @@ const EmployeeStatus = ({
   const [pendingStatuses, setPendingStatuses] =
     useState({});
 
-
   // ====================================================
   // SEARCH INPUT CHANGE
   // ====================================================
 
   const handleSearchChange = (e) => {
-
     const value = e.target.value;
 
-    // ==================================================
-    // EMPLOYEE ID SEARCH
-    // ==================================================
-
     if (/^\d/.test(value)) {
-
       const numericValue =
         value
           .replace(/\D/g, "")
           .slice(0, 9);
 
       setSearch(numericValue);
-
     } else {
-
-      // ==================================================
-      // NAME SEARCH
-      // ==================================================
-
       setSearch(value);
     }
 
     setIsSearchTouched(false);
-
     setValidationError("");
-
     setIsSearchValid(true);
 
-    setSearchApplied("");
+    // Keep table empty until Search is pressed.
+    setSearchApplied(null);
   };
-
 
   // ====================================================
   // SEARCH
   // ====================================================
 
   const handleSearch = () => {
-
     setIsSearchTouched(true);
 
     const rawValue = search;
@@ -399,25 +259,23 @@ const EmployeeStatus = ({
     // ==================================================
 
     if (rawValue === "") {
-
       setValidationError(
         "Please enter an Employee ID or Employee Name."
       );
 
       setIsSearchValid(false);
-
       setSearchApplied(null);
 
       return;
     }
 
-
     // ==================================================
     // EMPLOYEE ID SEARCH
     // ==================================================
 
-    if (looksLikeEmployeeId(rawValue)) {
-
+    if (
+      looksLikeEmployeeId(rawValue)
+    ) {
       const result =
         validateEmployeeId(rawValue);
 
@@ -426,13 +284,11 @@ const EmployeeStatus = ({
       // ==================================================
 
       if (!result.isValid) {
-
         setValidationError(
           result.message
         );
 
         setIsSearchValid(false);
-
         setSearchApplied(null);
 
         return;
@@ -444,32 +300,26 @@ const EmployeeStatus = ({
 
       const employeeId = rawValue;
 
-      let foundEmployee =
+      const foundEmployee =
         employees.find(
           (emp) =>
             emp.id === employeeId
         );
 
-
       // ==================================================
-      // CREATE IF NOT FOUND
+      // EMPLOYEE NOT FOUND
       // ==================================================
 
       if (!foundEmployee) {
+        setValidationError(
+          "Employee not found."
+        );
 
-        const newEmployee =
-          createEmployeeFromId(
-            employeeId
-          );
+        setIsSearchValid(false);
+        setSearchApplied(null);
 
-        setEmployees((prev) => [
-          ...prev,
-          newEmployee,
-        ]);
-
-        foundEmployee = newEmployee;
+        return;
       }
-
 
       // ==================================================
       // SUCCESS
@@ -480,12 +330,10 @@ const EmployeeStatus = ({
       );
 
       setValidationError("");
-
       setIsSearchValid(true);
 
       return;
     }
-
 
     // ==================================================
     // NAME SEARCH
@@ -494,60 +342,56 @@ const EmployeeStatus = ({
     const nameValue =
       rawValue.trim();
 
-
     // ==================================================
     // SPACES BEFORE / AFTER
     // ==================================================
 
-    if (rawValue !== nameValue) {
-
+    if (
+      rawValue !== nameValue
+    ) {
       setValidationError(
         "Search should not have spaces before or after the name."
       );
 
       setIsSearchValid(false);
-
       setSearchApplied(null);
 
       return;
     }
-
 
     // ==================================================
     // MULTIPLE SPACES
     // ==================================================
 
-    if (/\s{2,}/.test(nameValue)) {
-
+    if (
+      /\s{2,}/.test(nameValue)
+    ) {
       setValidationError(
         "Name search should not contain multiple spaces."
       );
 
       setIsSearchValid(false);
-
       setSearchApplied(null);
 
       return;
     }
-
 
     // ==================================================
     // MINIMUM 2 CHARACTERS
     // ==================================================
 
-    if (nameValue.length < 2) {
-
+    if (
+      nameValue.length < 2
+    ) {
       setValidationError(
         "Please enter at least 2 characters."
       );
 
       setIsSearchValid(false);
-
       setSearchApplied(null);
 
       return;
     }
-
 
     // ==================================================
     // ONLY LETTERS
@@ -558,18 +402,15 @@ const EmployeeStatus = ({
         nameValue
       )
     ) {
-
       setValidationError(
         "Name should contain only letters and single spaces."
       );
 
       setIsSearchValid(false);
-
       setSearchApplied(null);
 
       return;
     }
-
 
     // ==================================================
     // NAME SEARCH SUCCESS
@@ -580,25 +421,19 @@ const EmployeeStatus = ({
     );
 
     setValidationError("");
-
     setIsSearchValid(true);
   };
-
 
   // ====================================================
   // ENTER KEY
   // ====================================================
 
   const handleKeyDown = (e) => {
-
     if (e.key === "Enter") {
-
       e.preventDefault();
-
       handleSearch();
     }
   };
-
 
   // ====================================================
   // FILTER EMPLOYEES
@@ -609,7 +444,9 @@ const EmployeeStatus = ({
       ? []
       : searchApplied === ""
       ? employees
-      : looksLikeEmployeeId(searchApplied)
+      : looksLikeEmployeeId(
+          searchApplied
+        )
       ? employees.filter(
           (emp) =>
             emp.id === searchApplied
@@ -623,7 +460,6 @@ const EmployeeStatus = ({
               )
         );
 
-
   // ====================================================
   // PAGE SIZE
   // ====================================================
@@ -636,7 +472,6 @@ const EmployeeStatus = ({
           Number(pageSize)
         );
 
-
   // ====================================================
   // DROPDOWN CHANGE
   // ====================================================
@@ -645,13 +480,11 @@ const EmployeeStatus = ({
     empId,
     newStatus
   ) => {
-
     setPendingStatuses((prev) => ({
       ...prev,
       [empId]: newStatus,
     }));
   };
-
 
   // ====================================================
   // UPDATE BUTTON
@@ -660,16 +493,10 @@ const EmployeeStatus = ({
   const handleUpdateStatus = async (
     empId
   ) => {
-
     const newStatus =
       pendingStatuses[empId];
 
-    // ==================================================
-    // NOTHING CHANGED
-    // ==================================================
-
     if (!newStatus) {
-
       alert(
         "Please select a different status before clicking Update."
       );
@@ -677,95 +504,101 @@ const EmployeeStatus = ({
       return;
     }
 
-    // ==================================================
-    // CALL API
-    // ==================================================
-
     try {
-      const token = localStorage.getItem("token");
+      const token =
+        localStorage.getItem("token");
+
       const response = await fetch(
         `http://localhost:5000/api/employees/${empId}/status`,
         {
           method: "PATCH",
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type":
+              "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ status: newStatus }),
+          body: JSON.stringify({
+            status: newStatus,
+          }),
         }
       );
 
-      const data = await response.json();
+      const data =
+        await response.json();
 
       if (!response.ok) {
-        alert(data.message || "Failed to update status.");
+        alert(
+          data.message ||
+            "Failed to update status."
+        );
+
         return;
       }
-
-      // ==================================================
-      // UPDATE LOCAL STATE
-      // ==================================================
 
       setEmployees((prev) =>
         prev.map((employee) =>
           employee.id === empId
-            ? { ...employee, status: newStatus }
+            ? {
+                ...employee,
+                status: newStatus,
+              }
             : employee
         )
       );
 
-      // ==================================================
-      // REMOVE TEMPORARY STATUS
-      // ==================================================
-
       setPendingStatuses((prev) => {
-        const updated = { ...prev };
+        const updated = {
+          ...prev,
+        };
+
         delete updated[empId];
+
         return updated;
       });
 
-      alert(`✅ Status updated to "${newStatus}" successfully!`);
+      alert(
+        `✅ Status updated to "${newStatus}" successfully!`
+      );
     } catch (error) {
-      console.error("Update Status Error:", error);
-      alert("Unable to connect to server. Please make sure the backend is running.");
+      console.error(
+        "Update Status Error:",
+        error
+      );
+
+      alert(
+        "Unable to connect to server. Please make sure the backend is running."
+      );
     }
   };
-
 
   // ====================================================
   // GET DISPLAY STATUS
   // ====================================================
 
   const getDisplayStatus = (emp) => {
-
     return emp.status;
   };
-
 
   // ====================================================
   // GET DROPDOWN VALUE
   // ====================================================
 
   const getDropdownStatus = (emp) => {
-
     return (
       pendingStatuses[emp.id] ??
       emp.status
     );
   };
 
-
   // ====================================================
   // STATUS CLASS
   // ====================================================
 
   const getStatusClass = (status) => {
-
     return `es-status-${status
       .toLowerCase()
       .replace(/\s+/g, "-")}`;
   };
-
 
   // ====================================================
   // UI
@@ -792,7 +625,6 @@ const EmployeeStatus = ({
 
         </div>
 
-
         <div className="es-nav-right">
 
           <span className="es-nav-user">
@@ -814,7 +646,6 @@ const EmployeeStatus = ({
 
       </nav>
 
-
       {/* ============================================== */}
       {/* BODY */}
       {/* ============================================== */}
@@ -829,7 +660,6 @@ const EmployeeStatus = ({
           View and update employee status.
         </p>
 
-
         {/* ========================================== */}
         {/* SEARCH CARD */}
         {/* ========================================== */}
@@ -839,7 +669,6 @@ const EmployeeStatus = ({
           <h2 className="es-card-title">
             Search Employee
           </h2>
-
 
           <div className="es-search-group">
 
@@ -869,7 +698,6 @@ const EmployeeStatus = ({
                 aria-describedby="validation-error"
               />
 
-
               <button
                 className="es-btn-primary"
                 onClick={handleSearch}
@@ -879,14 +707,12 @@ const EmployeeStatus = ({
 
             </div>
 
-
             {/* ====================================== */}
             {/* VALIDATION MESSAGE */}
             {/* ====================================== */}
 
             {validationError &&
               isSearchTouched && (
-
                 <div
                   className="es-validation-error"
                   id="validation-error"
@@ -896,7 +722,6 @@ const EmployeeStatus = ({
                 </div>
               )}
 
-
             {/* ====================================== */}
             {/* FORMAT HINT */}
             {/* ====================================== */}
@@ -904,9 +729,10 @@ const EmployeeStatus = ({
             <div className="es-validation-hint">
 
               <small>
-                Employee ID format: YYMMDDXXX — exactly
-                9 digits. Past and today's dates are
-                allowed. Future dates are not allowed.
+                Employee ID format: YYMMDDXXX —
+                exactly 9 digits. Past and
+                today's dates are allowed.
+                Future dates are not allowed.
                 Last 3 digits: 001–999.
               </small>
 
@@ -915,7 +741,6 @@ const EmployeeStatus = ({
           </div>
 
         </div>
-
 
         {/* ========================================== */}
         {/* TABLE */}
@@ -953,7 +778,6 @@ const EmployeeStatus = ({
 
             </thead>
 
-
             <tbody>
 
               {visibleEmployees.length > 0 ? (
@@ -962,10 +786,14 @@ const EmployeeStatus = ({
                   (emp) => {
 
                     const displayStatus =
-                      getDisplayStatus(emp);
+                      getDisplayStatus(
+                        emp
+                      );
 
                     const dropdownStatus =
-                      getDropdownStatus(emp);
+                      getDropdownStatus(
+                        emp
+                      );
 
                     const hasPendingChange =
                       pendingStatuses[
@@ -993,7 +821,6 @@ const EmployeeStatus = ({
 
                         </td>
 
-
                         {/* ================================= */}
                         {/* NAME */}
                         {/* ================================= */}
@@ -1002,7 +829,6 @@ const EmployeeStatus = ({
                           {emp.name}
                         </td>
 
-
                         {/* ================================= */}
                         {/* DEPARTMENT */}
                         {/* ================================= */}
@@ -1010,7 +836,6 @@ const EmployeeStatus = ({
                         <td>
                           {emp.department}
                         </td>
-
 
                         {/* ================================= */}
                         {/* STATUS */}
@@ -1027,7 +852,6 @@ const EmployeeStatus = ({
                           </span>
 
                         </td>
-
 
                         {/* ================================= */}
                         {/* UPDATE */}
@@ -1064,7 +888,6 @@ const EmployeeStatus = ({
 
                             </select>
 
-
                             <button
                               className="es-update-btn"
                               onClick={() =>
@@ -1088,6 +911,20 @@ const EmployeeStatus = ({
                   }
                 )
 
+              ) : searchApplied === null ? (
+
+                <tr>
+
+                  <td
+                    colSpan="5"
+                    className="es-no-data"
+                  >
+                    🔍 Search for an employee to
+                    view status.
+                  </td>
+
+                </tr>
+
               ) : (
 
                 <tr>
@@ -1109,7 +946,6 @@ const EmployeeStatus = ({
 
         </div>
 
-
         {/* ========================================== */}
         {/* PAGINATION */}
         {/* ========================================== */}
@@ -1125,7 +961,6 @@ const EmployeeStatus = ({
             employees
 
           </span>
-
 
           <select
             className="es-page-size"
@@ -1160,7 +995,6 @@ const EmployeeStatus = ({
           </select>
 
         </div>
-
 
         {/* ========================================== */}
         {/* BACK */}
