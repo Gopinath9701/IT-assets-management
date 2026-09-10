@@ -136,8 +136,10 @@ const EmployeeStatus = ({
 
   const [search, setSearch] = useState("");
 
+  // IMPORTANT:
+  // Empty string means show all employees initially.
   const [searchApplied, setSearchApplied] =
-    useState(null);
+    useState("");
 
   // ====================================================
   // PAGINATION
@@ -241,8 +243,8 @@ const EmployeeStatus = ({
     setValidationError("");
     setIsSearchValid(true);
 
-    // Keep table empty until Search is pressed.
-    setSearchApplied(null);
+    // Show all employees again until Search is pressed.
+    setSearchApplied("");
   };
 
   // ====================================================
@@ -264,7 +266,9 @@ const EmployeeStatus = ({
       );
 
       setIsSearchValid(false);
-      setSearchApplied(null);
+
+      // Keep all employees visible for initial page.
+      setSearchApplied("");
 
       return;
     }
@@ -289,7 +293,7 @@ const EmployeeStatus = ({
         );
 
         setIsSearchValid(false);
-        setSearchApplied(null);
+        setSearchApplied("");
 
         return;
       }
@@ -316,7 +320,9 @@ const EmployeeStatus = ({
         );
 
         setIsSearchValid(false);
-        setSearchApplied(null);
+
+        // Show no matching employee.
+        setSearchApplied(employeeId);
 
         return;
       }
@@ -354,7 +360,7 @@ const EmployeeStatus = ({
       );
 
       setIsSearchValid(false);
-      setSearchApplied(null);
+      setSearchApplied("");
 
       return;
     }
@@ -371,7 +377,7 @@ const EmployeeStatus = ({
       );
 
       setIsSearchValid(false);
-      setSearchApplied(null);
+      setSearchApplied("");
 
       return;
     }
@@ -388,7 +394,7 @@ const EmployeeStatus = ({
       );
 
       setIsSearchValid(false);
-      setSearchApplied(null);
+      setSearchApplied("");
 
       return;
     }
@@ -407,7 +413,7 @@ const EmployeeStatus = ({
       );
 
       setIsSearchValid(false);
-      setSearchApplied(null);
+      setSearchApplied("");
 
       return;
     }
@@ -440,9 +446,7 @@ const EmployeeStatus = ({
   // ====================================================
 
   const filteredEmployees =
-    searchApplied === null
-      ? []
-      : searchApplied === ""
+    searchApplied === ""
       ? employees
       : looksLikeEmployeeId(
           searchApplied
@@ -535,6 +539,10 @@ const EmployeeStatus = ({
         return;
       }
 
+      // ==================================================
+      // UPDATE LOCAL STATE
+      // ==================================================
+
       setEmployees((prev) =>
         prev.map((employee) =>
           employee.id === empId
@@ -545,6 +553,10 @@ const EmployeeStatus = ({
             : employee
         )
       );
+
+      // ==================================================
+      // REMOVE TEMPORARY STATUS
+      // ==================================================
 
       setPendingStatuses((prev) => {
         const updated = {
@@ -910,20 +922,6 @@ const EmployeeStatus = ({
                     );
                   }
                 )
-
-              ) : searchApplied === null ? (
-
-                <tr>
-
-                  <td
-                    colSpan="5"
-                    className="es-no-data"
-                  >
-                    🔍 Search for an employee to
-                    view status.
-                  </td>
-
-                </tr>
 
               ) : (
 
