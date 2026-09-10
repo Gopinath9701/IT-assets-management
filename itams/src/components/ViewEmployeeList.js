@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./ViewEmployeeList.css";
 
 // =====================================================
@@ -11,7 +11,6 @@ import "./ViewEmployeeList.css";
 // MM  = Month
 // DD  = Day
 // XXX = Employee number (001 - 999)
-//
 // =====================================================
 
 const validateEmployeeId = (id) => {
@@ -153,6 +152,11 @@ const ViewEmployeeList = ({
   onBack,
 }) => {
   const [searchInput, setSearchInput] = useState("");
+
+  const [searchId, setSearchId] = useState("");
+
+  const [employees, setEmployees] = useState([]);
+
   const [selectedEmployee, setSelectedEmployee] =
     useState(null);
 
@@ -162,7 +166,60 @@ const ViewEmployeeList = ({
   const [searchTouched, setSearchTouched] =
     useState(false);
 
+  const [isSearchValid, setIsSearchValid] =
+    useState(true);
+
   const [loading, setLoading] = useState(false);
+
+  const [pageSize, setPageSize] = useState(10);
+
+  // =====================================================
+  // FETCH ALL EMPLOYEES
+  // =====================================================
+
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        const token =
+          localStorage.getItem("token");
+
+        const response = await fetch(
+          "http://localhost:5000/api/employees",
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const data =
+          await response.json();
+
+        if (
+          response.ok &&
+          data.employees
+        ) {
+          setEmployees(
+            data.employees.map((emp) => ({
+              id: emp.employee_id,
+              name: emp.employee_name,
+              department: emp.department,
+              status: emp.status,
+            }))
+          );
+        }
+      } catch (error) {
+        console.error(
+          "Fetch Employees Error:",
+          error
+        );
+      }
+    };
+
+    fetchEmployees();
+  }, []);
 
   // =====================================================
   // FETCH SINGLE EMPLOYEE
@@ -170,7 +227,8 @@ const ViewEmployeeList = ({
 
   const fetchEmployeeById = async (id) => {
     try {
-      const token = localStorage.getItem("token");
+      const token =
+        localStorage.getItem("token");
 
       const response = await fetch(
         `http://localhost:5000/api/employees/${id}`,
@@ -183,11 +241,18 @@ const ViewEmployeeList = ({
         }
       );
 
-      const data = await response.json();
+      const data =
+        await response.json();
 
-      console.log("EMPLOYEE RESPONSE:", data);
+      console.log(
+        "EMPLOYEE RESPONSE:",
+        data
+      );
 
-      if (!response.ok || !data.employee) {
+      if (
+        !response.ok ||
+        !data.employee
+      ) {
         return null;
       }
 
@@ -200,20 +265,45 @@ const ViewEmployeeList = ({
         status: emp.status,
         phone: emp.phone || "",
         email: emp.email || "",
-        joiningDate: emp.joining_date
-          ? new Date(emp.joining_date)
-              .toLocaleDateString("en-GB")
-              .replace(/\//g, "-")
-          : "",
-        assets: (data.assets || []).map((asset) => ({
-          assetId: asset.asset_id,
-          assetType: asset.asset_type,
-          assignedDate: asset.assigned_date
-            ? new Date(asset.assigned_date)
-                .toLocaleDateString("en-GB")
-                .replace(/\//g, "-")
+
+        joiningDate:
+          emp.joining_date
+            ? new Date(
+                emp.joining_date
+              )
+                .toLocaleDateString(
+                  "en-GB"
+                )
+                .replace(
+                  /\//g,
+                  "-"
+                )
             : "",
-        })),
+
+        assets:
+          (data.assets || []).map(
+            (asset) => ({
+              assetId:
+                asset.asset_id,
+
+              assetType:
+                asset.asset_type,
+
+              assignedDate:
+                asset.assigned_date
+                  ? new Date(
+                      asset.assigned_date
+                    )
+                      .toLocaleDateString(
+                        "en-GB"
+                      )
+                      .replace(
+                        /\//g,
+                        "-"
+                      )
+                  : "",
+            })
+          ),
       };
     } catch (error) {
       console.error(
@@ -230,66 +320,75 @@ const ViewEmployeeList = ({
   // =====================================================
 
   const handleSearchInputChange = (e) => {
-    // Only numbers
     const value = e.target.value
       .replace(/\D/g, "")
       .slice(0, 9);
 
     setSearchInput(value);
 
-    // Clear previous result/error while typing
-    setSelectedEmployee(null);
-    setValidationError("");
     setSearchTouched(false);
+    setValidationError("");
+    setIsSearchValid(true);
+
+    // Clear selected details while typing
+    setSelectedEmployee(null);
+
+    // Clear active search
+    setSearchId("");
   };
 
   // =====================================================
   // SEARCH EMPLOYEE
   // =====================================================
 
-  const handleSearch = async () => {
+  const handleSearch = () => {
     setSearchTouched(true);
-    setSelectedEmployee(null);
-    setValidationError("");
 
-    // Empty
-    if (searchInput === "") {
+    const rawValue = searchInput;
+
+    // ===================================================
+    // EMPTY
+    // ===================================================
+
+    if (rawValue === "") {
       setValidationError(
         "Please enter an Employee ID."
       );
+
+      setIsSearchValid(false);
+      setSearchId("");
+      setSelectedEmployee(null);
+
       return;
     }
 
-    // Validate Employee ID
+    // ===================================================
+    // VALIDATE
+    // ===================================================
+
     const result =
-      validateEmployeeId(searchInput);
+      validateEmployeeId(rawValue);
 
     if (!result.isValid) {
-      setValidationError(result.message);
+      setValidationError(
+        result.message
+      );
+
+      setIsSearchValid(false);
+      setSearchId("");
+      setSelectedEmployee(null);
+
       return;
     }
 
-    // Start loading
-    setLoading(true);
+    // ===================================================
+    // SUCCESS
+    // ===================================================
 
-    try {
-      const found =
-        await fetchEmployeeById(searchInput);
-
-      // Employee not found
-      if (!found) {
-        setValidationError(
-          "System data not found."
-        );
-        return;
-      }
-
-      // Employee found
-      setSelectedEmployee(found);
-      setValidationError("");
-    } finally {
-      setLoading(false);
-    }
+    setSearchId(rawValue);
+    setValidationError("");
+    setIsSearchValid(true);
+    setSelectedEmployee(null);
   };
 
   // =====================================================
@@ -300,6 +399,87 @@ const ViewEmployeeList = ({
     if (e.key === "Enter") {
       e.preventDefault();
       handleSearch();
+    }
+  };
+
+  // =====================================================
+  // FILTER EMPLOYEES
+  // =====================================================
+
+  const filteredEmployees =
+    searchId === ""
+      ? employees
+      : employees.filter(
+          (employee) =>
+            employee.id === searchId
+        );
+
+  // =====================================================
+  // PAGE SIZE
+  // =====================================================
+
+  const visibleEmployees =
+    pageSize === "All"
+      ? filteredEmployees
+      : filteredEmployees.slice(
+          0,
+          Number(pageSize)
+        );
+
+  // =====================================================
+  // VIEW EMPLOYEE
+  // =====================================================
+
+  const handleViewEmployee = async (
+    employee
+  ) => {
+    const validation =
+      validateEmployeeId(employee.id);
+
+    if (!validation.isValid) {
+      setValidationError(
+        validation.message
+      );
+
+      setSearchTouched(true);
+
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const fullEmployee =
+        await fetchEmployeeById(
+          employee.id
+        );
+
+      if (!fullEmployee) {
+        setValidationError(
+          `Could not load employee "${employee.id}".`
+        );
+
+        setSearchTouched(true);
+
+        return;
+      }
+
+      setSelectedEmployee(
+        fullEmployee
+      );
+
+      setSearchInput(
+        fullEmployee.id
+      );
+
+      setSearchId(
+        fullEmployee.id
+      );
+
+      setValidationError("");
+      setIsSearchValid(true);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -359,16 +539,18 @@ const ViewEmployeeList = ({
 
       <div className="vel-body">
 
+        {/* ================= LEFT SIDE ================= */}
+
         <div className="vel-left">
 
           {/* ================= PAGE TITLE ================= */}
 
           <h1 className="vel-page-title">
-            View Employee Details
+            View Employee List
           </h1>
 
           <p className="vel-page-sub">
-            Search and view employee information and
+            View employee information and
             assigned assets.
           </p>
 
@@ -398,7 +580,7 @@ const ViewEmployeeList = ({
 
                   <input
                     className={`vel-input ${
-                      validationError &&
+                      !isSearchValid &&
                       searchTouched
                         ? "vel-input-error"
                         : ""
@@ -406,14 +588,16 @@ const ViewEmployeeList = ({
                     type="text"
                     inputMode="numeric"
                     maxLength={9}
-                    placeholder="Enter Employee ID (e.g., 260805005)"
+                    placeholder="Enter Employee ID"
                     value={searchInput}
                     onChange={
                       handleSearchInputChange
                     }
-                    onKeyDown={handleKeyDown}
+                    onKeyDown={
+                      handleKeyDown
+                    }
                     aria-invalid={
-                      !!validationError
+                      !isSearchValid
                     }
                   />
 
@@ -423,9 +607,7 @@ const ViewEmployeeList = ({
                     onClick={handleSearch}
                     disabled={loading}
                   >
-                    {loading
-                      ? "Searching..."
-                      : "Search"}
+                    Search
                   </button>
 
                 </div>
@@ -434,12 +616,14 @@ const ViewEmployeeList = ({
 
                 {validationError &&
                   searchTouched && (
+
                     <div
                       className="vel-validation-error"
                       role="alert"
                     >
                       ⚠️ {validationError}
                     </div>
+
                   )}
 
               </div>
@@ -451,9 +635,10 @@ const ViewEmployeeList = ({
             <div className="vel-validation-hint">
 
               <small>
-                Format: YYMMDDXXX — exactly 9 digits,
-                no spaces. Past and today's dates are
-                allowed. Future dates are not allowed.
+                Format: YYMMDDXXX — exactly
+                9 digits, no spaces. Past and
+                today's dates are allowed.
+                Future dates are not allowed.
                 Last 3 digits: 001–999.
               </small>
 
@@ -461,209 +646,185 @@ const ViewEmployeeList = ({
 
           </div>
 
-          {/* =================================================
-              EMPLOYEE DETAILS
-          ================================================= */}
+          {/* ================= EMPLOYEE LIST ================= */}
 
           <div className="vel-card">
 
             <h2 className="vel-card-title">
-              Employee Details
+              Employee List
             </h2>
 
-            {!selectedEmployee ? (
+            <div className="vel-table-wrapper">
 
-              <div
-                style={{
-                  minHeight: "180px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#6b7280",
-                  fontSize: "14px",
-                  textAlign: "center",
-                }}
-              >
-                🔍 Search for an employee to view
-                details.
-              </div>
+              <table className="vel-table">
 
-            ) : (
+                <thead>
 
-              <div className="vel-details-body">
+                  <tr>
 
-                {/* ================= PERSONAL INFORMATION ================= */}
+                    <th>
+                      Employee ID
+                    </th>
 
-                <div className="vel-details-section">
+                    <th>
+                      Department
+                    </th>
 
-                  <h3 className="vel-section-title">
-                    Personal Information
-                  </h3>
+                    <th>
+                      Status
+                    </th>
 
-                  {[
-                    [
-                      "Employee ID",
-                      selectedEmployee.id,
-                    ],
+                    <th>
+                      Action
+                    </th>
 
-                    [
-                      "Employee Name",
-                      selectedEmployee.name,
-                    ],
+                  </tr>
 
-                    [
-                      "Department",
-                      selectedEmployee.department,
-                    ],
+                </thead>
 
-                    [
-                      "Phone Number",
-                      selectedEmployee.phone,
-                    ],
+                <tbody>
 
-                    [
-                      "Email ID",
-                      selectedEmployee.email,
-                    ],
+                  {visibleEmployees.length > 0 ? (
 
-                    [
-                      "Date of Joining",
-                      selectedEmployee.joiningDate,
-                    ],
+                    visibleEmployees.map(
+                      (emp) => (
 
-                    [
-                      "Status",
-                      selectedEmployee.status,
-                    ],
-                  ].map(
-                    ([label, value]) => (
-                      <div
-                        className="vel-detail-row"
-                        key={label}
-                      >
+                        <tr
+                          key={emp.id}
+                          className={
+                            selectedEmployee?.id ===
+                            emp.id
+                              ? "vel-row-active"
+                              : ""
+                          }
+                        >
 
-                        <span className="vel-detail-label">
-                          {label}
-                        </span>
+                          <td>
 
-                        <span className="vel-detail-colon">
-                          :
-                        </span>
+                            <span className="vel-employee-id">
+                              {emp.id}
+                            </span>
 
-                        <span className="vel-detail-value">
-                          {value || "-"}
-                        </span>
+                          </td>
 
-                      </div>
-                    )
-                  )}
+                          <td>
+                            {emp.department}
+                          </td>
 
-                </div>
+                          <td>
 
-                <hr className="vel-divider" />
+                            <span
+                              className={`vel-status-badge vel-status-${String(
+                                emp.status || ""
+                              )
+                                .toLowerCase()
+                                .replace(
+                                  /\s+/g,
+                                  "-"
+                                )}`}
+                            >
+                              {emp.status}
+                            </span>
 
-                {/* ================= ASSIGNED ASSETS ================= */}
+                          </td>
 
-                <div className="vel-details-section">
+                          <td>
 
-                  <h3 className="vel-section-title">
-                    Assigned Assets
-                  </h3>
+                            <button
+                              type="button"
+                              className="vel-view-btn"
+                              onClick={() =>
+                                handleViewEmployee(
+                                  emp
+                                )
+                              }
+                              disabled={loading}
+                            >
+                              {loading &&
+                              selectedEmployee?.id ===
+                                emp.id
+                                ? "Loading..."
+                                : "View"}
+                            </button>
 
-                  <div className="vel-asset-table-wrapper">
-
-                    <table className="vel-asset-table">
-
-                      <thead>
-
-                        <tr>
-
-                          <th>
-                            Asset ID
-                          </th>
-
-                          <th>
-                            Asset Type
-                          </th>
-
-                          <th>
-                            Assigned Date
-                          </th>
+                          </td>
 
                         </tr>
 
-                      </thead>
+                      )
+                    )
 
-                      <tbody>
+                  ) : (
 
-                        {selectedEmployee.assets &&
-                        selectedEmployee.assets.length >
-                          0 ? (
+                    <tr>
 
-                          selectedEmployee.assets.map(
-                            (asset, index) => (
-                              <tr
-                                key={`${asset.assetId}-${index}`}
-                              >
+                      <td
+                        colSpan="4"
+                        className="vel-no-data"
+                      >
+                        No employees found.
+                      </td>
 
-                                <td>
-                                  {asset.assetId}
-                                </td>
+                    </tr>
 
-                                <td>
-                                  {asset.assetType}
-                                </td>
+                  )}
 
-                                <td>
-                                  {asset.assignedDate}
-                                </td>
+                </tbody>
 
-                              </tr>
-                            )
-                          )
+              </table>
 
-                        ) : (
+            </div>
 
-                          <tr>
+            {/* ================= PAGINATION ================= */}
 
-                            <td
-                              colSpan="3"
-                              className="vel-no-data"
-                            >
-                              No Assets Assigned
-                            </td>
+            <div className="vel-pagination-row">
 
-                          </tr>
+              <span className="vel-pagination-info">
 
-                        )}
+                Showing{" "}
+                {visibleEmployees.length}{" "}
+                of{" "}
+                {filteredEmployees.length}{" "}
+                employees
 
-                      </tbody>
+              </span>
 
-                    </table>
+              <select
+                className="vel-page-size"
+                value={pageSize}
+                onChange={(e) => {
 
-                  </div>
+                  const value =
+                    e.target.value;
 
-                </div>
+                  setPageSize(
+                    value === "All"
+                      ? "All"
+                      : Number(value)
+                  );
 
-                {/* ================= CLOSE ================= */}
+                }}
+              >
 
-                <div className="vel-close-row">
+                <option value={10}>
+                  10
+                </option>
 
-                  <button
-                    type="button"
-                    className="vel-close-panel-btn"
-                    onClick={
-                      handleCloseDetails
-                    }
-                  >
-                    Close
-                  </button>
+                <option value={30}>
+                  30
+                </option>
 
-                </div>
+                <option value={50}>
+                  50
+                </option>
 
-              </div>
+                <option value="All">
+                  All
+                </option>
 
-            )}
+              </select>
+
+            </div>
 
           </div>
 
@@ -678,10 +839,219 @@ const ViewEmployeeList = ({
 
         </div>
 
+        {/* ================= RIGHT SIDE ================= */}
+
+        {selectedEmployee && (
+
+          <div className="vel-details-panel">
+
+            <div className="vel-details-panel-header">
+
+              <h2 className="vel-card-title">
+                Employee Details
+              </h2>
+
+              <button
+                type="button"
+                className="vel-details-close-x"
+                onClick={
+                  handleCloseDetails
+                }
+              >
+                ×
+              </button>
+
+            </div>
+
+            <div className="vel-details-body">
+
+              {/* ================= PERSONAL INFORMATION ================= */}
+
+              <div className="vel-details-section">
+
+                <h3 className="vel-section-title">
+                  Personal Information
+                </h3>
+
+                {[
+                  [
+                    "Employee ID",
+                    selectedEmployee.id,
+                  ],
+
+                  [
+                    "Employee Name",
+                    selectedEmployee.name,
+                  ],
+
+                  [
+                    "Department",
+                    selectedEmployee.department,
+                  ],
+
+                  [
+                    "Phone Number",
+                    selectedEmployee.phone,
+                  ],
+
+                  [
+                    "Email ID",
+                    selectedEmployee.email,
+                  ],
+
+                  [
+                    "Date of Joining",
+                    selectedEmployee.joiningDate,
+                  ],
+
+                  [
+                    "Status",
+                    selectedEmployee.status,
+                  ],
+
+                ].map(
+                  ([label, value]) => (
+
+                    <div
+                      className="vel-detail-row"
+                      key={label}
+                    >
+
+                      <span className="vel-detail-label">
+                        {label}
+                      </span>
+
+                      <span className="vel-detail-colon">
+                        :
+                      </span>
+
+                      <span className="vel-detail-value">
+                        {value || "-"}
+                      </span>
+
+                    </div>
+
+                  )
+                )}
+
+              </div>
+
+              <hr className="vel-divider" />
+
+              {/* ================= ASSIGNED ASSETS ================= */}
+
+              <div className="vel-details-section">
+
+                <h3 className="vel-section-title">
+                  Assigned Assets
+                </h3>
+
+                <div className="vel-asset-table-wrapper">
+
+                  <table className="vel-asset-table">
+
+                    <thead>
+
+                      <tr>
+
+                        <th>
+                          Asset ID
+                        </th>
+
+                        <th>
+                          Asset Type
+                        </th>
+
+                        <th>
+                          Assigned Date
+                        </th>
+
+                      </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                      {selectedEmployee.assets &&
+                      selectedEmployee.assets.length >
+                        0 ? (
+
+                        selectedEmployee.assets.map(
+                          (
+                            asset,
+                            index
+                          ) => (
+
+                            <tr
+                              key={`${asset.assetId}-${index}`}
+                            >
+
+                              <td>
+                                {asset.assetId}
+                              </td>
+
+                              <td>
+                                {asset.assetType}
+                              </td>
+
+                              <td>
+                                {asset.assignedDate}
+                              </td>
+
+                            </tr>
+
+                          )
+                        )
+
+                      ) : (
+
+                        <tr>
+
+                          <td
+                            colSpan="3"
+                            className="vel-no-data"
+                          >
+                            No Assets Assigned
+                          </td>
+
+                        </tr>
+
+                      )}
+
+                    </tbody>
+
+                  </table>
+
+                </div>
+
+              </div>
+
+              {/* ================= CLOSE ================= */}
+
+              <div className="vel-close-row">
+
+                <button
+                  type="button"
+                  className="vel-close-panel-btn"
+                  onClick={
+                    handleCloseDetails
+                  }
+                >
+                  Close
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        )}
+
       </div>
 
     </div>
   );
 };
 
-export default ViewEmployeeList;
+export default ViewEmployeeList;  
