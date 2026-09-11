@@ -49,12 +49,25 @@ async function getAvailableAssets(req, res, next) {
   try {
     const { type } = req.query;
     const params = ["Not In Use"];
-    let query = "SELECT asset_id, asset_type, model FROM assets WHERE status = $1";
+    // "Not In Use" only means no one currently holds it - it says nothing
+    // about whether it's actually working. An asset returned normally
+    // (not marked Damaged/Faulty) still shows "Not In Use" even if it has
+    // an older, still-open maintenance ticket nobody ever resolved, so
+    // exclude those too instead of handing a flagged-broken asset to a
+    // new employee.
+    let query = `
+      SELECT a.asset_id, a.asset_type, a.model FROM assets a
+      WHERE a.status = $1
+      AND NOT EXISTS (
+        SELECT 1 FROM maintenance_requests m
+        WHERE m.asset_id = a.asset_id AND m.status IN ('Pending', 'In Progress')
+      )
+    `;
     if (type) {
       params.push(type);
-      query += ` AND asset_type = $${params.length}`;
+      query += ` AND a.asset_type = $${params.length}`;
     }
-    query += " ORDER BY asset_id ASC";
+    query += " ORDER BY a.asset_id ASC";
     const { rows } = await pool.query(query, params);
     res.json({ success: true, assets: rows });
   } catch (err) {
@@ -84,6 +97,21 @@ async function assignAsset(req, res, next) {
     if (assetRows.rows.length === 0) {
       await client.query("ROLLBACK");
       return res.status(400).json({ success: false, message: "Asset not found or not available for assignment" });
+    }
+
+    // Backstop for the same check getAvailableAssets does - this is the
+    // authoritative assignment path, so it can't just trust that whatever
+    // called it already filtered out assets with an open maintenance ticket.
+    const openTicket = await client.query(
+      `SELECT request_id FROM maintenance_requests WHERE asset_id = $1 AND status IN ('Pending', 'In Progress')`,
+      [assetId]
+    );
+    if (openTicket.rows.length > 0) {
+      await client.query("ROLLBACK");
+      return res.status(400).json({
+        success: false,
+        message: `This asset has an open maintenance request (${openTicket.rows[0].request_id}) and can't be assigned.`,
+      });
     }
 
     const reqRows = await client.query(
@@ -179,6 +207,22 @@ async function reassignAsset(req, res, next) {
     if (targetAssetId !== currentAssignment.asset_id && assetResult.rows[0].status !== "Not In Use") {
       await client.query("ROLLBACK");
       return res.status(400).json({ success: false, message: "Target asset is not available for assignment" });
+    }
+
+    // Same open-maintenance-ticket backstop as assignAsset - "Not In Use"
+    // alone doesn't mean the asset is actually working.
+    if (targetAssetId !== currentAssignment.asset_id) {
+      const openTicket = await client.query(
+        `SELECT request_id FROM maintenance_requests WHERE asset_id = $1 AND status IN ('Pending', 'In Progress')`,
+        [targetAssetId]
+      );
+      if (openTicket.rows.length > 0) {
+        await client.query("ROLLBACK");
+        return res.status(400).json({
+          success: false,
+          message: `This asset has an open maintenance request (${openTicket.rows[0].request_id}) and can't be assigned.`,
+        });
+      }
     }
 
     await client.query(
