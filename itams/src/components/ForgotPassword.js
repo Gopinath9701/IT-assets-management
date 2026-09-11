@@ -12,6 +12,13 @@ const REGISTERED_EMAILS = {
   "260822003a@gmail.com": "Inventory",
 };
 
+// Must match OTP_EXPIRY_MINUTES in authController.js (backend) - this is
+// the actual real expiry, not a decoration, so the two can't be allowed
+// to drift apart the way they already had (this said 3 minutes while the
+// backend allowed 10, so the UI told users their still-valid OTP had
+// expired 7 minutes before it actually did).
+const OTP_EXPIRY_SECONDS = 3 * 60;
+
 // =====================================================
 // VALIDATE EMPLOYEE ID
 // =====================================================
@@ -559,17 +566,17 @@ export default function ForgotPassword({
         setOtpSent(true);
         setOtpVerified(false);
 
-        // 3-minute countdown
-        setOtpTimer(180);
+        setOtpTimer(OTP_EXPIRY_SECONDS);
 
         setOtp("");
         setOtpError("");
 
-        setSuccessMessage(
-          data.message ||
-            "OTP sent successfully."
-        );
-
+        // No setSuccessMessage here - the countdown note right above the
+        // OTP field ("An OTP has been sent to your email. It expires in
+        // ...") already says this, live and more precisely. Showing both
+        // was redundant, and worse, the two disagreed (this one echoed the
+        // backend's static "It expires in 10 minutes" text while the
+        // countdown below it counted down from 3).
         setServerError("");
       } else {
         setOtpSent(false);
