@@ -787,12 +787,12 @@ export default function ForgotPassword({
       return;
     }
 
-    if (otpTimer <= 0) {
-      setOtpError(
-        "OTP has expired. Please request a new OTP."
-      );
-      return;
-    }
+    // No otpTimer check here on purpose - that 3-minute countdown is for
+    // the OTP code itself, already spent the moment handleVerifyOTP
+    // succeeded above. The real window to actually reset the password
+    // after verifying is a separate 15 minutes, enforced server-side
+    // (password_resets.created_at) - the backend's own message surfaces
+    // correctly via serverError/otpError if that's actually expired too.
 
     // Validate password
     const passwordValidation =
@@ -1016,7 +1016,7 @@ export default function ForgotPassword({
 
           <label>Enter OTP</label>
 
-          {otpSent && (
+          {otpSent && !otpVerified && (
             <div
               style={{
                 color:
@@ -1091,7 +1091,7 @@ export default function ForgotPassword({
               RESEND OTP
           ========================================== */}
 
-          {otpSent && (
+          {otpSent && !otpVerified && (
             <button
               type="button"
               className="link-btn"
