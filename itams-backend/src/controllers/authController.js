@@ -5,7 +5,11 @@ const { sendOtpEmail } = require("../utils/email");
 const { generateOtp, otpExpiryDate } = require("../utils/otp");
 const { validatePassword, validateOtp } = require("../utils/validators");
 
-const OTP_EXPIRY_MINUTES = 10;
+// Must match OTP_EXPIRY_SECONDS in ForgotPassword.js (frontend) - that's
+// the real, actual expiry (used to set the OTP's expires_at below), not
+// just display text, so it can't be allowed to drift from what the UI's
+// countdown promises the user.
+const OTP_EXPIRY_MINUTES = 3;
 
 async function findUserByIdentifier(identifier) {
   const { rows } = await pool.query(
