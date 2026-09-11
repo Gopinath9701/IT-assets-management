@@ -361,6 +361,14 @@ const DESIGNATIONS_BY_DEPARTMENT = {
     "Process Analyst",
     "Operations Manager",
   ],
+  "Software Development": [
+    "Software Developer",
+    "Senior Developer",
+    "Backend Developer",
+    "Frontend Developer",
+    "Full Stack Developer",
+    "Software Development Manager",
+  ],
 };
 
 const GENERIC_DESIGNATIONS = [
