@@ -28,7 +28,7 @@ async function createMaintenanceRequest(req, res, next) {
     const { employeeId, assetId, issueCategory, description, priority } = req.body;
 
     if (!employeeId) {
-      return res.status(400).json({ success: false, message: "Employee ID is required." });
+      return res.status(400).json({ success: false, field: "employeeId", message: "Employee ID is required." });
     }
     const validationError = validateMaintenancePayload({ issueCategory, description, priority });
     if (validationError) {
@@ -39,6 +39,24 @@ async function createMaintenanceRequest(req, res, next) {
     // submissions can never compute the same requestId (see idGenerator.js).
     await client.query("BEGIN");
     await acquireIdLock(client, "maintenance");
+
+    // maintenance_requests.employee_id has a FK to employees - without this
+    // check, a nonexistent Employee ID fell all the way through to that FK
+    // violation, and the raw Postgres error text ("insert or update on
+    // table... violates foreign key constraint...") leaked straight to the
+    // user via the generic error handler.
+    const { rows: empRows } = await client.query(
+      `SELECT employee_id FROM employees WHERE employee_id = $1`,
+      [employeeId]
+    );
+    if (empRows.length === 0) {
+      await client.query("ROLLBACK");
+      return res.status(400).json({
+        success: false,
+        field: "employeeId",
+        message: "Employee ID does not exist in the database.",
+      });
+    }
 
     if (assetId) {
       // An employee can only report an issue on an asset that's actually
@@ -51,12 +69,13 @@ async function createMaintenanceRequest(req, res, next) {
       );
       if (assetRows.length === 0) {
         await client.query("ROLLBACK");
-        return res.status(404).json({ success: false, message: "Asset not found." });
+        return res.status(404).json({ success: false, field: "assetId", message: "Asset not found." });
       }
       if (assetRows[0].assigned_to !== employeeId) {
         await client.query("ROLLBACK");
         return res.status(403).json({
           success: false,
+          field: "assetId",
           message: "This asset is not currently assigned to this employee.",
         });
       }
@@ -74,6 +93,7 @@ async function createMaintenanceRequest(req, res, next) {
         await client.query("ROLLBACK");
         return res.status(409).json({
           success: false,
+          field: "assetId",
           message: `This asset already has an open maintenance request (${openForAsset[0].request_id}).`,
         });
       }
@@ -101,6 +121,16 @@ async function createMaintenanceRequest(req, res, next) {
         });
       }
       return res.status(409).json({ success: false, message: "Request ID already exists, please try again" });
+    }
+    if (err.code === "23503") {
+      // Defense in depth - the employeeId/assetId checks above should
+      // catch this first, but if a race ever let one through, this stops
+      // the raw Postgres constraint text from reaching the user directly.
+      return res.status(400).json({
+        success: false,
+        field: "employeeId",
+        message: "Employee ID does not exist in the database.",
+      });
     }
     next(err);
   } finally {
