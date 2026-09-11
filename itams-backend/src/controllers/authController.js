@@ -95,7 +95,7 @@ async function sendOtp(req, res, next) {
     // to the generic error handler as an opaque 500 — it needs its own
     // clear, honest message instead of looking like an unrelated server bug.
     try {
-      await sendOtpEmail(user.email, otp, user.name);
+      await sendOtpEmail(user.email, otp, user.name, OTP_EXPIRY_MINUTES);
     } catch (emailErr) {
       console.error("Failed to send OTP email:", emailErr.message);
       return res.status(502).json({

@@ -8,7 +8,7 @@ require("dotenv").config();
 // ANY recipient — no per-recipient whitelist to maintain.
 const brevo = new BrevoClient({ apiKey: process.env.BREVO_API_KEY });
 
-async function sendOtpEmail(toEmail, otp, name = "") {
+async function sendOtpEmail(toEmail, otp, name = "", expiryMinutes = 10) {
   const fromName = process.env.EMAIL_FROM_NAME || "ITAMS Support";
   const fromEmail = process.env.BREVO_FROM_EMAIL;
 
@@ -24,7 +24,7 @@ async function sendOtpEmail(toEmail, otp, name = "") {
         </div>
         <div style="padding:30px;">
           <p>Hi ${name || "there"},</p>
-          <p>Use the OTP below to reset your ITAMS account password. This code expires in <b>10 minutes</b>.</p>
+          <p>Use the OTP below to reset your ITAMS account password. This code expires in <b>${expiryMinutes} minutes</b>.</p>
           <div style="text-align:center;margin:30px 0;">
             <span style="font-size:32px;letter-spacing:8px;font-weight:700;color:#1d63ff;">${otp}</span>
           </div>
