@@ -10,6 +10,55 @@ const DEPARTMENTS = [
   "Operations",
 ];
 
+// Designations are scoped per department - a Finance employee shouldn't
+// be offered "Software Developer", an IT employee shouldn't be offered
+// "Accountant", etc. Keep this in sync with the identical mapping in
+// UpdateEmployee.js.
+const DESIGNATIONS_BY_DEPARTMENT = {
+  IT: [
+    "Software Developer",
+    "Senior Developer",
+    "System Administrator",
+    "QA Engineer",
+    "DevOps Engineer",
+    "Technical Lead",
+    "IT Manager",
+  ],
+  HR: [
+    "HR Executive",
+    "Recruiter",
+    "HR Generalist",
+    "Talent Acquisition Specialist",
+    "HR Manager",
+  ],
+  Finance: [
+    "Accountant",
+    "Financial Analyst",
+    "Accounts Executive",
+    "Auditor",
+    "Finance Manager",
+  ],
+  Marketing: [
+    "Marketing Executive",
+    "Content Strategist",
+    "SEO Specialist",
+    "Brand Manager",
+    "Marketing Manager",
+  ],
+  Sales: [
+    "Sales Executive",
+    "Account Executive",
+    "Business Development Executive",
+    "Sales Manager",
+  ],
+  Operations: [
+    "Operations Executive",
+    "Logistics Coordinator",
+    "Process Analyst",
+    "Operations Manager",
+  ],
+};
+
 const AddEmployee = ({ username = "username", onLogout, onBack }) => {
   const [employeeName, setEmployeeName] = useState("");
   const [employeeId, setEmployeeId] = useState("");
@@ -98,29 +147,19 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
   // DESIGNATION VALIDATION
   // =========================================================
 
-  const validateDesignation = (value) => {
-    if (!value || value.length === 0) {
+  const validateDesignation = (value, dept) => {
+    if (!dept) {
+      return "Select Department before selecting Designation.";
+    }
+
+    if (!value) {
       return "Designation is required.";
     }
 
-    if (value.startsWith(" ")) {
-      return "Designation cannot start with a space.";
-    }
+    const validDesignations = DESIGNATIONS_BY_DEPARTMENT[dept] || [];
 
-    if (value.endsWith(" ")) {
-      return "Designation cannot end with a space.";
-    }
-
-    if (value.trim().length < 2) {
-      return "Designation must contain at least 2 characters.";
-    }
-
-    if (/ {2,}/.test(value)) {
-      return "Only a single space is allowed between words.";
-    }
-
-    if (!/^[A-Za-z]+( [A-Za-z]+)*$/.test(value)) {
-      return "Designation can contain only letters and single spaces between words.";
+    if (!validDesignations.includes(value)) {
+      return "Please select a valid Designation for this Department.";
     }
 
     return "";
@@ -201,7 +240,7 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
       newErrors.department = departmentError;
     }
 
-    const designationError = validateDesignation(designation);
+    const designationError = validateDesignation(designation, department);
     if (designationError) {
       newErrors.designation = designationError;
     }
@@ -241,26 +280,26 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
 
     setDepartment(value);
 
+    // The previously-selected designation almost certainly isn't valid for
+    // the new department (e.g. "Accountant" was fine under Finance but not
+    // under IT) - clear it rather than silently keep an invalid pairing.
+    setDesignation("");
+
     setErrors((prev) => ({
       ...prev,
       department: validateDepartment(value),
+      designation: "",
     }));
   };
 
   const handleDesignationChange = (e) => {
-    let value = e.target.value;
-
-    // allow only letters and spaces (blocks numbers and all symbols)
-    value = value.replace(/[^A-Za-z ]/g, "");
-
-    // collapse multiple spaces into a single space
-    value = value.replace(/ {2,}/g, " ");
+    const value = e.target.value;
 
     setDesignation(value);
 
     setErrors((prev) => ({
       ...prev,
-      designation: validateDesignation(value),
+      designation: validateDesignation(value, department),
     }));
   };
 
@@ -665,17 +704,32 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
                   Designation *
                 </label>
 
-                <input
-                  type="text"
-                  placeholder="Enter designation"
+                <select
                   value={designation}
                   onChange={handleDesignationChange}
+                  disabled={!department}
                   className={
                     errors.designation
                       ? "input-error"
                       : ""
                   }
-                />
+                >
+
+                  <option value="">
+                    {department
+                      ? "Select Designation"
+                      : "Select Department first"}
+                  </option>
+
+                  {(DESIGNATIONS_BY_DEPARTMENT[department] || []).map(
+                    (title) => (
+                      <option key={title} value={title}>
+                        {title}
+                      </option>
+                    )
+                  )}
+
+                </select>
 
                 {errors.designation && (
                   <div className="error">

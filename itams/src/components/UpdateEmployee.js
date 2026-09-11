@@ -205,11 +205,27 @@ const validateDepartment = (department) => {
 // DESIGNATION VALIDATION
 // ======================================================
 
-const validateDesignation = (designation) => {
+const validateDesignation = (designation, department) => {
+  if (!department) {
+    return {
+      isValid: false,
+      message: "Select Department before selecting Designation.",
+    };
+  }
+
   if (!designation || designation.trim() === "") {
     return {
       isValid: false,
       message: "Designation is required.",
+    };
+  }
+
+  const validDesignations = DESIGNATIONS_BY_DEPARTMENT[department] || [];
+
+  if (!validDesignations.includes(designation)) {
+    return {
+      isValid: false,
+      message: "Please select a valid Designation for this Department.",
     };
   }
 
@@ -302,23 +318,59 @@ const DEPARTMENTS = [
   "Marketing",
   "Sales",
   "Operations",
-  "Administration",
 ];
 
 // ======================================================
-// DESIGNATIONS
+// DESIGNATIONS BY DEPARTMENT
+// A Finance employee shouldn't be offered "Software Developer", an IT
+// employee shouldn't be offered "Accountant", etc. Keep this in sync
+// with the identical mapping in AddEmployee.js.
 // ======================================================
 
-const DESIGNATIONS = [
-  "Developer",
-  "Manager",
-  "Accountant",
-  "Analyst",
-  "Executive",
-  "Assistant",
-  "Lead",
-  "Director",
-];
+const DESIGNATIONS_BY_DEPARTMENT = {
+  IT: [
+    "Software Developer",
+    "Senior Developer",
+    "System Administrator",
+    "QA Engineer",
+    "DevOps Engineer",
+    "Technical Lead",
+    "IT Manager",
+  ],
+  HR: [
+    "HR Executive",
+    "Recruiter",
+    "HR Generalist",
+    "Talent Acquisition Specialist",
+    "HR Manager",
+  ],
+  Finance: [
+    "Accountant",
+    "Financial Analyst",
+    "Accounts Executive",
+    "Auditor",
+    "Finance Manager",
+  ],
+  Marketing: [
+    "Marketing Executive",
+    "Content Strategist",
+    "SEO Specialist",
+    "Brand Manager",
+    "Marketing Manager",
+  ],
+  Sales: [
+    "Sales Executive",
+    "Account Executive",
+    "Business Development Executive",
+    "Sales Manager",
+  ],
+  Operations: [
+    "Operations Executive",
+    "Logistics Coordinator",
+    "Process Analyst",
+    "Operations Manager",
+  ],
+};
 
 // ======================================================
 // MAIN COMPONENT
@@ -494,14 +546,20 @@ const UpdateEmployee = ({
   const handleFormChange = (e) => {
     const { name, value } = e.target;
 
+    // The previously-selected designation almost certainly isn't valid for
+    // a newly-picked department (e.g. "Accountant" was fine under Finance
+    // but not under IT) - clear it rather than silently keep an invalid
+    // pairing.
     setFormData((previous) => ({
       ...previous,
       [name]: value,
+      ...(name === "department" ? { designation: "" } : {}),
     }));
 
     setFormErrors((previous) => ({
       ...previous,
       [name]: "",
+      ...(name === "department" ? { designation: "" } : {}),
     }));
 
     setUpdateSuccess(false);
@@ -529,7 +587,7 @@ const UpdateEmployee = ({
       errors.department = departmentResult.message;
     }
 
-    const designationResult = validateDesignation(formData.designation);
+    const designationResult = validateDesignation(formData.designation, formData.department);
     if (!designationResult.isValid) {
       errors.designation = designationResult.message;
     }
@@ -882,13 +940,20 @@ const UpdateEmployee = ({
                     name="designation"
                     value={formData.designation}
                     onChange={handleFormChange}
+                    disabled={!formData.department}
                   >
 
                     <option value="">
-                      Select Designation
+                      {formData.department
+                        ? "Select Designation"
+                        : "Select Department first"}
                     </option>
 
-                    {DESIGNATIONS.map((designation) => (
+                    {(
+                      DESIGNATIONS_BY_DEPARTMENT[
+                        formData.department
+                      ] || []
+                    ).map((designation) => (
                       <option
                         key={designation}
                         value={designation}

@@ -206,6 +206,7 @@ const ViewEmployeeList = ({
               id: emp.employee_id,
               name: emp.employee_name,
               department: emp.department,
+              designation: emp.designation,
               status: emp.status,
             }))
           );
@@ -262,6 +263,7 @@ const ViewEmployeeList = ({
         id: emp.employee_id,
         name: emp.employee_name,
         department: emp.department,
+        designation: emp.designation || "",
         status: emp.status,
         phone: emp.phone || "",
         email: emp.email || "",
@@ -671,6 +673,10 @@ const ViewEmployeeList = ({
                     </th>
 
                     <th>
+                      Designation
+                    </th>
+
+                    <th>
                       Status
                     </th>
 
@@ -709,6 +715,10 @@ const ViewEmployeeList = ({
 
                           <td>
                             {emp.department}
+                          </td>
+
+                          <td>
+                            {emp.designation || "-"}
                           </td>
 
                           <td>
@@ -887,6 +897,11 @@ const ViewEmployeeList = ({
                   [
                     "Department",
                     selectedEmployee.department,
+                  ],
+
+                  [
+                    "Designation",
+                    selectedEmployee.designation,
                   ],
 
                   [
