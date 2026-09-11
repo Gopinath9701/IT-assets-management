@@ -392,10 +392,22 @@ export default function Login({
       // =================================================
 
       else {
-        setIdentifierTouched(true);
-        setIdentifierError(
-          "System data not found."
-        );
+        // Backend tells us which field is actually wrong (field:
+        // "identifier" | "password") instead of a generic message, so show
+        // it on the right input instead of always blaming the Employee
+        // ID/Email field regardless of what actually failed.
+        if (data.field === "password") {
+          setPasswordTouched(true);
+          setPasswordError(
+            data.message || "Incorrect password."
+          );
+        } else {
+          setIdentifierTouched(true);
+          setIdentifierError(
+            data.message ||
+              "No account found for that Employee ID/Email."
+          );
+        }
       }
     } catch (error) {
       console.error(
