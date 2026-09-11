@@ -55,8 +55,22 @@ async function getAvailableAssets(req, res, next) {
     // an older, still-open maintenance ticket nobody ever resolved, so
     // exclude those too instead of handing a flagged-broken asset to a
     // new employee.
+    // Picking by asset_id order meant whichever asset happened to have the
+    // lowest ID got handed out every single time it became free again,
+    // instead of spreading use across the fleet - e.g. LAP001 kept getting
+    // reassigned over and over just because it sorts first. Order by how
+    // long each asset has actually been sitting idle instead: the most
+    // recent time it was returned (or, for one that's never been assigned
+    // at all, when it was added) - oldest first, so the asset that's been
+    // idle longest is offered before one that just became free.
     let query = `
       SELECT a.asset_id, a.asset_type, a.model FROM assets a
+      LEFT JOIN (
+        SELECT asset_id, MAX(returned_date) AS last_returned
+        FROM asset_assignments
+        WHERE status = 'Returned'
+        GROUP BY asset_id
+      ) r ON r.asset_id = a.asset_id
       WHERE a.status = $1
       AND NOT EXISTS (
         SELECT 1 FROM maintenance_requests m
@@ -67,7 +81,7 @@ async function getAvailableAssets(req, res, next) {
       params.push(type);
       query += ` AND a.asset_type = $${params.length}`;
     }
-    query += " ORDER BY a.asset_id ASC";
+    query += " ORDER BY COALESCE(r.last_returned, a.created_at) ASC";
     const { rows } = await pool.query(query, params);
     res.json({ success: true, assets: rows });
   } catch (err) {
