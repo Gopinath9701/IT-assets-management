@@ -275,7 +275,7 @@ const EmployeeStatus = ({
   const handleSearchChange = (e) => {
     const value = e.target.value;
 
-    // Employee ID
+    // Employee ID (starts with a digit) — numbers only, max 9
     if (/^\d/.test(value)) {
       const numericValue = value
         .replace(/\D/g, "")
@@ -283,8 +283,10 @@ const EmployeeStatus = ({
 
       setSearch(numericValue);
     } else {
-      // Name search
-      setSearch(value);
+      // Name search — letters and spaces only, no special characters
+      const letterValue = value.replace(/[^A-Za-z ]/g, "");
+
+      setSearch(letterValue);
     }
 
     setIsSearchTouched(false);
@@ -292,8 +294,6 @@ const EmployeeStatus = ({
     setValidationError("");
 
     setIsSearchValid(true);
-
-    setSearchApplied("");
   };
 
   // ====================================================
@@ -445,11 +445,8 @@ const EmployeeStatus = ({
         )
       : employees.filter(
           (emp) =>
-            emp.name
-              .toLowerCase()
-              .includes(
-                searchApplied.toLowerCase()
-              )
+            emp.name.toLowerCase() ===
+            searchApplied.toLowerCase()
         );
 
   // ====================================================
@@ -557,7 +554,7 @@ const EmployeeStatus = ({
                 }`}
                 type="text"
                 inputMode="text"
-                maxLength={9}
+                maxLength={50}
                 placeholder="Enter Employee ID or Employee Name"
                 value={search}
                 onChange={
