@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./UpdateEmployee.css";
 
 // ======================================================
@@ -220,7 +220,7 @@ const validateDesignation = (designation, department) => {
     };
   }
 
-  const validDesignations = DESIGNATIONS_BY_DEPARTMENT[department] || [];
+  const validDesignations = DESIGNATIONS_BY_DEPARTMENT[department] || GENERIC_DESIGNATIONS;
 
   if (!validDesignations.includes(designation)) {
     return {
@@ -308,23 +308,14 @@ const EMPLOYEE_DATA = {
 };
 
 // ======================================================
-// DEPARTMENTS
-// ======================================================
-
-const DEPARTMENTS = [
-  "IT",
-  "HR",
-  "Finance",
-  "Marketing",
-  "Sales",
-  "Operations",
-];
-
-// ======================================================
 // DESIGNATIONS BY DEPARTMENT
 // A Finance employee shouldn't be offered "Software Developer", an IT
 // employee shouldn't be offered "Accountant", etc. Keep this in sync
-// with the identical mapping in AddEmployee.js.
+// with the identical mapping in AddEmployee.js. Departments themselves
+// come from the real departments table (fetched in the component below)
+// so a department added via Department Management shows up here
+// immediately; any department not covered by this curated map falls
+// back to GENERIC_DESIGNATIONS.
 // ======================================================
 
 const DESIGNATIONS_BY_DEPARTMENT = {
@@ -372,6 +363,13 @@ const DESIGNATIONS_BY_DEPARTMENT = {
   ],
 };
 
+const GENERIC_DESIGNATIONS = [
+  "Executive",
+  "Senior Executive",
+  "Team Lead",
+  "Manager",
+];
+
 // ======================================================
 // MAIN COMPONENT
 // ======================================================
@@ -399,6 +397,24 @@ const UpdateEmployee = ({
 
   const [formErrors, setFormErrors] = useState({});
   const [updateSuccess, setUpdateSuccess] = useState(false);
+  const [departments, setDepartments] = useState([]);
+
+  // Departments are fetched live from the departments table (managed via
+  // Department Management) instead of a hardcoded list, so adding/removing
+  // a department there is immediately reflected in this dropdown.
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    fetch("http://localhost:5000/api/departments", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          setDepartments(data.departments.map((d) => d.name));
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // ====================================================
   // SEARCH INPUT
@@ -905,7 +921,7 @@ const UpdateEmployee = ({
                       Select Department
                     </option>
 
-                    {DEPARTMENTS.map((department) => (
+                    {departments.map((department) => (
                       <option
                         key={department}
                         value={department}
@@ -952,7 +968,7 @@ const UpdateEmployee = ({
                     {(
                       DESIGNATIONS_BY_DEPARTMENT[
                         formData.department
-                      ] || []
+                      ] || GENERIC_DESIGNATIONS
                     ).map((designation) => (
                       <option
                         key={designation}

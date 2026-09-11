@@ -1,19 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./AddEmployee.css";
-
-const DEPARTMENTS = [
-  "IT",
-  "HR",
-  "Finance",
-  "Marketing",
-  "Sales",
-  "Operations",
-];
 
 // Designations are scoped per department - a Finance employee shouldn't
 // be offered "Software Developer", an IT employee shouldn't be offered
 // "Accountant", etc. Keep this in sync with the identical mapping in
-// UpdateEmployee.js.
+// UpdateEmployee.js. Departments themselves come from the real
+// departments table (see the useEffect below) so a department added via
+// Department Management shows up here immediately; any department not
+// covered by this curated map falls back to GENERIC_DESIGNATIONS.
 const DESIGNATIONS_BY_DEPARTMENT = {
   IT: [
     "Software Developer",
@@ -59,6 +53,13 @@ const DESIGNATIONS_BY_DEPARTMENT = {
   ],
 };
 
+const GENERIC_DESIGNATIONS = [
+  "Executive",
+  "Senior Executive",
+  "Team Lead",
+  "Manager",
+];
+
 const AddEmployee = ({ username = "username", onLogout, onBack }) => {
   const [employeeName, setEmployeeName] = useState("");
   const [employeeId, setEmployeeId] = useState("");
@@ -67,8 +68,26 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
   const [designation, setDesignation] = useState("");
   const [phone, setPhone] = useState("");
   const [dateOfJoining, setDateOfJoining] = useState("");
+  const [departments, setDepartments] = useState([]);
 
   const [errors, setErrors] = useState({});
+
+  // Departments are fetched live from the departments table (managed via
+  // Department Management) instead of a hardcoded list, so adding/removing
+  // a department there is immediately reflected in this dropdown.
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    fetch("http://localhost:5000/api/departments", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          setDepartments(data.departments.map((d) => d.name));
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // =========================================================
   // DATE HELPERS
@@ -156,7 +175,7 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
       return "Designation is required.";
     }
 
-    const validDesignations = DESIGNATIONS_BY_DEPARTMENT[dept] || [];
+    const validDesignations = DESIGNATIONS_BY_DEPARTMENT[dept] || GENERIC_DESIGNATIONS;
 
     if (!validDesignations.includes(value)) {
       return "Please select a valid Designation for this Department.";
@@ -674,7 +693,7 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
                     Select Department
                   </option>
 
-                  {DEPARTMENTS.map((dept) => (
+                  {departments.map((dept) => (
                     <option
                       key={dept}
                       value={dept}
@@ -721,7 +740,7 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
                       : "Select Department first"}
                   </option>
 
-                  {(DESIGNATIONS_BY_DEPARTMENT[department] || []).map(
+                  {(DESIGNATIONS_BY_DEPARTMENT[department] || GENERIC_DESIGNATIONS).map(
                     (title) => (
                       <option key={title} value={title}>
                         {title}
