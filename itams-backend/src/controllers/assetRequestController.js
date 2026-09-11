@@ -70,10 +70,17 @@ async function createRequest(req, res, next) {
     await acquireIdLock(client, "request");
 
     // Don't let someone request an asset type they're already holding -
-    // assigned_to is only cleared on return, so this stays true regardless
-    // of whether the asset is currently "In Use" or "Under Maintenance".
+    // unless they've returned it (assigned_to cleared, so this simply
+    // finds nothing) or it's out for repair (an open maintenance ticket
+    // means they don't actually have a working one right now, so a new
+    // request for the same type should still go through).
     const { rows: alreadyOwned } = await client.query(
-      `SELECT asset_id FROM assets WHERE assigned_to = $1 AND asset_type = $2`,
+      `SELECT a.asset_id FROM assets a
+       WHERE a.assigned_to = $1 AND a.asset_type = $2
+       AND NOT EXISTS (
+         SELECT 1 FROM maintenance_requests m
+         WHERE m.asset_id = a.asset_id AND m.status IN ('Pending', 'In Progress')
+       )`,
       [employeeId, assetType]
     );
     if (alreadyOwned.length > 0) {
