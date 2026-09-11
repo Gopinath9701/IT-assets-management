@@ -69,6 +69,21 @@ async function createRequest(req, res, next) {
     await client.query("BEGIN");
     await acquireIdLock(client, "request");
 
+    // Don't let someone request an asset type they're already holding -
+    // assigned_to is only cleared on return, so this stays true regardless
+    // of whether the asset is currently "In Use" or "Under Maintenance".
+    const { rows: alreadyOwned } = await client.query(
+      `SELECT asset_id FROM assets WHERE assigned_to = $1 AND asset_type = $2`,
+      [employeeId, assetType]
+    );
+    if (alreadyOwned.length > 0) {
+      await client.query("ROLLBACK");
+      return res.status(409).json({
+        success: false,
+        message: `You already have a ${assetType} assigned to you (${alreadyOwned[0].asset_id}).`,
+      });
+    }
+
     // One employee doesn't need two pending requests for the same asset
     // type - idx_one_pending_request_per_employee_asset_type (migration 008)
     // enforces this at the DB level regardless of what checks this
