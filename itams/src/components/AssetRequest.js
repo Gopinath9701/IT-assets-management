@@ -589,10 +589,28 @@ const AssetRequest = ({
         await response.json();
 
       if (!response.ok) {
-        alert(
-          data.message ||
-            "Failed to submit asset request."
-        );
+        // Backend tells us which field the error is actually about
+        // (field: "employeeId" | "assetType" | "purpose" | "requiredDate")
+        // - show it right there instead of a generic popup. Falls back to
+        // an alert only for the rare error that isn't tied to any field.
+        const knownFields = [
+          "employeeId",
+          "assetType",
+          "purpose",
+          "requiredDate",
+        ];
+
+        if (knownFields.includes(data.field)) {
+          setErrors((previous) => ({
+            ...previous,
+            [data.field]: data.message,
+          }));
+        } else {
+          alert(
+            data.message ||
+              "Failed to submit asset request."
+          );
+        }
         return;
       }
 
