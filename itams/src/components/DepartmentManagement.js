@@ -272,6 +272,8 @@ const DepartmentManagement = ({
   const [employeeCount, setEmployeeCount] = useState("");
 
   const [errors, setErrors] = useState({});
+  const [successMessage, setSuccessMessage] = useState("");
+  const [serverError, setServerError] = useState("");
 
   // =====================================================
   // DEPARTMENT DATA
@@ -563,12 +565,14 @@ const DepartmentManagement = ({
           return;
         }
 
-        alert(
+        setServerError(
           data.message || "Failed to add department."
         );
 
         return;
       }
+
+      setServerError("");
 
       // Refresh departments list
       const refreshResponse = await fetch(
@@ -611,11 +615,11 @@ const DepartmentManagement = ({
       setSearchError("");
       setSearchTouched(false);
 
-      alert("✅ Department added successfully!");
+      setSuccessMessage("✅ Department added successfully!");
     } catch (error) {
       console.error("Add Department Error:", error);
 
-      alert(
+      setServerError(
         "Unable to connect to server. Please make sure the backend is running."
       );
     }
@@ -629,6 +633,8 @@ const DepartmentManagement = ({
     setDepartmentHead("");
     setEmployeeCount("");
     setErrors({});
+    setSuccessMessage("");
+    setServerError("");
   };
 
   // =====================================================
@@ -814,6 +820,18 @@ const DepartmentManagement = ({
               )}
 
             </div>
+
+            {successMessage && (
+              <div style={{ color: "#188038", fontSize: "13px", marginTop: "8px" }}>
+                {successMessage}
+              </div>
+            )}
+
+            {serverError && (
+              <div style={{ color: "#d93025", fontSize: "13px", marginTop: "8px" }}>
+                ⚠️ {serverError}
+              </div>
+            )}
 
             {/* BUTTONS */}
             <div className="dm-btn-row">

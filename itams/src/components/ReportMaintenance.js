@@ -354,6 +354,8 @@ const ReportMaintenance = ({
   const [priority, setPriority] = useState("");
 
   const [errors, setErrors] = useState({});
+  const [successMessage, setSuccessMessage] = useState("");
+  const [serverError, setServerError] = useState("");
 
   // =====================================================
   // LOAD REPORTS FROM BACKEND
@@ -473,12 +475,13 @@ const ReportMaintenance = ({
             [data.field]: data.message,
           }));
         } else {
-          alert(data.message || "Failed to submit maintenance request.");
+          setServerError(data.message || "Failed to submit maintenance request.");
         }
         return;
       }
 
-      alert("✅ Maintenance request submitted successfully!");
+      setServerError("");
+      setSuccessMessage("✅ Maintenance request submitted successfully!");
 
       // Reload reports list
       const refreshResp = await fetch("http://localhost:5000/api/maintenance", {
@@ -509,7 +512,7 @@ const ReportMaintenance = ({
       setErrors({});
     } catch (error) {
       console.error("Submit Maintenance Error:", error);
-      alert("Unable to connect to server. Please make sure the backend is running.");
+      setServerError("Unable to connect to server. Please make sure the backend is running.");
     }
   };
 
@@ -523,6 +526,8 @@ const ReportMaintenance = ({
     setDescription("");
     setPriority("");
     setErrors({});
+    setSuccessMessage("");
+    setServerError("");
   };
 
   // =====================================================
@@ -867,6 +872,18 @@ const ReportMaintenance = ({
             )}
 
           </div>
+
+          {successMessage && (
+            <div style={{ color: "#188038", fontSize: "13px", marginTop: "8px" }}>
+              {successMessage}
+            </div>
+          )}
+
+          {serverError && (
+            <div style={{ color: "#d93025", fontSize: "13px", marginTop: "8px" }}>
+              ⚠️ {serverError}
+            </div>
+          )}
 
           {/* BUTTONS */}
           <div className="buttons">

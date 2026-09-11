@@ -318,6 +318,8 @@ const AssetRequest = ({
   // FORM ERRORS
   // ===================================================
 
+  const [successMessage, setSuccessMessage] = useState("");
+  const [serverError, setServerError] = useState("");
   const [errors, setErrors] =
     useState({});
 
@@ -550,6 +552,8 @@ const AssetRequest = ({
     setPurpose("");
     setRequiredDate("");
     setErrors({});
+    setSuccessMessage("");
+    setServerError("");
   };
 
   // ===================================================
@@ -606,7 +610,7 @@ const AssetRequest = ({
             [data.field]: data.message,
           }));
         } else {
-          alert(
+          setServerError(
             data.message ||
               "Failed to submit asset request."
           );
@@ -614,11 +618,11 @@ const AssetRequest = ({
         return;
       }
 
-      alert(
+      setServerError("");
+      handleCancel();
+      setSuccessMessage(
         "✅ Asset Request Submitted Successfully!"
       );
-
-      handleCancel();
 
       // Reload history
       const refreshResponse =
@@ -668,7 +672,7 @@ const AssetRequest = ({
         error
       );
 
-      alert(
+      setServerError(
         "Unable to connect to server. Please make sure the backend is running."
       );
     }
@@ -1133,6 +1137,18 @@ const AssetRequest = ({
                   </div>
 
                 </div>
+
+                {successMessage && (
+                  <div style={{ color: "#188038", fontSize: "13px", marginTop: "8px" }}>
+                    {successMessage}
+                  </div>
+                )}
+
+                {serverError && (
+                  <div style={{ color: "#d93025", fontSize: "13px", marginTop: "8px" }}>
+                    ⚠️ {serverError}
+                  </div>
+                )}
 
                 {/* BUTTONS */}
 

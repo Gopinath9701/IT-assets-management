@@ -9,6 +9,8 @@ const Maintenance = ({
 }) => {
   const [activeSidebar, setActiveSidebar] = useState("maintenance");
 
+  const [statusMessage, setStatusMessage] = useState("");
+  const [statusMessageIsError, setStatusMessageIsError] = useState(false);
   const [tickets, setTickets] = useState([]);
   const [inProgressTickets, setInProgressTickets] = useState([]);
   const [history, setHistory] = useState([]);
@@ -122,7 +124,8 @@ const Maintenance = ({
       const data = await resp.json();
 
       if (!resp.ok) {
-        alert(
+        setStatusMessageIsError(true);
+        setStatusMessage(
           data.message || "Failed to update status."
         );
         return false;
@@ -130,7 +133,8 @@ const Maintenance = ({
 
       return true;
     } catch (err) {
-      alert("Unable to connect to server.");
+      setStatusMessageIsError(true);
+      setStatusMessage("Unable to connect to server.");
       return false;
     }
   };
@@ -172,7 +176,8 @@ const Maintenance = ({
     );
 
     if (ok) {
-      alert(
+      setStatusMessageIsError(false);
+      setStatusMessage(
         `Repair started for Ticket ${ticket.ticket}`
       );
 
@@ -197,7 +202,8 @@ const Maintenance = ({
     );
 
     if (ok) {
-      alert(
+      setStatusMessageIsError(false);
+      setStatusMessage(
         `Ticket ${ticket.ticket} marked as repaired.`
       );
 
@@ -333,6 +339,19 @@ const Maintenance = ({
             Manage reported asset issues. Tickets are generated
             automatically in First Come First Serve order.
           </p>
+
+          {statusMessage && (
+            <div
+              style={{
+                color: statusMessageIsError ? "#d93025" : "#188038",
+                fontSize: "13px",
+                marginBottom: "10px",
+              }}
+            >
+              {statusMessageIsError ? "⚠️ " : "✅ "}
+              {statusMessage}
+            </div>
+          )}
 
           {/* ================= QUEUE ================= */}
 

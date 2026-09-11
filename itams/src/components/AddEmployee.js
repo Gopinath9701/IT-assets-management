@@ -79,6 +79,8 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
   const [departments, setDepartments] = useState([]);
 
   const [errors, setErrors] = useState({});
+  const [successMessage, setSuccessMessage] = useState("");
+  const [serverError, setServerError] = useState("");
 
   // Departments are fetched live from the departments table (managed via
   // Department Management) instead of a hardcoded list, so adding/removing
@@ -395,11 +397,12 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
       const data = await response.json();
 
       if (!response.ok) {
-        alert(data.message || "Failed to add employee.");
+        setServerError(data.message || "Failed to add employee.");
         return;
       }
 
-      alert(
+      setServerError("");
+      setSuccessMessage(
         `✅ Employee added successfully! Employee ID: ${data.employeeId} | Email: ${data.email}`
       );
 
@@ -414,7 +417,7 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
     } catch (error) {
       console.error("Add Employee Error:", error);
 
-      alert(
+      setServerError(
         "Unable to connect to server. Please make sure the backend is running."
       );
     }
@@ -433,6 +436,8 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
     setPhone("");
     setDateOfJoining("");
     setErrors({});
+    setSuccessMessage("");
+    setServerError("");
   };
 
   // =========================================================
@@ -768,6 +773,18 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
 
             </div>
 
+
+            {successMessage && (
+              <div style={{ color: "#188038", fontSize: "13px", marginTop: "10px" }}>
+                {successMessage}
+              </div>
+            )}
+
+            {serverError && (
+              <div style={{ color: "#d93025", fontSize: "13px", marginTop: "10px" }}>
+                ⚠️ {serverError}
+              </div>
+            )}
 
             {/* =================================================
                 BUTTONS

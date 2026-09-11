@@ -34,6 +34,7 @@ const AssetReturn = ({ username = "username", onLogout, onBack }) => {
   const [conditionError, setConditionError] = useState("");
   const [remarksError, setRemarksError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [returnError, setReturnError] = useState("");
 
   // =====================================================
   // EMPLOYEE ID VALIDATION
@@ -196,7 +197,7 @@ const AssetReturn = ({ username = "username", onLogout, onBack }) => {
       );
     } catch (err) {
       console.error("Search Error:", err);
-      alert("Unable to connect to server.");
+      setSuccessMessage("Unable to connect to server.");
     }
   };
 
@@ -227,6 +228,7 @@ const AssetReturn = ({ username = "username", onLogout, onBack }) => {
     setReturnDateError("");
     setConditionError("");
     setRemarksError("");
+    setReturnError("");
   };
 
   // =====================================================
@@ -245,6 +247,7 @@ const AssetReturn = ({ username = "username", onLogout, onBack }) => {
     setReturnDateError("");
     setConditionError("");
     setRemarksError("");
+    setReturnError("");
   };
 
   // =====================================================
@@ -370,7 +373,10 @@ const AssetReturn = ({ username = "username", onLogout, onBack }) => {
         }
       );
       const data = await response.json();
-      if (!response.ok) { alert(data.message || "Failed to return asset."); return; }
+      if (!response.ok) {
+        setReturnError(data.message || "Failed to return asset.");
+        return;
+      }
 
       closeModal();
       setSuccessMessage("Asset returned successfully!");
@@ -378,7 +384,7 @@ const AssetReturn = ({ username = "username", onLogout, onBack }) => {
       handleSearch();
     } catch (err) {
       console.error("Return Error:", err);
-      alert("Unable to connect to server.");
+      setReturnError("Unable to connect to server.");
     }
   };
 
@@ -900,6 +906,12 @@ const AssetReturn = ({ username = "username", onLogout, onBack }) => {
               </div>
 
             </div>
+
+            {returnError && (
+              <div className="validation-error">
+                ⚠ {returnError}
+              </div>
+            )}
 
             {/* MODAL BUTTONS */}
 

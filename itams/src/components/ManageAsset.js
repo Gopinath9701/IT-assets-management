@@ -427,6 +427,8 @@ const ManageAsset = ({
      SEARCH STATE
   ===================================================== */
 
+  const [pageMessage, setPageMessage] = useState("");
+  const [pageMessageIsError, setPageMessageIsError] = useState(false);
   const [searchName, setSearchName] = useState("");
   const [searchType, setSearchType] = useState("All Assets");
   const [appliedName, setAppliedName] = useState("");
@@ -537,14 +539,20 @@ const ManageAsset = ({
       ================================================= */
 
       if (response.status === 401) {
-        alert("Session expired. Please login again.");
+        setPageMessageIsError(true);
+        setPageMessage("Session expired. Please login again.");
 
         localStorage.removeItem("token");
         localStorage.removeItem("user");
 
-        if (onLogout) {
-          onLogout();
-        }
+        // Delayed so the message above is actually visible before this
+        // component unmounts, instead of a popup that would've blocked the
+        // logout until dismissed anyway.
+        setTimeout(() => {
+          if (onLogout) {
+            onLogout();
+          }
+        }, 1500);
 
         return;
       }
@@ -554,7 +562,8 @@ const ManageAsset = ({
       ================================================= */
 
       if (response.status === 403) {
-        alert(
+        setPageMessageIsError(true);
+        setPageMessage(
           "You do not have permission to access assets."
         );
 
@@ -1011,7 +1020,8 @@ const ManageAsset = ({
         )
       );
 
-      alert(
+      setPageMessageIsError(false);
+      setPageMessage(
         `Asset ${newAssetId} updated successfully!`
       );
 
@@ -1028,7 +1038,8 @@ const ManageAsset = ({
       const token = getToken();
 
       if (!token) {
-        alert(
+        setPageMessageIsError(true);
+        setPageMessage(
           "Login session expired. Please login again."
         );
 
@@ -1061,7 +1072,8 @@ const ManageAsset = ({
       console.log("Update Asset Response:", data);
 
       if (!response.ok || !data.success) {
-        alert(
+        setPageMessageIsError(true);
+        setPageMessage(
           data.message ||
             "Failed to update asset."
         );
@@ -1069,7 +1081,8 @@ const ManageAsset = ({
         return;
       }
 
-      alert(
+      setPageMessageIsError(false);
+      setPageMessage(
         `Asset ${newAssetId} updated successfully!`
       );
 
@@ -1079,7 +1092,8 @@ const ManageAsset = ({
     } catch (error) {
       console.error("Update Asset Error:", error);
 
-      alert("Unable to connect to backend.");
+      setPageMessageIsError(true);
+      setPageMessage("Unable to connect to backend.");
     }
   };
 
@@ -1089,6 +1103,7 @@ const ManageAsset = ({
 
   const openDelete = (asset) => {
     setDeleteAsset(asset);
+    setPageMessage("");
   };
 
   /* =====================================================
@@ -1116,7 +1131,8 @@ const ManageAsset = ({
 
       setDeleteAsset(null);
 
-      alert(
+      setPageMessageIsError(false);
+      setPageMessage(
         `Asset ${deletedId} deleted successfully!`
       );
 
@@ -1131,7 +1147,8 @@ const ManageAsset = ({
       const token = getToken();
 
       if (!token) {
-        alert(
+        setPageMessageIsError(true);
+        setPageMessage(
           "Login session expired. Please login again."
         );
 
@@ -1158,7 +1175,8 @@ const ManageAsset = ({
       );
 
       if (!response.ok || !data.success) {
-        alert(
+        setPageMessageIsError(true);
+        setPageMessage(
           data.message ||
             "Failed to delete asset."
         );
@@ -1166,7 +1184,8 @@ const ManageAsset = ({
         return;
       }
 
-      alert(
+      setPageMessageIsError(false);
+      setPageMessage(
         `Asset ${deleteAsset.asset_id} deleted successfully!`
       );
 
@@ -1179,7 +1198,8 @@ const ManageAsset = ({
         error
       );
 
-      alert("Unable to connect to backend.");
+      setPageMessageIsError(true);
+      setPageMessage("Unable to connect to backend.");
     }
   };
 
@@ -1201,6 +1221,19 @@ const ManageAsset = ({
               Edit the details of the asset
               and update the information.
             </p>
+
+            {pageMessage && (
+              <div
+                style={{
+                  color: pageMessageIsError ? "#d93025" : "#188038",
+                  fontSize: "13px",
+                  marginTop: "8px",
+                }}
+              >
+                {pageMessageIsError ? "⚠️ " : ""}
+                {pageMessage}
+              </div>
+            )}
           </div>
 
           <div className="ma-edit-form">
@@ -1509,6 +1542,19 @@ const ManageAsset = ({
             assets in the organization.
           </p>
 
+          {pageMessage && (
+            <div
+              style={{
+                color: pageMessageIsError ? "#d93025" : "#188038",
+                fontSize: "13px",
+                marginBottom: "10px",
+              }}
+            >
+              {pageMessageIsError ? "⚠️ " : ""}
+              {pageMessage}
+            </div>
+          )}
+
           {/* SEARCH CARD */}
 
           <div className="ma-card">
@@ -1799,6 +1845,12 @@ const ManageAsset = ({
               </div>
 
             </div>
+
+            {pageMessageIsError && pageMessage && (
+              <div style={{ color: "#d93025", fontSize: "13px", marginBottom: "8px" }}>
+                ⚠️ {pageMessage}
+              </div>
+            )}
 
             {/* BUTTONS */}
 

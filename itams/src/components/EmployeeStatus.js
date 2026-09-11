@@ -165,6 +165,8 @@ const EmployeeStatus = ({
   // ====================================================
 
   const [employees, setEmployees] = useState([]);
+  const [statusMessage, setStatusMessage] = useState("");
+  const [statusMessageIsError, setStatusMessageIsError] = useState(false);
 
   // ====================================================
   // FETCH EMPLOYEES FROM BACKEND
@@ -501,7 +503,8 @@ const EmployeeStatus = ({
       pendingStatuses[empId];
 
     if (!newStatus) {
-      alert(
+      setStatusMessageIsError(true);
+      setStatusMessage(
         "Please select a different status before clicking Update."
       );
 
@@ -531,7 +534,8 @@ const EmployeeStatus = ({
         await response.json();
 
       if (!response.ok) {
-        alert(
+        setStatusMessageIsError(true);
+        setStatusMessage(
           data.message ||
             "Failed to update status."
         );
@@ -568,7 +572,8 @@ const EmployeeStatus = ({
         return updated;
       });
 
-      alert(
+      setStatusMessageIsError(false);
+      setStatusMessage(
         `✅ Status updated to "${newStatus}" successfully!`
       );
     } catch (error) {
@@ -577,7 +582,8 @@ const EmployeeStatus = ({
         error
       );
 
-      alert(
+      setStatusMessageIsError(true);
+      setStatusMessage(
         "Unable to connect to server. Please make sure the backend is running."
       );
     }
@@ -671,6 +677,19 @@ const EmployeeStatus = ({
         <p className="es-page-sub">
           View and update employee status.
         </p>
+
+        {statusMessage && (
+          <div
+            style={{
+              color: statusMessageIsError ? "#d93025" : "#188038",
+              fontSize: "13px",
+              marginBottom: "10px",
+            }}
+          >
+            {statusMessageIsError ? "⚠️ " : ""}
+            {statusMessage}
+          </div>
+        )}
 
         {/* ========================================== */}
         {/* SEARCH CARD */}

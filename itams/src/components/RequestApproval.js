@@ -345,6 +345,8 @@ const RequestApproval = ({
   const [requests, setRequests] = useState([]);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [selectedReq, setSelectedReq] = useState(null);
+  const [actionMessage, setActionMessage] = useState("");
+  const [actionMessageIsError, setActionMessageIsError] = useState(false);
 
   // Load all requests on mount
   useEffect(() => {
@@ -557,14 +559,20 @@ const RequestApproval = ({
         { method: "PATCH", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` } }
       );
       const data = await response.json();
-      if (!response.ok) { alert(data.message || "Failed to approve."); return; }
-      alert(`✅ Request ${selectedReq.id} approved successfully!`);
+      if (!response.ok) {
+        setActionMessageIsError(true);
+        setActionMessage(data.message || "Failed to approve.");
+        return;
+      }
+      setActionMessageIsError(false);
+      setActionMessage(`✅ Request ${selectedReq.id} approved successfully!`);
       setSelectedReq(null);
       setRejectionReason("");
       setRejectError("");
       loadRequests();
     } catch (err) {
-      alert("Unable to connect to server.");
+      setActionMessageIsError(true);
+      setActionMessage("Unable to connect to server.");
     }
   };
 
@@ -589,14 +597,20 @@ const RequestApproval = ({
         }
       );
       const data = await response.json();
-      if (!response.ok) { alert(data.message || "Failed to reject."); return; }
-      alert(`❌ Request ${selectedReq.id} rejected.`);
+      if (!response.ok) {
+        setActionMessageIsError(true);
+        setActionMessage(data.message || "Failed to reject.");
+        return;
+      }
+      setActionMessageIsError(false);
+      setActionMessage(`❌ Request ${selectedReq.id} rejected.`);
       setSelectedReq(null);
       setRejectionReason("");
       setRejectError("");
       loadRequests();
     } catch (err) {
-      alert("Unable to connect to server.");
+      setActionMessageIsError(true);
+      setActionMessage("Unable to connect to server.");
     }
   };
 
@@ -699,6 +713,19 @@ const RequestApproval = ({
           <p className="ra-page-subtitle">
             Review and approve or reject asset requests.
           </p>
+
+          {actionMessage && (
+            <div
+              style={{
+                color: actionMessageIsError ? "#d93025" : "#188038",
+                fontSize: "13px",
+                marginBottom: "10px",
+              }}
+            >
+              {actionMessageIsError ? "⚠️ " : ""}
+              {actionMessage}
+            </div>
+          )}
 
           {/* SEARCH */}
 

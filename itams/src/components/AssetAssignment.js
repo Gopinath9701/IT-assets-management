@@ -291,6 +291,8 @@ const AssetAssignment = ({
   // Assign modal
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
+  const [assignError, setAssignError] = useState("");
+  const [assignSuccess, setAssignSuccess] = useState("");
 
   // ==========================================
   // SIDEBAR
@@ -393,11 +395,13 @@ const AssetAssignment = ({
   const openAssignModal = (req) => {
     setSelectedRequest(req);
     setShowAssignModal(true);
+    setAssignError("");
   };
 
   const closeAssignModal = () => {
     setShowAssignModal(false);
     setSelectedRequest(null);
+    setAssignError("");
   };
 
   // ==========================================
@@ -420,7 +424,7 @@ const AssetAssignment = ({
       const available = availData.assets || [];
 
       if (available.length === 0) {
-        alert(`No available ${selectedRequest.assetType} assets to assign. Please add stock first.`);
+        setAssignError(`No available ${selectedRequest.assetType} assets to assign. Please add stock first.`);
         return;
       }
 
@@ -433,14 +437,17 @@ const AssetAssignment = ({
       });
       const data = await response.json();
 
-      if (!response.ok) { alert(data.message || "Failed to assign asset."); return; }
+      if (!response.ok) {
+        setAssignError(data.message || "Failed to assign asset.");
+        return;
+      }
 
-      alert(`Asset assigned successfully!\nAssignment ID: ${data.assignmentId}\nAsset: ${assetId}`);
       closeAssignModal();
+      setAssignSuccess(`Asset assigned successfully! Assignment ID: ${data.assignmentId} | Asset: ${assetId}`);
       loadData();
     } catch (err) {
       console.error("Confirm Assign Error:", err);
-      alert("Unable to connect to server.");
+      setAssignError("Unable to connect to server.");
     }
   };
 
@@ -520,6 +527,12 @@ const AssetAssignment = ({
           <p className="asa-page-subtitle">
             Assign approved asset requests to employees.
           </p>
+
+          {assignSuccess && (
+            <div style={{ color: "#188038", fontSize: "13px", marginBottom: "10px" }}>
+              ✅ {assignSuccess}
+            </div>
+          )}
 
           {/* ==================================
               SEARCH
@@ -890,6 +903,12 @@ const AssetAssignment = ({
             </div>
 
             {/* NO OTHER FIELDS */}
+
+            {assignError && (
+              <div style={{ color: "#d93025", fontSize: "13px", padding: "0 16px" }}>
+                ⚠️ {assignError}
+              </div>
+            )}
 
             <div className="asa-modal-footer">
 

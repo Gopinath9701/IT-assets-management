@@ -405,6 +405,7 @@ const UpdateEmployee = ({
 
   const [formErrors, setFormErrors] = useState({});
   const [updateSuccess, setUpdateSuccess] = useState(false);
+  const [serverError, setServerError] = useState("");
   const [departments, setDepartments] = useState([]);
 
   // Departments are fetched live from the departments table (managed via
@@ -673,16 +674,16 @@ const UpdateEmployee = ({
       const data = await response.json();
 
       if (!response.ok) {
-        alert(data.message || "Failed to update employee.");
+        setServerError(data.message || "Failed to update employee.");
         return;
       }
 
+      setServerError("");
       setEmployee({ ...formData });
       setUpdateSuccess(true);
-      alert(`✅ Employee ${formData.id} updated successfully!`);
     } catch (error) {
       console.error("Update Employee Error:", error);
-      alert(
+      setServerError(
         "Unable to connect to server. Please make sure the backend is running."
       );
     }
@@ -1049,6 +1050,13 @@ const UpdateEmployee = ({
               {updateSuccess && (
                 <div className="success-message">
                   ✅ Employee details updated successfully!
+                </div>
+              )}
+
+              {/* SERVER ERROR */}
+              {serverError && (
+                <div style={{ color: "#d93025", fontSize: "13px", marginTop: "8px" }}>
+                  ⚠️ {serverError}
                 </div>
               )}
 

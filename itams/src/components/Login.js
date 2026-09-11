@@ -244,6 +244,9 @@ export default function Login({
   const [passwordTouched, setPasswordTouched] =
     useState(false);
 
+  const [serverError, setServerError] =
+    useState("");
+
   // ===================================================
   // HANDLE INPUT CHANGE
   // ===================================================
@@ -380,7 +383,7 @@ export default function Login({
           data.user
         );
 
-        alert("Login Successful");
+        setServerError("");
 
         if (onLoginSuccess) {
           onLoginSuccess(data.user);
@@ -415,7 +418,7 @@ export default function Login({
         error
       );
 
-      alert(
+      setServerError(
         "Unable to connect to server. Please make sure the backend is running."
       );
     } finally {
@@ -551,6 +554,19 @@ export default function Login({
         >
           Forgot Password?
         </a>
+
+        {serverError && (
+          <div
+            style={{
+              color: "#d93025",
+              fontSize: "12px",
+              marginTop: "5px",
+              marginBottom: "8px",
+            }}
+          >
+            ⚠️ {serverError}
+          </div>
+        )}
 
         {/* LOGIN BUTTON */}
 
