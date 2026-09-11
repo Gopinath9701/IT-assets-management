@@ -28,14 +28,28 @@ async function login(req, res, next) {
       return res.status(400).json({ success: false, message: "Employee ID/Email and password are required" });
     }
 
+    // Distinguishes "no such account" from "wrong password" instead of the
+    // usual generic "Invalid credentials" - the same tradeoff sendOtp below
+    // already makes (see its comment): with exactly 3 fixed, known login
+    // accounts, enumeration isn't a meaningful risk here, and telling the
+    // user which field is actually wrong is far more useful than making
+    // them guess.
     const user = await findUserByIdentifier(identifier);
     if (!user || !user.is_active) {
-      return res.status(401).json({ success: false, message: "Invalid credentials" });
+      return res.status(401).json({
+        success: false,
+        field: "identifier",
+        message: "No account found for that Employee ID/Email.",
+      });
     }
 
     const match = await bcrypt.compare(password, user.password_hash);
     if (!match) {
-      return res.status(401).json({ success: false, message: "Invalid credentials" });
+      return res.status(401).json({
+        success: false,
+        field: "password",
+        message: "Incorrect password.",
+      });
     }
 
     const token = jwt.sign(
