@@ -69,6 +69,23 @@ async function createRequest(req, res, next) {
     await client.query("BEGIN");
     await acquireIdLock(client, "request");
 
+    // One employee doesn't need two pending requests for the same asset
+    // type - idx_one_pending_request_per_employee_asset_type (migration 008)
+    // enforces this at the DB level regardless of what checks this
+    // app-level code does, but checking here first gives a clear, specific
+    // message instead of a generic one after the INSERT fails.
+    const { rows: existingPending } = await client.query(
+      `SELECT request_id FROM asset_requests WHERE employee_id = $1 AND asset_type = $2 AND status = 'Pending'`,
+      [employeeId, assetType]
+    );
+    if (existingPending.length > 0) {
+      await client.query("ROLLBACK");
+      return res.status(409).json({
+        success: false,
+        message: `You already have a pending request for ${assetType} (${existingPending[0].request_id}).`,
+      });
+    }
+
     const requestId = await generateRequestId(client);
 
     await client.query(
@@ -82,6 +99,14 @@ async function createRequest(req, res, next) {
   } catch (err) {
     await client.query("ROLLBACK");
     if (err.code === "23505") {
+      // Distinguish which constraint actually fired - both share the same
+      // Postgres error code, but mean very different things to the user.
+      if (err.constraint === "idx_one_pending_request_per_employee_asset_type") {
+        return res.status(409).json({
+          success: false,
+          message: `You already have a pending request for ${req.body.assetType}.`,
+        });
+      }
       return res.status(409).json({ success: false, message: "Request ID already exists, please try again" });
     }
     next(err);
