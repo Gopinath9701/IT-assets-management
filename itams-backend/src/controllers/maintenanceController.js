@@ -40,12 +40,32 @@ async function createMaintenanceRequest(req, res, next) {
     await client.query("BEGIN");
     await acquireIdLock(client, "maintenance");
 
-    // An asset can only have one open (Pending/In Progress) ticket at a
-    // time - idx_one_open_maintenance_per_asset (migration 006) enforces
-    // this at the DB level regardless of what checks this app-level code
-    // does, but checking here first gives a clear, specific message
-    // instead of a generic one after the INSERT fails.
     if (assetId) {
+      // An employee can only report an issue on an asset that's actually
+      // assigned to them, not any asset in the system - nothing enforced
+      // this before, so any employeeId/assetId pair typed into the form
+      // was accepted regardless of who the asset actually belonged to.
+      const { rows: assetRows } = await client.query(
+        `SELECT assigned_to FROM assets WHERE asset_id = $1`,
+        [assetId]
+      );
+      if (assetRows.length === 0) {
+        await client.query("ROLLBACK");
+        return res.status(404).json({ success: false, message: "Asset not found." });
+      }
+      if (assetRows[0].assigned_to !== employeeId) {
+        await client.query("ROLLBACK");
+        return res.status(403).json({
+          success: false,
+          message: "This asset is not currently assigned to this employee.",
+        });
+      }
+
+      // An asset can only have one open (Pending/In Progress) ticket at a
+      // time - idx_one_open_maintenance_per_asset (migration 006) enforces
+      // this at the DB level regardless of what checks this app-level code
+      // does, but checking here first gives a clear, specific message
+      // instead of a generic one after the INSERT fails.
       const { rows: openForAsset } = await client.query(
         `SELECT request_id FROM maintenance_requests WHERE asset_id = $1 AND status IN ('Pending', 'In Progress')`,
         [assetId]
