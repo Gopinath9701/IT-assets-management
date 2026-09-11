@@ -44,24 +44,24 @@ async function createRequest(req, res, next) {
     const { employeeId, assetType, purpose, requiredDate } = req.body;
 
     if (!employeeId) {
-      return res.status(400).json({ success: false, message: "Employee ID is required" });
+      return res.status(400).json({ success: false, field: "employeeId", message: "Employee ID is required" });
     }
     if (!assetType || !ASSET_TYPES.includes(assetType)) {
-      return res.status(400).json({ success: false, message: "Please select a valid Asset Type" });
+      return res.status(400).json({ success: false, field: "assetType", message: "Please select a valid Asset Type" });
     }
     const purposeError = validatePurpose(purpose);
     if (purposeError) {
-      return res.status(400).json({ success: false, message: purposeError });
+      return res.status(400).json({ success: false, field: "purpose", message: purposeError });
     }
 
     const { rows: empRows } = await pool.query("SELECT employee_id FROM employees WHERE employee_id = $1", [employeeId]);
     if (empRows.length === 0) {
-      return res.status(400).json({ success: false, message: "Employee ID does not exist in the database" });
+      return res.status(400).json({ success: false, field: "employeeId", message: "Employee ID does not exist in the database" });
     }
 
     const requiredDateError = validateRequiredDate(requiredDate);
     if (requiredDateError) {
-      return res.status(400).json({ success: false, message: requiredDateError });
+      return res.status(400).json({ success: false, field: "requiredDate", message: requiredDateError });
     }
 
     // Lock held for the rest of this transaction so two concurrent
@@ -87,6 +87,7 @@ async function createRequest(req, res, next) {
       await client.query("ROLLBACK");
       return res.status(409).json({
         success: false,
+        field: "assetType",
         message: `You already have a ${assetType} assigned to you (${alreadyOwned[0].asset_id}).`,
       });
     }
@@ -104,6 +105,7 @@ async function createRequest(req, res, next) {
       await client.query("ROLLBACK");
       return res.status(409).json({
         success: false,
+        field: "assetType",
         message: `You already have a pending request for ${assetType} (${existingPending[0].request_id}).`,
       });
     }
@@ -126,6 +128,7 @@ async function createRequest(req, res, next) {
       if (err.constraint === "idx_one_pending_request_per_employee_asset_type") {
         return res.status(409).json({
           success: false,
+          field: "assetType",
           message: `You already have a pending request for ${req.body.assetType}.`,
         });
       }
