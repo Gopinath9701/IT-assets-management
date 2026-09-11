@@ -333,6 +333,14 @@ export default function ForgotPassword({
   const [serverError, setServerError] =
     useState("");
 
+  // Separate from successMessage - that one is shown near the top of the
+  // form (reused for "OTP verified" too) and the reset handler immediately
+  // clears the email/OTP fields around it, so a "password reset
+  // successful" confirmation there was easy to miss. This renders right
+  // under the Reset Password button instead, where the user is looking.
+  const [resetComplete, setResetComplete] =
+    useState(false);
+
   // ===================================================
   // OTP TIMER
   // ===================================================
@@ -403,6 +411,7 @@ export default function ForgotPassword({
     setOtpError("");
     setSuccessMessage("");
     setServerError("");
+    setResetComplete(false);
 
     setEmailFound(false);
 
@@ -848,6 +857,8 @@ export default function ForgotPassword({
             "Password reset successfully."
         );
 
+        setResetComplete(true);
+
         // Clear form
         setEmail("");
         setOtp("");
@@ -868,7 +879,7 @@ export default function ForgotPassword({
         if (onLoginClick) {
           setTimeout(() => {
             onLoginClick();
-          }, 1200);
+          }, 2500);
         }
       } else {
         setServerError(
@@ -1313,6 +1324,19 @@ export default function ForgotPassword({
               ? "Resetting..."
               : "Reset Password"}
           </button>
+
+          {resetComplete && (
+            <div
+              style={{
+                color: "#188038",
+                fontSize: "13px",
+                marginTop: "10px",
+                textAlign: "center",
+              }}
+            >
+              ✓ Password reset successful! Redirecting to login...
+            </div>
+          )}
 
           {/* ==========================================
               BACK TO LOGIN — BOTTOM
