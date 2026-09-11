@@ -28,6 +28,7 @@ function App() {
 
   const [view, setView] = useState("home");
   const [activeTab, setActiveTab] = useState("home");
+  const [roleError, setRoleError] = useState("");
 
   const [user, setUser] = useState(() => {
 
@@ -202,6 +203,7 @@ function App() {
       loggedInUser
     );
 
+    setRoleError("");
     setUser(loggedInUser);
 
     localStorage.setItem(
@@ -243,7 +245,7 @@ function App() {
         loggedInUser.role
       );
 
-      alert(
+      setRoleError(
         "Unknown user role: " +
         loggedInUser.role
       );
@@ -493,11 +495,26 @@ function App() {
 
       {view === "home" && (
 
-        <Home
-          onLoginClick={() =>
-            setView("login")
-          }
-        />
+        <>
+          {roleError && (
+            <div
+              style={{
+                color: "#d93025",
+                fontSize: "13px",
+                textAlign: "center",
+                padding: "10px",
+              }}
+            >
+              ⚠️ {roleError}
+            </div>
+          )}
+
+          <Home
+            onLoginClick={() =>
+              setView("login")
+            }
+          />
+        </>
 
       )}
 
