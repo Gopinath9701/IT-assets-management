@@ -11,6 +11,7 @@ const Maintenance = ({
 
   const [statusMessage, setStatusMessage] = useState("");
   const [statusMessageIsError, setStatusMessageIsError] = useState(false);
+  const [pendingConfirm, setPendingConfirm] = useState(null);
   const [tickets, setTickets] = useState([]);
   const [inProgressTickets, setInProgressTickets] = useState([]);
   const [history, setHistory] = useState([]);
@@ -163,13 +164,11 @@ const Maintenance = ({
   // START REPAIR
   // =====================================================
 
+  const askStartRepair = (ticket) => {
+    setPendingConfirm({ type: "start", ticket });
+  };
+
   const startRepair = async (ticket) => {
-    const confirmed = window.confirm(
-      `Start repair for Ticket ${ticket.ticket}?`
-    );
-
-    if (!confirmed) return;
-
     const ok = await updateStatus(
       ticket.requestId,
       "In Progress"
@@ -189,13 +188,11 @@ const Maintenance = ({
   // COMPLETE REPAIR
   // =====================================================
 
+  const askCompleteRepair = (ticket) => {
+    setPendingConfirm({ type: "complete", ticket });
+  };
+
   const completeRepair = async (ticket) => {
-    const confirmed = window.confirm(
-      `Mark Ticket ${ticket.ticket} as repaired?`
-    );
-
-    if (!confirmed) return;
-
     const ok = await updateStatus(
       ticket.requestId,
       "Completed"
@@ -209,6 +206,27 @@ const Maintenance = ({
 
       loadMaintenanceData();
     }
+  };
+
+  // =====================================================
+  // CONFIRM MODAL ACTIONS
+  // =====================================================
+
+  const confirmPendingAction = async () => {
+    if (!pendingConfirm) return;
+
+    const { type, ticket } = pendingConfirm;
+    setPendingConfirm(null);
+
+    if (type === "start") {
+      await startRepair(ticket);
+    } else if (type === "complete") {
+      await completeRepair(ticket);
+    }
+  };
+
+  const cancelPendingAction = () => {
+    setPendingConfirm(null);
   };
 
   return (
@@ -466,7 +484,7 @@ const Maintenance = ({
                           <button
                             className="maintenance-action-button"
                             onClick={() =>
-                              startRepair(ticket)
+                              askStartRepair(ticket)
                             }
                           >
                             Start Repair
@@ -594,7 +612,7 @@ const Maintenance = ({
                           <button
                             className="maintenance-action-button"
                             onClick={() =>
-                              completeRepair(ticket)
+                              askCompleteRepair(ticket)
                             }
                           >
                             Repaired
@@ -774,6 +792,58 @@ const Maintenance = ({
         </main>
 
       </div>
+
+      {pendingConfirm && (
+        <div
+          onClick={cancelPendingAction}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "rgba(0, 0, 0, 0.4)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: "#fff",
+              borderRadius: "8px",
+              padding: "24px",
+              maxWidth: "360px",
+              width: "90%",
+              boxShadow: "0 4px 20px rgba(0, 0, 0, 0.2)",
+            }}
+          >
+            <p style={{ margin: "0 0 20px", fontSize: "14px", color: "#202124" }}>
+              {pendingConfirm.type === "start"
+                ? `Start repair for Ticket ${pendingConfirm.ticket.ticket}?`
+                : `Mark Ticket ${pendingConfirm.ticket.ticket} as repaired?`}
+            </p>
+
+            <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
+              <button
+                onClick={cancelPendingAction}
+                className="maintenance-back-button"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={confirmPendingAction}
+                className="maintenance-action-button"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
