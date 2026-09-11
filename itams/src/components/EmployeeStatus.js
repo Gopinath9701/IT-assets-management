@@ -244,9 +244,6 @@ const EmployeeStatus = ({
     setIsSearchTouched(false);
     setValidationError("");
     setIsSearchValid(true);
-
-    // Show all employees again until Search is pressed.
-    setSearchApplied("");
   };
 
   // ====================================================
@@ -459,11 +456,8 @@ const EmployeeStatus = ({
         )
       : employees.filter(
           (emp) =>
-            emp.name
-              .toLowerCase()
-              .includes(
-                searchApplied.toLowerCase()
-              )
+            emp.name.toLowerCase() ===
+            searchApplied.toLowerCase()
         );
 
   // ====================================================
