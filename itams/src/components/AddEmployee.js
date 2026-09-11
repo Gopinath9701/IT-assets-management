@@ -25,18 +25,6 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
   // DATE HELPERS
   // =========================================================
 
-  const formatDateForId = (dateValue) => {
-    if (!dateValue) return "";
-
-    const [year, month, day] = dateValue.split("-");
-
-    return (
-      year.substring(2, 4) +
-      month.padStart(2, "0") +
-      day.padStart(2, "0")
-    );
-  };
-
   const getToday = () => {
     const date = new Date();
     date.setHours(0, 0, 0, 0);
@@ -89,74 +77,10 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
     return "";
   };
 
-  // =========================================================
-  // EMPLOYEE ID VALIDATION
-  // =========================================================
-
-  const validateEmployeeId = (value, joiningDate) => {
-    if (!value) {
-      return "Employee ID is required.";
-    }
-
-    if (/\s/.test(value)) {
-      return "Employee ID cannot contain spaces.";
-    }
-
-    if (!/^\d+$/.test(value)) {
-      return "Employee ID must contain only numbers.";
-    }
-
-    if (!/^\d{9}$/.test(value)) {
-      return "Employee ID must contain exactly 9 digits.";
-    }
-
-    // YYMMDD + 3 digit employee number
-    const employeeNumber = value.substring(6);
-
-    if (!/^\d{3}$/.test(employeeNumber)) {
-      return "Last 3 digits must be the employee number.";
-    }
-
-    if (!joiningDate) {
-      return "Select Date of Joining before entering Employee ID.";
-    }
-
-    const expectedDatePart = formatDateForId(joiningDate);
-    const enteredDatePart = value.substring(0, 6);
-
-    if (enteredDatePart !== expectedDatePart) {
-      return `Employee ID must start with ${expectedDatePart}, matching Date of Joining.`;
-    }
-
-    return "";
-  };
-
-  // =========================================================
-  // EMAIL VALIDATION
-  // =========================================================
-
-  const validateEmail = (value, id) => {
-    if (!value) {
-      return "Email is required.";
-    }
-
-    if (/\s/.test(value)) {
-      return "Email cannot contain spaces.";
-    }
-
-    if (!id) {
-      return "Enter Employee ID before entering Email.";
-    }
-
-    // Must be exactly: employeeIDa@gmail.com
-    const expectedEmail = `${id}a@gmail.com`;
-
-    if (value !== expectedEmail) {
-      return `Email must be ${expectedEmail}.`;
-    }
-
-    return "";
-  };
+  // Employee ID and Email are NOT user input - the backend generates both
+  // server-side (employeeController.js never reads either field from the
+  // request body) and returns the real values in the response. There's
+  // nothing to validate here because there's nothing for the user to type.
 
   // =========================================================
   // DEPARTMENT VALIDATION
@@ -252,18 +176,6 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
       return "Date of Joining can only be today or within the previous 7 days.";
     }
 
-    if (employeeId) {
-      const expectedDatePart = formatDateForId(value);
-      const enteredDatePart = employeeId.substring(0, 6);
-
-      if (
-        /^\d{9}$/.test(employeeId) &&
-        enteredDatePart !== expectedDatePart
-      ) {
-        return `Date of Joining must match Employee ID (${enteredDatePart}).`;
-      }
-    }
-
     return "";
   };
 
@@ -282,16 +194,6 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
     const dateError = validateJoiningDate(dateOfJoining);
     if (dateError) {
       newErrors.dateOfJoining = dateError;
-    }
-
-    const idError = validateEmployeeId(employeeId, dateOfJoining);
-    if (idError) {
-      newErrors.employeeId = idError;
-    }
-
-    const emailError = validateEmail(email, employeeId);
-    if (emailError) {
-      newErrors.email = emailError;
     }
 
     const departmentError = validateDepartment(department);
@@ -330,34 +232,9 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
     }));
   };
 
-  const handleEmployeeIdChange = (e) => {
-    const value = e.target.value.replace(/\D/g, "");
-
-    const limitedValue = value.substring(0, 9);
-
-    setEmployeeId(limitedValue);
-
-    setErrors((prev) => ({
-      ...prev,
-      employeeId: limitedValue
-        ? validateEmployeeId(limitedValue, dateOfJoining)
-        : "Employee ID is required.",
-      email: email
-        ? validateEmail(email, limitedValue)
-        : prev.email,
-    }));
-  };
-
-  const handleEmailChange = (e) => {
-    const value = e.target.value;
-
-    setEmail(value);
-
-    setErrors((prev) => ({
-      ...prev,
-      email: validateEmail(value, employeeId),
-    }));
-  };
+  // No handleEmployeeIdChange / handleEmailChange - both fields are
+  // read-only, populated from the backend's response after a successful
+  // submit (see handleSubmit).
 
   const handleDepartmentChange = (e) => {
     const value = e.target.value;
@@ -412,9 +289,6 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
     setErrors((prev) => ({
       ...prev,
       dateOfJoining: dateError,
-      employeeId: employeeId
-        ? validateEmployeeId(employeeId, value)
-        : prev.employeeId,
     }));
   };
 
@@ -441,8 +315,9 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
+            // No employeeId/email here - the backend never reads either
+            // from the request, it generates both itself.
             employeeName,
-            email,
             department,
             designation,
             phone: `+91${phone}`,
@@ -459,7 +334,7 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
       }
 
       alert(
-        `✅ Employee added successfully! Employee ID: ${data.employeeId}`
+        `✅ Employee added successfully! Employee ID: ${data.employeeId} | Email: ${data.email}`
       );
 
       setEmployeeName("");
@@ -641,28 +516,15 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
               <div className="form-group employee-id-field">
 
                 <label>
-                  Employee ID *
+                  Employee ID (Automatically Generated)
                 </label>
 
                 <input
                   type="text"
-                  placeholder="YYMMDD001"
+                  placeholder="Assigned automatically after you submit"
                   value={employeeId}
-                  onChange={handleEmployeeIdChange}
-                  maxLength={9}
-                  inputMode="numeric"
-                  className={
-                    errors.employeeId
-                      ? "input-error"
-                      : ""
-                  }
+                  readOnly
                 />
-
-                {errors.employeeId && (
-                  <div className="error">
-                    {errors.employeeId}
-                  </div>
-                )}
 
               </div>
 
@@ -674,26 +536,15 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
               <div className="form-group email-field">
 
                 <label>
-                  Email *
+                  Email (Automatically Generated)
                 </label>
 
                 <input
                   type="email"
-                  placeholder="YYMMDD001a@gmail.com"
+                  placeholder="Assigned automatically after you submit"
                   value={email}
-                  onChange={handleEmailChange}
-                  className={
-                    errors.email
-                      ? "input-error"
-                      : ""
-                  }
+                  readOnly
                 />
-
-                {errors.email && (
-                  <div className="error">
-                    {errors.email}
-                  </div>
-                )}
 
               </div>
 
