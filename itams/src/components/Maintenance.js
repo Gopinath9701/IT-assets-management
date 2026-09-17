@@ -11,6 +11,14 @@ const Maintenance = ({
 
   const [statusMessage, setStatusMessage] = useState("");
   const [statusMessageIsError, setStatusMessageIsError] = useState(false);
+
+  // Status banner clears itself after a few seconds instead of sitting
+  // there until the next action overwrites it.
+  useEffect(() => {
+    if (!statusMessage) return;
+    const timer = setTimeout(() => setStatusMessage(""), 3500);
+    return () => clearTimeout(timer);
+  }, [statusMessage]);
   const [pendingConfirm, setPendingConfirm] = useState(null);
   const [tickets, setTickets] = useState([]);
   const [inProgressTickets, setInProgressTickets] = useState([]);

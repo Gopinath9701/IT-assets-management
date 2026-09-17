@@ -1,5 +1,5 @@
 import "./index.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import Home from "./components/Home";
 import Login from "./components/Login";
@@ -29,6 +29,12 @@ function App() {
   const [view, setView] = useState("home");
   const [activeTab, setActiveTab] = useState("home");
   const [roleError, setRoleError] = useState("");
+
+  useEffect(() => {
+    if (!roleError) return;
+    const timer = setTimeout(() => setRoleError(""), 3500);
+    return () => clearTimeout(timer);
+  }, [roleError]);
 
   const [user, setUser] = useState(() => {
 

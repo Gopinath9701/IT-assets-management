@@ -82,6 +82,14 @@ const AddEmployee = ({ username = "username", onLogout, onBack }) => {
   const [successMessage, setSuccessMessage] = useState("");
   const [serverError, setServerError] = useState("");
 
+  // Success banner clears itself after a few seconds instead of sitting
+  // there until the next submit overwrites it.
+  useEffect(() => {
+    if (!successMessage) return;
+    const timer = setTimeout(() => setSuccessMessage(""), 3500);
+    return () => clearTimeout(timer);
+  }, [successMessage]);
+
   // Departments are fetched live from the departments table (managed via
   // Department Management) instead of a hardcoded list, so adding/removing
   // a department there is immediately reflected in this dropdown.

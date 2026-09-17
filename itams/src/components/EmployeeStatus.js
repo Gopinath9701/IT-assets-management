@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./EmployeeStatus.css";
 
 const PAGE_SIZE_OPTIONS = [10, 30, 50, "All"];
@@ -167,6 +167,14 @@ const EmployeeStatus = ({
   const [employees, setEmployees] = useState([]);
   const [statusMessage, setStatusMessage] = useState("");
   const [statusMessageIsError, setStatusMessageIsError] = useState(false);
+
+  // Status banner clears itself after a few seconds instead of sitting
+  // there until the next update overwrites it.
+  useEffect(() => {
+    if (!statusMessage) return;
+    const timer = setTimeout(() => setStatusMessage(""), 3500);
+    return () => clearTimeout(timer);
+  }, [statusMessage]);
 
   // ====================================================
   // FETCH EMPLOYEES FROM BACKEND

@@ -294,6 +294,14 @@ const AssetAssignment = ({
   const [assignError, setAssignError] = useState("");
   const [assignSuccess, setAssignSuccess] = useState("");
 
+  // Success banner clears itself after a few seconds instead of sitting
+  // there until the next assignment overwrites it.
+  useEffect(() => {
+    if (!assignSuccess) return;
+    const timer = setTimeout(() => setAssignSuccess(""), 3500);
+    return () => clearTimeout(timer);
+  }, [assignSuccess]);
+
   // ==========================================
   // SIDEBAR
   // ==========================================

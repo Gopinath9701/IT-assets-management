@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./AssetReturn.css";
 
 const PAGE_SIZE_OPTIONS = [10, 30, 50, "All"];
@@ -35,6 +35,15 @@ const AssetReturn = ({ username = "username", onLogout, onBack }) => {
   const [remarksError, setRemarksError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [returnError, setReturnError] = useState("");
+
+  // successMessage doubles as the search-results description ("Found N
+  // assigned assets...") which should stay put while that table is shown,
+  // so only auto-clear it for the actual "return succeeded" confirmation.
+  useEffect(() => {
+    if (successMessage !== "Asset returned successfully!") return;
+    const timer = setTimeout(() => setSuccessMessage(""), 3500);
+    return () => clearTimeout(timer);
+  }, [successMessage]);
 
   // =====================================================
   // EMPLOYEE ID VALIDATION

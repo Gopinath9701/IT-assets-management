@@ -429,6 +429,14 @@ const ManageAsset = ({
 
   const [pageMessage, setPageMessage] = useState("");
   const [pageMessageIsError, setPageMessageIsError] = useState(false);
+
+  // Status banner clears itself after a few seconds instead of sitting
+  // there until the next action overwrites it.
+  useEffect(() => {
+    if (!pageMessage) return;
+    const timer = setTimeout(() => setPageMessage(""), 3500);
+    return () => clearTimeout(timer);
+  }, [pageMessage]);
   const [searchName, setSearchName] = useState("");
   const [searchType, setSearchType] = useState("All Assets");
   const [appliedName, setAppliedName] = useState("");

@@ -357,6 +357,14 @@ const ReportMaintenance = ({
   const [successMessage, setSuccessMessage] = useState("");
   const [serverError, setServerError] = useState("");
 
+  // Success banner clears itself after a few seconds instead of sitting
+  // there until the next submit overwrites it.
+  useEffect(() => {
+    if (!successMessage) return;
+    const timer = setTimeout(() => setSuccessMessage(""), 3500);
+    return () => clearTimeout(timer);
+  }, [successMessage]);
+
   // =====================================================
   // LOAD REPORTS FROM BACKEND
   // =====================================================

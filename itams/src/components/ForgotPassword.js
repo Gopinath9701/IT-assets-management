@@ -333,6 +333,15 @@ export default function ForgotPassword({
   const [serverError, setServerError] =
     useState("");
 
+  // Clears itself after a few seconds instead of sitting there
+  // indefinitely - the reset-success case navigates away long before this
+  // fires anyway (see resetComplete's own redirect timeout below).
+  useEffect(() => {
+    if (!successMessage) return;
+    const timer = setTimeout(() => setSuccessMessage(""), 3500);
+    return () => clearTimeout(timer);
+  }, [successMessage]);
+
   // Separate from successMessage - that one is shown near the top of the
   // form (reused for "OTP verified" too) and the reset handler immediately
   // clears the email/OTP fields around it, so a "password reset

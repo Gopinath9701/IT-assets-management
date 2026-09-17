@@ -408,6 +408,31 @@ const UpdateEmployee = ({
   const [serverError, setServerError] = useState("");
   const [departments, setDepartments] = useState([]);
 
+  // Success banner shows briefly, then the whole page resets back to the
+  // search screen so a different Employee ID can be looked up right away
+  // instead of leaving the just-updated record sitting there.
+  useEffect(() => {
+    if (!updateSuccess) return;
+    const timer = setTimeout(() => {
+      setUpdateSuccess(false);
+      setSearchInput("");
+      setSearchError("");
+      setIsSearchValid(true);
+      setIsSearchTouched(false);
+      setEmployee(null);
+      setFormData({
+        id: "",
+        name: "",
+        email: "",
+        department: "",
+        designation: "",
+        phone: "",
+      });
+      setFormErrors({});
+    }, 3500);
+    return () => clearTimeout(timer);
+  }, [updateSuccess]);
+
   // Departments are fetched live from the departments table (managed via
   // Department Management) instead of a hardcoded list, so adding/removing
   // a department there is immediately reflected in this dropdown.
