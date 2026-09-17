@@ -196,6 +196,17 @@ async function resetPassword(req, res, next) {
       return res.status(400).json({ success: false, message: "Please verify OTP again before resetting password" });
     }
 
+    // A "reset" that lands you back on the exact same password isn't a
+    // reset - and if someone typed their old one out of habit while trying
+    // to actually change it, they'd otherwise have no idea it didn't work.
+    const sameAsOld = await bcrypt.compare(newPassword, user.password_hash);
+    if (sameAsOld) {
+      return res.status(400).json({
+        success: false,
+        message: "New password must be different from your current password.",
+      });
+    }
+
     const hash = await bcrypt.hash(newPassword, 10);
     await pool.query("UPDATE users SET password_hash = $1 WHERE id = $2", [hash, user.id]);
     await pool.query("DELETE FROM password_resets WHERE user_id = $1", [user.id]);
