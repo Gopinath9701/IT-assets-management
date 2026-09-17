@@ -181,66 +181,6 @@ const validateEmployeeCount = (count) => {
 };
 
 // =====================================================
-// VALIDATION - SEARCH
-// =====================================================
-const validateSearch = (search) => {
-  if (search.length === 0) {
-    return {
-      isValid: false,
-      message: "Department Name is required for search",
-    };
-  }
-
-  if (search.trim() === "") {
-    return {
-      isValid: false,
-      message: "Search cannot contain only spaces",
-    };
-  }
-
-  if (search !== search.trim()) {
-    return {
-      isValid: false,
-      message:
-        "Search should not have leading or trailing spaces",
-    };
-  }
-
-  if (/\s{2,}/.test(search)) {
-    return {
-      isValid: false,
-      message: "Only a single space is allowed between words",
-    };
-  }
-
-  if (search.length < 2) {
-    return {
-      isValid: false,
-      message: "Search must contain at least 2 characters",
-    };
-  }
-
-  if (search.length > 100) {
-    return {
-      isValid: false,
-      message: "Search cannot exceed 100 characters",
-    };
-  }
-
-  if (!/^[A-Za-z ]+$/.test(search)) {
-    return {
-      isValid: false,
-      message: "Search should contain only letters and spaces",
-    };
-  }
-
-  return {
-    isValid: true,
-    message: "",
-  };
-};
-
-// =====================================================
 // MAIN COMPONENT
 // =====================================================
 const DepartmentManagement = ({
@@ -252,17 +192,8 @@ const DepartmentManagement = ({
   // SEARCH STATES
   // =====================================================
 
-  // What user is currently typing
+  // Live filter - the list narrows as this changes, no Search button needed.
   const [search, setSearch] = useState("");
-
-  // Search value ONLY after Search button is clicked
-  const [searchApplied, setSearchApplied] = useState("");
-
-  // Search error
-  const [searchError, setSearchError] = useState("");
-
-  // Whether Search button has been clicked
-  const [searchTouched, setSearchTouched] = useState(false);
 
   // =====================================================
   // FORM STATES
@@ -339,8 +270,8 @@ const DepartmentManagement = ({
 
   // =====================================================
   // SEARCH INPUT CHANGE
-  // IMPORTANT:
-  // Typing DOES NOT perform search
+  // Live filter - the table below re-derives from `search` on every
+  // keystroke, so there's nothing else to do here.
   // =====================================================
   const handleSearchChange = (e) => {
     let value = e.target.value;
@@ -353,84 +284,17 @@ const DepartmentManagement = ({
     // Convert multiple spaces into one
     value = value.replace(/ {2,}/g, " ");
 
-    // Update only the input value
     setSearch(value);
-
-    // IMPORTANT:
-    // Do NOT change searchApplied here.
-    // Do NOT filter the list while typing.
-    setSearchTouched(false);
-    setSearchError("");
-
-    // Exception: backspacing the field back to empty should restore the
-    // full list immediately, not leave the last searched-for department
-    // showing until Search is clicked again on an empty field.
-    if (value.trim() === "") {
-      setSearchApplied("");
-    }
-  };
-
-  // =====================================================
-  // SEARCH BUTTON
-  // SEARCH HAPPENS ONLY HERE
-  // =====================================================
-  const handleSearch = () => {
-    setSearchTouched(true);
-
-    const result = validateSearch(search);
-
-    // Invalid search
-    if (!result.isValid) {
-      setSearchError(result.message);
-      setSearchApplied(null);
-      return;
-    }
-
-    const searchValue = search.trim().toLowerCase();
-
-    // EXACT department name match
-    const found = departments.some(
-      (dept) =>
-        dept.name.trim().toLowerCase() === searchValue
-    );
-
-    // No department found
-    if (!found) {
-      setSearchApplied(null);
-      setSearchError("No department found.");
-      return;
-    }
-
-    // Department found
-    setSearchApplied(search.trim());
-    setSearchError("");
-  };
-
-  // =====================================================
-  // SEARCH ENTER KEY
-  // =====================================================
-  const handleSearchKeyDown = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleSearch();
-    }
   };
 
   // =====================================================
   // FILTER DEPARTMENTS
-  // IMPORTANT:
-  // Uses searchApplied, NOT search
+  // Substring match against the live search text - empty search shows
+  // everything, no separate "applied" state to fall out of sync with it.
   // =====================================================
-  const filteredDepartments =
-    searchApplied === null
-      ? []
-      : searchApplied === ""
-      ? departments
-      : departments.filter(
-          (dept) =>
-            dept.name.trim().toLowerCase() ===
-            searchApplied.trim().toLowerCase()
-        );
+  const filteredDepartments = departments.filter((dept) =>
+    dept.name.trim().toLowerCase().includes(search.trim().toLowerCase())
+  );
 
   // =====================================================
   // FORM VALIDATION
@@ -717,33 +581,14 @@ const DepartmentManagement = ({
             <div className="dm-search-input-wrapper">
 
               <input
-                className={`dm-input ${
-                  searchError && searchTouched
-                    ? "dm-input-error"
-                    : ""
-                }`}
+                className="dm-input"
                 type="text"
-                placeholder="Enter Department Name"
+                placeholder="Type to filter by Department Name"
                 value={search}
                 onChange={handleSearchChange}
-                onKeyDown={handleSearchKeyDown}
               />
 
-              {/* RED SEARCH ERROR */}
-              {searchError && searchTouched && (
-                <span className="dm-error-text">
-                  ⚠️ {searchError}
-                </span>
-              )}
-
             </div>
-
-            <button
-              className="dm-btn-primary"
-              onClick={handleSearch}
-            >
-              Search
-            </button>
 
           </div>
 

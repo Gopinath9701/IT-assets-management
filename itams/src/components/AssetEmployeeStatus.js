@@ -4,140 +4,6 @@ import "./EmployeeStatus.css";
 const PAGE_SIZE_OPTIONS = [10, 30, 50, "All"];
 
 // ======================================================
-// EMPLOYEE ID VALIDATION
-//
-// FORMAT:
-// YYMMDDXXX
-//
-// YY  = Actual year
-// MM  = Month
-// DD  = Day
-// XXX = Employee number (001 - 999)
-//
-// RULES:
-// 1. Exactly 9 digits
-// 2. Numbers only
-// 3. No spaces
-// 4. Valid calendar date
-// 5. Past dates allowed
-// 6. Today's date allowed
-// 7. Future dates NOT allowed
-// 8. Last 3 digits must be 001 - 999
-// ======================================================
-
-const validateEmployeeId = (id) => {
-  // EMPTY
-  if (!id || id.length === 0) {
-    return {
-      isValid: false,
-      message: "Employee ID is required.",
-    };
-  }
-
-  // SPACES
-  if (/\s/.test(id)) {
-    return {
-      isValid: false,
-      message: "Employee ID must not contain spaces.",
-    };
-  }
-
-  // ONLY NUMBERS
-  if (!/^\d+$/.test(id)) {
-    return {
-      isValid: false,
-      message: "Employee ID must contain only numbers.",
-    };
-  }
-
-  // EXACTLY 9 DIGITS
-  if (id.length !== 9) {
-    return {
-      isValid: false,
-      message:
-        "Employee ID must be exactly 9 digits (YYMMDDXXX).",
-    };
-  }
-
-  // SPLIT ID
-  const yearShort = Number(id.substring(0, 2));
-  const month = Number(id.substring(2, 4));
-  const day = Number(id.substring(4, 6));
-  const employeeNumber = Number(id.substring(6, 9));
-
-  // ACTUAL YEAR
-  const fullYear = 2000 + yearShort;
-
-  // MONTH
-  if (month < 1 || month > 12) {
-    return {
-      isValid: false,
-      message: "Employee ID contains an invalid month.",
-    };
-  }
-
-  // DAY
-  if (day < 1 || day > 31) {
-    return {
-      isValid: false,
-      message: "Employee ID contains an invalid day.",
-    };
-  }
-
-  // EMPLOYEE NUMBER
-  if (
-    employeeNumber < 1 ||
-    employeeNumber > 999
-  ) {
-    return {
-      isValid: false,
-      message:
-        "Employee number must be between 001 and 999.",
-    };
-  }
-
-  // VALID CALENDAR DATE
-  const employeeDate = new Date(
-    fullYear,
-    month - 1,
-    day
-  );
-
-  employeeDate.setHours(0, 0, 0, 0);
-
-  // PREVENT INVALID DATES
-  if (
-    employeeDate.getFullYear() !== fullYear ||
-    employeeDate.getMonth() !== month - 1 ||
-    employeeDate.getDate() !== day
-  ) {
-    return {
-      isValid: false,
-      message: "Employee ID contains an invalid date.",
-    };
-  }
-
-  // TODAY
-  const today = new Date();
-
-  today.setHours(0, 0, 0, 0);
-
-  // FUTURE DATE CHECK
-  if (employeeDate > today) {
-    return {
-      isValid: false,
-      message:
-        "Future dates are not allowed. Employee ID must contain a past or today's date.",
-    };
-  }
-
-  return {
-    isValid: true,
-    message: "",
-  };
-};
-
-// ======================================================
 // CHECK WHETHER SEARCH IS AN EMPLOYEE ID
 // ======================================================
 
@@ -210,29 +76,15 @@ const EmployeeStatus = ({
   // SEARCH
   // ====================================================
 
+  // Live filter - the list narrows as `search` changes, no Search
+  // button/Enter key needed. Empty search shows every employee.
   const [search, setSearch] = useState("");
-
-  const [searchApplied, setSearchApplied] =
-    useState("");
 
   // ====================================================
   // PAGINATION
   // ====================================================
 
   const [pageSize, setPageSize] = useState(10);
-
-  // ====================================================
-  // VALIDATION
-  // ====================================================
-
-  const [validationError, setValidationError] =
-    useState("");
-
-  const [isSearchValid, setIsSearchValid] =
-    useState(true);
-
-  const [isSearchTouched, setIsSearchTouched] =
-    useState(false);
 
   // ====================================================
   // EMPLOYEE DATA — loaded from backend
@@ -274,188 +126,32 @@ const EmployeeStatus = ({
 
   const handleSearchChange = (e) => {
     const value = e.target.value;
-    let cleanedValue = value;
 
     // Employee ID (starts with a digit) — numbers only, max 9
     if (/^\d/.test(value)) {
-      cleanedValue = value
-        .replace(/\D/g, "")
-        .slice(0, 9);
-
-      setSearch(cleanedValue);
+      setSearch(value.replace(/\D/g, "").slice(0, 9));
     } else {
       // Name search — letters and spaces only, no special characters
-      cleanedValue = value.replace(/[^A-Za-z ]/g, "");
-
-      setSearch(cleanedValue);
-    }
-
-    setIsSearchTouched(false);
-
-    setValidationError("");
-
-    setIsSearchValid(true);
-
-    // Backspacing the field back to empty should restore the full
-    // employee list immediately, not leave the last search's results
-    // showing until Search is clicked again on an empty field.
-    if (cleanedValue === "") {
-      setSearchApplied("");
-    }
-  };
-
-  // ====================================================
-  // SEARCH
-  // ====================================================
-
-  const handleSearch = () => {
-    setIsSearchTouched(true);
-
-    const rawValue = search;
-
-    // EMPTY
-    if (rawValue === "") {
-      setValidationError(
-        "Please enter an Employee ID or Employee Name."
-      );
-
-      setIsSearchValid(false);
-
-      setSearchApplied(null);
-
-      return;
-    }
-
-    // ==================================================
-    // EMPLOYEE ID SEARCH
-    // ==================================================
-
-    if (looksLikeEmployeeId(rawValue)) {
-      const result =
-        validateEmployeeId(rawValue);
-
-      // INVALID ID
-      if (!result.isValid) {
-        setValidationError(
-          result.message
-        );
-
-        setIsSearchValid(false);
-
-        setSearchApplied(null);
-
-        return;
-      }
-
-      // VALID ID — filter from real data
-      setSearchApplied(rawValue);
-      setValidationError("");
-      setIsSearchValid(true);
-      return;
-    }
-
-    // ==================================================
-    // NAME SEARCH
-    // ==================================================
-
-    const nameValue =
-      rawValue.trim();
-
-    // SPACES BEFORE / AFTER
-    if (rawValue !== nameValue) {
-      setValidationError(
-        "Search should not have spaces before or after the name."
-      );
-
-      setIsSearchValid(false);
-
-      setSearchApplied(null);
-
-      return;
-    }
-
-    // MULTIPLE SPACES
-    if (/\s{2,}/.test(nameValue)) {
-      setValidationError(
-        "Name search should not contain multiple spaces."
-      );
-
-      setIsSearchValid(false);
-
-      setSearchApplied(null);
-
-      return;
-    }
-
-    // MINIMUM 2 CHARACTERS
-    if (nameValue.length < 2) {
-      setValidationError(
-        "Please enter at least 2 characters."
-      );
-
-      setIsSearchValid(false);
-
-      setSearchApplied(null);
-
-      return;
-    }
-
-    // ONLY LETTERS
-    if (
-      !/^[A-Za-z]+(?: [A-Za-z]+)*$/.test(
-        nameValue
-      )
-    ) {
-      setValidationError(
-        "Name should contain only letters and single spaces."
-      );
-
-      setIsSearchValid(false);
-
-      setSearchApplied(null);
-
-      return;
-    }
-
-    // NAME SEARCH SUCCESS
-    setSearchApplied(nameValue);
-
-    setValidationError("");
-
-    setIsSearchValid(true);
-  };
-
-  // ====================================================
-  // ENTER KEY
-  // ====================================================
-
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-
-      handleSearch();
+      setSearch(value.replace(/[^A-Za-z ]/g, ""));
     }
   };
 
   // ====================================================
   // FILTER EMPLOYEES
+  // Substring match against the live search text, no separate "applied"
+  // state to fall out of sync with it.
   // ====================================================
 
-  const filteredEmployees =
-    searchApplied === null
-      ? []
-      : searchApplied === ""
-      ? employees
-      : looksLikeEmployeeId(searchApplied)
-      ? employees.filter(
-          (emp) =>
-            emp.id === searchApplied
-        )
-      : employees.filter(
-          (emp) =>
-            emp.name.toLowerCase() ===
-            searchApplied.toLowerCase()
+  const filteredEmployees = (() => {
+    const value = search.trim();
+    if (!value) return employees;
+
+    return looksLikeEmployeeId(value)
+      ? employees.filter((emp) => emp.id.includes(value))
+      : employees.filter((emp) =>
+          emp.name.toLowerCase().includes(value.toLowerCase())
         );
+  })();
 
   // ====================================================
   // PAGE SIZE
@@ -554,53 +250,18 @@ const EmployeeStatus = ({
             <div className="es-search-row">
 
               <input
-                className={`es-input ${
-                  !isSearchValid &&
-                  isSearchTouched
-                    ? "es-input-error"
-                    : ""
-                }`}
+                className="es-input"
                 type="text"
                 inputMode="text"
                 maxLength={50}
-                placeholder="Enter Employee ID or Employee Name"
+                placeholder="Type to filter by Employee ID or Name"
                 value={search}
                 onChange={
                   handleSearchChange
                 }
-                onKeyDown={
-                  handleKeyDown
-                }
-                aria-invalid={
-                  !isSearchValid
-                }
-                aria-describedby="validation-error"
               />
 
-              <button
-                className="es-btn-primary"
-                onClick={handleSearch}
-              >
-                Search
-              </button>
-
             </div>
-
-            {/* ====================================== */}
-            {/* VALIDATION MESSAGE */}
-            {/* ====================================== */}
-
-            {validationError &&
-              isSearchTouched && (
-
-                <div
-                  className="es-validation-error"
-                  id="validation-error"
-                  role="alert"
-                >
-                  ⚠️ {validationError}
-                </div>
-              )}
 
             {/* ====================================== */}
             {/* FORMAT HINT */}

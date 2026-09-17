@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./ManageAsset.css";
 
 const ASSET_TYPES = [
@@ -144,60 +144,6 @@ const DEMO_ASSETS = [
       "Business desktop computer with Intel i5 processor and 16GB RAM.",
   },
 ];
-
-/* =========================================================
-   VALIDATE ASSET ID
-========================================================= */
-
-const validateAssetId = (id) => {
-  if (!id || id.trim() === "") {
-    return {
-      isValid: false,
-      message: "Asset ID is required",
-    };
-  }
-
-  if (id !== id.trim()) {
-    return {
-      isValid: false,
-      message: "Asset ID should not have leading or trailing spaces",
-    };
-  }
-
-  if (/\s/.test(id)) {
-    return {
-      isValid: false,
-      message: "Asset ID should not contain spaces",
-    };
-  }
-
-  if (id.length !== 6) {
-    return {
-      isValid: false,
-      message: "Asset ID must be exactly 6 characters (e.g., LAP001)",
-    };
-  }
-
-  if (!/^[A-Z]{3}[0-9]{3}$/.test(id)) {
-    return {
-      isValid: false,
-      message:
-        "Asset ID must contain 3 CAPITAL letters followed by 3 numbers (e.g., LAP001)",
-    };
-  }
-
-  if (id.slice(3) === "000") {
-    return {
-      isValid: false,
-      message: "Asset ID number cannot be 000",
-    };
-  }
-
-  return {
-    isValid: true,
-    message: "",
-  };
-};
 
 /* =========================================================
    VALIDATE ASSET TYPE
@@ -437,12 +383,15 @@ const ManageAsset = ({
     const timer = setTimeout(() => setPageMessage(""), 3500);
     return () => clearTimeout(timer);
   }, [pageMessage]);
+  // Live filter: searchName/searchType update the visible list immediately
+  // (via filteredAssets' client-side substring match below), while a
+  // debounced effect keeps appliedName/appliedType in sync and re-fetches
+  // from the backend so the underlying `assets` list stays current without
+  // hammering the server on every keystroke.
   const [searchName, setSearchName] = useState("");
   const [searchType, setSearchType] = useState("All Assets");
   const [appliedName, setAppliedName] = useState("");
   const [appliedType, setAppliedType] = useState("All Assets");
-  const [searchError, setSearchError] = useState("");
-  const [showFieldError, setShowFieldError] = useState(false);
 
   /* =====================================================
      DATABASE / DEMO ASSETS
@@ -643,75 +592,10 @@ const ManageAsset = ({
   }, []);
 
   /* =====================================================
-     SEARCH
-  ===================================================== */
-
-  const handleSearch = () => {
-    setSearchError("");
-    setShowFieldError(false);
-
-    const searchValue = searchName.trim().toUpperCase();
-
-    /* BOTH EMPTY */
-
-    if (
-      !searchValue &&
-      searchType === "All Assets"
-    ) {
-      setSearchError(
-        "Please enter an Asset ID or select an Asset Type to search"
-      );
-
-      setShowFieldError(true);
-
-      setAppliedName("");
-      setAppliedType("All Assets");
-
-      fetchAssets();
-
-      return;
-    }
-
-    /* ONLY TYPE */
-
-    if (
-      !searchValue &&
-      searchType !== "All Assets"
-    ) {
-      setAppliedName("");
-      setAppliedType(searchType);
-
-      fetchAssets("", searchType);
-
-      return;
-    }
-
-    /* ASSET ID VALIDATION */
-
-    if (searchValue) {
-      const result = validateAssetId(searchValue);
-
-      if (!result.isValid) {
-        setSearchError(result.message);
-        setShowFieldError(true);
-        return;
-      }
-    }
-
-    /* APPLY SEARCH */
-
-    setAppliedName(searchValue);
-    setAppliedType(searchType);
-
-    if (isDemoMode) {
-      return;
-    }
-
-    fetchAssets(searchValue, searchType);
-  };
-
-  /* =====================================================
-     SEARCH INPUT
+     SEARCH INPUT / TYPE CHANGE
+     Live filter - appliedName/appliedType update immediately so
+     filteredAssets (below) narrows the currently-loaded list on every
+     keystroke, no Search button/Enter needed.
   ===================================================== */
 
   const handleSearchNameChange = (e) => {
@@ -720,42 +604,43 @@ const ManageAsset = ({
       .replace(/[^A-Z0-9]/g, "");
 
     setSearchName(value);
-
-    setSearchError("");
-    setShowFieldError(false);
-
-    // Backspacing the field back to empty should restore the full asset
-    // list immediately (still respecting whatever Asset Type is selected),
-    // not leave the last searched-for asset showing until Search is
-    // clicked again on an empty field.
-    if (!value) {
-      setAppliedName("");
-      setAppliedType(searchType);
-      fetchAssets("", searchType);
-    }
+    setAppliedName(value);
   };
-
-  /* =====================================================
-     ENTER KEY
-  ===================================================== */
-
-  const handleSearchKeyDown = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleSearch();
-    }
-  };
-
-  /* =====================================================
-     TYPE CHANGE
-  ===================================================== */
 
   const handleSearchTypeChange = (e) => {
-    setSearchType(e.target.value);
+    const value = e.target.value;
 
-    setSearchError("");
-    setShowFieldError(false);
+    setSearchType(value);
+    setAppliedType(value);
   };
+
+  /* =====================================================
+     DEBOUNCED BACKEND REFETCH
+     filteredAssets already narrows whatever's currently loaded on every
+     keystroke, but that's only ever a subset of the last full fetch - this
+     re-fetches from the backend shortly after typing pauses so the
+     underlying list actually contains every real match, without sending a
+     request on every single keystroke. Demo mode has no backend to ask, so
+     filteredAssets alone (already live) is the whole story there.
+  ===================================================== */
+
+  const isFirstRender = useRef(true);
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+
+    if (isDemoMode) return;
+
+    const timer = setTimeout(() => {
+      fetchAssets(searchName, searchType);
+    }, 350);
+
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchName, searchType]);
 
   /* =====================================================
      FRONTEND FILTER
@@ -1590,30 +1475,15 @@ const ManageAsset = ({
                 </label>
 
                 <input
-                  className={`ma-input ${
-                    showFieldError
-                      ? "ma-input--error"
-                      : ""
-                  }`}
+                  className="ma-input"
                   type="text"
-                  placeholder="Enter Asset ID (e.g., LAP001)"
+                  placeholder="Type to filter by Asset ID (e.g., LAP001)"
                   value={searchName}
                   maxLength={6}
                   onChange={
                     handleSearchNameChange
                   }
-                  onKeyDown={
-                    handleSearchKeyDown
-                  }
                 />
-
-                <div className="ma-validation-hint">
-                  <small>
-                    Format: 3 CAPITAL letters +
-                    3 numbers (e.g., LAP001,
-                    MON001)
-                  </small>
-                </div>
               </div>
 
               {/* ASSET TYPE */}
@@ -1624,11 +1494,7 @@ const ManageAsset = ({
                 </label>
 
                 <select
-                  className={`ma-select ${
-                    showFieldError
-                      ? "ma-input--error"
-                      : ""
-                  }`}
+                  className="ma-select"
                   value={searchType}
                   onChange={
                     handleSearchTypeChange
@@ -1645,24 +1511,8 @@ const ManageAsset = ({
                 </select>
               </div>
 
-              {/* SEARCH BUTTON */}
-
-              <button
-                className="ma-search-btn"
-                onClick={handleSearch}
-              >
-                Search
-              </button>
-
             </div>
 
-            {searchError && (
-              <div className="ma-search-error-container">
-                <span className="ma-error-text">
-                  ⚠️ {searchError}
-                </span>
-              </div>
-            )}
           </div>
 
           {/* ASSET LIST */}
