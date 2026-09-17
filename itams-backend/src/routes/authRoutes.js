@@ -6,16 +6,20 @@ const router = express.Router();
 
 // Keyed by the account being acted on (emailOrId), not by IP. With the
 // default IP-based key, testing several different accounts back to back
-// from the same machine/network shared one 5-request budget - trying
-// account 001 (worked) then 002 and 003 shortly after got 002/003 blocked
-// even though neither of them had actually been touched yet. Rate limiting
-// exists to slow down brute-forcing a specific account's OTP, so it should
-// track that account, not whoever's IP happens to be making the request.
-// Falls back to IP only if the identifier is missing from the request.
+// from the same machine/network shared one budget - trying account 001
+// (worked) then 002 and 003 shortly after got 002/003 blocked even though
+// neither of them had actually been touched yet. Rate limiting exists to
+// slow down brute-forcing a specific account's OTP, so it should track
+// that account, not whoever's IP happens to be making the request. Falls
+// back to IP only if the identifier is missing from the request.
+//
+// Shared across send-otp/verify-otp/reset, so a single full flow (send +
+// verify + reset) already spends most of the budget - 3 requests per day
+// per account, not 3 full flows.
 const otpLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 5,
-  message: { success: false, message: "Too many attempts. Please try again later." },
+  windowMs: 24 * 60 * 60 * 1000,
+  max: 3,
+  message: { success: false, message: "Too many attempts. Please try again tomorrow." },
   keyGenerator: (req) => {
     const identifier = req.body?.emailOrId;
     return identifier ? `id:${identifier}` : req.ip;
