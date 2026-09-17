@@ -16,10 +16,15 @@ const toLocalIso = (date) => {
 const todayIso = () => toLocalIso(new Date());
 
 const AssetReturn = ({ username = "username", onLogout, onBack }) => {
+  // Live filter - assignedAssets/returnHistory (derived below) narrow as
+  // this changes, no Search button/Enter needed. Exact match, not
+  // substring: this page looks up one specific employee's assets, so
+  // nothing should show until the full ID is typed - a partial match
+  // mixing several employees' assets together would risk returning the
+  // wrong person's asset.
   const [employeeId, setEmployeeId] = useState("");
   const [employeeIdError, setEmployeeIdError] = useState("");
-  const [assignedAssets, setAssignedAssets] = useState([]);
-  const [returnHistory, setReturnHistory] = useState([]);
+  const [allHistory, setAllHistory] = useState([]);
   const [historyPageSize, setHistoryPageSize] = useState(10);
 
   const [selectedAsset, setSelectedAsset] = useState(null);
@@ -129,15 +134,13 @@ const AssetReturn = ({ username = "username", onLogout, onBack }) => {
   };
 
   // =====================================================
-  // SEARCH EMPLOYEE — loads their current assignments
+  // LOAD ASSIGNMENT HISTORY
+  // The employeeId filter (below) is purely client-side over this same
+  // full history, so there's no need to re-fetch on every search - only
+  // once on mount, and again after a return actually changes it.
   // =====================================================
 
-  const handleSearch = async () => {
-    setSuccessMessage("");
-    const error = validateEmployeeId(employeeId);
-    if (error) { setEmployeeIdError(error); return; }
-    setEmployeeIdError("");
-
+  const loadHistory = async () => {
     try {
       const token = localStorage.getItem("token");
       const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` };
@@ -147,68 +150,72 @@ const AssetReturn = ({ username = "username", onLogout, onBack }) => {
         { headers }
       );
       const data = await resp.json();
-      if (!data.success) { setSuccessMessage("Could not load assignments."); return; }
+      if (!data.success) {
+        setSuccessMessage("Could not load assignments.");
+        return;
+      }
 
-      const allForEmployee = (data.history || []).filter(
-        (h) => h.employee_id === employeeId
-      );
-
-      // Active (not yet returned)
-      const active = allForEmployee.filter((h) => h.status === "Assigned");
-      setAssignedAssets(
-        active.map((h) => {
-          // asset_name_id format: "Model (ASSETID)" — extract ID from inside parens
-          const assetIdMatch = h.asset_name_id
-            ? h.asset_name_id.match(/\(([^)]+)\)$/)
-            : null;
-          const assetId = assetIdMatch ? assetIdMatch[1] : h.asset_name_id || "-";
-          return {
-            assignmentId: h.assignment_id,
-            assetId,
-            assetType: h.asset_type || "-",
-            assignedDate: h.assigned_date
-              ? new Date(h.assigned_date).toLocaleDateString("en-GB").replace(/\//g, "-")
-              : "-",
-            // ISO form kept alongside the display string above so the return
-            // modal's date picker can set min= to this exact date.
-            assignedDateIso: h.assigned_date
-              ? toLocalIso(new Date(h.assigned_date))
-              : null,
-          };
-        })
-      );
-
-      // Returned history
-      const returned = allForEmployee.filter((h) => h.status === "Returned");
-      setReturnHistory(
-        returned.map((h) => {
-          const assetIdMatch = h.asset_name_id
-            ? h.asset_name_id.match(/\(([^)]+)\)$/)
-            : null;
-          const assetId = assetIdMatch ? assetIdMatch[1] : h.asset_name_id || "-";
-          return {
-            assetId,
-            employeeId: h.employee_id,
-            assetType: h.asset_type || "-",
-            returnDate: h.returned_date
-              ? new Date(h.returned_date).toLocaleDateString("en-GB").replace(/\//g, "-")
-              : "-",
-            condition: h.condition || "-",
-            remarks: h.remarks || "-",
-          };
-        })
-      );
-
-      setSuccessMessage(
-        active.length > 0
-          ? `Found ${active.length} assigned asset(s) for this employee.`
-          : "No currently assigned assets found for this employee."
-      );
+      setAllHistory(data.history || []);
     } catch (err) {
-      console.error("Search Error:", err);
+      console.error("Load History Error:", err);
       setSuccessMessage("Unable to connect to server.");
     }
   };
+
+  useEffect(() => {
+    loadHistory();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // asset_name_id format: "Model (ASSETID)" — extract ID from inside parens
+  const extractAssetId = (h) => {
+    const match = h.asset_name_id
+      ? h.asset_name_id.match(/\(([^)]+)\)$/)
+      : null;
+    return match ? match[1] : h.asset_name_id || "-";
+  };
+
+  const employeeHistory = employeeId
+    ? allHistory.filter((h) => h.employee_id === employeeId)
+    : [];
+
+  const assignedAssets = employeeHistory
+    .filter((h) => h.status === "Assigned")
+    .map((h) => ({
+      assignmentId: h.assignment_id,
+      assetId: extractAssetId(h),
+      assetType: h.asset_type || "-",
+      assignedDate: h.assigned_date
+        ? new Date(h.assigned_date).toLocaleDateString("en-GB").replace(/\//g, "-")
+        : "-",
+      // ISO form kept alongside the display string above so the return
+      // modal's date picker can set min= to this exact date.
+      assignedDateIso: h.assigned_date
+        ? toLocalIso(new Date(h.assigned_date))
+        : null,
+    }));
+
+  const returnHistory = employeeHistory
+    .filter((h) => h.status === "Returned")
+    .map((h) => ({
+      assetId: extractAssetId(h),
+      employeeId: h.employee_id,
+      assetType: h.asset_type || "-",
+      returnDate: h.returned_date
+        ? new Date(h.returned_date).toLocaleDateString("en-GB").replace(/\//g, "-")
+        : "-",
+      condition: h.condition || "-",
+      remarks: h.remarks || "-",
+    }));
+
+  // Live status line - not a set piece of successMessage state, since it
+  // needs to reflect the current employeeId on every render, not just
+  // whatever it was when a button was last clicked.
+  const searchStatusText = !employeeId
+    ? ""
+    : assignedAssets.length > 0
+    ? `Found ${assignedAssets.length} assigned asset(s) for this employee.`
+    : "No currently assigned assets found for this employee.";
 
   // =====================================================
   // OPEN RETURN MODAL
@@ -389,8 +396,9 @@ const AssetReturn = ({ username = "username", onLogout, onBack }) => {
 
       closeModal();
       setSuccessMessage("Asset returned successfully!");
-      // Refresh the list
-      handleSearch();
+      // Refresh the underlying history so the derived assignedAssets/
+      // returnHistory (and searchStatusText) reflect the return.
+      loadHistory();
     } catch (err) {
       console.error("Return Error:", err);
       setReturnError("Unable to connect to server.");
@@ -473,20 +481,14 @@ const AssetReturn = ({ username = "username", onLogout, onBack }) => {
                 type="text"
                 value={employeeId}
                 onChange={(e) => {
-                  const value = e.target.value;
+                  const value = e.target.value
+                    .replace(/\D/g, "")
+                    .slice(0, 9);
 
                   setEmployeeId(value);
-
                   setEmployeeIdError("");
-                  setSuccessMessage("");
                 }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    handleSearch();
-                  }
-                }}
-                placeholder="Enter Employee ID (e.g. 260815001)"
+                placeholder="Type Employee ID (e.g. 260815001)"
                 maxLength={9}
               />
 
@@ -496,19 +498,18 @@ const AssetReturn = ({ username = "username", onLogout, onBack }) => {
                 </div>
               )}
 
+              {searchStatusText && (
+                <div className="validation-hint">
+                  {searchStatusText}
+                </div>
+              )}
+
               <div className="validation-hint">
                 Format: YYMMDD + 3 employee digits
                 (e.g., 260815001)
               </div>
 
             </div>
-
-            <button
-              className="search-button"
-              onClick={handleSearch}
-            >
-              Search
-            </button>
 
           </div>
 

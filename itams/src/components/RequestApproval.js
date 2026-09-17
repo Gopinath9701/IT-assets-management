@@ -18,145 +18,6 @@ const ASSET_TYPES = [
 
 const ROWS_OPTIONS = [10, 30, 50, "All"];
 
-const validateEmployeeId = (id) => {
-  if (!id || id.length === 0) {
-    return {
-      isValid: false,
-      message: "Employee ID is required.",
-    };
-  }
-
-  if (/\s/.test(id)) {
-    return {
-      isValid: false,
-      message: "Employee ID should not contain spaces.",
-    };
-  }
-
-  if (id !== id.trim()) {
-    return {
-      isValid: false,
-      message: "Employee ID should not have leading or trailing spaces.",
-    };
-  }
-
-  if (!/^\d+$/.test(id)) {
-    return {
-      isValid: false,
-      message: "Employee ID should contain numbers only.",
-    };
-  }
-
-  if (id.length !== 9) {
-    return {
-      isValid: false,
-      message: "Employee ID must contain exactly 9 digits.",
-    };
-  }
-
-  // YYMMDD
-  const year = Number(id.substring(0, 2));
-  const month = Number(id.substring(2, 4));
-  const day = Number(id.substring(4, 6));
-
-  if (month < 1 || month > 12) {
-    return {
-      isValid: false,
-      message: "Employee ID must contain a valid month.",
-    };
-  }
-
-  if (day < 1 || day > 31) {
-    return {
-      isValid: false,
-      message: "Employee ID must contain a valid day.",
-    };
-  }
-
-  const fullYear = 2000 + year;
-
-  const employeeDate = new Date(
-    fullYear,
-    month - 1,
-    day
-  );
-
-  if (
-    employeeDate.getFullYear() !== fullYear ||
-    employeeDate.getMonth() !== month - 1 ||
-    employeeDate.getDate() !== day
-  ) {
-    return {
-      isValid: false,
-      message: "Employee ID contains an invalid date.",
-    };
-  }
-
-  const today = new Date();
-
-  today.setHours(0, 0, 0, 0);
-  employeeDate.setHours(0, 0, 0, 0);
-
-  if (employeeDate > today) {
-    return {
-      isValid: false,
-      message: "Future date Employee IDs are not allowed.",
-    };
-  }
-
-  const employeeNumber = id.substring(6, 9);
-
-  if (employeeNumber === "000") {
-    return {
-      isValid: false,
-      message: "Employee number cannot be 000.",
-    };
-  }
-
-  return {
-    isValid: true,
-    message: "",
-  };
-};
-
-// =====================================================
-// VALIDATION - SEARCH
-// =====================================================
-
-const validateSearch = (empId, assetType) => {
-  const cleanEmpId = empId || "";
-
-  const hasEmpId = cleanEmpId.length > 0;
-
-  const hasAssetType =
-    assetType && assetType !== "All Assets";
-
-  // Both empty
-  if (!hasEmpId && !hasAssetType) {
-    return {
-      isValid: false,
-      message:
-        "Please enter an Employee ID or select an Asset Type to search.",
-    };
-  }
-
-  // If Employee ID is entered, it MUST be valid
-  if (hasEmpId) {
-    const employeeValidation =
-      validateEmployeeId(cleanEmpId);
-
-    if (!employeeValidation.isValid) {
-      return employeeValidation;
-    }
-  }
-
-  // Asset-only search is allowed
-  return {
-    isValid: true,
-    message: "",
-  };
-};
-
 // =====================================================
 // VALIDATION - REJECTION DESCRIPTION
 // =====================================================
@@ -318,6 +179,8 @@ const RequestApproval = ({
 
   // ===================================================
   // SEARCH STATE
+  // Live filter - `filtered` (below) re-derives from these on every
+  // keystroke/selection, no Search button/Enter needed.
   // ===================================================
 
   const [searchEmpId, setSearchEmpId] =
@@ -325,18 +188,6 @@ const RequestApproval = ({
 
   const [searchType, setSearchType] =
     useState("All Assets");
-
-  const [appliedEmpId, setAppliedEmpId] =
-    useState("");
-
-  const [appliedType, setAppliedType] =
-    useState("All Assets");
-
-  const [searchError, setSearchError] =
-    useState("");
-
-  const [isSearchTouched, setIsSearchTouched] =
-    useState(false);
 
   // ===================================================
   // TABLE STATE — loaded from backend
@@ -437,72 +288,15 @@ const RequestApproval = ({
   };
 
   // ===================================================
-  // SEARCH
-  // ===================================================
-
-  const handleSearch = () => {
-    setIsSearchTouched(true);
-
-    const result = validateSearch(
-      searchEmpId,
-      searchType
-    );
-
-    if (!result.isValid) {
-      setSearchError(result.message);
-
-      setAppliedEmpId("");
-      setAppliedType("All Assets");
-
-      return;
-    }
-
-    const cleanEmpId =
-      searchEmpId.trim();
-
-    setAppliedEmpId(cleanEmpId);
-    setAppliedType(searchType);
-
-    setSearchError("");
-  };
-
-  // ===================================================
-  // SEARCH INPUT CHANGE
+  // SEARCH INPUT CHANGE / ASSET TYPE CHANGE
   // ===================================================
 
   const handleSearchChange = (e) => {
-    const value = e.target.value;
-
-    setSearchEmpId(value);
-
-    setSearchError("");
-
-    setIsSearchTouched(false);
+    setSearchEmpId(e.target.value);
   };
-
-  // ===================================================
-  // ASSET TYPE CHANGE
-  // ===================================================
 
   const handleSearchTypeChange = (e) => {
-    const value = e.target.value;
-
-    setSearchType(value);
-
-    setSearchError("");
-
-    setIsSearchTouched(false);
-  };
-
-  // ===================================================
-  // ENTER KEY
-  // ===================================================
-
-  const handleSearchKeyDown = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleSearch();
-    }
+    setSearchType(e.target.value);
   };
 
   // ===================================================
@@ -510,19 +304,19 @@ const RequestApproval = ({
   // ===================================================
 
   const filtered = requests.filter((request) => {
-    const empMatch = appliedEmpId
+    const empMatch = searchEmpId
       ? request.employeeId
           .toLowerCase()
           .includes(
-            appliedEmpId.toLowerCase()
+            searchEmpId.trim().toLowerCase()
           )
       : true;
 
     const typeMatch =
-      appliedType === "All Assets"
+      searchType === "All Assets"
         ? true
         : request.assetType ===
-          appliedType;
+          searchType;
 
     return empMatch && typeMatch;
   });
@@ -754,22 +548,12 @@ const RequestApproval = ({
                 </label>
 
                 <input
-                  className={
-                    `ra-input ${
-                      searchError &&
-                      isSearchTouched
-                        ? "ra-input-error"
-                        : ""
-                    }`
-                  }
+                  className="ra-input"
                   type="text"
-                  placeholder="Enter employee ID"
+                  placeholder="Type to filter by Employee ID"
                   value={searchEmpId}
                   onChange={
                     handleSearchChange
-                  }
-                  onKeyDown={
-                    handleSearchKeyDown
                   }
                   maxLength={9}
                 />
@@ -805,25 +589,7 @@ const RequestApproval = ({
 
               </div>
 
-              {/* SEARCH BUTTON */}
-
-              <button
-                className="ra-search-btn"
-                onClick={handleSearch}
-              >
-                Search
-              </button>
-
             </div>
-
-            {/* SEARCH ERROR */}
-
-            {searchError &&
-              isSearchTouched && (
-                <div className="ra-search-error">
-                  ⚠️ {searchError}
-                </div>
-              )}
 
             {/* EMPLOYEE ID HINT */}
 

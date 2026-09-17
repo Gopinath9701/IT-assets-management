@@ -335,13 +335,9 @@ const AssetRequest = ({
   // SEARCH STATES
   // ===================================================
 
+  // Live filter - the request history table narrows as this changes, no
+  // Search button/Enter needed.
   const [searchInput, setSearchInput] =
-    useState("");
-
-  const [searchId, setSearchId] =
-    useState("");
-
-  const [searchError, setSearchError] =
     useState("");
 
   // ===================================================
@@ -687,151 +683,9 @@ const AssetRequest = ({
   };
 
   // ===================================================
-  // SEARCH VALIDATION
-  // ===================================================
-
-  const validateSearch = (value) => {
-    if (value.length === 0) {
-      return {
-        isValid: false,
-        message: "Employee ID is required",
-      };
-    }
-
-    if (/\s/.test(value)) {
-      return {
-        isValid: false,
-        message:
-          "Employee ID should not contain spaces",
-      };
-    }
-
-    if (!/^[0-9]+$/.test(value)) {
-      return {
-        isValid: false,
-        message:
-          "Employee ID must contain numbers only",
-      };
-    }
-
-    if (value.length !== 9) {
-      return {
-        isValid: false,
-        message:
-          "Employee ID must be exactly 9 digits",
-      };
-    }
-
-    const year =
-      Number(value.substring(0, 2));
-
-    const month =
-      Number(value.substring(2, 4));
-
-    const day =
-      Number(value.substring(4, 6));
-
-    if (
-      month < 1 ||
-      month > 12
-    ) {
-      return {
-        isValid: false,
-        message:
-          "Invalid month in Employee ID",
-      };
-    }
-
-    if (
-      day < 1 ||
-      day > 31
-    ) {
-      return {
-        isValid: false,
-        message:
-          "Invalid day in Employee ID",
-      };
-    }
-
-    const fullYear =
-      2000 + year;
-
-    const date = new Date(
-      fullYear,
-      month - 1,
-      day
-    );
-
-    if (
-      date.getFullYear() !==
-        fullYear ||
-      date.getMonth() !==
-        month - 1 ||
-      date.getDate() !== day
-    ) {
-      return {
-        isValid: false,
-        message:
-          "Invalid date in Employee ID",
-      };
-    }
-
-    const today = new Date();
-
-    today.setHours(0, 0, 0, 0);
-    date.setHours(0, 0, 0, 0);
-
-    if (date > today) {
-      return {
-        isValid: false,
-        message:
-          "Future employee IDs are not allowed",
-      };
-    }
-
-    const employeeNumber =
-      value.substring(6);
-
-    if (
-      employeeNumber === "000"
-    ) {
-      return {
-        isValid: false,
-        message:
-          "Employee number cannot be 000",
-      };
-    }
-
-    return {
-      isValid: true,
-      message: "",
-    };
-  };
-
-  // ===================================================
-  // SEARCH EMPLOYEE
-  // ===================================================
-
-  const handleSearch = () => {
-    const result =
-      validateSearch(searchInput);
-
-    if (!result.isValid) {
-      setSearchError(
-        result.message
-      );
-
-      setSearchId("");
-
-      return;
-    }
-
-    setSearchError("");
-    setSearchId(searchInput);
-  };
-
-  // ===================================================
   // SEARCH INPUT CHANGE
+  // Live filter - filteredRequests re-derives from `searchInput` on every
+  // keystroke, no Search button/Enter needed.
   // ===================================================
 
   const handleSearchChange = (e) => {
@@ -841,18 +695,6 @@ const AssetRequest = ({
         .slice(0, 9);
 
     setSearchInput(value);
-    setSearchError("");
-  };
-
-  // ===================================================
-  // SEARCH ENTER
-  // ===================================================
-
-  const handleSearchKeyDown = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleSearch();
-    }
   };
 
   // ===================================================
@@ -860,7 +702,7 @@ const AssetRequest = ({
   // ===================================================
 
   const filteredRequests =
-    searchId.trim() === ""
+    searchInput.trim() === ""
       ? requests
       : requests.filter(
           (request) =>
@@ -869,7 +711,7 @@ const AssetRequest = ({
             )
               .toLowerCase()
               .includes(
-                searchId.toLowerCase()
+                searchInput.toLowerCase()
               )
         );
 
@@ -1211,38 +1053,17 @@ const AssetRequest = ({
 
                   <input
                     type="text"
-                    className={`ar-input ${
-                      searchError
-                        ? "ar-input-error"
-                        : ""
-                    }`}
-                    placeholder="Enter Employee ID"
+                    className="ar-input"
+                    placeholder="Type to filter by Employee ID"
                     value={searchInput}
                     maxLength={9}
                     inputMode="numeric"
                     onChange={
                       handleSearchChange
                     }
-                    onKeyDown={
-                      handleSearchKeyDown
-                    }
                   />
 
-                  <button
-                    type="button"
-                    className="ar-search-btn"
-                    onClick={handleSearch}
-                  >
-                    Search
-                  </button>
-
                 </div>
-
-                {searchError && (
-                  <span className="ar-error-text">
-                    ⚠️ {searchError}
-                  </span>
-                )}
 
               </div>
 

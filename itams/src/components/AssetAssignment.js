@@ -4,140 +4,6 @@ import "./AssetAssignment.css";
 const ROWS_OPTIONS = [10, 30, 50, "All"];
 
 // ==========================================
-// EMPLOYEE ID VALIDATION
-// Format: YYMMDD + 3 digits
-// Example: 260821001
-// ==========================================
-
-const validateEmployeeId = (id) => {
-  if (!id || id.length === 0) {
-    return {
-      isValid: false,
-      message: "Employee ID is required",
-    };
-  }
-
-  // No spaces anywhere
-  if (/\s/.test(id)) {
-    return {
-      isValid: false,
-      message: "Employee ID should not contain spaces",
-    };
-  }
-
-  // No leading or trailing spaces
-  if (id !== id.trim()) {
-    return {
-      isValid: false,
-      message: "Employee ID should not have leading or trailing spaces",
-    };
-  }
-
-  // Numbers only
-  if (!/^\d+$/.test(id)) {
-    return {
-      isValid: false,
-      message: "Employee ID must contain numbers only",
-    };
-  }
-
-  // Exactly 9 digits
-  if (id.length !== 9) {
-    return {
-      isValid: false,
-      message: "Employee ID must be exactly 9 digits",
-    };
-  }
-
-  // ==========================================
-  // YYMMDD + 3 DIGITS
-  // ==========================================
-
-  const year = Number(id.substring(0, 2));
-  const month = Number(id.substring(2, 4));
-  const day = Number(id.substring(4, 6));
-  const employeeNumber = id.substring(6, 9);
-
-  // Month validation
-  if (month < 1 || month > 12) {
-    return {
-      isValid: false,
-      message: "Employee ID must contain a valid month",
-    };
-  }
-
-  // Day basic validation
-  if (day < 1 || day > 31) {
-    return {
-      isValid: false,
-      message: "Employee ID must contain a valid day",
-    };
-  }
-
-  // ==========================================
-  // ACTUAL CALENDAR DATE VALIDATION
-  // ==========================================
-
-  const fullYear = 2000 + year;
-
-  const employeeDate = new Date(
-    fullYear,
-    month - 1,
-    day
-  );
-
-  if (
-    employeeDate.getFullYear() !== fullYear ||
-    employeeDate.getMonth() !== month - 1 ||
-    employeeDate.getDate() !== day
-  ) {
-    return {
-      isValid: false,
-      message: "Employee ID contains an invalid date",
-    };
-  }
-
-  // ==========================================
-  // FUTURE DATE NOT ALLOWED
-  // ==========================================
-
-  const today = new Date();
-
-  today.setHours(0, 0, 0, 0);
-  employeeDate.setHours(0, 0, 0, 0);
-
-  if (employeeDate > today) {
-    return {
-      isValid: false,
-      message: "Future date Employee IDs are not allowed",
-    };
-  }
-
-  // ==========================================
-  // EMPLOYEE NUMBER
-  // ==========================================
-
-  if (!/^\d{3}$/.test(employeeNumber)) {
-    return {
-      isValid: false,
-      message: "Last 3 digits must be employee numbers",
-    };
-  }
-
-  if (employeeNumber === "000") {
-    return {
-      isValid: false,
-      message: "Employee number cannot be 000",
-    };
-  }
-
-  return {
-    isValid: true,
-    message: "",
-  };
-};
-
-// ==========================================
 // INITIAL DATA
 // Employee ID format: YYMMDD + 3 digits
 // ==========================================
@@ -227,11 +93,9 @@ const AssetAssignment = ({
   const [activeSidebar, setActiveSidebar] =
     useState("asset-assignment");
 
-  // Search state
+  // Live filter - the pending/history tables narrow as this changes, no
+  // Search button/Enter needed.
   const [searchEmpId, setSearchEmpId] = useState("");
-  const [appliedEmpId, setAppliedEmpId] = useState("");
-  const [searchError, setSearchError] = useState("");
-  const [isSearchTouched, setIsSearchTouched] = useState(false);
 
   // Table data — loaded from backend
   const [pending, setPending] = useState([]);
@@ -338,51 +202,28 @@ const AssetAssignment = ({
   };
 
   // ==========================================
-  // SEARCH
+  // SEARCH INPUT CHANGE
   // ==========================================
-
-  const handleSearch = () => {
-    setIsSearchTouched(true);
-    setSearchError("");
-
-    const result = validateEmployeeId(searchEmpId);
-
-    if (!result.isValid) {
-      setSearchError(result.message);
-      setAppliedEmpId("");
-      return;
-    }
-
-    setAppliedEmpId(searchEmpId);
-    setSearchError("");
-  };
 
   const handleSearchChange = (e) => {
     setSearchEmpId(e.target.value);
-    setSearchError("");
-    setIsSearchTouched(false);
-  };
-
-  const handleSearchKeyDown = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleSearch();
-    }
   };
 
   // ==========================================
   // FILTER
+  // Substring match against the live search text - empty search shows
+  // everything.
   // ==========================================
 
   const filteredPending = pending.filter((r) =>
-    appliedEmpId
-      ? r.employeeId === appliedEmpId
+    searchEmpId
+      ? r.employeeId.includes(searchEmpId)
       : true
   );
 
   const filteredHistory = history.filter((r) =>
-    appliedEmpId
-      ? r.employeeId === appliedEmpId
+    searchEmpId
+      ? r.employeeId.includes(searchEmpId)
       : true
   );
 
@@ -555,37 +396,15 @@ const AssetAssignment = ({
             <div className="asa-search-row">
 
               <input
-                className={
-                  `asa-input ${
-                    searchError && isSearchTouched
-                      ? "asa-input-error"
-                      : ""
-                  }`
-                }
+                className="asa-input"
                 type="text"
-                placeholder="Enter Employee ID (e.g., 260808001)"
+                placeholder="Type to filter by Employee ID (e.g., 260808001)"
                 value={searchEmpId}
                 onChange={handleSearchChange}
-                onKeyDown={handleSearchKeyDown}
                 maxLength={9}
               />
 
-              <button
-                className="asa-search-btn"
-                onClick={handleSearch}
-              >
-                Search
-              </button>
-
             </div>
-
-            {/* ERROR */}
-
-            {searchError && isSearchTouched && (
-              <div className="asa-search-error">
-                ⚠️ {searchError}
-              </div>
-            )}
 
             {/* VALIDATION HINT */}
 
