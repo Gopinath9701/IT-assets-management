@@ -723,6 +723,16 @@ const ManageAsset = ({
 
     setSearchError("");
     setShowFieldError(false);
+
+    // Backspacing the field back to empty should restore the full asset
+    // list immediately (still respecting whatever Asset Type is selected),
+    // not leave the last searched-for asset showing until Search is
+    // clicked again on an empty field.
+    if (!value) {
+      setAppliedName("");
+      setAppliedType(searchType);
+      fetchAssets("", searchType);
+    }
   };
 
   /* =====================================================

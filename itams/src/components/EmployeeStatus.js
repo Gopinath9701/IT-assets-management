@@ -237,14 +237,15 @@ const EmployeeStatus = ({
 
   const handleSearchChange = (e) => {
     const value = e.target.value;
+    let cleanedValue = value;
 
     if (/^\d/.test(value)) {
-      const numericValue =
+      cleanedValue =
         value
           .replace(/\D/g, "")
           .slice(0, 9);
 
-      setSearch(numericValue);
+      setSearch(cleanedValue);
     } else {
       setSearch(value);
     }
@@ -252,6 +253,13 @@ const EmployeeStatus = ({
     setIsSearchTouched(false);
     setValidationError("");
     setIsSearchValid(true);
+
+    // Backspacing the field back to empty should restore the full
+    // employee list immediately, not leave the last search's results
+    // showing until Search is clicked again on an empty field.
+    if (cleanedValue === "") {
+      setSearchApplied("");
+    }
   };
 
   // ====================================================

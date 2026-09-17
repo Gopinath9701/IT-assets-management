@@ -274,19 +274,20 @@ const EmployeeStatus = ({
 
   const handleSearchChange = (e) => {
     const value = e.target.value;
+    let cleanedValue = value;
 
     // Employee ID (starts with a digit) — numbers only, max 9
     if (/^\d/.test(value)) {
-      const numericValue = value
+      cleanedValue = value
         .replace(/\D/g, "")
         .slice(0, 9);
 
-      setSearch(numericValue);
+      setSearch(cleanedValue);
     } else {
       // Name search — letters and spaces only, no special characters
-      const letterValue = value.replace(/[^A-Za-z ]/g, "");
+      cleanedValue = value.replace(/[^A-Za-z ]/g, "");
 
-      setSearch(letterValue);
+      setSearch(cleanedValue);
     }
 
     setIsSearchTouched(false);
@@ -294,6 +295,13 @@ const EmployeeStatus = ({
     setValidationError("");
 
     setIsSearchValid(true);
+
+    // Backspacing the field back to empty should restore the full
+    // employee list immediately, not leave the last search's results
+    // showing until Search is clicked again on an empty field.
+    if (cleanedValue === "") {
+      setSearchApplied("");
+    }
   };
 
   // ====================================================

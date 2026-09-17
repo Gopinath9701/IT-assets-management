@@ -361,6 +361,13 @@ const DepartmentManagement = ({
     // Do NOT filter the list while typing.
     setSearchTouched(false);
     setSearchError("");
+
+    // Exception: backspacing the field back to empty should restore the
+    // full list immediately, not leave the last searched-for department
+    // showing until Search is clicked again on an empty field.
+    if (value.trim() === "") {
+      setSearchApplied("");
+    }
   };
 
   // =====================================================
