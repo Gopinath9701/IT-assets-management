@@ -8,12 +8,12 @@ const { generateEmployeeId } = require("../src/utils/idGenerator");
 const { validatePassword, buildEmployeeEmail } = require("../src/utils/validators");
 
 async function seed() {
-  const plainPassword = process.env.DEFAULT_SEED_PASSWORD || "Itams@2026";
+  const plainPassword = process.env.SEED_PASSWORD;
 
   const passwordError = validatePassword(plainPassword);
   if (passwordError) {
-    console.error(`❌ DEFAULT_SEED_PASSWORD does not meet the password policy: ${passwordError}`);
-    console.error("   Fix DEFAULT_SEED_PASSWORD in .env (needs 8-20 chars, upper+lower+digit+special) and re-run.");
+    console.error(`❌ SEED_PASSWORD does not meet the password policy: ${passwordError}`);
+    console.error("   Set SEED_PASSWORD in .env (needs 8-20 chars, upper+lower+digit+special) and re-run.");
     process.exit(1);
   }
 

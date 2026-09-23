@@ -48,8 +48,7 @@ Paste the full contents of `sql/schema.sql` into Neon's **SQL Editor** and run i
 Once that sender is verified, it can email any recipient — no per-recipient
 whitelist to maintain, unlike Mailgun/Resend's sandbox modes.
 
-`DEFAULT_SEED_PASSWORD` must satisfy the password policy above — the
-default (`Itams@2026`) does.
+`SEED_PASSWORD` must be set in `.env` and satisfy the password policy above.
 
 ## 4. Install, seed, run
 
